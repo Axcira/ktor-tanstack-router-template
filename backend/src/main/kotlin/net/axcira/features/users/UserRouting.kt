@@ -1,0 +1,47 @@
+package net.axcira.features.users
+
+import io.ktor.http.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
+import net.axcira.plugins.UserSession
+import org.koin.ktor.ext.inject
+
+fun Routing.users() {
+    val userService: UserService by inject()
+
+    // Create user
+    post("/users") {
+        val user = call.receive<CreateUserInput>()
+        val createdUser = userService.createUser(user)
+        call.sessions.set(UserSession(createdUser.id))
+        call.respond(HttpStatusCode.Created, createdUser)
+    }
+
+    authenticate {
+        // Get user
+        get("/users/me") {
+            val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+            val user = userService.findById(userId) ?: throw IllegalArgumentException("User not found")
+            call.respond(user)
+        }
+
+        // Update user
+        put("/users/me") {
+            val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+            val user = call.receive<UpdateUserInput>()
+            userService.update(userId, user)
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        // Delete user
+        delete("/users/me") {
+            val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+            userService.delete(userId)
+            call.respond(HttpStatusCode.NoContent)
+        }
+    }
+}
+
