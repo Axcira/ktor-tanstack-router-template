@@ -3,6 +3,7 @@
   <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$/../../backend" dumb="true">
       <excludeFolder url="file://$MODULE_DIR$/../../backend/.kotlin" />
+      <excludeFolder url="file://$MODULE_DIR$/../../backend/generated" />
     </content>
   </component>
 </module>
