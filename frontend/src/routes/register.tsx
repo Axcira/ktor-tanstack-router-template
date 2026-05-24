@@ -1,12 +1,16 @@
 import {
   createFileRoute,
   Link,
+  useNavigate,
 } from "@tanstack/react-router"
 import {
   type SubmitEventHandler,
   useState,
 } from "react"
 import { usePostUsers } from "@/api/generated/default/default"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/register")({
   component: RegisterComponent,
@@ -17,6 +21,7 @@ function RegisterComponent() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const registerMutation = usePostUsers()
+  const navigate = useNavigate()
 
   const handleSubmit: SubmitEventHandler = (e) => {
     e.preventDefault()
@@ -25,8 +30,12 @@ function RegisterComponent() {
       return
     }
     registerMutation.mutate({data: {email, password}}, {
-      onSuccess: () => {
-        alert("アカウント登録に成功しました")
+      onSuccess: (data) => {
+        if (data.status === 201) {
+          alert("アカウント登録に成功しました")
+          navigate({to: "/"}).then()
+          return
+        }
       }, onError: () => {
         alert("アカウント登録に失敗しました")
       },
@@ -38,45 +47,45 @@ function RegisterComponent() {
       <h1 className="text-2xl font-bold mb-6 text-center">アカウント登録</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700" htmlFor="email">メールアドレス</label>
-          <input
-            id={"email"}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
+          <Label className="block text-sm font-medium">メールアドレス
+            <Input
+              type={"email"}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              aria-label={"メールアドレス"}
+            />
+          </Label>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700" htmlFor="password">パスワード</label>
-          <input
-            id={"password"}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
+          <Label className="block text-sm font-medium">パスワード
+            <Input
+              type={"password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              aria-label={"パスワード"}
+            />
+          </Label>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700" htmlFor="confirmPassword">パスワード（確認）</label>
-          <input
-            id={"confirmPassword"}
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
+          <Label className="block text-sm font-medium">パスワード（確認）
+            <Input
+              type={"password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              aria-label={"パスワード（確認）"}
+            />
+          </Label>
         </div>
-        <button
+        <Button
           type="submit"
           disabled={registerMutation.isPending}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          className={"w-full"}
         >
           {registerMutation.isPending ? "登録中..." : "登録"}
-        </button>
+        </Button>
       </form>
       <div className="mt-4 text-center">
         <Link to="/login" className="text-sm text-blue-600 hover:text-blue-500">

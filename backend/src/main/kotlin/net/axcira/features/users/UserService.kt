@@ -18,7 +18,7 @@ data class UpdateUserInput(val email: String?, val password: String?)
 data class UserDTO(val id: UInt, val email: String)
 
 object Users : UIntIdTable() {
-    val email = varchar("email", length = 50)
+    val email = varchar("email", length = 50).uniqueIndex()
     val passwordHash = varchar("password_hash", length = 128)
 }
 
