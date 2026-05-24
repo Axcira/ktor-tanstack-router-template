@@ -11,11 +11,14 @@ fun Application.main() {
     configureSerialization()
     configureAuthentication()
     configureOpenApi()
-    configureRouting()
     configureDatabase()
 
+    install(IgnoreTrailingSlash)
     routing {
-        auth()
-        users()
+        route("/api") {
+            root()
+            auth()
+            users()
+        }
     }
 }

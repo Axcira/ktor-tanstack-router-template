@@ -17,7 +17,7 @@ fun Application.configureOpenApi() {
             val doc = OpenApiDoc(info = OpenApiInfo("My API", "1.0")) + call.application.routingRoot.descendants()
             call.respond(doc)
         }.hide()
-        get("scalar") {
+        get("/") {
             call.respondHtml(HttpStatusCode.OK) {
                 head {
                     title { +"API Reference" }

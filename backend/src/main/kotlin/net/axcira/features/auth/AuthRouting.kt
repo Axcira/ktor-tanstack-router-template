@@ -10,7 +10,7 @@ import org.koin.ktor.ext.inject
 @Serializable
 data class LoginRequest(val email: String, val password: String)
 
-fun Routing.auth() {
+fun Route.auth() {
     val authService: AuthService by inject()
 
     route("/auth") {

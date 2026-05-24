@@ -9,7 +9,7 @@ import io.ktor.server.sessions.*
 import net.axcira.plugins.UserSession
 import org.koin.ktor.ext.inject
 
-fun Routing.users() {
+fun Route.users() {
     val userService: UserService by inject()
 
     // Create user
