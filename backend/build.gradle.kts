@@ -9,6 +9,7 @@ version = "1.0.0-SNAPSHOT"
 
 application {
     mainClass = "io.ktor.server.cio.EngineMain"
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
 kotlin {
@@ -52,6 +53,7 @@ ktor {
 
 tasks.register<JavaExec>("generateOpenApiJson") {
     description = "Generate OpenAPI Specification."
+    dependsOn("compileKotlin")
     classpath = sourceSets["main"].runtimeClasspath
     mainClass.set("net.axcira.GenerateOpenApiKt")
 }
