@@ -21,6 +21,7 @@ dependencies {
     implementation(ktorLibs.server.config.yaml)
     implementation(ktorLibs.server.contentNegotiation)
     implementation(ktorLibs.server.core)
+    implementation(ktorLibs.server.di)
     implementation(ktorLibs.server.openapi)
     implementation(ktorLibs.server.routingOpenapi)
     implementation(ktorLibs.server.sessions)
@@ -34,14 +35,10 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.hikaricp)
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.12.0")
-    implementation("io.insert-koin:koin-ktor:4.2.0")
-    implementation("io.insert-koin:koin-logger-slf4j:4.2.0")
     implementation(libs.argon2.jvm)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.h2)
-    testImplementation("io.insert-koin:koin-test:4.2.0")
-    testImplementation("io.insert-koin:koin-test-junit5:4.2.0")
     testImplementation(ktorLibs.client.contentNegotiation)
     testImplementation(ktorLibs.client.serialization)
 }

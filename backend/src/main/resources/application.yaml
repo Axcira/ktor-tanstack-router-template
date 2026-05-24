@@ -4,3 +4,13 @@ ktor:
   application:
     modules:
       - net.axcira.ApplicationKt.main
+      - net.axcira.plugins.SerializationKt.configureSerialization
+      - net.axcira.plugins.AuthenticationKt.configureAuthentication
+      - net.axcira.plugins.DatabasesKt.configureDatabase
+      - net.axcira.plugins.OpenApiKt.configureOpenApi
+      - net.axcira.plugins.RoutingKt.root
+      - net.axcira.features.auth.AuthRoutingKt.auth
+      - net.axcira.features.todos.TodoRoutingKt.todos
+      - net.axcira.features.users.UserRoutingKt.users
+    dependencies:
+      - net.axcira.plugins.DatabasesKt.database

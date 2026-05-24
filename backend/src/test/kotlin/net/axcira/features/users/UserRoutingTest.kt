@@ -5,22 +5,13 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.testing.*
-import net.axcira.testConfig
-import org.junit.jupiter.api.AfterEach
+import net.axcira.test
 import org.junit.jupiter.api.Test
-import org.koin.core.context.GlobalContext.stopKoin
 import kotlin.test.assertEquals
 
 class UserRoutingTest {
-    @AfterEach
-    fun tearDown() {
-        stopKoin()
-    }
-
     @Test
-    fun `test create user via api`() = testApplication {
-        testConfig()
+    fun `test create user via api`() = test {
         val client = createClient {
             install(ContentNegotiation) {
                 json()

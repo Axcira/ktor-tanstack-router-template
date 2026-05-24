@@ -1,17 +1,15 @@
 package net.axcira.plugins
 
 import io.ktor.server.application.*
-import net.axcira.dbModule
-import net.axcira.features.auth.authModule
-import net.axcira.features.users.userModule
-import org.koin.ktor.plugin.Koin
+import io.ktor.server.plugins.di.*
+import net.axcira.features.auth.AuthService
+import net.axcira.features.todos.TodoService
+import net.axcira.features.users.UserService
 
 fun Application.module() {
-    install(Koin) {
-        modules(
-            dbModule,
-            userModule,
-            authModule,
-        )
+    dependencies {
+        provide<AuthService>(::AuthService)
+        provide<UserService>(::UserService)
+        provide<TodoService>(::TodoService)
     }
 }
