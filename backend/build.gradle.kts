@@ -26,6 +26,7 @@ dependencies {
     implementation(ktorLibs.server.sessions)
     implementation(ktorLibs.server.swagger)
     implementation(ktorLibs.server.htmlBuilder)
+    implementation(ktorLibs.server.testHost)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.dao)
@@ -38,7 +39,6 @@ dependencies {
     implementation(libs.argon2.jvm)
 
     testImplementation(kotlin("test"))
-    testImplementation(ktorLibs.server.testHost)
 }
 
 ktor {
@@ -46,4 +46,19 @@ ktor {
         enabled = true
         codeInferenceEnabled = true
     }
+}
+
+tasks.register<JavaExec>("generateOpenApiJson") {
+    description = "Generate OpenAPI Specification."
+    dependsOn("compileKotlin")
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("net.axcira.GenerateOpenApiKt")
+}
+
+tasks.register<Exec>("generateClient") {
+    description = "Generate frontend client code from OpenAPI specification using Orval."
+    dependsOn(":backend:generateOpenApiJson")
+
+    workingDir = file("../frontend")
+    commandLine("npx", "orval")
 }
