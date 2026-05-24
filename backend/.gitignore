@@ -49,3 +49,5 @@ gradle-app.setting
 .classpath
 
 *.db
+
+generated/

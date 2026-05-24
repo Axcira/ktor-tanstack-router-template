@@ -23,12 +23,12 @@ fun main() {
     runBlocking {
         val response = testApp.client.get("/openapi.json")
 
-        File("../openapi/openapi.json").also {
+        File("generated/openapi.json").also {
             it.parentFile.mkdirs()
             it.writeText(response.bodyAsText())
         }
 
         testApp.stop()
-        println("✅ openapi.json を出力しました")
+        println("openapi.json generated successfully.")
     }
 }
