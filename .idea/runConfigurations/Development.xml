@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Development" type="CompoundRunConfigurationType">
+    <toRun name="docker compose" type="docker-deploy" />
+    <toRun name="backend" type="GradleRunConfiguration" />
+    <toRun name="build [hot]" type="GradleRunConfiguration" />
+    <toRun name="frontend dev" type="js.build_tools.npm" />
+    <toRun name="orval:watch" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -31,7 +31,7 @@ fun Application.users() {
             /**
              * Get current user
              *
-             * OperationID: getMe
+             * OperationID: getSelf
              */
             get("/users/me") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")

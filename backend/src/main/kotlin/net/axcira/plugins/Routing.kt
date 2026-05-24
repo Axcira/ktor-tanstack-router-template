@@ -8,7 +8,7 @@ import net.axcira.apiRouting
 fun Application.root() {
     apiRouting {
         get("/") {
-            call.respondText("Hello, World!")
+            call.respondText("Hello, World, Reloading!")
         }
         get("/json/kotlinx-serialization") {
             call.respond(mapOf("hello" to "world"))
