@@ -52,14 +52,13 @@ ktor {
 
 tasks.register<JavaExec>("generateOpenApiJson") {
     description = "Generate OpenAPI Specification."
-    dependsOn("compileKotlin")
     classpath = sourceSets["main"].runtimeClasspath
     mainClass.set("net.axcira.GenerateOpenApiKt")
 }
 
 tasks.register<Exec>("generateClient") {
     description = "Generate frontend client code from OpenAPI specification using Orval."
-    dependsOn(":backend:generateOpenApiJson")
+    dependsOn("generateOpenApiJson")
 
     workingDir = file("../frontend")
     commandLine("npx", "orval")
@@ -67,4 +66,8 @@ tasks.register<Exec>("generateClient") {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.run {
+    dependsOn("generateClient")
 }

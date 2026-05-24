@@ -16,12 +16,22 @@ fun Application.todos() {
 
     apiRouting {
         authenticate {
+            /**
+             * Get all todos
+             *
+             * OperationID: getAllTodos
+             */
             get("/todos") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                 val todos = todoService.getTodos(userId)
                 call.respond(todos)
             }
 
+            /**
+             * Create a new todo
+             *
+             * OperationID: createTodo
+             */
             post("/todos") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                 val input = call.receive<CreateTodoInput>()
@@ -29,6 +39,11 @@ fun Application.todos() {
                 call.respond(HttpStatusCode.Created, todo)
             }
 
+            /**
+             * Update a todo
+             *
+             * OperationID: updateTodo
+             */
             patch("/todos/{id}") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                 val todoId = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("Invalid ID")
@@ -37,6 +52,11 @@ fun Application.todos() {
                 call.respond(HttpStatusCode.NoContent)
             }
 
+            /**
+             * Delete a todo
+             *
+             * OperationID: deleteTodo
+             */
             delete("/todos/{id}") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                 val todoId = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("Invalid ID")

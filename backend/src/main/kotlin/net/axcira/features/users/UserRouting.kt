@@ -15,7 +15,11 @@ fun Application.users() {
     val userService: UserService by dependencies
 
     apiRouting {
-        // Create user
+        /**
+         * Create a new user
+         *
+         * OperationID: createUser
+         */
         post("/users") {
             val user = call.receive<CreateUserInput>()
             val createdUser = userService.createUser(user)
@@ -24,14 +28,22 @@ fun Application.users() {
         }
 
         authenticate {
-            // Get user
+            /**
+             * Get current user
+             *
+             * OperationID: getMe
+             */
             get("/users/me") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                 val user = userService.findById(userId) ?: throw IllegalArgumentException("User not found")
                 call.respond(user)
             }
 
-            // Update user
+            /**
+             * Update the current user
+             *
+             * OperationID: updateMe
+             */
             put("/users/me") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                 val user = call.receive<UpdateUserInput>()
@@ -39,7 +51,11 @@ fun Application.users() {
                 call.respond(HttpStatusCode.NoContent)
             }
 
-            // Delete user
+            /**
+             * Delete the current user
+             *
+             * OperationID: deleteMe
+             */
             delete("/users/me") {
                 val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                 userService.delete(userId)

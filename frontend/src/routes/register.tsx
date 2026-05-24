@@ -7,10 +7,10 @@ import {
   type SubmitEventHandler,
   useState,
 } from "react"
-import { usePostUsers } from "@/api/generated/default/default"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useCreateUser } from "#/api/generated/default/default.ts";
 
 export const Route = createFileRoute("/register")({
   component: RegisterComponent,
@@ -20,7 +20,7 @@ function RegisterComponent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const registerMutation = usePostUsers()
+  const registerMutation = useCreateUser()
   const navigate = useNavigate()
 
   const handleSubmit: SubmitEventHandler = (e) => {

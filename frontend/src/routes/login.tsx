@@ -7,10 +7,10 @@ import {
   type SubmitEventHandler,
   useState,
 } from "react"
-import { usePostAuthLogin } from "@/api/generated/default/default"
+import { useLogin } from "#/api/generated/default/default.ts";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/login")({
   component: LoginComponent,
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/login")({
 function LoginComponent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const loginMutation = usePostAuthLogin()
+  const loginMutation = useLogin()
   const navigate = useNavigate()
 
   const handleSubmit: SubmitEventHandler = (e) => {
