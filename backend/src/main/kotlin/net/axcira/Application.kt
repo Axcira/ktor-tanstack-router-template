@@ -6,8 +6,17 @@ import net.axcira.features.auth.auth
 import net.axcira.features.users.users
 import net.axcira.plugins.*
 
-fun Application.main() {
-    module()
+import org.koin.core.module.Module
+import org.koin.ktor.plugin.Koin
+
+fun Application.main(koinModules: List<Module>? = null) {
+    if (koinModules != null) {
+        install(Koin) {
+            modules(koinModules)
+        }
+    } else {
+        module()
+    }
     configureSerialization()
     configureAuthentication()
     configureOpenApi()

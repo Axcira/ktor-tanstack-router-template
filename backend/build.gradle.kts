@@ -39,6 +39,11 @@ dependencies {
     implementation(libs.argon2.jvm)
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.h2)
+    testImplementation("io.insert-koin:koin-test:4.2.0")
+    testImplementation("io.insert-koin:koin-test-junit5:4.2.0")
+    testImplementation(ktorLibs.client.contentNegotiation)
+    testImplementation(ktorLibs.client.serialization)
 }
 
 ktor {
@@ -61,4 +66,8 @@ tasks.register<Exec>("generateClient") {
 
     workingDir = file("../frontend")
     commandLine("npx", "orval")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
