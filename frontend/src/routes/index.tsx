@@ -2,13 +2,13 @@ import {
   createFileRoute,
   Link,
 } from "@tanstack/react-router"
-import { useGetMe } from "@/api/generated/default/default"
+import { useGetSelf } from "#/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({component: Home})
 
 function Home() {
-  const {data, isLoading, isError} = useGetMe()
+  const {data, isLoading, isError} = useGetSelf()
 
   if (isLoading) return <div>Loading...</div>
   if (isError) return <div className={"text-red-500"}>An internal error occurred. Check your internet connection and try again later.</div>
