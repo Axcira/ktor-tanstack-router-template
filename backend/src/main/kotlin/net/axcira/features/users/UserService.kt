@@ -6,7 +6,6 @@ import org.jetbrains.exposed.v1.core.dao.id.UIntIdTable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 @Serializable
 data class CreateUserInput(val email: String, val password: String)
@@ -23,8 +22,8 @@ object Users : UIntIdTable() {
 }
 
 class UserService(val database: Database) {
-    fun createUser(user: CreateUserInput): UserDTO {
-        return transaction(database) {
+    suspend fun createUser(user: CreateUserInput): UserDTO {
+        return suspendTransaction(database) {
             val id = Users.insert {
                 it[email] = user.email
                 it[passwordHash] = PasswordHasher.hashPassword(user.password)
