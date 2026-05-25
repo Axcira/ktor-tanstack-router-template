@@ -10,6 +10,7 @@
             <option value="$PROJECT_DIR$/backend" />
           </set>
         </option>
+        <option name="myGradleHome" value="/usr/share/java/gradle" />
       </GradleProjectSettings>
     </option>
   </component>

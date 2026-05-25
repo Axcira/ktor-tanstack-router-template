@@ -3,6 +3,10 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/backend/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/.kotlin" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/build" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/generated" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/.tanstack" />
     </content>
     <orderEntry type="inheritedJdk" />
