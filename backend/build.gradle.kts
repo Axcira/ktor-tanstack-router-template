@@ -69,7 +69,3 @@ tasks.register<Exec>("generateClient") {
 tasks.test {
     useJUnitPlatform()
 }
-
-tasks.run {
-    dependsOn("generateClient")
-}
