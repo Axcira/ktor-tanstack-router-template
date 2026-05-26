@@ -1,28 +1,43 @@
 package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.axcira.features.users.Users
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.measureTime
+
+suspend fun <T> minWait(duration: Duration, block: suspend () -> T): T {
+    val result: Result<T>
+    val elapsedTime = measureTime {
+        result = runCatching {
+            block()
+        }
+    }
+    if (elapsedTime < duration) {
+        delay(duration - elapsedTime)
+    }
+    return result.getOrThrow()
+}
 
 class AuthService(private val database: Database) {
     private data class AuthUserCredential(
         val id: UInt, val email: String, val passwordHash: String
     )
 
-    suspend fun login(email: String, password: String): UserSession? {
+    suspend fun login(email: String, password: String): UserSession? = minWait(1.seconds) {
         val credential = database.dbQuery {
             Users.selectAll().where { Users.email eq email }.map {
                 AuthUserCredential(it[Users.id].value, it[Users.email], it[Users.passwordHash])
             }.singleOrNull() ?: return@dbQuery null
-        } ?: return null
+        } ?: return@minWait null
 
         val isValid = PasswordHasher.verifyPassword(password, credential.passwordHash)
-        return if (isValid) UserSession(credential.id) else null
+        return@minWait if (isValid) UserSession(credential.id) else null
     }
 }
 
