@@ -4,7 +4,10 @@ import {
   Outlet,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
+import { AppSidebar } from "@/components/layout/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 
+import { TooltipProvider } from "@/components/ui/tooltip"
 import "../styles.css"
 import {
   QueryClient,
@@ -20,7 +23,12 @@ const queryClient = new QueryClient()
 function RootComponent() {
   return (<>
     <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <SidebarProvider>
+          <AppSidebar />
       <Outlet/>
+        </SidebarProvider>
+      </TooltipProvider>
     </QueryClientProvider>
     <TanStackDevtools
       config={{
