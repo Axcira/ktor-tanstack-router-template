@@ -12,10 +12,10 @@ function AppLayout() {
   return (
       <SidebarProvider>
         <AppSidebar />
-        <div className="flex flex-1 flex-col w-full overflow-hidden">
+        <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
           <Header />
           <main className="flex-1 overflow-y-auto">
-            <Outlet /> {/* この中に /photos などの中身が入る */}
+            <Outlet />
           </main>
         </div>
       </SidebarProvider>

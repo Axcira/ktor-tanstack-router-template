@@ -163,10 +163,3 @@ body {
         @apply font-sans;
     }
 }
-
-/* デスクトップ表示でもサイドバーをオーバーレイ（被せる）表示にし、コンテンツやヘッダーがズレないようにする */
-@media (min-width: 768px) {
-    [data-slot="sidebar-gap"] {
-        display: none !important;
-    }
-}

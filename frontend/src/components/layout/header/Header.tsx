@@ -14,7 +14,7 @@ export default function AppHeader() {
 					variant="ghost"
 				    size="icon"
 
-				    className="text-primary hover:bg-primary/10 hover:text-primary w-10 h-10"
+				    className="text-primary hover:bg-primary/10 hover:text-primary w-10 h-10 md:hidden"
 				    aria-label="メニュー"
 				    onClick={toggleSidebar}
 				>
