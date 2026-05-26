@@ -20,7 +20,7 @@ export default function AppHeader() {
 				>
 					<Menu className="h-6 w-6" />
 				</Button>
-				<span className="text-primary font-medium text-xl">Photos</span>
+				<span className="text-primary font-medium text-xl">Ktor-Tanstack-Router-Template</span>
 			</div>
 
 			{/* User icon */}
