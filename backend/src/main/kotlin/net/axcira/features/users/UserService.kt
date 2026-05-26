@@ -6,7 +6,6 @@ import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.dao.id.UIntIdTable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
-import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
 @Serializable
 data class CreateUserInput(val email: String, val password: String)

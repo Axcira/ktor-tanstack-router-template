@@ -1,10 +1,8 @@
 package net.axcira.features.auth
 
 import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import net.axcira.features.users.CreateUserInput
 import net.axcira.test
 import org.junit.jupiter.api.Test
