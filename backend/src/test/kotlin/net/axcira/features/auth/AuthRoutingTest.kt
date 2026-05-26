@@ -12,13 +12,7 @@ import kotlin.test.assertEquals
 
 class AuthRoutingTest {
     @Test
-    fun `test login via api`() = test {
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-
+    fun `test login via api`() = test { client ->
         // Prepare user
         client.post("/api/users") {
             contentType(ContentType.Application.Json)

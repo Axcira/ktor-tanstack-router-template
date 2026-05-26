@@ -11,13 +11,7 @@ import kotlin.test.assertEquals
 
 class UserRoutingTest {
     @Test
-    fun `test create user via api`() = test {
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-
+    fun `test create user via api`() = test { client ->
         val response = client.post("/api/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("api-test@example.com", "password"))
