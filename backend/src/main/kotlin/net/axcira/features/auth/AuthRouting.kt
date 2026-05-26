@@ -8,6 +8,9 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.clear
+import io.ktor.server.sessions.sessions
+import io.ktor.server.sessions.set
 import io.ktor.utils.io.*
 import kotlinx.serialization.Serializable
 import net.axcira.apiRouting
@@ -32,7 +35,18 @@ fun Application.auth() {
                     call.respond(HttpStatusCode.Unauthorized)
                     return@post
                 }
+                call.sessions.set(session)
                 call.respond(session)
+            }
+
+            /**
+             * Logout
+             *
+             * OperationID: logout
+             */
+            post("/logout") {
+                call.sessions.clear<UserSession>()
+                call.respond(HttpStatusCode.NoContent)
             }
         }
     }

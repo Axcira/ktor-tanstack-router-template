@@ -3,5 +3,4 @@ ktor:
     dependencies:
       - net.axcira.BaseTestKt.database
       - net.axcira.features.auth.AuthService
-      - net.axcira.features.todos.TodoService
       - net.axcira.features.users.UserService

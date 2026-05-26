@@ -9,7 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import net.axcira.apiRouting
-import net.axcira.plugins.UserSession
+import net.axcira.features.auth.UserSession
 
 fun Application.users() {
     val userService: UserService by dependencies

@@ -8,7 +8,7 @@ ktor:
       # Main Plugins
       - net.axcira.ApplicationKt.main
       - net.axcira.plugins.SerializationKt.configureSerialization
-      - net.axcira.plugins.AuthenticationKt.configureAuthentication
+      - net.axcira.features.auth.AuthenticationKt.configureAuthentication
       - net.axcira.plugins.DatabasesKt.configureDatabase
       - net.axcira.plugins.OpenApiKt.configureOpenApi
       - net.axcira.plugins.RoutingKt.root
