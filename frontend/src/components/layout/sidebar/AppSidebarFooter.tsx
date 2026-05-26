@@ -3,7 +3,7 @@ import { SidebarFooter } from "@/components/ui/sidebar.tsx";
 
 export default function AppSidebarFooter() {
     return(
-        <SidebarFooter className="p-4 border-t">
+        <SidebarFooter className="p-4 border-t border-sidebar-border">
             <div className="flex items-center gap-2">
                 <img
                     src="https://github.com/shadcn.png"
@@ -12,7 +12,7 @@ export default function AppSidebarFooter() {
                 />
                 <div className="flex flex-col text-sm leading-tight">
                     <span className="font-semibold">shadcn</span>
-                    <span className="text-xs text-gray-500">m@example.com</span>
+                    <span className="text-xs text-sidebar-foreground/70">m@example.com</span>
                 </div>
             </div>
         </SidebarFooter>

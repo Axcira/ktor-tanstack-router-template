@@ -8,14 +8,14 @@ import { Frame, PanelLeftClose } from "lucide-react";
 export default function AppSidebarHeader() {
     const { toggleSidebar } = useSidebar();
     return(
-        <SidebarHeader className="p-4 border-b flex flex-row items-center justify-between">
+        <SidebarHeader className="p-4 h-17 border-b border-sidebar-border flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                     <Frame className="h-5 w-5" />
                 </div>
                 <div className="flex flex-col text-sm leading-tight">
                     <span className="font-semibold">Acme Inc</span>
-                    <span className="text-xs text-gray-500">Enterprise</span>
+                    <span className="text-xs text-sidebar-foreground/70">Enterprise</span>
                 </div>
             </div>
 
@@ -24,7 +24,7 @@ export default function AppSidebarHeader() {
                 variant="ghost"
                 size="icon"
                 onClick={toggleSidebar}
-                className="h-8 w-8 text-gray-500 hover:text-black"
+                className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
             >
                 <PanelLeftClose className="h-5 w-5" />
             </Button>
