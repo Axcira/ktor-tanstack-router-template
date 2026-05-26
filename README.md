@@ -118,11 +118,30 @@ bun run orval:watch
 ### Extend backend
 
 1. `backend/src/.../features/users` パッケージをコピーし、`todos/`を作成します。
-1. 必要なテーブル定義を`backend/src/...db`パッケージにコピーして編集します。
+1. 必要なテーブル定義を`backend/src/...db`パッケージにコピーして編集します。（必要な場合）
 1. 中にあるファイル名やクラス名 (`UserRouting` --> `ToDoRouting` など) を置換します。
 1. `Application.kt` の `dependencies` の中に、`ToDoService`を追加します。
 1. `resources/application.yaml` の `modules` の中に、`net.axcira.features.users.ToDoRoutingKt.todos` を追記します。
 1. `backend/src/test/.../users` パッケージをコピーし、`todos/`を作成し、テストコードを修正します。
+
+#### Database
+
+`net/axcira/db` 以下に作成された全ての `Table` を継承したオブジェクトは、Exposed Gradle プラグインによって自動で認識され、追跡されます。  
+データベースにテーブルを作成するには、以下のコマンドを実行してマイグレーションスクリプトを作成します。  
+
+```bash
+cd backend
+./gradlew generateMigrations
+```
+
+マイグレーションスクリプトは `resources/db/migration` に作成されます。
+
+> [!WARNING]
+> [公式ドキュメント](https://www.jetbrains.com/help/exposed/migrations.html) によると、`DROP COLUMN`や`DROP SEQUENCE`などの
+> 破壊的なSQLが生成される可能性があるとされています。  
+> そのため、生成されたSQLのヒューマンレビューを推奨します。
+
+生成されたマイグレーションファイルは、サーバーの起動時に（未適用のマイグレーションも含めて）適用されます。
 
 ### Extend frontend
 
