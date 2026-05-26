@@ -8,6 +8,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
 import io.ktor.utils.io.*
@@ -36,6 +37,16 @@ fun Application.auth() {
                 }
                 call.sessions.set(session)
                 call.respond(session)
+            }
+
+            /**
+             * Logout
+             *
+             * OperationID: logout
+             */
+            post("/logout") {
+                call.sessions.clear<UserSession>()
+                call.respond(HttpStatusCode.NoContent)
             }
         }
     }
