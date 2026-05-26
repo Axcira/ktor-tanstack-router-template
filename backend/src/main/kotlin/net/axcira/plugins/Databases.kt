@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
+import net.axcira.features.auth.SessionsTable
 import net.axcira.features.users.Users
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -36,7 +37,7 @@ fun Application.configureDatabase() {
 
     transaction(database) {
         SchemaUtils.create(
-            Users,
+            Users, SessionsTable
         )
     }
 }

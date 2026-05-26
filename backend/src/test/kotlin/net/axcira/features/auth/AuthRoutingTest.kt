@@ -6,7 +6,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import net.axcira.features.users.CreateUserInput
-import net.axcira.plugins.UserSession
 import net.axcira.test
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

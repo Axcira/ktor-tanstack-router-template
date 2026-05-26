@@ -1,0 +1,74 @@
+package net.axcira.features.auth
+
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.sessions.*
+import kotlinx.serialization.Serializable
+import net.axcira.features.auth.SessionsTable.sessionId
+import net.axcira.features.users.Users
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.upsert
+
+
+@Serializable
+data class UserSession(val userId: UInt)
+
+object SessionsTable : Table() {
+    val sessionId = varchar("session_id", 64)
+    val session = text("session")
+
+    override val primaryKey = PrimaryKey(sessionId)
+}
+
+class DatabaseSessionStorage(private val database: Database) : SessionStorage {
+    override suspend fun invalidate(id: String) {
+        suspendTransaction(database) {
+            SessionsTable.deleteWhere { sessionId eq id }
+        }
+    }
+
+    override suspend fun read(id: String): String {
+        return suspendTransaction(database) {
+            SessionsTable.select(SessionsTable.session).where { sessionId eq id }.single()[SessionsTable.session]
+        }
+    }
+
+    override suspend fun write(id: String, value: String) {
+        suspendTransaction(database) {
+            SessionsTable.upsert {
+                it[sessionId] = id
+                it[session] = value
+            }
+        }
+    }
+}
+
+fun Application.configureAuthentication(database: Database) {
+    install(Sessions) {
+        cookie<UserSession>("user_session", DatabaseSessionStorage(database)) {
+            cookie.path = "/"
+            cookie.httpOnly = true
+            cookie.secure = true
+        }
+    }
+    install(Authentication) {
+        session<UserSession> {
+            validate { session ->
+                val user = suspendTransaction(database) {
+                    Users.selectAll().where { Users.id eq session.userId }.firstOrNull()
+                }
+                if (user != null) {
+                    session
+                } else {
+                    null
+                }
+            }
+        }
+    }
+}
