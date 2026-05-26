@@ -2,7 +2,7 @@ package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
 import kotlinx.coroutines.*
-import net.axcira.features.users.Users
+import net.axcira.db.Users
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database

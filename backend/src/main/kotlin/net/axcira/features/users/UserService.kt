@@ -1,9 +1,9 @@
 package net.axcira.features.users
 
 import kotlinx.serialization.Serializable
+import net.axcira.db.Users
 import net.axcira.features.auth.PasswordHasher
 import net.axcira.plugins.dbQuery
-import org.jetbrains.exposed.v1.core.dao.id.UIntIdTable
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 
@@ -15,11 +15,6 @@ data class UpdateUserInput(val email: String?, val password: String?)
 
 @Serializable
 data class UserDTO(val id: UInt, val email: String)
-
-object Users : UIntIdTable() {
-    val email = varchar("email", length = 50).uniqueIndex()
-    val passwordHash = varchar("password_hash", length = 128)
-}
 
 class UserService(val database: Database) {
     suspend fun createUser(user: CreateUserInput): UserDTO {

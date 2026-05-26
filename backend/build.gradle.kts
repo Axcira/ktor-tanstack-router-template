@@ -1,7 +1,11 @@
+import org.gradle.internal.execution.caching.CachingState.enabled
+import org.jetbrains.exposed.v1.gradle.plugin.VersionFormat
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(ktorLibs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.exposed)
 }
 
 group = "net.axcira"
@@ -37,6 +41,8 @@ dependencies {
     implementation(libs.hikaricp)
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.12.0")
     implementation(libs.argon2.jvm)
+    implementation(libs.flyway.core)
+    implementation(libs.flyway.database.postgresql)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.h2)
@@ -68,4 +74,12 @@ tasks.register<Exec>("generateClient") {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+exposed {
+    migrations {
+        tablesPackage.set("net.axcira.db")
+        testContainersImageName.set("postgres:latest")
+        fileVersionFormat.set(VersionFormat.MAJOR_ONLY)
+    }
 }
