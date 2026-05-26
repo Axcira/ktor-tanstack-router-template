@@ -1,17 +1,14 @@
 package net.axcira.features.articles
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
+import net.axcira.Pagination
 import net.axcira.apiRouting
 import net.axcira.features.auth.UserSession
-import net.axcira.features.users.CreateUserInput
-import net.axcira.features.users.UpdateUserInput
 
 fun Application.articles() {
     val articleService: ArticleService by dependencies
@@ -20,10 +17,19 @@ fun Application.articles() {
         authenticate {
             route("/articles") {
                 get {
-                    val articles = articleService.getAll()
+                    val pagination = Pagination(
+                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                    )
+                    val articles = articleService.get(pagination)
                     call.respond(articles)
                 }
-
+                post {
+                    val article = call.receive<CreateArticleInput>()
+                    val userId = call.principal<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+                    val createdArticle = articleService.create(article, userId)
+                    call.respond(createdArticle)
+                }
             }
         }
     }

@@ -15,5 +15,6 @@ ktor:
       # Features
       - net.axcira.features.auth.AuthRoutingKt.auth
       - net.axcira.features.users.UserRoutingKt.users
+      - net.axcira.features.articles.ArticleRoutingKt.articles
     dependencies:
       - net.axcira.plugins.DatabasesKt.database
