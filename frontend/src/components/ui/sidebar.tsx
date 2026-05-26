@@ -225,14 +225,7 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
         )}
       />
-      {/* Backdrop overlay */}
-      <div
-        className={cn(
-          "fixed inset-0 z-5 bg-black/30 backdrop-blur-sm transition-opacity duration-200 md:block hidden",
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}
-        onClick={() => setOpen(false)}
-      />
+
       <div
         data-slot="sidebar-container"
         data-side={side}

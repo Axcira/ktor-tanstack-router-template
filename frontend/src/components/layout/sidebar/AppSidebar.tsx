@@ -8,7 +8,7 @@ import AppSidebarFooter from "./AppSidebarFooter"
 
 export function AppSidebar() {
     return (
-        <Sidebar>
+        <Sidebar collapsible="icon">
             {/* サイドバーのヘッダー部分（ロゴなど） */}
             <AppSidebarHeader />
 

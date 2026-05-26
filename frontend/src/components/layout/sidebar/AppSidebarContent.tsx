@@ -25,9 +25,9 @@ export default function AppSidebarContent() {
                         <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
                                 <SidebarMenuButton tooltip="Playground">
-                                    <SquareTerminal className="mr-2 h-4 w-4" />
-                                    <span>Playground</span>
-                                    <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                                    <SquareTerminal className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0" />
+                                    <span className="group-data-[state=collapsed]:hidden">Playground</span>
+                                    <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90 group-data-[state=collapsed]:hidden" />
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
@@ -56,9 +56,9 @@ export default function AppSidebarContent() {
                     <SidebarMenuItem>
                         <SidebarMenuButton tooltip="Models" asChild>
                             <Link to="/models">
-                                <Bot className="mr-2 h-4 w-4" />
-                                <span>Models</span>
-                                <ChevronRight className="ml-auto h-4 w-4" />
+                                <Bot className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0" />
+                                <span className="group-data-[state=collapsed]:hidden">Models</span>
+                                <ChevronRight className="ml-auto h-4 w-4 group-data-[state=collapsed]:hidden" />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -66,9 +66,9 @@ export default function AppSidebarContent() {
                     <SidebarMenuItem>
                         <SidebarMenuButton tooltip="Documentation" asChild>
                             <Link to="/documentation">
-                                <BookOpen className="mr-2 h-4 w-4" />
-                                <span>Documentation</span>
-                                <ChevronRight className="ml-auto h-4 w-4" />
+                                <BookOpen className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0" />
+                                <span className="group-data-[state=collapsed]:hidden">Documentation</span>
+                                <ChevronRight className="ml-auto h-4 w-4 group-data-[state=collapsed]:hidden" />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -76,9 +76,9 @@ export default function AppSidebarContent() {
                     <SidebarMenuItem>
                         <SidebarMenuButton tooltip="Settings" asChild>
                             <Link to="/settings">
-                                <Settings2 className="mr-2 h-4 w-4" />
-                                <span>Settings</span>
-                                <ChevronRight className="ml-auto h-4 w-4" />
+                                <Settings2 className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0" />
+                                <span className="group-data-[state=collapsed]:hidden">Settings</span>
+                                <ChevronRight className="ml-auto h-4 w-4 group-data-[state=collapsed]:hidden" />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

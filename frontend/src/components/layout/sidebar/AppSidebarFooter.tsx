@@ -37,16 +37,18 @@ export default function AppSidebarFooter() {
     })
 
     return (
-        <SidebarFooter className="p-4 border-t border-sidebar-border">
+        <SidebarFooter className="p-4 border-t border-sidebar-border group-data-[state=collapsed]:p-2 group-data-[state=collapsed]:flex group-data-[state=collapsed]:justify-center">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button
                         variant="ghost"
-                        className="w-full justify-start text-destructive hover:bg-sidebar-accent hover:text-destructive"
+                        className="w-full justify-start text-destructive hover:bg-sidebar-accent hover:text-destructive group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:w-10 group-data-[state=collapsed]:h-10 group-data-[state=collapsed]:p-0"
                         disabled={logoutMutation.isPending}
                     >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        {logoutMutation.isPending ? "ログアウト中..." : "ログアウト"}
+                        <LogOut className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0" />
+                        <span className="group-data-[state=collapsed]:hidden">
+                            {logoutMutation.isPending ? "ログアウト中..." : "ログアウト"}
+                        </span>
                     </Button>
                 </AlertDialogTrigger>
 
