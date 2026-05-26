@@ -36,7 +36,7 @@ export default function AppSidebarContent() {
                                             <a href="#">Nav 1-1</a>
                                         </SidebarMenuSubButton>
                                     </SidebarMenuSubItem>
-                                    <SidebarMenuSubItem>a
+                                    <SidebarMenuSubItem>
                                         <SidebarMenuSubButton asChild>
                                             <a href="#">Nav 1-2</a>
                                         </SidebarMenuSubButton>
