@@ -8,7 +8,7 @@ export default function AppHeader() {
     return (
 		<header className="w-full h-17 bg-background text-foreground border-b border-border flex items-center justify-between px-6">
 
-			{/* Left: Hamburger + Title */}
+			{/* Hamburger + Title */}
 			<div className="flex items-center gap-5">
 				<Button
 					variant="ghost"
@@ -23,11 +23,9 @@ export default function AppHeader() {
 				<span className="text-primary font-medium text-xl">Photos</span>
 			</div>
 
-			{/* Right: User icon */}
-			{/* 修正3: リングの色を「白」から「青(primary)の透過」に変更 */}
+			{/* User icon */}
 			<Avatar className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all">
-				<AvatarImage src="https://github.com/shadcn.png" alt="ユーザー" />
-				{/* 修正4: 画像がない時の代替えアイコンを「青背景に白文字」に変更 */}
+				<AvatarImage src="" alt="ユーザー" />
 				<AvatarFallback className="bg-primary text-primary-foreground text-sm">U</AvatarFallback>
 			</Avatar>
 
