@@ -48,8 +48,8 @@
 
 ## 0. Ready
 
-GitHubの "Use this template" ボタンをクリックし、このテンプレートをもとにした新しいリポジトリを作成します。
-作成したリポジトリをクローンしてください。
+GitHubの "Use this template" ボタンをクリックし、このテンプレートをもとにした新しいリポジトリを作成します。  
+作成したリポジトリをクローンしてください。  
 
 ## 1. Install dependencies
 
@@ -62,26 +62,28 @@ bun i
 
 ## 2. Start the project
 
-このプロジェクトはモノレポ構成になっています。以下の手順でローカル環境を立ち上げてください。
-なお、IntelliJ IDEAを使用している場合、 "Development" と書かれた複合実行構成を起動してください。
-VSCodeなど、他のエディターを使用している場合は、以下の手順に従ってください。
+このプロジェクトはモノレポ構成になっています。以下の手順でローカル環境を立ち上げてください。  
+なお、IntelliJ IDEAを使用している場合、 "Development" と書かれた複合実行構成を起動してください。  
+VSCodeなど、他のエディターを使用している場合は、以下の手順に従ってください。  
 
-**データベースの起動**
+**データベースの起動**  
 Docker Compose経由で、Postgresが起動します。
 
 ```bash
 docker compose up -d
 ```
 
-**バックエンドの起動**
-依存関係の解決はこのタイミングで行われます。自動読み込みに対応しています。
+**バックエンドの起動**  
+依存関係の解決はこのタイミングで行われます。  
+`.class` ファイルが変更された際に、自動で再読み込みします。  
+⚠️ Java の仕様上、一部の変更は自動で適用されなかったり、オブジェクトが破棄される場合があります。
 
 ```bash
 cd backend
 ./gradlew run
 ```
 
-**フロントエンドの起動**
+**フロントエンドの起動**  
 開発モードで起動するため、ホットリロードに対応しています。
 
 ```bash
@@ -89,17 +91,20 @@ cd frontend
 bun run dev
 ```
 
-開発を本格的に進める場合は、以下の2つのプロセスも立ちあげてください。
+開発を本格的に進める場合は、以下の2つのプロセスも立ちあげてください。  
 (Compound 実行構成に含まれています。)
 
-**自動コンパイル**
+**自動コンパイル**  
+バックエンドのソースコードをリアルタイムで監視し、変更された場合にコンパイルします。  
+OpenAPI 仕様も自動生成されます。
 
 ```bash
 cd backend
 ./gradlew generateOpenApiJson -t -i
 ```
 
-**Orval監視とクライアントライブラリの自動生成**
+**Orval監視とクライアントライブラリの自動生成**  
+OrvalがOpenAPI 仕様を監視し、変更された場合にクライアントライブラリを自動生成します。
 
 ```bash
 cd frontend
@@ -112,12 +117,12 @@ bun run orval:watch
 
 ### Extend backend
 
-1. `backend/src/.../features/users` パッケージをコピーし、`todos/`を作成する。
-2. 中にあるファイル名やクラス名 (`UserRouting` --> `ToDoRouting` など) を置換します。
-3. `ToDoService.kt` ファイルでテーブルを定義し、`plugins/Databases.kt` の `SchemaUtils.create(...)` の中に追記します。
-4. `Application.kt` の `dependencies` の中に、`ToDoService`を追加します。
-5. `resources/application.yaml` の `modules` の中に、`net.axcira.features.users.ToDoRoutingKt.todos` を追記します。
-6. `backend/src/test/.../users` パッケージをコピーし、`todos/`を作成し、テストコードを修正します。
+1. `backend/src/.../features/users` パッケージをコピーし、`todos/`を作成します。
+1. 必要なテーブル定義を`backend/src/...db`パッケージにコピーして編集します。
+1. 中にあるファイル名やクラス名 (`UserRouting` --> `ToDoRouting` など) を置換します。
+1. `Application.kt` の `dependencies` の中に、`ToDoService`を追加します。
+1. `resources/application.yaml` の `modules` の中に、`net.axcira.features.users.ToDoRoutingKt.todos` を追記します。
+1. `backend/src/test/.../users` パッケージをコピーし、`todos/`を作成し、テストコードを修正します。
 
 ### Extend frontend
 
