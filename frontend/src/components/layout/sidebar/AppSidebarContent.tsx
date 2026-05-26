@@ -25,7 +25,7 @@ export default function AppSidebarContent() {
                             <CollapsibleTrigger asChild>
                                 <SidebarMenuButton tooltip="Playground">
                                     <SquareTerminal className="mr-2 h-4 w-4" />
-                                    <span>Playground</span>
+                                    <span>Sidebar Nav 1</span>
                                     <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
@@ -33,17 +33,17 @@ export default function AppSidebarContent() {
                                 <SidebarMenuSub>
                                     <SidebarMenuSubItem>
                                         <SidebarMenuSubButton asChild>
-                                            <a href="#">History</a>
+                                            <a href="#">Nav 1-1</a>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                    <SidebarMenuSubItem>a
+                                        <SidebarMenuSubButton asChild>
+                                            <a href="#">Nav 1-2</a>
                                         </SidebarMenuSubButton>
                                     </SidebarMenuSubItem>
                                     <SidebarMenuSubItem>
                                         <SidebarMenuSubButton asChild>
-                                            <a href="#">Starred</a>
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                    <SidebarMenuSubItem>
-                                        <SidebarMenuSubButton asChild>
-                                            <a href="#">Settings</a>
+                                            <a href="#">Nav 1-2</a>
                                         </SidebarMenuSubButton>
                                     </SidebarMenuSubItem>
                                 </SidebarMenuSub>
@@ -55,7 +55,7 @@ export default function AppSidebarContent() {
                     <SidebarMenuItem>
                         <SidebarMenuButton tooltip="Models">
                             <Bot className="mr-2 h-4 w-4" />
-                            <span>Models</span>
+                            <span>Sidebar Nav 2</span>
                             <ChevronRight className="ml-auto h-4 w-4" />
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -63,7 +63,7 @@ export default function AppSidebarContent() {
                     <SidebarMenuItem>
                         <SidebarMenuButton tooltip="Documentation">
                             <BookOpen className="mr-2 h-4 w-4" />
-                            <span>Documentation</span>
+                            <span>Sidebar Nav 3</span>
                             <ChevronRight className="ml-auto h-4 w-4" />
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -71,7 +71,7 @@ export default function AppSidebarContent() {
                     <SidebarMenuItem>
                         <SidebarMenuButton tooltip="Settings">
                             <Settings2 className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
+                            <span>Sidebar Nav 4</span>
                             <ChevronRight className="ml-auto h-4 w-4" />
                         </SidebarMenuButton>
                     </SidebarMenuItem>
