@@ -11,7 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as HeroRouteImport } from './routes/hero'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppModelsRouteImport } from './routes/_app.models'
+import { Route as AppDocumentationRouteImport } from './routes/_app.documentation'
+import { Route as AppPlaygroundNav12RouteImport } from './routes/_app.playground.nav1-2'
+import { Route as AppPlaygroundNav11RouteImport } from './routes/_app.playground.nav1-1'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -23,38 +30,121 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const HeroRoute = HeroRouteImport.update({
+  id: '/hero',
+  path: '/hero',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppModelsRoute = AppModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocumentationRoute = AppDocumentationRouteImport.update({
+  id: '/documentation',
+  path: '/documentation',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlaygroundNav12Route = AppPlaygroundNav12RouteImport.update({
+  id: '/playground/nav1-2',
+  path: '/playground/nav1-2',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
+  id: '/playground/nav1-1',
+  path: '/playground/nav1-1',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/documentation': typeof AppDocumentationRoute
+  '/models': typeof AppModelsRoute
+  '/settings': typeof AppSettingsRoute
+  '/playground/nav1-1': typeof AppPlaygroundNav11Route
+  '/playground/nav1-2': typeof AppPlaygroundNav12Route
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/documentation': typeof AppDocumentationRoute
+  '/models': typeof AppModelsRoute
+  '/settings': typeof AppSettingsRoute
+  '/': typeof AppIndexRoute
+  '/playground/nav1-1': typeof AppPlaygroundNav11Route
+  '/playground/nav1-2': typeof AppPlaygroundNav12Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_app/documentation': typeof AppDocumentationRoute
+  '/_app/models': typeof AppModelsRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/playground/nav1-1': typeof AppPlaygroundNav11Route
+  '/_app/playground/nav1-2': typeof AppPlaygroundNav12Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/hero'
+    | '/login'
+    | '/register'
+    | '/documentation'
+    | '/models'
+    | '/settings'
+    | '/playground/nav1-1'
+    | '/playground/nav1-2'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register'
-  id: '__root__' | '/' | '/login' | '/register'
+  to:
+    | '/hero'
+    | '/login'
+    | '/register'
+    | '/documentation'
+    | '/models'
+    | '/settings'
+    | '/'
+    | '/playground/nav1-1'
+    | '/playground/nav1-2'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/hero'
+    | '/login'
+    | '/register'
+    | '/_app/documentation'
+    | '/_app/models'
+    | '/_app/settings'
+    | '/_app/'
+    | '/_app/playground/nav1-1'
+    | '/_app/playground/nav1-2'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  HeroRoute: typeof HeroRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -75,18 +165,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/hero': {
+      id: '/hero'
+      path: '/hero'
+      fullPath: '/hero'
+      preLoaderRoute: typeof HeroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/models': {
+      id: '/_app/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof AppModelsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/documentation': {
+      id: '/_app/documentation'
+      path: '/documentation'
+      fullPath: '/documentation'
+      preLoaderRoute: typeof AppDocumentationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/playground/nav1-2': {
+      id: '/_app/playground/nav1-2'
+      path: '/playground/nav1-2'
+      fullPath: '/playground/nav1-2'
+      preLoaderRoute: typeof AppPlaygroundNav12RouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/playground/nav1-1': {
+      id: '/_app/playground/nav1-1'
+      path: '/playground/nav1-1'
+      fullPath: '/playground/nav1-1'
+      preLoaderRoute: typeof AppPlaygroundNav11RouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppDocumentationRoute: typeof AppDocumentationRoute
+  AppModelsRoute: typeof AppModelsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
+  AppPlaygroundNav12Route: typeof AppPlaygroundNav12Route
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDocumentationRoute: AppDocumentationRoute,
+  AppModelsRoute: AppModelsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppPlaygroundNav11Route: AppPlaygroundNav11Route,
+  AppPlaygroundNav12Route: AppPlaygroundNav12Route,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  HeroRoute: HeroRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }

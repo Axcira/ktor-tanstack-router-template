@@ -7,10 +7,10 @@ import {
   type SubmitEventHandler,
   useState,
 } from "react"
+import { useCreateUser } from "#/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateUser } from "#/api/generated/default/default.ts";
 
 export const Route = createFileRoute("/register")({
   component: RegisterComponent,
