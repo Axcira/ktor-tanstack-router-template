@@ -2395,6 +2395,42 @@
         <option name="homepage" value="https://wensity.com" />
         <option name="urlTemplate" value="https://raw.githubusercontent.com/ksparth12/wensity-shadcn-registry/main/{name}.json" />
       </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-toc-cn" />
+        <option name="name" value="Toc-cn" />
+        <option name="namespace" value="@toc-cn" />
+        <option name="baseUrl" value="https://tocn.vercel.app/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Documentation-style in-page table of contents with scroll spy, animated SVG tree indicator, and mobile sticky collapsible." />
+        <option name="homepage" value="https://tocn.vercel.app" />
+        <option name="urlTemplate" value="https://tocn.vercel.app/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-dominik-ui" />
+        <option name="name" value="Dominik-ui" />
+        <option name="namespace" value="@dominik-ui" />
+        <option name="baseUrl" value="https://dominikkoch.dev/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Opinionated components and tools for building modern AI interfaces." />
+        <option name="homepage" value="https://dominikkoch.dev" />
+        <option name="urlTemplate" value="https://dominikkoch.dev/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-blockus" />
+        <option name="name" value="Blockus" />
+        <option name="namespace" value="@blockus" />
+        <option name="baseUrl" value="https://blockus.lndevui.com/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Production-ready React blocks built on shadcn/ui and Tailwind — drop them in, swap the copy, ship the page. Heroes, pricing and footer sections crafted by hand." />
+        <option name="homepage" value="https://blockus.lndevui.com" />
+        <option name="urlTemplate" value="https://blockus.lndevui.com/r/{name}.json" />
+      </RegistryConfigState>
     </registryConfigs>
   </component>
 </project>
