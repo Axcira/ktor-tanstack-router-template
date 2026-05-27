@@ -1,6 +1,6 @@
 package net.axcira.features.articles
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.di.*
@@ -38,12 +38,16 @@ fun Application.articles() {
                 }
                 patch("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
-                    val article = call.receive<UpdateArticleInput>()
-                    articleService.update(id, article)
+                    val scheme = call.receive<UpdateArticleInput>()
+                    val article = articleService.getById(id) ?: return@patch call.respond(HttpStatusCode.NotFound)
+                    if (article.userId != call.principal<UserSession>()?.userId) return@patch call.respond(HttpStatusCode.Forbidden)
+                    articleService.update(id, scheme)
                     call.respond(HttpStatusCode.NoContent)
                 }
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                    val article = articleService.getById(id) ?: return@delete call.respond(HttpStatusCode.NotFound)
+                    if (article.userId != call.principal<UserSession>()?.userId) return@delete call.respond(HttpStatusCode.Forbidden)
                     articleService.delete(id)
                     call.respond(HttpStatusCode.NoContent)
                 }
