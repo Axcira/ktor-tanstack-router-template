@@ -10,7 +10,7 @@ const router = createRouter({
 })
 
 declare module "@tanstack/react-router" {
-    // noinspection JSUnusedGlobalSymbols
+
     interface Register {
         router: typeof router
     }

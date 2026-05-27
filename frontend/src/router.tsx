@@ -8,7 +8,6 @@ export function getRouter() {
 }
 
 declare module "@tanstack/react-router" {
-    // noinspection JSUnusedGlobalSymbols
     interface Register {
         router: ReturnType<typeof getRouter>
     }

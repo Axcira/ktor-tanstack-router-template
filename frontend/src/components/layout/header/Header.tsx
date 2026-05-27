@@ -8,7 +8,6 @@ export default function AppHeader() {
     return (
 		<header className="w-full h-17 bg-background text-foreground border-b border-border flex items-center justify-between px-6">
 
-			{/* Hamburger + Title */}
 			<div className="flex items-center gap-5">
 				<Button
 					variant="ghost"
@@ -23,7 +22,6 @@ export default function AppHeader() {
 				<span className="text-primary font-medium text-xl">Ktor-Tanstack-Router-Template</span>
 			</div>
 
-			{/* User icon */}
 			<Avatar className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all">
 				<AvatarImage src="" alt="ユーザー" />
 				<AvatarFallback className="bg-primary text-primary-foreground text-sm">U</AvatarFallback>

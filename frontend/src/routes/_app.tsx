@@ -1,4 +1,4 @@
-// src/routes/_app.tsx
+
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 import { AppSidebar } from "#/components/layout/sidebar/AppSidebar.tsx"
 import { SidebarProvider } from "@/components/ui/sidebar"

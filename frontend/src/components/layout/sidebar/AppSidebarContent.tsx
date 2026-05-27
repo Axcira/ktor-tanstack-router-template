@@ -19,8 +19,6 @@ export default function AppSidebarContent() {
             <SidebarGroup>
                 <SidebarGroupLabel>Platform</SidebarGroupLabel>
                 <SidebarMenu>
-
-                    {/* 開閉するメニュー（Playground） */}
                     <Collapsible defaultOpen className="group/collapsible">
                         <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
@@ -52,7 +50,6 @@ export default function AppSidebarContent() {
                         </SidebarMenuItem>
                     </Collapsible>
 
-                    {/* 開閉しない通常のメニュー */}
                     <SidebarMenuItem>
                         <SidebarMenuButton tooltip="Models" asChild>
                             <Link to="/models">

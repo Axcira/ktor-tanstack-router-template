@@ -16,7 +16,6 @@ export default function AppSidebarHeader() {
                 </div>
             </div>
 
-            {/* サイドバー開閉ボタン */}
             <Button
                 variant="ghost"
                 size="icon"
