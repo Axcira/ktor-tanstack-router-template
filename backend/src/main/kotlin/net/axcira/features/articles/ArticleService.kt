@@ -24,7 +24,7 @@ data class ArticleDTO(
     val id: UInt, val userId: UInt, val title: String, val description: String, val body: String, val tagList: List<TagDTO>
 )
 
-private fun Database.upsertTags(tags: List<String>) = run {
+private fun upsertTags(tags: List<String>) = run {
     val existingTags = Tags.selectAll().where { Tags.name inList tags }.toList()
     val newTags = tags.filter { tag -> tag !in existingTags.map { it[Tags.name] } }
     val generatedTags = Tags.batchInsert(newTags) {
@@ -49,6 +49,13 @@ class ArticleService(val database: Database) {
                 tagsByArticle[row[Articles.id].value] ?: emptyList()
             )
         }
+    }
+
+    suspend fun getById(id: UInt) = database.dbQuery {
+        val article = Articles.selectAll().where { Articles.id eq id }.singleOrNull() ?: return@dbQuery null
+        val tags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
+            .map { TagDTO(it[Tags.id].value, it[Tags.name]) }
+        ArticleDTO(article[Articles.id].value, article[Articles.userId].value, article[Articles.title], article[Articles.description], article[Articles.body], tags)
     }
 
     suspend fun create(article: CreateArticleInput, userId: UInt): ArticleDTO = database.dbQuery {
