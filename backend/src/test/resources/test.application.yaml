@@ -2,5 +2,3 @@ ktor:
   application:
     dependencies:
       - net.axcira.BaseTestKt.database
-      - net.axcira.features.auth.AuthService
-      - net.axcira.features.users.UserService

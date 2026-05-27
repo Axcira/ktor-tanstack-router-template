@@ -18,13 +18,28 @@ class AuthRoutingTest {
         }
 
         // Login
-        val response = client.post("/api/auth/login") {
+        client.post("/api/auth/login") {
             contentType(ContentType.Application.Json)
             setBody(LoginRequest("api-auth@example.com", "password"))
+        }.let {
+            assertEquals(HttpStatusCode.OK, it.status)
+            val session = it.body<UserSession>()
+            assert(session.userId > 0u)
         }
 
-        assertEquals(HttpStatusCode.OK, response.status)
-        val session = response.body<UserSession>()
-        assert(session.userId > 0u)
+        // Access to protected resources
+        client.get("/api/users/me").let {
+            assertEquals(HttpStatusCode.OK, it.status)
+        }
+
+        // Logout
+        client.post("/api/auth/logout").let {
+            assertEquals(HttpStatusCode.NoContent, it.status)
+        }
+
+        // Access to protected resources again
+        client.get("/api/users/me").let {
+            assertEquals(HttpStatusCode.Unauthorized, it.status)
+        }
     }
 }

@@ -43,7 +43,7 @@ fun Application.configureAuthentication(database: Database) {
         cookie<UserSession>("user_session", DatabaseSessionStorage(database)) {
             cookie.path = "/"
             cookie.httpOnly = true
-            cookie.secure = true
+            cookie.secure = (System.getenv("environment") ?: "development") == "production"
         }
     }
     install(Authentication) {
