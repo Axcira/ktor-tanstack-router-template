@@ -84,7 +84,7 @@ class ArticleService(val database: Database) {
 
     suspend fun update(id: UInt, article: UpdateArticleInput) = database.dbQuery {
         if (article.tagList != null) {
-            val currentTags = ArticleTags.select(ArticleTags.tagId).where { ArticleTags.articleId eq id }
+            val currentTags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
                 .map { TagDTO(it[ArticleTags.tagId].value, it[Tags.name]) }
             val newTags = upsertTags(article.tagList)
 
@@ -97,10 +97,13 @@ class ArticleService(val database: Database) {
                 this[ArticleTags.tagId] = tagId.id
             }
         }
+        val (title, description, body) = article
+        if (title == null && description == null && body == null) return@dbQuery
+
         Articles.update({ Articles.id eq id }) {
-            if (article.title != null) it[Articles.title] = article.title
-            if (article.description != null) it[Articles.description] = article.description
-            if (article.body != null) it[Articles.body] = article.body
+            if (title != null) it[Articles.title] = title
+            if (description != null) it[Articles.description] = description
+            if (body != null) it[Articles.body] = body
         }
     }
 
