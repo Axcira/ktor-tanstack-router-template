@@ -1,29 +1,27 @@
 import {
-    SidebarFooter,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { LogOut } from "lucide-react"
-import {
-    useNavigate,
-    useRouter,
+  useNavigate,
+  useRouter,
 } from "@tanstack/react-router"
-
+import { LogOut } from "lucide-react"
 import { useLogout } from "@/api/generated/default/default"
-
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogOverlay,
-    AlertDialogPortal,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  SidebarFooter,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
 
 export default function AppSidebarFooter() {
   const router = useRouter()
@@ -34,7 +32,7 @@ export default function AppSidebarFooter() {
       onSuccess: async () => {
         console.log("サーバー側のログアウトに成功しました")
         await router.invalidate()
-        navigate({to: "/hero"})
+        await navigate({to: "/hero"})
       }, onError: (error) => {
         console.error("ログアウト処理でエラーが発生しました:", error)
       },
@@ -64,7 +62,7 @@ export default function AppSidebarFooter() {
       <AlertDialogPortal>
         <AlertDialogOverlay className="fixed inset-0 z-50 bg-black/5 backdrop-blur-sm"/>
         <AlertDialogContent
-          className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg -translate-x-[50%] -translate-y-[50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg duration-100 data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:zoom-out-95">
+          className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg duration-100 data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:zoom-out-95">
           <AlertDialogHeader>
             <AlertDialogTitle>ログアウトしますか？</AlertDialogTitle>
             <AlertDialogDescription>
