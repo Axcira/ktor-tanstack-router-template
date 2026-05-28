@@ -8,8 +8,6 @@ import io.ktor.client.plugins.cookies.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.v1.core.DatabaseConfig
-import org.jetbrains.exposed.v1.core.vendors.PostgreSQLDialect
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.containers.PostgreSQLContainer
 
