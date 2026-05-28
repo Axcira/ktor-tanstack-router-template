@@ -44,6 +44,7 @@
 - **Test included**: テスト用データベースに差し替えたバックエンドサーバーのテストが組み込まれています。
 - **Database included**: Exposedを使用したデータベース接続が組み込まれています。
 - **Authentication included**: ログイン・アカウント登録機能が組み込まれています。
+- **Articles included**: サンプルとして、タグとのMany to Manyリレーションを持つ記事管理機能が組み込まれています。
 - **Scalar included**: OpenAPIドキュメントツール "Scalar" が組み込まれています。
 - **Vertical Slice Architecture**: 機能拡張・削除がしやすく、結合しづらいディレクトリ構成を採用しています。
 - **Type-safe API Client**: Orvalを用いた、TanStack Queryサポートの型安全なAPIクライアント生成に対応しています。
