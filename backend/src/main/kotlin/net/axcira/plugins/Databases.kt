@@ -2,17 +2,11 @@ package net.axcira.plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.application.*
-import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.axcira.db.SessionsTable
-import net.axcira.db.Users
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 val database by lazy {
     val host = System.getenv("DB_HOST") ?: "localhost"
@@ -33,11 +27,7 @@ val database by lazy {
         validate()
     }
     val datasource = HikariDataSource(config)
-    Flyway.configure()
-        .dataSource(datasource)
-        .locations("classpath:db/migration")
-        .load()
-        .migrate()
+    Flyway.configure().dataSource(datasource).locations("classpath:db/migration").load().migrate()
     Database.connect(datasource)
 }
 

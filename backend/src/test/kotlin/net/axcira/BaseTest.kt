@@ -1,15 +1,16 @@
 package net.axcira
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.cookies.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
-import io.ktor.utils.io.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.testcontainers.containers.PostgreSQLContainer
 
-@OptIn(InternalAPI::class)
 fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
     configure("application.yaml", "test.application.yaml")
     client = createClient {
@@ -23,9 +24,16 @@ fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testAppli
     block(client)
 }
 
-fun database(): Database {
-    val url = "jdbc:h2:mem:regular;DB_CLOSE_DELAY=-1"
-    Flyway.configure().dataSource(url, "sa", null).locations("classpath:db/migration").load().migrate()
-
-    return Database.connect(url, driver = "org.h2.Driver", user = "sa", password = "")
+val postgres = PostgreSQLContainer("postgres:18.4").apply { start() }
+val database = run {
+    val url = postgres.jdbcUrl
+    val dataSource = HikariDataSource(HikariConfig().apply {
+        jdbcUrl = url
+        driverClassName = postgres.driverClassName
+        username = postgres.username
+        password = postgres.password
+    })
+    Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate()
+    Database.connect(dataSource)
 }
+fun database() = database

@@ -82,7 +82,7 @@ class ArticleService(val database: Database) {
         )
     }
 
-    suspend fun update(id: UInt, article: UpdateArticleInput) = database.dbQuery {
+    suspend fun update(id: UInt, article: UpdateArticleInput): ArticleDTO? = database.dbQuery {
         if (article.tagList != null) {
             val currentTags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
                 .map { TagDTO(it[ArticleTags.tagId].value, it[Tags.name]) }
@@ -98,12 +98,21 @@ class ArticleService(val database: Database) {
             }
         }
         val (title, description, body) = article
-        if (title == null && description == null && body == null) return@dbQuery
+        if (title == null && description == null && body == null) return@dbQuery null
 
-        Articles.update({ Articles.id eq id }) {
+        return@dbQuery Articles.updateReturning(where = { Articles.id eq id }) {
             if (title != null) it[Articles.title] = title
             if (description != null) it[Articles.description] = description
             if (body != null) it[Articles.body] = body
+        }.single().let {
+            ArticleDTO(
+                it[Articles.id].value,
+                it[Articles.userId].value,
+                it[Articles.title],
+                it[Articles.description],
+                it[Articles.body],
+                emptyList()
+            )
         }
     }
 

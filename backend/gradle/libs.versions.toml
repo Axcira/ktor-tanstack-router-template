@@ -5,8 +5,9 @@ logback = "1.5.21"
 hikaricp = "7.0.2"
 postgres = "42.7.8"
 argon2 = "2.12"
-h2 = "2.3.232"
+h2 = "2.4.240"
 flyway = "12.6.2"
+testcontainers = "1.21.4"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -21,7 +22,9 @@ hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers"}
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-exposed = { id = "org.jetbrains.exposed.plugin", version.ref = "exposed"}
+exposed = { id = "org.jetbrains.exposed.plugin", version.ref = "exposed" }
