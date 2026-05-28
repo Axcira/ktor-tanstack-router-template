@@ -18,6 +18,8 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
 import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground/nav1-2'
+import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
+import { Route as AppPlaygroundNav111RouteImport } from './routes/_app/playground/nav1-1-1'
 import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -64,6 +66,16 @@ const AppPlaygroundNav12Route = AppPlaygroundNav12RouteImport.update({
   path: '/playground/nav1-2',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPlaygroundNav112Route = AppPlaygroundNav112RouteImport.update({
+  id: '/playground/nav1-1-2',
+  path: '/playground/nav1-1-2',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlaygroundNav111Route = AppPlaygroundNav111RouteImport.update({
+  id: '/playground/nav1-1-1',
+  path: '/playground/nav1-1-1',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
   id: '/playground/nav1-1',
   path: '/playground/nav1-1',
@@ -79,6 +91,8 @@ export interface FileRoutesByFullPath {
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
+  '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
+  '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
 }
 export interface FileRoutesByTo {
@@ -90,6 +104,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
+  '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
+  '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
 }
 export interface FileRoutesById {
@@ -103,6 +119,8 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/playground/nav1-1': typeof AppPlaygroundNav11Route
+  '/_app/playground/nav1-1-1': typeof AppPlaygroundNav111Route
+  '/_app/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/_app/playground/nav1-2': typeof AppPlaygroundNav12Route
 }
 export interface FileRouteTypes {
@@ -116,6 +134,8 @@ export interface FileRouteTypes {
     | '/documentation'
     | '/settings'
     | '/playground/nav1-1'
+    | '/playground/nav1-1-1'
+    | '/playground/nav1-1-2'
     | '/playground/nav1-2'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -127,6 +147,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/playground/nav1-1'
+    | '/playground/nav1-1-1'
+    | '/playground/nav1-1-2'
     | '/playground/nav1-2'
   id:
     | '__root__'
@@ -139,6 +161,8 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/'
     | '/_app/playground/nav1-1'
+    | '/_app/playground/nav1-1-1'
+    | '/_app/playground/nav1-1-2'
     | '/_app/playground/nav1-2'
   fileRoutesById: FileRoutesById
 }
@@ -214,6 +238,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlaygroundNav12RouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/playground/nav1-1-2': {
+      id: '/_app/playground/nav1-1-2'
+      path: '/playground/nav1-1-2'
+      fullPath: '/playground/nav1-1-2'
+      preLoaderRoute: typeof AppPlaygroundNav112RouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/playground/nav1-1-1': {
+      id: '/_app/playground/nav1-1-1'
+      path: '/playground/nav1-1-1'
+      fullPath: '/playground/nav1-1-1'
+      preLoaderRoute: typeof AppPlaygroundNav111RouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/playground/nav1-1': {
       id: '/_app/playground/nav1-1'
       path: '/playground/nav1-1'
@@ -230,6 +268,8 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
+  AppPlaygroundNav111Route: typeof AppPlaygroundNav111Route
+  AppPlaygroundNav112Route: typeof AppPlaygroundNav112Route
   AppPlaygroundNav12Route: typeof AppPlaygroundNav12Route
 }
 
@@ -239,6 +279,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppPlaygroundNav11Route: AppPlaygroundNav11Route,
+  AppPlaygroundNav111Route: AppPlaygroundNav111Route,
+  AppPlaygroundNav112Route: AppPlaygroundNav112Route,
   AppPlaygroundNav12Route: AppPlaygroundNav12Route,
 }
 
