@@ -14,7 +14,7 @@ export default function PopoverMenuItems({items}: { items: MenuItem[] }) {
       <PopoverTrigger asChild>
         <button
           type={"button"}
-          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent">
+          className="flex w-full items-center gap-2 rounded-full px-2 py-1.5 text-sm hover:bg-accent">
           {item.icon && <span className="h-4 w-4 shrink-0">{item.icon}</span>}
           <span className="flex-1 text-left">{item.text}</span>
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground"/>
