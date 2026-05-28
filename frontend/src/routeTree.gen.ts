@@ -13,12 +13,12 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HeroRouteImport } from './routes/hero'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as AppIndexRouteImport } from './routes/_app.index'
-import { Route as AppSettingsRouteImport } from './routes/_app.settings'
-import { Route as AppModelsRouteImport } from './routes/_app.models'
-import { Route as AppDocumentationRouteImport } from './routes/_app.documentation'
-import { Route as AppPlaygroundNav12RouteImport } from './routes/_app.playground.nav1-2'
-import { Route as AppPlaygroundNav11RouteImport } from './routes/_app.playground.nav1-1'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
+import { Route as AppArticlesRouteImport } from './routes/_app/articles'
+import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground/nav1-2'
+import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -49,14 +49,14 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
-const AppModelsRoute = AppModelsRouteImport.update({
-  id: '/models',
-  path: '/models',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDocumentationRoute = AppDocumentationRouteImport.update({
   id: '/documentation',
   path: '/documentation',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppArticlesRoute = AppArticlesRouteImport.update({
+  id: '/articles',
+  path: '/articles',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPlaygroundNav12Route = AppPlaygroundNav12RouteImport.update({
@@ -75,8 +75,8 @@ export interface FileRoutesByFullPath {
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/articles': typeof AppArticlesRoute
   '/documentation': typeof AppDocumentationRoute
-  '/models': typeof AppModelsRoute
   '/settings': typeof AppSettingsRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
@@ -85,8 +85,8 @@ export interface FileRoutesByTo {
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/articles': typeof AppArticlesRoute
   '/documentation': typeof AppDocumentationRoute
-  '/models': typeof AppModelsRoute
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
@@ -98,8 +98,8 @@ export interface FileRoutesById {
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_app/articles': typeof AppArticlesRoute
   '/_app/documentation': typeof AppDocumentationRoute
-  '/_app/models': typeof AppModelsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/playground/nav1-1': typeof AppPlaygroundNav11Route
@@ -112,8 +112,8 @@ export interface FileRouteTypes {
     | '/hero'
     | '/login'
     | '/register'
+    | '/articles'
     | '/documentation'
-    | '/models'
     | '/settings'
     | '/playground/nav1-1'
     | '/playground/nav1-2'
@@ -122,8 +122,8 @@ export interface FileRouteTypes {
     | '/hero'
     | '/login'
     | '/register'
+    | '/articles'
     | '/documentation'
-    | '/models'
     | '/settings'
     | '/'
     | '/playground/nav1-1'
@@ -134,8 +134,8 @@ export interface FileRouteTypes {
     | '/hero'
     | '/login'
     | '/register'
+    | '/_app/articles'
     | '/_app/documentation'
-    | '/_app/models'
     | '/_app/settings'
     | '/_app/'
     | '/_app/playground/nav1-1'
@@ -193,18 +193,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/models': {
-      id: '/_app/models'
-      path: '/models'
-      fullPath: '/models'
-      preLoaderRoute: typeof AppModelsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/documentation': {
       id: '/_app/documentation'
       path: '/documentation'
       fullPath: '/documentation'
       preLoaderRoute: typeof AppDocumentationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/articles': {
+      id: '/_app/articles'
+      path: '/articles'
+      fullPath: '/articles'
+      preLoaderRoute: typeof AppArticlesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/playground/nav1-2': {
@@ -225,8 +225,8 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppArticlesRoute: typeof AppArticlesRoute
   AppDocumentationRoute: typeof AppDocumentationRoute
-  AppModelsRoute: typeof AppModelsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
@@ -234,8 +234,8 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppArticlesRoute: AppArticlesRoute,
   AppDocumentationRoute: AppDocumentationRoute,
-  AppModelsRoute: AppModelsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppPlaygroundNav11Route: AppPlaygroundNav11Route,

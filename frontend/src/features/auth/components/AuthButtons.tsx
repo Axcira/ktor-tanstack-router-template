@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router"
-import { useGetSelf } from "#/api/generated/default/default.ts";
+import { useGetSelf } from "@/features/auth/api";
 import { Button } from "@/components/ui/button";
 
 
-export default function AuthButton() {
+export default function AuthButtons() {
   const {data} = useGetSelf()
 
   return (<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

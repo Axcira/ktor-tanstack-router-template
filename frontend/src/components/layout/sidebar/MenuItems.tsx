@@ -13,7 +13,7 @@ export interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [{
-  text: "Models", icon: <Bot/>, children: [{
+  text: "Articles", icon: <Bot/>, children: [{
     text: "Some Item 1",
     to: "/playground/nav1-1",
     children: [{text: "Sub Item 1-1", to: "/playground/nav1-1-1"}, {text: "Sub Item 1-2", to: "/playground/nav1-1-2"}],

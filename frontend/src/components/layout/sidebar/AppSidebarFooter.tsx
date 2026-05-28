@@ -3,7 +3,7 @@ import {
   useRouter,
 } from "@tanstack/react-router"
 import { LogOut } from "lucide-react"
-import { useLogout } from "@/api/generated/default/default"
+import { useLogout } from "@/features/auth/api"
 import {
   AlertDialog,
   AlertDialogAction,
