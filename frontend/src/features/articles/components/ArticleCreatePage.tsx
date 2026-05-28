@@ -24,7 +24,7 @@ export default function ArticleCreatePage() {
       });
 
       if (response.status === 201 || response.status === 200) {
-        navigate({ to: "/articles" });
+        await navigate({to: "/articles"});
       }
     } catch (error) {
       console.error("Failed to create article:", error);
