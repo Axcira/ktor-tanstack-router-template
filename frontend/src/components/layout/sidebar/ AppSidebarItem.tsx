@@ -1,23 +1,23 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import CollapsibleMenuItems from "#/components/layout/sidebar/CollapsibleMenuItems.tsx";
-import type { MenuItem } from "#/components/layout/sidebar/MenuItems";
-import PopoverMenuItems from "#/components/layout/sidebar/PopoverMenuItems.tsx";
+import CollapsibleMenuItems from "@/components/layout/sidebar/CollapsibleMenuItems.tsx";
+import type { MenuItem } from "@/components/layout/sidebar/MenuItems";
+import PopoverMenuItems from "@/components/layout/sidebar/PopoverMenuItems.tsx";
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
-} from "#/components/ui/collapsible.tsx";
+} from "@/components/ui/collapsible.tsx";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "#/components/ui/popover.tsx";
+} from "@/components/ui/popover.tsx";
 import {
     SidebarMenuButton,
     SidebarMenuItem,
     useSidebar,
-} from "#/components/ui/sidebar.tsx";
+} from "@/components/ui/sidebar.tsx";
 
 export default function AppSidebarItem({item}: { item: MenuItem }) {
   const {state} = useSidebar()

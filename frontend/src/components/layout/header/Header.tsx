@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { useSidebar } from "#/components/ui/sidebar.tsx";
+import { useSidebar } from "@/components/ui/sidebar.tsx";
 import {
 	Avatar,
 	AvatarFallback,

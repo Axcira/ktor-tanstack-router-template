@@ -1,4 +1,4 @@
-import AppSidebarItem from "#/components/layout/sidebar/ AppSidebarItem.tsx";
+import AppSidebarItem from "@/components/layout/sidebar/ AppSidebarItem.tsx";
 
 import menuItems from "@/components/layout/sidebar/MenuItems";
 import {

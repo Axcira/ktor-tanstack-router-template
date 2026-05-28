@@ -3,8 +3,8 @@ import {
     Outlet,
     redirect,
 } from "@tanstack/react-router"
-import Header from "#/components/layout/header/Header.tsx"
-import { AppSidebar } from "#/components/layout/sidebar/AppSidebar.tsx"
+import Header from "@/components/layout/header/Header.tsx"
+import { AppSidebar } from "@/components/layout/sidebar/AppSidebar.tsx"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { getSelf } from "@/features/auth/api"
 

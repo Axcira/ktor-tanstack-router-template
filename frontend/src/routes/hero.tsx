@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import WelcomeMessage from "@/features/dashboard/components/WelcomeMessage";
-import AuthButtons from "#/features/auth/components/AuthButtons.tsx";
+import AuthButtons from "@/features/auth/components/AuthButtons.tsx";
 
 export const Route = createFileRoute("/hero")({component: Home})
 

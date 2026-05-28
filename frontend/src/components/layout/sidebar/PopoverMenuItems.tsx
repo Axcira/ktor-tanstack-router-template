@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import type { MenuItem } from "#/components/layout/sidebar/MenuItems";
+import type { MenuItem } from "@/components/layout/sidebar/MenuItems";
 import {
     Popover,
     PopoverContent,
