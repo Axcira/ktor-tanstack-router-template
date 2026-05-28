@@ -17,6 +17,11 @@ fun Application.articles() {
     apiRouting {
         authenticate {
             route("/articles") {
+                /**
+                 * List articles
+                 *
+                 * OperationID: listArticles
+                 */
                 get {
                     val pagination = Pagination(
                         call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
@@ -25,17 +30,35 @@ fun Application.articles() {
                     val articles = articleService.get(pagination)
                     call.respond(articles)
                 }
+
+                /**
+                 * Get a single article
+                 *
+                 * OperationID: getArticle
+                 */
                 get("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
-                    val article = articleService.getById(id) ?: call.respond(HttpStatusCode.NotFound)
+                    val article = articleService.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respond(article)
                 }
+
+                /**
+                 * Create an article
+                 *
+                 * OperationID: createArticle
+                 */
                 post {
                     val article = call.receive<CreateArticleInput>()
                     val userId = call.principal<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                     val createdArticle = articleService.create(article, userId)
                     call.respond(HttpStatusCode.Created, createdArticle)
                 }
+
+                /**
+                 * Update an article
+                 *
+                 * OperationID: updateArticle
+                 */
                 patch("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val scheme = call.receive<UpdateArticleInput>()
@@ -44,6 +67,12 @@ fun Application.articles() {
                     val updatedArticle = articleService.update(id, scheme) ?: return@patch call.respond(HttpStatusCode.NotFound)
                     call.respond(updatedArticle)
                 }
+
+                /**
+                 * Delete an article
+                 *
+                 * OperationID: deleteArticle
+                 */
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val article = articleService.getById(id) ?: return@delete call.respond(HttpStatusCode.NotFound)

@@ -17,10 +17,14 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
+import { Route as AppArticlesIndexRouteImport } from './routes/_app/articles/index'
 import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground/nav1-2'
 import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
 import { Route as AppPlaygroundNav111RouteImport } from './routes/_app/playground/nav1-1-1'
 import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
+import { Route as AppArticlesCreateRouteImport } from './routes/_app/articles/create'
+import { Route as AppArticlesArticleIdRouteImport } from './routes/_app/articles/$articleId'
+import { Route as AppArticlesArticleIdEditRouteImport } from './routes/_app/articles/$articleId.edit'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -61,6 +65,11 @@ const AppArticlesRoute = AppArticlesRouteImport.update({
   path: '/articles',
   getParentRoute: () => AppRoute,
 } as any)
+const AppArticlesIndexRoute = AppArticlesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppArticlesRoute,
+} as any)
 const AppPlaygroundNav12Route = AppPlaygroundNav12RouteImport.update({
   id: '/playground/nav1-2',
   path: '/playground/nav1-2',
@@ -81,32 +90,55 @@ const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
   path: '/playground/nav1-1',
   getParentRoute: () => AppRoute,
 } as any)
+const AppArticlesCreateRoute = AppArticlesCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AppArticlesRoute,
+} as any)
+const AppArticlesArticleIdRoute = AppArticlesArticleIdRouteImport.update({
+  id: '/$articleId',
+  path: '/$articleId',
+  getParentRoute: () => AppArticlesRoute,
+} as any)
+const AppArticlesArticleIdEditRoute =
+  AppArticlesArticleIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AppArticlesArticleIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/articles': typeof AppArticlesRoute
+  '/articles': typeof AppArticlesRouteWithChildren
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
+  '/articles/$articleId': typeof AppArticlesArticleIdRouteWithChildren
+  '/articles/create': typeof AppArticlesCreateRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
+  '/articles/': typeof AppArticlesIndexRoute
+  '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
 }
 export interface FileRoutesByTo {
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/articles': typeof AppArticlesRoute
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
+  '/articles/$articleId': typeof AppArticlesArticleIdRouteWithChildren
+  '/articles/create': typeof AppArticlesCreateRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
+  '/articles': typeof AppArticlesIndexRoute
+  '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,14 +146,18 @@ export interface FileRoutesById {
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_app/articles': typeof AppArticlesRoute
+  '/_app/articles': typeof AppArticlesRouteWithChildren
   '/_app/documentation': typeof AppDocumentationRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/articles/$articleId': typeof AppArticlesArticleIdRouteWithChildren
+  '/_app/articles/create': typeof AppArticlesCreateRoute
   '/_app/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/_app/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/_app/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/_app/playground/nav1-2': typeof AppPlaygroundNav12Route
+  '/_app/articles/': typeof AppArticlesIndexRoute
+  '/_app/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -133,23 +169,30 @@ export interface FileRouteTypes {
     | '/articles'
     | '/documentation'
     | '/settings'
+    | '/articles/$articleId'
+    | '/articles/create'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
     | '/playground/nav1-2'
+    | '/articles/'
+    | '/articles/$articleId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/hero'
     | '/login'
     | '/register'
-    | '/articles'
     | '/documentation'
     | '/settings'
     | '/'
+    | '/articles/$articleId'
+    | '/articles/create'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
     | '/playground/nav1-2'
+    | '/articles'
+    | '/articles/$articleId/edit'
   id:
     | '__root__'
     | '/_app'
@@ -160,10 +203,14 @@ export interface FileRouteTypes {
     | '/_app/documentation'
     | '/_app/settings'
     | '/_app/'
+    | '/_app/articles/$articleId'
+    | '/_app/articles/create'
     | '/_app/playground/nav1-1'
     | '/_app/playground/nav1-1-1'
     | '/_app/playground/nav1-1-2'
     | '/_app/playground/nav1-2'
+    | '/_app/articles/'
+    | '/_app/articles/$articleId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -231,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppArticlesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/articles/': {
+      id: '/_app/articles/'
+      path: '/'
+      fullPath: '/articles/'
+      preLoaderRoute: typeof AppArticlesIndexRouteImport
+      parentRoute: typeof AppArticlesRoute
+    }
     '/_app/playground/nav1-2': {
       id: '/_app/playground/nav1-2'
       path: '/playground/nav1-2'
@@ -259,11 +313,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlaygroundNav11RouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/articles/create': {
+      id: '/_app/articles/create'
+      path: '/create'
+      fullPath: '/articles/create'
+      preLoaderRoute: typeof AppArticlesCreateRouteImport
+      parentRoute: typeof AppArticlesRoute
+    }
+    '/_app/articles/$articleId': {
+      id: '/_app/articles/$articleId'
+      path: '/$articleId'
+      fullPath: '/articles/$articleId'
+      preLoaderRoute: typeof AppArticlesArticleIdRouteImport
+      parentRoute: typeof AppArticlesRoute
+    }
+    '/_app/articles/$articleId/edit': {
+      id: '/_app/articles/$articleId/edit'
+      path: '/edit'
+      fullPath: '/articles/$articleId/edit'
+      preLoaderRoute: typeof AppArticlesArticleIdEditRouteImport
+      parentRoute: typeof AppArticlesArticleIdRoute
+    }
   }
 }
 
+interface AppArticlesArticleIdRouteChildren {
+  AppArticlesArticleIdEditRoute: typeof AppArticlesArticleIdEditRoute
+}
+
+const AppArticlesArticleIdRouteChildren: AppArticlesArticleIdRouteChildren = {
+  AppArticlesArticleIdEditRoute: AppArticlesArticleIdEditRoute,
+}
+
+const AppArticlesArticleIdRouteWithChildren =
+  AppArticlesArticleIdRoute._addFileChildren(AppArticlesArticleIdRouteChildren)
+
+interface AppArticlesRouteChildren {
+  AppArticlesArticleIdRoute: typeof AppArticlesArticleIdRouteWithChildren
+  AppArticlesCreateRoute: typeof AppArticlesCreateRoute
+  AppArticlesIndexRoute: typeof AppArticlesIndexRoute
+}
+
+const AppArticlesRouteChildren: AppArticlesRouteChildren = {
+  AppArticlesArticleIdRoute: AppArticlesArticleIdRouteWithChildren,
+  AppArticlesCreateRoute: AppArticlesCreateRoute,
+  AppArticlesIndexRoute: AppArticlesIndexRoute,
+}
+
+const AppArticlesRouteWithChildren = AppArticlesRoute._addFileChildren(
+  AppArticlesRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppArticlesRoute: typeof AppArticlesRoute
+  AppArticlesRoute: typeof AppArticlesRouteWithChildren
   AppDocumentationRoute: typeof AppDocumentationRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -274,7 +376,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppArticlesRoute: AppArticlesRoute,
+  AppArticlesRoute: AppArticlesRouteWithChildren,
   AppDocumentationRoute: AppDocumentationRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
