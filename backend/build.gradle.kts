@@ -48,6 +48,7 @@ dependencies {
     testImplementation(libs.h2)
     testImplementation(ktorLibs.client.contentNegotiation)
     testImplementation(ktorLibs.client.serialization)
+    testImplementation(libs.testcontainers.postgresql)
 }
 
 ktor {

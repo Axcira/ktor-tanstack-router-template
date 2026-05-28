@@ -34,15 +34,15 @@ fun Application.articles() {
                     val article = call.receive<CreateArticleInput>()
                     val userId = call.principal<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
                     val createdArticle = articleService.create(article, userId)
-                    call.respond(createdArticle)
+                    call.respond(HttpStatusCode.Created, createdArticle)
                 }
                 patch("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val scheme = call.receive<UpdateArticleInput>()
                     val article = articleService.getById(id) ?: return@patch call.respond(HttpStatusCode.NotFound)
                     if (article.userId != call.principal<UserSession>()?.userId) return@patch call.respond(HttpStatusCode.Forbidden)
-                    articleService.update(id, scheme)
-                    call.respond(HttpStatusCode.NoContent)
+                    val updatedArticle = articleService.update(id, scheme) ?: return@patch call.respond(HttpStatusCode.NotFound)
+                    call.respond(updatedArticle)
                 }
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")

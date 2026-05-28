@@ -11,6 +11,7 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.core.DatabaseConfig
 import org.jetbrains.exposed.v1.core.vendors.PostgreSQLDialect
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.testcontainers.containers.PostgreSQLContainer
 
 fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
     configure("application.yaml", "test.application.yaml")
@@ -25,18 +26,16 @@ fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testAppli
     block(client)
 }
 
-fun database(): Database {
-    val url = "jdbc:h2:mem:regular;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH"
+val postgres = PostgreSQLContainer("postgres:18.4").apply { start() }
+val database = run {
+    val url = postgres.jdbcUrl
     val dataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = url
-        driverClassName = "org.h2.Driver"
-        username = "sa"
-        password = ""
+        driverClassName = postgres.driverClassName
+        username = postgres.username
+        password = postgres.password
     })
-
     Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate()
-
-    return Database.connect(dataSource, databaseConfig = DatabaseConfig {
-        explicitDialect = PostgreSQLDialect()
-    })
+    Database.connect(dataSource)
 }
+fun database() = database
