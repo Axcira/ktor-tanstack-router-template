@@ -3,7 +3,7 @@ import { Route } from "@/routes/_app/articles/$articleId.edit.tsx";
 import { useNavigate, Link, useRouteContext } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import ArticleForm, { ArticleFormValues } from "./ArticleForm";
+import ArticleForm, { type ArticleFormValues } from "./ArticleForm";
 
 export default function ArticleEditPage() {
   const { articleId } = Route.useParams();
@@ -11,12 +11,12 @@ export default function ArticleEditPage() {
   const { user } = useRouteContext({ from: "/_app" });
   const updateArticle = useUpdateArticle();
 
-  const { data, isLoading, isError } = useGetArticle(Number(articleId));
+  const { data, isLoading, isError } = useGetArticle(articleId);
   const article = data?.data;
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center min-h-100">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -61,7 +61,7 @@ export default function ArticleEditPage() {
         : [];
 
       await updateArticle.mutateAsync({
-        id: article.id,
+        id: article.id.toString(),
         data: {
           title: values.title,
           description: values.description,
@@ -70,9 +70,8 @@ export default function ArticleEditPage() {
         },
       });
 
-      navigate({
-        to: "/articles/$articleId",
-        params: { articleId: article.id.toString() },
+      await navigate({
+        to: "/articles/$articleId", params: {articleId: article.id.toString()},
       });
     } catch (error) {
       console.error("Failed to update article:", error);

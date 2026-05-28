@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import * as React from "react";
 
 export interface ArticleFormValues {
   title: string;
@@ -40,9 +41,9 @@ export default function ArticleForm({
     setValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    onSubmit(values);
+    await onSubmit(values);
   };
 
   return (

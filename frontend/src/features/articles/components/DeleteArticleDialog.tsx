@@ -31,9 +31,9 @@ export default function DeleteArticleDialog({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteMutation.mutateAsync({ id: articleId });
+      await deleteMutation.mutateAsync({ id: articleId.toString() });
       onOpenChange(false);
-      navigate({ to: "/articles", replace: true });
+      await navigate({ to: "/articles", replace: true });
     } catch (error) {
       console.error("Failed to delete article:", error);
     } finally {
@@ -55,7 +55,7 @@ export default function DeleteArticleDialog({
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
-              handleDelete();
+              handleDelete().then();
             }}
             disabled={isDeleting}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
