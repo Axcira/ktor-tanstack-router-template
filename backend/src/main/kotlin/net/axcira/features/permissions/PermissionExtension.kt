@@ -17,7 +17,8 @@ inline fun <reified T : Permission> permissionPlugin(permission: T) = createRout
 ) {
     on(AuthenticationChecked) { call ->
         val principal = call.principal<UserSession>() ?: return@on
-        if (permission !in principal.permissions) {
+        val hasPermission = principal.permissions.any { it.satisfies(permission) }
+        if (!hasPermission) {
             call.respond(HttpStatusCode.Forbidden)
         }
     }
