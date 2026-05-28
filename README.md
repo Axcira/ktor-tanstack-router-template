@@ -2,6 +2,11 @@
 
 このプロジェクトは、Axciraの技術スタックを元に、極限まで開発者体験 (DX) を向上させることと、開発の初動を加速させることを目的としたテンプレートです。
 
+> [!WARNING]
+> このプロジェクトはまだ **Work in Progress** です。
+> 本番環境での利用は想定されていません。
+> 問題が見つかったら、[Issues](https://github.com/Axcira/ktor-tanstack-router-template/issues) で教えてください。よろしくお願いします！
+
 # Project Structure
 
 このテンプレートは、大きく2つのディレクトリに分割されています。
