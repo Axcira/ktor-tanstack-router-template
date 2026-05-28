@@ -10,22 +10,23 @@ import { getSelf } from "@/features/auth/api"
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: async () => {
+        let response
+
         try {
-            const response = await getSelf()
-
-            if (response.status !== 200) {
-                throw redirect({
-                    to: '/hero',
-                })
-            }
-
-            return { user: response.data }
-        } catch (error) {
-            if (error instanceof Response) throw error
+            response = await getSelf()
+        } catch {
             throw redirect({
-                to: '/hero',
+                to: "/hero",
             })
         }
+
+        if (response.status !== 200) {
+            throw redirect({
+                to: "/hero",
+            })
+        }
+
+        return { user: response.data }
     },
     component: AppLayout,
 })
