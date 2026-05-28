@@ -17,7 +17,7 @@ class ArticleRoutingTest {
         // Create test user
         val user = client.post("/api/users") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("admin@example.com", "password"))
+            setBody(CreateUserInput("admin@example.com", "password", 1u))
         }.body<UserDTO>()
 
         // Create test article

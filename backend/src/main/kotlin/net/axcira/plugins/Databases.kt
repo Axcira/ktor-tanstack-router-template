@@ -33,7 +33,7 @@ val database by lazy {
 
 fun database() = database
 
-suspend fun <T> Database.dbQuery(block: Database.() -> T) = withContext(Dispatchers.IO) {
+suspend fun <T> Database.dbQuery(block: suspend Database.() -> T) = withContext(Dispatchers.IO) {
     suspendTransaction(this@dbQuery) {
         block()
     }
