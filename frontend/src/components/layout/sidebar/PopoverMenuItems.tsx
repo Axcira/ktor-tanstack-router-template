@@ -11,7 +11,7 @@ import { SidebarMenuSubButton } from "@/components/ui/sidebar.tsx";
 export default function PopoverMenuItems({items}: { items: MenuItem[] }) {
   return (<>
     {items.map((item) => item.children && item.children.length > 0 ? (<Popover key={item.text}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild className={"px-2"}>
         <button
           type={"button"}
           className="flex w-full items-center gap-2 rounded-full px-2 py-1.5 text-sm hover:bg-accent">
@@ -26,7 +26,7 @@ export default function PopoverMenuItems({items}: { items: MenuItem[] }) {
         </p>
         <PopoverMenuItems items={item.children}/>
       </PopoverContent>
-    </Popover>) : (<SidebarMenuSubButton key={item.text} asChild>
+    </Popover>) : (<SidebarMenuSubButton key={item.text} asChild className={"px-2"}>
       <Link
         to={item.to ?? "#"}
         className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent"
