@@ -22,7 +22,16 @@ const menuItems: MenuItem[] = [
   {
     text: "Articles",
     icon: <FileText />,
-    to: "/articles",
+    children: [
+      {
+        text: "List",
+        to: "/articles",
+      },
+      {
+        text: "Create",
+        to: "/articles/create",
+      }
+    ]
   },
   {
     text: "Settings",
