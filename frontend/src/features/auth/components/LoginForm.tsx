@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, type SubmitEventHandler } from "react";
-import { useLogin } from "@/features/auth/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLogin } from "@/api/generated/default/default.ts";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");

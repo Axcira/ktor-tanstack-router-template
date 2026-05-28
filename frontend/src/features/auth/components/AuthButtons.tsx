@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
-import { useGetSelf } from "@/features/auth/api";
 import { Button } from "@/components/ui/button";
+import { useGetSelf } from "@/api/generated/default/default.ts";
 
 
 export default function AuthButtons() {
