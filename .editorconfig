@@ -1,4 +1,8 @@
 root = true
 
+[*.{tsx,ts}]
+indent_size = 2
+
 [*.{md,mdx}]
 trim_trailing_whitespace = false
+
