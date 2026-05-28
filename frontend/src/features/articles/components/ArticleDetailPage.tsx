@@ -1,5 +1,5 @@
 import { useGetArticle } from "@/api/generated/default/default.ts";
-import { Route } from "@/routes/_app/articles/$articleId.tsx";
+import { Route } from "@/routes/_app/articles/$articleId.index.tsx";
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Edit, Trash2 } from "lucide-react";
