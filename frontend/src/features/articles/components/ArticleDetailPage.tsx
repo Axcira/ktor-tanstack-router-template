@@ -16,7 +16,7 @@ export default function ArticleDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center min-h-100">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
