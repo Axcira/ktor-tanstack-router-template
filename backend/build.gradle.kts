@@ -1,4 +1,4 @@
-import org.gradle.internal.execution.caching.CachingState.enabled
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.exposed.v1.gradle.plugin.VersionFormat
 
 plugins {
@@ -12,7 +12,7 @@ group = "net.axcira"
 version = "1.0.0-SNAPSHOT"
 
 application {
-    mainClass = "io.ktor.server.cio.EngineMain"
+    mainClass = "net.axcira.MainKt"
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
@@ -83,4 +83,10 @@ exposed {
         testContainersImageName.set("postgres:latest")
         fileVersionFormat.set(VersionFormat.MAJOR_ONLY)
     }
+}
+
+tasks.named<ShadowJar>("shadowJar") {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    mergeServiceFiles()
+    exclude("logback.xml")
 }
