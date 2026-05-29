@@ -2,6 +2,7 @@ package net.axcira.features.auth
 
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.di.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
 import net.axcira.db.SessionsTable
@@ -38,7 +39,8 @@ class DatabaseSessionStorage(private val database: Database) : SessionStorage {
     }
 }
 
-fun Application.configureAuthentication(database: Database) {
+fun Application.configureAuthentication() {
+    val database: Database by dependencies
     install(Sessions) {
         cookie<UserSession>("user_session", DatabaseSessionStorage(database)) {
             cookie.path = "/"
