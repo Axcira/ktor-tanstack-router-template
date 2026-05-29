@@ -25,7 +25,8 @@ class DatabaseSessionStorage(private val database: Database) : SessionStorage {
 
     override suspend fun read(id: String): String {
         return database.dbQuery {
-            SessionsTable.select(SessionsTable.session).where { sessionId eq id }.single()[SessionsTable.session]
+            SessionsTable.select(SessionsTable.session).where { sessionId eq id }.singleOrNull()?.get(SessionsTable.session)
+                ?: throw NoSuchElementException("Session $id not found")
         }
     }
 
