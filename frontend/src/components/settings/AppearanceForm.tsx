@@ -17,7 +17,11 @@ export default function AppearanceForm() {
 
       <RadioGroup
         value={theme}
-        onValueChange={(v) => setTheme(v as "light" | "dark" | "system")}
+        onValueChange={(v) => {
+          if (v === "light" || v === "dark" || v === "system") {
+            setTheme(v)
+          }
+        }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
       >
         <Label className="cursor-pointer group relative flex flex-col rounded-xl border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
