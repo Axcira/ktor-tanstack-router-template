@@ -16,9 +16,12 @@ fun Application.main() {
     install(IgnoreTrailingSlash)
 }
 
-fun Application.apiRouting(block: Route.() -> Unit) {
+fun Application.apiRouting(route: String? = null, block: Route.() -> Unit) {
+    val path = route?.let {
+        if (it.startsWith("/")) it else "/$it"
+    } ?: ""
     routing {
-        route("/api") {
+        route("/api${path}") {
             block()
         }
     }
