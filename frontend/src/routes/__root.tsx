@@ -4,6 +4,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import "../styles.css"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useThemeEffect } from "@/hooks/useThemeEffect.ts"
 
 export const Route = createRootRoute({
     component: RootComponent,
@@ -12,6 +13,7 @@ export const Route = createRootRoute({
 const queryClient = new QueryClient()
 
 function RootComponent() {
+  useThemeEffect()
     return (
         <>
             <QueryClientProvider client={queryClient}>

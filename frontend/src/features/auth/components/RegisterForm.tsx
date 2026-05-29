@@ -36,12 +36,12 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+      <div className="w-full max-w-md p-8 bg-card text-card-foreground border border-border rounded-xl shadow-sm">
         <h1 className="text-2xl font-bold mb-6 text-center">アカウント登録</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label className="block text-sm font-medium">
+            <Label className="block text-sm font-medium mb-1.5">
               メールアドレス
               <Input
                 type={"email"}
@@ -49,11 +49,12 @@ export default function RegisterForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 aria-label={"メールアドレス"}
+                className="mt-1"
               />
             </Label>
           </div>
           <div>
-            <Label className="block text-sm font-medium">
+            <Label className="block text-sm font-medium mb-1.5">
               パスワード
               <Input
                 type={"password"}
@@ -61,11 +62,12 @@ export default function RegisterForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 aria-label={"パスワード"}
+                className="mt-1"
               />
             </Label>
           </div>
           <div>
-            <Label className="block text-sm font-medium">
+            <Label className="block text-sm font-medium mb-1.5">
               パスワード（確認）
               <Input
                 type={"password"}
@@ -73,27 +75,28 @@ export default function RegisterForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 aria-label={"パスワード（確認）"}
+                className="mt-1"
               />
             </Label>
           </div>
           <Button
             type="submit"
             disabled={registerMutation.isPending}
-            className={"w-full"}
+            className={"w-full mt-2"}
           >
             {registerMutation.isPending ? "登録中..." : "登録"}
           </Button>
         </form>
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <Link
             to="/login"
-            className="text-sm text-blue-600 hover:text-blue-500"
+            className="text-sm text-primary hover:text-primary/80 transition-colors"
           >
             すでにアカウントをお持ちの方はこちら
           </Link>
         </div>
-        <div className="mt-2 text-center">
-          <Link to="/" className="text-sm text-gray-600 hover:text-gray-500">
+        <div className="mt-3 text-center">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ホームに戻る
           </Link>
         </div>
