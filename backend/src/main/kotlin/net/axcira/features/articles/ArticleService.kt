@@ -95,7 +95,7 @@ class ArticleService(val database: Database) {
     suspend fun update(id: UInt, article: UpdateArticleInput): UpdateResult<ArticleDTO> = database.dbQuery {
         val (title, description, body, tagList) = article
         if (arrayOf(title, description, body, tagList).all { it is Optional.None }) return@dbQuery UpdateResult.NotModified
-        tagList.getOrNull()?.let { tags ->
+        val resultTags = tagList.getOrNull()?.let { tags ->
             val currentTags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
                 .map { TagDTO(it[ArticleTags.tagId].value, it[Tags.name]) }
             val newTags = upsertTags(tags)
@@ -108,6 +108,9 @@ class ArticleService(val database: Database) {
                 this[ArticleTags.articleId] = id
                 this[ArticleTags.tagId] = tagId.id
             }
+            newTags
+        } ?: (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }.map {
+            TagDTO(it[ArticleTags.tagId].value, it[Tags.name])
         }
 
         if (arrayOf(title, description, body).all { it is Optional.None }) {
@@ -120,7 +123,7 @@ class ArticleService(val database: Database) {
                         it[Articles.title],
                         it[Articles.description],
                         it[Articles.body],
-                        emptyList()
+                        resultTags
                     )
                 )
             } ?: return@dbQuery UpdateResult.NotFound
@@ -138,7 +141,7 @@ class ArticleService(val database: Database) {
                     it[Articles.title],
                     it[Articles.description],
                     it[Articles.body],
-                    emptyList()
+                    resultTags
                 )
             )
         } ?: UpdateResult.NotFound
