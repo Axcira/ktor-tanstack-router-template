@@ -1,5 +1,5 @@
 # build stage
-FROM eclipse-temurin:25-jdk AS builder
+FROM docker.io/eclipse-temurin:25-jdk AS builder
 WORKDIR /build
 
 COPY gradle/ gradle/
@@ -13,7 +13,7 @@ RUN ./gradlew shadowJar --no-daemon
 
 
 # AOT Record stage (to minimize cold start time)
-FROM eclipse-temurin:25-jre AS aot
+FROM docker.io/eclipse-temurin:25-jre AS aot
 WORKDIR /app
 COPY --from=builder /build/build/libs/backend-all.jar /app/app.jar
 
