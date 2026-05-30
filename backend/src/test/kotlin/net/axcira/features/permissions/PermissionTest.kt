@@ -77,7 +77,7 @@ class PermissionTest {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("staff@example.com", "password", roleId = staffRoleId))
         }
-        client.put("/api/articles/${createdArticle.id}") {
+        client.patch("/api/articles/${createdArticle.id}") {
             contentType(ContentType.Application.Json)
             setBody(article)
         }.let {
