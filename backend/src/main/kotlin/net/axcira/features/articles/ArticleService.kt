@@ -3,7 +3,9 @@ package net.axcira.features.articles
 import kotlinx.serialization.Serializable
 import net.axcira.Pagination
 import net.axcira.db.*
+import net.axcira.db.Articles.title
 import net.axcira.paginate
+import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
@@ -13,7 +15,10 @@ data class CreateArticleInput(val title: String, val description: String, val bo
 
 @Serializable
 data class UpdateArticleInput(
-    val title: String?, val description: String?, val body: String?, val tagList: List<String>?
+    val title: Optional<String> = Optional.None,
+    val description: Optional<String> = Optional.None,
+    val body: Optional<String> = Optional.None,
+    val tagList: Optional<List<String>> = Optional.None
 )
 
 @Serializable
@@ -43,7 +48,7 @@ class ArticleService(val database: Database) {
             ArticleDTO(
                 row[Articles.id].value,
                 row[Articles.userId].value,
-                row[Articles.title],
+                row[title],
                 row[Articles.description],
                 row[Articles.body],
                 tagsByArticle[row[Articles.id].value] ?: emptyList()
@@ -55,7 +60,7 @@ class ArticleService(val database: Database) {
         val article = Articles.selectAll().where { Articles.id eq id }.singleOrNull() ?: return@dbQuery null
         val tags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
             .map { TagDTO(it[Tags.id].value, it[Tags.name]) }
-        ArticleDTO(article[Articles.id].value, article[Articles.userId].value, article[Articles.title], article[Articles.description], article[Articles.body], tags)
+        ArticleDTO(article[Articles.id].value, article[Articles.userId].value, article[title], article[Articles.description], article[Articles.body], tags)
     }
 
     suspend fun create(article: CreateArticleInput, userId: UInt): ArticleDTO = database.dbQuery {
@@ -83,27 +88,31 @@ class ArticleService(val database: Database) {
     }
 
     suspend fun update(id: UInt, article: UpdateArticleInput): ArticleDTO? = database.dbQuery {
-        if (article.tagList != null) {
-            val currentTags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
-                .map { TagDTO(it[ArticleTags.tagId].value, it[Tags.name]) }
-            val newTags = upsertTags(article.tagList)
+        article.tagList.let {
+            if (it is Optional.Present) {
+                it.value.let { tags ->
+                    val currentTags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
+                        .map { TagDTO(it[ArticleTags.tagId].value, it[Tags.name]) }
+                    val newTags = upsertTags(tags)
 
-            val tagsToRemove = currentTags - newTags.toSet()
-            val tagsToAdd = newTags - currentTags.toSet()
+                    val tagsToRemove = currentTags - newTags.toSet()
+                    val tagsToAdd = newTags - currentTags.toSet()
 
-            ArticleTags.deleteWhere { ArticleTags.articleId eq id and (ArticleTags.tagId inList tagsToRemove.map { it.id }) }
-            ArticleTags.batchInsert(tagsToAdd) { tagId ->
-                this[ArticleTags.articleId] = id
-                this[ArticleTags.tagId] = tagId.id
+                    ArticleTags.deleteWhere { ArticleTags.articleId eq id and (ArticleTags.tagId inList tagsToRemove.map { it.id }) }
+                    ArticleTags.batchInsert(tagsToAdd) { tagId ->
+                        this[ArticleTags.articleId] = id
+                        this[ArticleTags.tagId] = tagId.id
+                    }
+                }
             }
         }
         val (title, description, body) = article
-        if (title == null && description == null && body == null) return@dbQuery null
+        if (arrayOf(title, description, body).all { it is Optional.None }) return@dbQuery null
 
         return@dbQuery Articles.updateReturning(where = { Articles.id eq id }) {
-            if (title != null) it[Articles.title] = title
-            if (description != null) it[Articles.description] = description
-            if (body != null) it[Articles.body] = body
+            if (title is Optional.Present) it[Articles.title] = title.value
+            if (description is Optional.Present) it[Articles.description] = description.value
+            if (body is Optional.Present) it[Articles.body] = body.value
         }.single().let {
             ArticleDTO(
                 it[Articles.id].value,
