@@ -38,8 +38,14 @@ RUN service postgresql start && \
 FROM docker.io/eclipse-temurin:25-jre
 WORKDIR /app
 
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 COPY --from=aot /app/app.jar /app/app.jar
 COPY --from=aot /app/ktor.aot /app/ktor.aot
+
+RUN chown -R appuser:appuser /app
+
+USER appuser
 
 EXPOSE 8080
 
