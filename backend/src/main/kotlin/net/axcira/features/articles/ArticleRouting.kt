@@ -69,7 +69,7 @@ fun Application.articles() {
                 when (val updatedArticle = articleService.update(id, scheme)) {
                     is UpdateResult.Success -> call.respond(HttpStatusCode.OK, updatedArticle.value)
                     is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound)
-                    is UpdateResult.NotModified -> call.respond(HttpStatusCode.NotModified)
+                    is UpdateResult.NotModified -> call.respond(HttpStatusCode.NoContent)
                 }
             }
 

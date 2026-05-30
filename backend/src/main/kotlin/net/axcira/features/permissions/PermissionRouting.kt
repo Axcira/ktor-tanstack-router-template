@@ -41,7 +41,7 @@ fun Application.permissions() {
                     when (val role = permissionService.update(id, scheme)) {
                         is UpdateResult.Success -> call.respond(HttpStatusCode.OK, role.value)
                         is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound)
-                        is UpdateResult.NotModified -> call.respond(HttpStatusCode.NotModified)
+                        is UpdateResult.NotModified -> call.respond(HttpStatusCode.NoContent)
                     }
                 }
 
