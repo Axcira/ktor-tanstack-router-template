@@ -7,7 +7,8 @@ import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.json.Json
-import net.axcira.plugins.Optional.*
+import net.axcira.plugins.Optional.None
+import net.axcira.plugins.Optional.Present
 
 @Serializable(with = OptionalPropertySerializer::class)
 sealed interface Optional<out T> {
@@ -30,8 +31,9 @@ class OptionalPropertySerializer<T>(
     override fun serialize(encoder: kotlinx.serialization.encoding.Encoder, value: Optional<T>) {
         when (value) {
             is None -> {
-                throw SerializationException("Cannot serialize NotPresent")
+                throw SerializationException("Cannot serialize None")
             }
+
             is Present -> {
                 valueSerializer.serialize(encoder, value.value)
             }
