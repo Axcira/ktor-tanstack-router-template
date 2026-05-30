@@ -42,7 +42,7 @@ class PermissionTest {
         val staffRole = client.post("/api/roles") {
             contentType(ContentType.Application.Json)
             setBody(
-                UpdateRoleInput(
+                CreateRoleInput(
                     "staff", "Staff", listOf(Permission.CreateArticle, Permission.UpdateArticle(false), Permission.DeleteArticle(false))
                 )
             )
@@ -53,7 +53,7 @@ class PermissionTest {
         val userRole = client.post("/api/roles") {
             contentType(ContentType.Application.Json)
             setBody(
-                UpdateRoleInput(
+                CreateRoleInput(
                     "user", "User", emptyList()
                 )
             )
@@ -81,6 +81,8 @@ class PermissionTest {
         client.post("/api/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("admin@example.com", "password", roleId = adminRole.id))
+        }.let {
+            assertEquals(HttpStatusCode.Created, it.status)
         }
         val createdArticle = client.post("/api/articles") {
             contentType(ContentType.Application.Json)
@@ -94,6 +96,8 @@ class PermissionTest {
         client.post("/api/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("staff@example.com", "password", roleId = staffRole.id))
+        }.let {
+            assertEquals(HttpStatusCode.Created, it.status)
         }
         client.patch("/api/articles/${createdArticle.id}") {
             contentType(ContentType.Application.Json)
