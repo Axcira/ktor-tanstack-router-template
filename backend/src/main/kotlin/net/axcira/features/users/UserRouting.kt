@@ -25,7 +25,7 @@ fun Application.users() {
         post("/users") {
             val user = call.receive<CreateUserInput>()
             val createdUser = userService.createUser(user)
-            val permissions = permissionService.getPermissionsForUser(createdUser.id)
+            val permissions = permissionService.getPermissionsForUser(createdUser.id)?:throw IllegalArgumentException("User permissions not found")
             call.sessions.set(UserSession(createdUser.id, permissions))
             call.respond(HttpStatusCode.Created, createdUser)
         }
