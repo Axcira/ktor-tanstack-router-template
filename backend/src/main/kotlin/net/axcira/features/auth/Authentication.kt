@@ -2,6 +2,7 @@ package net.axcira.features.auth
 
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.di.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
 import net.axcira.db.SessionsTable
@@ -25,7 +26,8 @@ class DatabaseSessionStorage(private val database: Database) : SessionStorage {
 
     override suspend fun read(id: String): String {
         return database.dbQuery {
-            SessionsTable.select(SessionsTable.session).where { sessionId eq id }.single()[SessionsTable.session]
+            SessionsTable.select(SessionsTable.session).where { sessionId eq id }.singleOrNull()?.get(SessionsTable.session)
+                ?: throw NoSuchElementException("Session $id not found")
         }
     }
 
@@ -39,7 +41,8 @@ class DatabaseSessionStorage(private val database: Database) : SessionStorage {
     }
 }
 
-fun Application.configureAuthentication(database: Database) {
+fun Application.configureAuthentication() {
+    val database: Database by dependencies
     install(Sessions) {
         cookie<UserSession>("user_session", DatabaseSessionStorage(database)) {
             cookie.path = "/"

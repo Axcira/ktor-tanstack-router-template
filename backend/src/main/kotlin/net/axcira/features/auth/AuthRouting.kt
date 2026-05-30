@@ -19,33 +19,27 @@ data class LoginRequest(val email: String, val password: String)
 fun Application.auth() {
     val authService: AuthService by dependencies
 
-    apiRouting {
-        route("/auth") {
-            /**
-             * Authenticate (Login)
-             *
-             * OperationID: login
-             */
-            post("/login") {
-                val request = call.receive<LoginRequest>()
-                val session = authService.login(request.email, request.password)
-                if (session == null) {
-                    call.respond(HttpStatusCode.Unauthorized)
-                    return@post
-                }
-                call.sessions.set(session)
-                call.respond(session)
-            }
+    apiRouting("/auth") {
+        /**
+         * Authenticate (Login)
+         *
+         * OperationID: login
+         */
+        post("/login") {
+            val request = call.receive<LoginRequest>()
+            val session = authService.login(request.email, request.password) ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            call.sessions.set(session)
+            call.respond(session)
+        }
 
-            /**
-             * Logout
-             *
-             * OperationID: logout
-             */
-            post("/logout") {
-                call.sessions.clear<UserSession>()
-                call.respond(HttpStatusCode.NoContent)
-            }
+        /**
+         * Logout
+         *
+         * OperationID: logout
+         */
+        post("/logout") {
+            call.sessions.clear<UserSession>()
+            call.respond(HttpStatusCode.NoContent)
         }
     }
 }

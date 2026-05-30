@@ -18,9 +18,19 @@ fun Application.main() {
     install(IgnoreTrailingSlash)
 }
 
-fun Application.apiRouting(block: Route.() -> Unit) {
+/**
+ * /api 以下にルーティングを設定する。
+ * 指定されたパスを基にルーティングを作成し、ブロック内で個別のエンドポイントを定義可能。
+ *
+ * @param route ルートのパス。指定された場合、"/api/<path>" の形でルーティングが設定される。デフォルトはnull。
+ * @param block ルーティングブロック。Routeスコープ内でエンドポイントを定義可能。
+ */
+fun Application.apiRouting(route: String? = null, block: Route.() -> Unit) {
+    val path = route?.let {
+        if (it.startsWith("/")) it else "/$it"
+    } ?: ""
     routing {
-        route("/api") {
+        route("/api${path}") {
             block()
         }
     }

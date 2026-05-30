@@ -33,6 +33,14 @@ val database by lazy {
 
 fun database() = database
 
+/**
+ * データベースで指定されたブロックを非同期的に実行します。
+ * この関数はI/Oスレッドで実行されるように設計されています。
+ *
+ * @param block 実行するデータベース操作を含むラムダブロック
+ * @return ブロックの実行結果
+ * @throws Exception 実行中に発生した例外
+ */
 suspend fun <T> Database.dbQuery(block: suspend Database.() -> T) = withContext(Dispatchers.IO) {
     suspendTransaction(this@dbQuery) {
         block()

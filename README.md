@@ -152,3 +152,71 @@ cd backend
 ### Extend frontend
 
 // TODO: フロントエンドをもうちょっとちゃんと詰めてここを書く
+
+## 4. Build the project
+
+アプリケーションが完成し、公開する準備ができた場合、以下の方法でプロジェクトをビルドしてください。
+
+### Build the backend
+
+#### Docker Container (Recommended)
+
+Dockerfile を使用してビルドすると、起動時間短縮のために AOT Cache によって事前最適化された Docker イメージを作成できます。
+
+```bash
+cd backend
+docker build ./ -t backend
+```
+
+#### Build manually
+
+バックエンドをビルドし、 `jar` ファイルを生成するには、以下のコマンドを実行します。
+
+```bash
+cd backend
+./gradlew shadowJar
+```
+
+`backend/build/libs/backend-all.jar` に成果物が生成されます。  
+生成された jar ファイルは、次の方法で起動できます:
+
+```bash
+java -jar backend-all.jar
+```
+
+Java 25以上を使用している場合、起動時間を削減するために AOT Cache を使用できます。  
+まず、生成された jar ファイルを `-XX:AOTMode=record` で起動します。
+
+```bash
+java -XX:AOTMode=record -XX:AOTConfiguration=ktor.aot.conf -jar backend-all.jar
+```
+
+サーバーが起動したら、幾つかのエンドポイントを呼び出してコード パスのプロファイリングを行います。（任意）  
+十分にコードパスを通ったら、 Ctrl-C でサーバーを停止します。
+
+次に、生成された AOT Configuration を使用して、 AOT Cache を作成します。  
+
+```bash
+java -XX:AOTMode=create -XX:AOTConfiguration=ktor.aot.conf -XX:AOTCache=ktor.aot -jar backend-all.jar
+```
+
+最後に、生成された AOT Cache を使用して、サーバーを起動します。  
+ 
+```bash
+java -XX:AOTCache=ktor.aot -jar backend-all.jar
+```
+
+> [!WARNING]
+> プロファイリング、 AOT Cache の作成、サーバーの実行は、全て同じマシン・同じJREで行うようにしてください。  
+> さもなければ、 AOT Cache が正しく読み込まれなかったり、クラッシュの原因となります。
+
+### Build the frontend
+
+以下のコマンドを実行して、フロントエンドをビルドします。  
+
+```bash
+cd frontend
+bun run build
+```
+
+`frontend/dist/` に静的アセットが生成されるため、 Cloudflare Pages などのプロバイダーを使用して配信してください。
