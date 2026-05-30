@@ -10,9 +10,11 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import net.axcira.apiRouting
 import net.axcira.features.auth.UserSession
+import net.axcira.features.permissions.PermissionService
 
 fun Application.users() {
     val userService: UserService by dependencies
+    val permissionService: PermissionService by dependencies
 
     apiRouting("/users") {
         /**
@@ -23,7 +25,8 @@ fun Application.users() {
         post {
             val user = call.receive<CreateUserInput>()
             val createdUser = userService.createUser(user)
-            call.sessions.set(UserSession(createdUser.id))
+            val permissions = permissionService.getPermissionsForUser(createdUser.id)?:throw IllegalArgumentException("User permissions not found")
+            call.sessions.set(UserSession(createdUser.id, permissions))
             call.respond(HttpStatusCode.Created, createdUser)
         }
 

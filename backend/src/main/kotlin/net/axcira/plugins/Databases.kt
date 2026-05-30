@@ -41,7 +41,7 @@ fun database() = database
  * @return ブロックの実行結果
  * @throws Exception 実行中に発生した例外
  */
-suspend fun <T> Database.dbQuery(block: Database.() -> T) = withContext(Dispatchers.IO) {
+suspend fun <T> Database.dbQuery(block: suspend Database.() -> T) = withContext(Dispatchers.IO) {
     suspendTransaction(this@dbQuery) {
         block()
     }

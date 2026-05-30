@@ -5,16 +5,16 @@ import io.ktor.server.auth.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
-import net.axcira.db.SessionsTable
+import net.axcira.db.*
 import net.axcira.db.SessionsTable.sessionId
-import net.axcira.db.Users
+import net.axcira.features.permissions.Permission
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 
 
 @Serializable
-data class UserSession(val userId: UInt)
+data class UserSession(val userId: UInt, val permissions: List<Permission>)
 
 class DatabaseSessionStorage(private val database: Database) : SessionStorage {
     override suspend fun invalidate(id: String) {
@@ -52,10 +52,11 @@ fun Application.configureAuthentication() {
     install(Authentication) {
         session<UserSession> {
             validate { session ->
-                val user = database.dbQuery {
-                    Users.selectAll().where { Users.id eq session.userId }.firstOrNull()
+                database.dbQuery {
+                    (Users innerJoin Role).selectAll().where { Users.id eq session.userId }.singleOrNull()?.let {
+                        UserSession(it[Users.id].value, it[Role.permissions])
+                    }
                 }
-                user?.let { session }
             }
         }
     }

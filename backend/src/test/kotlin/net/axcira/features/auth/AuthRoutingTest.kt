@@ -14,7 +14,7 @@ class AuthRoutingTest {
         // Prepare user
         client.post("/api/users") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("api-auth@example.com", "password"))
+            setBody(CreateUserInput("api-auth@example.com", "password", 1u))
         }
 
         // Login

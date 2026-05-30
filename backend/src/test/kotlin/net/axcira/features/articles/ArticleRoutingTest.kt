@@ -3,9 +3,15 @@ package net.axcira.features.articles
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.server.plugins.di.*
+import net.axcira.db.Role
+import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserDTO
+import net.axcira.plugins.dbQuery
 import net.axcira.test
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
@@ -14,10 +20,19 @@ import kotlin.test.assertEquals
 class ArticleRoutingTest {
     @Test
     fun `test article`() = test { client ->
+        val database: Database by application.dependencies
+        // Create test role
+        val role = database.dbQuery {
+            Role.insertAndGetId {
+                it[name] = "admin"
+                it[description] = "Administrator"
+                it[permissions] = listOf(Permission.Administrator)
+            }
+        }
         // Create test user
         val user = client.post("/api/users") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("admin@example.com", "password"))
+            setBody(CreateUserInput("admin@example.com", "password", role.value))
         }.body<UserDTO>()
 
         // Create test article
