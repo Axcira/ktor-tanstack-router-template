@@ -161,7 +161,7 @@ cd backend
 
 #### Docker Container (Recommended)
 
-Dockerfile を使用して Docker イメージをビルドすると、起動時間短縮のために AOT Cache によって事前最適化された Docker イメージを作成できます。
+Dockerfile を使用してビルドすると、起動時間短縮のために AOT Cache によって事前最適化された Docker イメージを作成できます。
 
 ```bash
 cd backend
