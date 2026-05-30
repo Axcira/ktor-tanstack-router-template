@@ -1,6 +1,7 @@
 package net.axcira.features.permissions
 
 import kotlinx.serialization.Serializable
+import net.axcira.UpdateResult
 import net.axcira.db.Role
 import net.axcira.db.Users
 import net.axcira.plugins.Optional
@@ -41,21 +42,24 @@ class PermissionService(val database: Database) {
         RoleDTO(createdRole[Role.id].value, createdRole[Role.name], createdRole[Role.description], createdRole[Role.permissions])
     }
 
-    suspend fun update(id: UInt, updateRoleInput: UpdateRoleInput): RoleDTO? = database.dbQuery {
+    suspend fun update(id: UInt, updateRoleInput: UpdateRoleInput): UpdateResult<RoleDTO> = database.dbQuery {
         if (arrayOf(
                 updateRoleInput.name,
                 updateRoleInput.description,
                 updateRoleInput.permissions,
             ).all { it == Optional.None }
-        ) return@dbQuery null
+        ) return@dbQuery UpdateResult.NotModified
 
         val (name, description, permissions) = updateRoleInput
-        val updatedRole = Role.updateReturning(where = { Role.id eq id }) {
+        return@dbQuery Role.updateReturning(where = { Role.id eq id }) {
             if (name is Optional.Present) it[Role.name] = name.value
             if (description is Optional.Present) it[Role.description] = description.value
             if (permissions is Optional.Present) it[Role.permissions] = permissions.value
-        }.singleOrNull() ?: return@dbQuery null
-        RoleDTO(updatedRole[Role.id].value, updatedRole[Role.name], updatedRole[Role.description], updatedRole[Role.permissions])
+        }.singleOrNull()?.let {
+            UpdateResult.Success(
+                RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions])
+            )
+        } ?: UpdateResult.NotFound
     }
 
     suspend fun delete(id: UInt, deleteRoleInput: DeleteRoleInput): Int = database.dbQuery {

@@ -1,6 +1,7 @@
 package net.axcira.features.users
 
 import kotlinx.serialization.Serializable
+import net.axcira.UpdateResult
 import net.axcira.db.Users
 import net.axcira.features.auth.PasswordHasher
 import net.axcira.plugins.Optional
@@ -30,16 +31,21 @@ class UserService(val database: Database) {
         }
     }
 
-    suspend fun update(id: UInt, user: UpdateUserInput) {
+    suspend fun update(id: UInt, user: UpdateUserInput): UpdateResult<UserDTO> {
         val (email, password, roleId) = user
-        if (arrayOf(email, password, roleId).all { it == Optional.None }) return
-        val hash = if (password is Optional.Present) PasswordHasher.hashPassword(password.value) else null
-        database.dbQuery {
-            Users.update({ Users.id eq id }) {
+        if (arrayOf(email, password, roleId).all { it == Optional.None }) return UpdateResult.NotModified
+        val hash = when (password) {
+            is Optional.Present -> PasswordHasher.hashPassword(password.value)
+            is Optional.None -> null
+        }
+        return database.dbQuery {
+            Users.updateReturning(where = { Users.id eq id }) {
                 if (email is Optional.Present) it[Users.email] = email.value
                 if (hash != null) it[passwordHash] = hash
                 if (roleId is Optional.Present) it[Users.roleId] = roleId.value
-            }
+            }.singleOrNull()?.let {
+                UpdateResult.Success(UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value))
+            } ?: UpdateResult.NotFound
         }
     }
 

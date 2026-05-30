@@ -7,6 +7,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import net.axcira.UpdateResult
 import net.axcira.apiRouting
 
 fun Application.permissions() {
@@ -37,9 +38,11 @@ fun Application.permissions() {
                 patch("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val scheme = call.receive<UpdateRoleInput>()
-                    // 本来updateはschemeが全部nullでもnullを返すので、NotFoundは変かも...
-                    val role = permissionService.update(id, scheme) ?: return@patch call.respond(HttpStatusCode.NotFound)
-                    call.respond(HttpStatusCode.Created, role)
+                    when (val role = permissionService.update(id, scheme)) {
+                        is UpdateResult.Success -> call.respond(HttpStatusCode.OK, role.value)
+                        is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound)
+                        is UpdateResult.NotModified -> call.respond(HttpStatusCode.NotModified)
+                    }
                 }
 
                 delete("/{id}") {
