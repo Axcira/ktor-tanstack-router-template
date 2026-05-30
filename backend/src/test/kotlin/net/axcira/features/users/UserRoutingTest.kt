@@ -12,7 +12,7 @@ class UserRoutingTest {
     fun `test create user via api`() = test { client ->
         val response = client.post("/api/users") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("api-test@example.com", "password"))
+            setBody(CreateUserInput("api-test@example.com", "password", 1u))
         }
 
         assertEquals(HttpStatusCode.Created, response.status)

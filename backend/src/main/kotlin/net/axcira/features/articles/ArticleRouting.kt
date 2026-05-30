@@ -10,6 +10,8 @@ import io.ktor.server.routing.*
 import net.axcira.Pagination
 import net.axcira.apiRouting
 import net.axcira.features.auth.UserSession
+import net.axcira.features.permissions.Permission
+import net.axcira.features.permissions.withPermission
 
 fun Application.articles() {
     val articleService: ArticleService by dependencies
@@ -41,16 +43,18 @@ fun Application.articles() {
                 call.respond(article)
             }
 
-            /**
-             * Create an article
-             *
-             * OperationID: createArticle
-             */
-            post {
-                val article = call.receive<CreateArticleInput>()
-                val userId = call.principal<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
-                val createdArticle = articleService.create(article, userId)
-                call.respond(HttpStatusCode.Created, createdArticle)
+            withPermission(Permission.CreateArticle) {
+                /**
+                 * Create an article
+                 *
+                 * OperationID: createArticle
+                 */
+                post {
+                    val article = call.receive<CreateArticleInput>()
+                    val userId = call.principal<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+                    val createdArticle = articleService.create(article, userId)
+                    call.respond(HttpStatusCode.Created, createdArticle)
+                }
             }
 
             /**

@@ -2,6 +2,7 @@ package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
 import kotlinx.coroutines.*
+import net.axcira.db.Role
 import net.axcira.db.Users
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
@@ -31,13 +32,15 @@ class AuthService(private val database: Database) {
 
     suspend fun login(email: String, password: String): UserSession? = minWait(1.seconds) {
         val credential = database.dbQuery {
-            Users.selectAll().where { Users.email eq email }.map {
-                AuthUserCredential(it[Users.id].value, it[Users.email], it[Users.passwordHash])
-            }.singleOrNull() ?: return@dbQuery null
+            (Users innerJoin Role).selectAll().where { Users.email eq email }.singleOrNull()?.let {
+                Pair(
+                    AuthUserCredential(it[Users.id].value, it[Users.email], it[Users.passwordHash]), it[Role.permissions]
+                )
+            } ?: return@dbQuery null
         } ?: return@minWait null
 
-        val isValid = PasswordHasher.verifyPassword(password, credential.passwordHash)
-        return@minWait if (isValid) UserSession(credential.id) else null
+        val isValid = PasswordHasher.verifyPassword(password, credential.first.passwordHash)
+        return@minWait if (isValid) UserSession(credential.first.id, credential.second) else null
     }
 }
 
