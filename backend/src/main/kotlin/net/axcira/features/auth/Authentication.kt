@@ -5,9 +5,8 @@ import io.ktor.server.auth.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
-import net.axcira.db.SessionsTable
+import net.axcira.db.*
 import net.axcira.db.SessionsTable.sessionId
-import net.axcira.db.Users
 import net.axcira.features.permissions.Permission
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
@@ -53,10 +52,11 @@ fun Application.configureAuthentication() {
     install(Authentication) {
         session<UserSession> {
             validate { session ->
-                val user = database.dbQuery {
-                    Users.selectAll().where { Users.id eq session.userId }.firstOrNull()
+                database.dbQuery {
+                    (Users innerJoin Role).selectAll().where { Users.id eq session.userId }.singleOrNull()?.let {
+                        UserSession(it[Users.id].value, it[Role.permissions])
+                    }
                 }
-                user?.let { session }
             }
         }
     }
