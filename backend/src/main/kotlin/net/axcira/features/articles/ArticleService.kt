@@ -1,10 +1,10 @@
 package net.axcira.features.articles
 
 import kotlinx.serialization.Serializable
-import net.axcira.Pagination
+import net.axcira.*
 import net.axcira.db.*
-import net.axcira.paginate
-import net.axcira.plugins.dbQuery
+import net.axcira.db.Articles.title
+import net.axcira.plugins.*
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
 
@@ -13,7 +13,10 @@ data class CreateArticleInput(val title: String, val description: String, val bo
 
 @Serializable
 data class UpdateArticleInput(
-    val title: String?, val description: String?, val body: String?, val tagList: List<String>?
+    val title: Optional<String> = Optional.None,
+    val description: Optional<String> = Optional.None,
+    val body: Optional<String> = Optional.None,
+    val tagList: Optional<List<String>> = Optional.None
 )
 
 @Serializable
@@ -43,7 +46,7 @@ class ArticleService(val database: Database) {
             ArticleDTO(
                 row[Articles.id].value,
                 row[Articles.userId].value,
-                row[Articles.title],
+                row[title],
                 row[Articles.description],
                 row[Articles.body],
                 tagsByArticle[row[Articles.id].value] ?: emptyList()
@@ -53,9 +56,16 @@ class ArticleService(val database: Database) {
 
     suspend fun getById(id: UInt) = database.dbQuery {
         val article = Articles.selectAll().where { Articles.id eq id }.singleOrNull() ?: return@dbQuery null
-        val tags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
-            .map { TagDTO(it[Tags.id].value, it[Tags.name]) }
-        ArticleDTO(article[Articles.id].value, article[Articles.userId].value, article[Articles.title], article[Articles.description], article[Articles.body], tags)
+        val tags =
+            (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }.map { TagDTO(it[Tags.id].value, it[Tags.name]) }
+        ArticleDTO(
+            article[Articles.id].value,
+            article[Articles.userId].value,
+            article[title],
+            article[Articles.description],
+            article[Articles.body],
+            tags
+        )
     }
 
     suspend fun create(article: CreateArticleInput, userId: UInt): ArticleDTO = database.dbQuery {
@@ -82,11 +92,13 @@ class ArticleService(val database: Database) {
         )
     }
 
-    suspend fun update(id: UInt, article: UpdateArticleInput): ArticleDTO? = database.dbQuery {
-        if (article.tagList != null) {
+    suspend fun update(id: UInt, article: UpdateArticleInput): UpdateResult<ArticleDTO> = database.dbQuery {
+        val (title, description, body, tagList) = article
+        if (arrayOf(title, description, body, tagList).all { it is Optional.None }) return@dbQuery UpdateResult.NotModified
+        val resultTags = tagList.getOrNull()?.let { tags ->
             val currentTags = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }
                 .map { TagDTO(it[ArticleTags.tagId].value, it[Tags.name]) }
-            val newTags = upsertTags(article.tagList)
+            val newTags = upsertTags(tags)
 
             val tagsToRemove = currentTags - newTags.toSet()
             val tagsToAdd = newTags - currentTags.toSet()
@@ -96,24 +108,43 @@ class ArticleService(val database: Database) {
                 this[ArticleTags.articleId] = id
                 this[ArticleTags.tagId] = tagId.id
             }
+            newTags
+        } ?: (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId eq id }.map {
+            TagDTO(it[ArticleTags.tagId].value, it[Tags.name])
         }
-        val (title, description, body) = article
-        if (title == null && description == null && body == null) return@dbQuery null
+
+        if (arrayOf(title, description, body).all { it is Optional.None }) {
+            // Query the article to return
+            return@dbQuery Articles.selectAll().where { Articles.id eq id }.singleOrNull()?.let {
+                UpdateResult.Success(
+                    ArticleDTO(
+                        it[Articles.id].value,
+                        it[Articles.userId].value,
+                        it[Articles.title],
+                        it[Articles.description],
+                        it[Articles.body],
+                        resultTags
+                    )
+                )
+            } ?: return@dbQuery UpdateResult.NotFound
+        }
 
         return@dbQuery Articles.updateReturning(where = { Articles.id eq id }) {
-            if (title != null) it[Articles.title] = title
-            if (description != null) it[Articles.description] = description
-            if (body != null) it[Articles.body] = body
-        }.single().let {
-            ArticleDTO(
-                it[Articles.id].value,
-                it[Articles.userId].value,
-                it[Articles.title],
-                it[Articles.description],
-                it[Articles.body],
-                emptyList()
+            if (title is Optional.Present) it[Articles.title] = title.value
+            if (description is Optional.Present) it[Articles.description] = description.value
+            if (body is Optional.Present) it[Articles.body] = body.value
+        }.singleOrNull()?.let {
+            UpdateResult.Success(
+                ArticleDTO(
+                    it[Articles.id].value,
+                    it[Articles.userId].value,
+                    it[Articles.title],
+                    it[Articles.description],
+                    it[Articles.body],
+                    resultTags
+                )
             )
-        }
+        } ?: UpdateResult.NotFound
     }
 
     suspend fun delete(id: UInt) {

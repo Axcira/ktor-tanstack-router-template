@@ -1,8 +1,10 @@
 package net.axcira.features.permissions
 
 import kotlinx.serialization.Serializable
+import net.axcira.UpdateResult
 import net.axcira.db.Role
 import net.axcira.db.Users
+import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
@@ -15,7 +17,7 @@ data class RoleDTO(val id: UInt, val name: String, val description: String, val 
 data class CreateRoleInput(val name: String, val description: String, val permissions: List<Permission>)
 
 @Serializable
-data class UpdateRoleInput(val name: String?, val description: String?, val permissions: List<Permission>?)
+data class UpdateRoleInput(val name: Optional<String>, val description: Optional<String>, val permissions: Optional<List<Permission>>)
 
 @Serializable
 data class DeleteRoleInput(val fallbackRoleId: UInt)
@@ -40,15 +42,24 @@ class PermissionService(val database: Database) {
         RoleDTO(createdRole[Role.id].value, createdRole[Role.name], createdRole[Role.description], createdRole[Role.permissions])
     }
 
-    suspend fun update(id: UInt, updateRoleInput: UpdateRoleInput): RoleDTO? = database.dbQuery {
-        if (updateRoleInput.name == null && updateRoleInput.description == null && updateRoleInput.permissions == null) return@dbQuery null
+    suspend fun update(id: UInt, updateRoleInput: UpdateRoleInput): UpdateResult<RoleDTO> = database.dbQuery {
+        if (arrayOf(
+                updateRoleInput.name,
+                updateRoleInput.description,
+                updateRoleInput.permissions,
+            ).all { it == Optional.None }
+        ) return@dbQuery UpdateResult.NotModified
 
-        val updatedRole = Role.updateReturning(where = { Role.id eq id }) {
-            if (updateRoleInput.name != null) it[Role.name] = updateRoleInput.name
-            if (updateRoleInput.description != null) it[Role.description] = updateRoleInput.description
-            if (updateRoleInput.permissions != null) it[Role.permissions] = updateRoleInput.permissions
-        }.singleOrNull() ?: return@dbQuery null
-        RoleDTO(updatedRole[Role.id].value, updatedRole[Role.name], updatedRole[Role.description], updatedRole[Role.permissions])
+        val (name, description, permissions) = updateRoleInput
+        return@dbQuery Role.updateReturning(where = { Role.id eq id }) {
+            if (name is Optional.Present) it[Role.name] = name.value
+            if (description is Optional.Present) it[Role.description] = description.value
+            if (permissions is Optional.Present) it[Role.permissions] = permissions.value
+        }.singleOrNull()?.let {
+            UpdateResult.Success(
+                RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions])
+            )
+        } ?: UpdateResult.NotFound
     }
 
     suspend fun delete(id: UInt, deleteRoleInput: DeleteRoleInput): Int = database.dbQuery {

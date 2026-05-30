@@ -1,8 +1,10 @@
 package net.axcira.features.users
 
 import kotlinx.serialization.Serializable
+import net.axcira.UpdateResult
 import net.axcira.db.Users
 import net.axcira.features.auth.PasswordHasher
+import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
@@ -11,7 +13,7 @@ import org.jetbrains.exposed.v1.jdbc.*
 data class CreateUserInput(val email: String, val password: String, val roleId: UInt)
 
 @Serializable
-data class UpdateUserInput(val email: String?, val password: String?, val roleId: UInt?)
+data class UpdateUserInput(val email: Optional<String>, val password: Optional<String>, val roleId: Optional<UInt>)
 
 @Serializable
 data class UserDTO(val id: UInt, val email: String, val roleId: UInt? = null)
@@ -29,15 +31,21 @@ class UserService(val database: Database) {
         }
     }
 
-    suspend fun update(id: UInt, user: UpdateUserInput) {
-        if (user.email == null && user.password == null && user.roleId == null) return
-        val hash = if (user.password != null) PasswordHasher.hashPassword(user.password) else null
-        database.dbQuery {
-            Users.update({ Users.id eq id }) {
-                if (user.email != null) it[email] = user.email
+    suspend fun update(id: UInt, user: UpdateUserInput): UpdateResult<UserDTO> {
+        val (email, password, roleId) = user
+        if (arrayOf(email, password, roleId).all { it == Optional.None }) return UpdateResult.NotModified
+        val hash = when (password) {
+            is Optional.Present -> PasswordHasher.hashPassword(password.value)
+            is Optional.None -> null
+        }
+        return database.dbQuery {
+            Users.updateReturning(where = { Users.id eq id }) {
+                if (email is Optional.Present) it[Users.email] = email.value
                 if (hash != null) it[passwordHash] = hash
-                if (user.roleId != null) it[roleId] = user.roleId
-            }
+                if (roleId is Optional.Present) it[Users.roleId] = roleId.value
+            }.singleOrNull()?.let {
+                UpdateResult.Success(UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value))
+            } ?: UpdateResult.NotFound
         }
     }
 

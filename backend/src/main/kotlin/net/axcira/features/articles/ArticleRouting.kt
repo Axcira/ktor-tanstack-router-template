@@ -7,8 +7,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import net.axcira.Pagination
-import net.axcira.apiRouting
+import net.axcira.*
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.Permission
 import net.axcira.features.permissions.withPermission
@@ -67,8 +66,11 @@ fun Application.articles() {
                 val scheme = call.receive<UpdateArticleInput>()
                 val article = articleService.getById(id) ?: return@patch call.respond(HttpStatusCode.NotFound)
                 if (article.userId != call.principal<UserSession>()?.userId) return@patch call.respond(HttpStatusCode.Forbidden)
-                val updatedArticle = articleService.update(id, scheme) ?: return@patch call.respond(HttpStatusCode.NotFound)
-                call.respond(updatedArticle)
+                when (val updatedArticle = articleService.update(id, scheme)) {
+                    is UpdateResult.Success -> call.respond(HttpStatusCode.OK, updatedArticle.value)
+                    is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound)
+                    is UpdateResult.NotModified -> call.respond(HttpStatusCode.NoContent)
+                }
             }
 
             /**
