@@ -24,8 +24,7 @@ fun Application.permissions() {
             }
             route("/roles") {
                 get("/{roleId}") {
-                    val roleId =
-                        call.request.queryParameters["roleId"]?.toUIntOrNull() ?: throw IllegalArgumentException("No role id found")
+                    val roleId = call.parameters["roleId"]?.toUIntOrNull() ?: throw IllegalArgumentException("No role id found")
                     val role = permissionService.getRoleById(roleId) ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respond(role)
                 }
@@ -36,7 +35,7 @@ fun Application.permissions() {
                 }
 
                 patch("/{id}") {
-                    val id = call.request.queryParameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                    val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val scheme = call.receive<UpdateRoleInput>()
                     // 本来updateはschemeが全部nullでもnullを返すので、NotFoundは変かも...
                     val role = permissionService.update(id, scheme) ?: return@patch call.respond(HttpStatusCode.NotFound)
