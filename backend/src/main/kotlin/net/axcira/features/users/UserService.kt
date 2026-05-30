@@ -47,7 +47,8 @@ class UserService(val database: Database) {
 
     suspend fun findById(id: UInt): UserDTO? {
         return database.dbQuery {
-            Users.selectAll().where { Users.id eq id }.map { UserDTO(it[Users.id].value, it[Users.email]) }.singleOrNull()
+            Users.selectAll().where { Users.id eq id }.map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+                .singleOrNull()
         }
     }
 }
