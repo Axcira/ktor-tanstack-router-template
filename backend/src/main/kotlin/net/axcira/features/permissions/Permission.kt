@@ -26,7 +26,7 @@ sealed interface Permission {
     data object ManageArticles : Permission {
         override fun check(required: Permission): Boolean {
             return when (required) {
-                is CreateArticle, is UpdateArticle, is DeleteArticle -> true
+                is CreateArticle, is UpdateArticle, is DeleteArticle, is ManageArticles -> true
                 else -> false
             }
         }
