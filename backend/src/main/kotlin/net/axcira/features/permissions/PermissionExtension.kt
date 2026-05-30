@@ -12,14 +12,16 @@ class PermissionRouteSelector(private val permission: String) : RouteSelector() 
     override fun toString() = "(requirePermission: $permission)"
 }
 
+fun Iterable<Permission>.satisfies(permission: Permission) = any { it.satisfies(permission) }
+
 inline fun <reified T : Permission> permissionPlugin(permission: T) = createRouteScopedPlugin(
     "RequirePermission_${T::class.java.simpleName}"
 ) {
     on(AuthenticationChecked) { call ->
         val principal = call.principal<UserSession>() ?: return@on
-        val hasPermission = principal.permissions.any { it.satisfies(permission) }
+        val hasPermission = principal.permissions.satisfies(permission)
         if (!hasPermission) {
-            call.respond(HttpStatusCode.Forbidden)
+            return@on call.respond(HttpStatusCode.Forbidden)
         }
     }
 }
