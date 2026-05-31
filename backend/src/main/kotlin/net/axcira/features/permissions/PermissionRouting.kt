@@ -9,6 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import net.axcira.UpdateResult
 import net.axcira.apiRouting
+import net.axcira.features.auth.UserSession
 
 fun Application.permissions() {
     val permissionService: PermissionService by dependencies
@@ -21,6 +22,16 @@ fun Application.permissions() {
                         call.request.queryParameters["userid"]?.toUIntOrNull() ?: throw IllegalArgumentException("No user id found")
                     val permissions = permissionService.getPermissionsForUser(userid) ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respond(permissions)
+                }
+                post("/can-i") {
+                    val permissions = call.principal<UserSession>()?.permissions ?: throw IllegalArgumentException("User not authenticated")
+                    val requested = call.receive<Permission>()
+                    val result = permissions.satisfies(requested)
+                    if (result) {
+                        call.respond(HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.Forbidden)
+                    }
                 }
             }
             route("/roles") {

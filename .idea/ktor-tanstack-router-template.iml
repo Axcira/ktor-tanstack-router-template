@@ -13,6 +13,7 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/build" />
       <excludeFolder url="file://$MODULE_DIR$/backend/generated" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/.tanstack" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

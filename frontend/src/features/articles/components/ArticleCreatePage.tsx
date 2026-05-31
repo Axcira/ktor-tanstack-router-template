@@ -1,7 +1,10 @@
-import { useCreateArticle } from "@/api/generated/default/default.ts";
-import { useNavigate, Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
+import {
+  Link,
+  useNavigate,
+} from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { useCreateArticle } from "@/api/generated/default/default.ts";
+import { Button } from "@/components/ui/button";
 import ArticleForm, { type ArticleFormValues } from "./ArticleForm";
 
 export default function ArticleCreatePage() {
@@ -10,16 +13,11 @@ export default function ArticleCreatePage() {
 
   const handleSubmit = async (values: ArticleFormValues) => {
     try {
-      const tagList = values.tagList
-        ? values.tagList.split(",").map((t) => t.trim()).filter(Boolean)
-        : [];
-      
+      const tagList = values.tagList ? values.tagList.split(",").map((t) => t.trim()).filter(Boolean) : [];
+
       const response = await createArticle.mutateAsync({
         data: {
-          title: values.title,
-          description: values.description,
-          body: values.body,
-          tagList,
+          title: values.title, description: values.description, body: values.body, tagList,
         },
       });
 
@@ -31,11 +29,10 @@ export default function ArticleCreatePage() {
     }
   };
 
-  return (
-    <div className="container mx-auto p-6 max-w-2xl space-y-6">
+  return (<div className="container mx-auto p-6 max-w-2xl space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 text-muted-foreground hover:text-foreground">
         <Link to="/articles">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-2 h-4 w-4"/>
           一覧に戻る
         </Link>
       </Button>
@@ -54,6 +51,5 @@ export default function ArticleCreatePage() {
           submitLabel="記事を投稿する"
         />
       </div>
-    </div>
-  );
+    </div>);
 }

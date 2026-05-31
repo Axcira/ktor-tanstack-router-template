@@ -17,12 +17,20 @@ data class RoleDTO(val id: UInt, val name: String, val description: String, val 
 data class CreateRoleInput(val name: String, val description: String, val permissions: List<Permission>)
 
 @Serializable
-data class UpdateRoleInput(val name: Optional<String>, val description: Optional<String>, val permissions: Optional<List<Permission>>)
+data class UpdateRoleInput(
+    val name: Optional<String> = Optional.None,
+    val description: Optional<String> = Optional.None,
+    val permissions: Optional<List<Permission>> = Optional.None
+)
 
 @Serializable
 data class DeleteRoleInput(val fallbackRoleId: UInt)
 
 class PermissionService(val database: Database) {
+    suspend fun getAllRoles(): List<RoleDTO> = database.dbQuery {
+        Role.selectAll().map { RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]) }
+    }
+
     suspend fun getRoleById(id: UInt): RoleDTO? = database.dbQuery {
         val role = Role.selectAll().where { Role.id eq id }.singleOrNull() ?: return@dbQuery null
         RoleDTO(role[Role.id].value, role[Role.name], role[Role.description], role[Role.permissions])

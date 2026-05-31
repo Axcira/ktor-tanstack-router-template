@@ -13,7 +13,9 @@ import org.jetbrains.exposed.v1.jdbc.*
 data class CreateUserInput(val email: String, val password: String, val roleId: UInt)
 
 @Serializable
-data class UpdateUserInput(val email: Optional<String>, val password: Optional<String>, val roleId: Optional<UInt>)
+data class UpdateUserInput(
+    val email: Optional<String> = Optional.None, val password: Optional<String> = Optional.None, val roleId: Optional<UInt> = Optional.None
+)
 
 @Serializable
 data class UserDTO(val id: UInt, val email: String, val roleId: UInt? = null)
