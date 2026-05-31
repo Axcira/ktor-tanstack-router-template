@@ -25,8 +25,9 @@ fun Application.users() {
         post {
             val user = call.receive<CreateUserInput>()
             val createdUser = userService.createUser(user)
-            val permissions = permissionService.getPermissionsForUser(createdUser.id)?:throw IllegalArgumentException("User permissions not found")
-            call.sessions.set(UserSession(createdUser.id, permissions))
+            val permissions =
+                permissionService.getPermissionsForUser(createdUser.id) ?: throw IllegalArgumentException("User permissions not found")
+            call.sessions.set(UserSession(createdUser, permissions))
             call.respond(HttpStatusCode.Created, createdUser)
         }
 
@@ -37,9 +38,8 @@ fun Application.users() {
              * OperationID: getSelf
              */
             get("/me") {
-                val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
-                val user = userService.findById(userId) ?: throw IllegalArgumentException("User not found")
-                call.respond(user)
+                val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
+                call.respond(principal)
             }
 
             /**
@@ -48,7 +48,8 @@ fun Application.users() {
              * OperationID: updateMe
              */
             put("/me") {
-                val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+                val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
+                val userId = principal.user.id
                 val user = call.receive<UpdateUserInput>()
                 userService.update(userId, user)
                 call.respond(HttpStatusCode.NoContent)
@@ -60,7 +61,8 @@ fun Application.users() {
              * OperationID: deleteMe
              */
             delete("/me") {
-                val userId = call.sessions.get<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+                val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
+                val userId = principal.user.id
                 userService.delete(userId)
                 call.respond(HttpStatusCode.NoContent)
             }

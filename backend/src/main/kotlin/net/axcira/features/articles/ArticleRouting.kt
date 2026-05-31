@@ -50,7 +50,7 @@ fun Application.articles() {
                  */
                 post {
                     val article = call.receive<CreateArticleInput>()
-                    val userId = call.principal<UserSession>()?.userId ?: throw IllegalArgumentException("User not authenticated")
+                    val userId = call.principal<UserSession>()?.user?.id ?: throw IllegalArgumentException("User not authenticated")
                     val createdArticle = articleService.create(article, userId)
                     call.respond(HttpStatusCode.Created, createdArticle)
                 }
@@ -65,7 +65,7 @@ fun Application.articles() {
                 val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                 val scheme = call.receive<UpdateArticleInput>()
                 val article = articleService.getById(id) ?: return@patch call.respond(HttpStatusCode.NotFound)
-                if (article.userId != call.principal<UserSession>()?.userId) return@patch call.respond(HttpStatusCode.Forbidden)
+                if (article.userId != call.principal<UserSession>()?.user?.id) return@patch call.respond(HttpStatusCode.Forbidden)
                 when (val updatedArticle = articleService.update(id, scheme)) {
                     is UpdateResult.Success -> call.respond(HttpStatusCode.OK, updatedArticle.value)
                     is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound)
@@ -81,7 +81,7 @@ fun Application.articles() {
             delete("/{id}") {
                 val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                 val article = articleService.getById(id) ?: return@delete call.respond(HttpStatusCode.NotFound)
-                if (article.userId != call.principal<UserSession>()?.userId) return@delete call.respond(HttpStatusCode.Forbidden)
+                if (article.userId != call.principal<UserSession>()?.user?.id) return@delete call.respond(HttpStatusCode.Forbidden)
                 articleService.delete(id)
                 call.respond(HttpStatusCode.NoContent)
             }

@@ -8,13 +8,14 @@ import kotlinx.serialization.Serializable
 import net.axcira.db.*
 import net.axcira.db.SessionsTable.sessionId
 import net.axcira.features.permissions.Permission
+import net.axcira.features.users.UserDTO
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 
 
 @Serializable
-data class UserSession(val userId: UInt, val permissions: List<Permission>)
+data class UserSession(val user: UserDTO, val permissions: List<Permission>)
 
 class DatabaseSessionStorage(private val database: Database) : SessionStorage {
     override suspend fun invalidate(id: String) {
@@ -53,8 +54,12 @@ fun Application.configureAuthentication() {
         session<UserSession> {
             validate { session ->
                 database.dbQuery {
-                    (Users innerJoin Role).selectAll().where { Users.id eq session.userId }.singleOrNull()?.let {
-                        UserSession(it[Users.id].value, it[Role.permissions])
+                    (Users innerJoin Role).selectAll().where { Users.id eq session.user.id }.singleOrNull()?.let {
+                        UserSession(
+                            UserDTO(
+                                it[Users.id].value, it[Users.email], it[Users.roleId].value
+                            ), it[Role.permissions]
+                        )
                     }
                 }
             }
