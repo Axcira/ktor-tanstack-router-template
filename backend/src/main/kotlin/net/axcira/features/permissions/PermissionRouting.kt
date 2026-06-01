@@ -23,6 +23,12 @@ fun Application.permissions() {
                     val permissions = permissionService.getPermissionsForUser(userid) ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respond(permissions)
                 }
+
+                /**
+                 * Check permission for user
+                 *
+                 * OperationID: canI
+                 */
                 post("/can-i") {
                     val permissions = call.principal<UserSession>()?.permissions ?: throw IllegalArgumentException("User not authenticated")
                     val requested = call.receive<Permission>()
