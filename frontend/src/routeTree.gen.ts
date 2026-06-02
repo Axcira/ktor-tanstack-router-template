@@ -15,6 +15,7 @@ import { Route as HeroRouteImport } from './routes/hero'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppPermissionsRouteImport } from './routes/_app/permissions'
 import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
 import { Route as AppArticlesIndexRouteImport } from './routes/_app/articles/index'
@@ -53,6 +54,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPermissionsRoute = AppPermissionsRouteImport.update({
+  id: '/permissions',
+  path: '/permissions',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDocumentationRoute = AppDocumentationRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/articles': typeof AppArticlesRouteWithChildren
   '/documentation': typeof AppDocumentationRoute
+  '/permissions': typeof AppPermissionsRoute
   '/settings': typeof AppSettingsRoute
   '/articles/create': typeof AppArticlesCreateRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/documentation': typeof AppDocumentationRoute
+  '/permissions': typeof AppPermissionsRoute
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/articles/create': typeof AppArticlesCreateRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/articles': typeof AppArticlesRouteWithChildren
   '/_app/documentation': typeof AppDocumentationRoute
+  '/_app/permissions': typeof AppPermissionsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/articles/create': typeof AppArticlesCreateRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/articles'
     | '/documentation'
+    | '/permissions'
     | '/settings'
     | '/articles/create'
     | '/playground/nav1-1'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/documentation'
+    | '/permissions'
     | '/settings'
     | '/'
     | '/articles/create'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_app/articles'
     | '/_app/documentation'
+    | '/_app/permissions'
     | '/_app/settings'
     | '/_app/'
     | '/_app/articles/create'
@@ -263,6 +275,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/permissions': {
+      id: '/_app/permissions'
+      path: '/permissions'
+      fullPath: '/permissions'
+      preLoaderRoute: typeof AppPermissionsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/documentation': {
@@ -359,6 +378,7 @@ const AppArticlesRouteWithChildren = AppArticlesRoute._addFileChildren(
 interface AppRouteChildren {
   AppArticlesRoute: typeof AppArticlesRouteWithChildren
   AppDocumentationRoute: typeof AppDocumentationRoute
+  AppPermissionsRoute: typeof AppPermissionsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
@@ -370,6 +390,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppArticlesRoute: AppArticlesRouteWithChildren,
   AppDocumentationRoute: AppDocumentationRoute,
+  AppPermissionsRoute: AppPermissionsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppPlaygroundNav11Route: AppPlaygroundNav11Route,
