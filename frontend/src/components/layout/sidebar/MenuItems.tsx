@@ -1,16 +1,13 @@
-import {
-    BookOpen,
-    FileText,
-    LayoutDashboard,
-    Settings2,
-} from "lucide-react";
+import { BookOpen, FileText, LayoutDashboard, Settings2 } from "lucide-react";
 import type * as React from "react";
+import type { Permission } from "@/api/generated/schemas";
 
 export interface MenuItem {
   text: string;
   icon?: React.ReactNode;
   children?: MenuItem[];
   to?: string;
+  requiredPermission?: Permission;
 }
 
 const menuItems: MenuItem[] = [
@@ -30,8 +27,9 @@ const menuItems: MenuItem[] = [
       {
         text: "Create",
         to: "/articles/create",
-      }
-    ]
+        requiredPermission: { type: "CreateArticle" },
+      },
+    ],
   },
   {
     text: "Settings",
