@@ -8,11 +8,16 @@ import { Button } from "@/components/ui/button";
 import ArticleForm, { type ArticleFormValues } from "./ArticleForm";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 import NoPermission from "@/components/NoPermission.tsx";
+import LoadingSpinner from "@/components/LoadingSpinner.tsx";
 
 export default function ArticleCreatePage() {
   const navigate = useNavigate();
   const createArticle = useCreateArticle();
-  const {isAllowed} = useAuthorize({type: "CreateArticle"})
+  const {isAllowed, isLoading} = useAuthorize({type: "CreateArticle"})
+
+  if (isLoading) {
+    return <LoadingSpinner/>
+  }
 
   if (!isAllowed) {
     return <NoPermission/>
