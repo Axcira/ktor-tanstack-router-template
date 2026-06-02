@@ -12,10 +12,10 @@ import { queryClient } from "@/routes/__root.tsx";
 
 const selfQueryOptions = queryOptions({
   queryKey: ["self"], queryFn: async () => {
-    const self =  await getSelf()
+    const self = await getSelf()
     if (self.status === 200) return self.data
     throw new Error("Failed to fetch self data")
-  }, staleTime: 1000 * 60 * 5
+  }, staleTime: 1000 * 60,
 })
 
 export const Route = createFileRoute("/_app")({
