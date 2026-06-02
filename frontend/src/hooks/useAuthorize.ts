@@ -7,7 +7,8 @@ export function useAuthorize(permission: Permission, options?: Omit<Parameters<t
   const {session} = Route.useRouteContext();
 
   const {data, ...rest} = useQuery({
-    queryKey: ["authorize", permission.type, {...permission}],
+    ...options,
+    queryKey: ["authorize", session, permission.type, {...permission}],
     queryFn: () => checkPermission(session, permission),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
