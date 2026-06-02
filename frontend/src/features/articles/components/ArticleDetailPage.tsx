@@ -70,7 +70,7 @@ function ArticleDetail({article}: { article: ArticleDTO }) {
         </Button>)}
       </div>
 
-      <div className="prose prose-slate dark:prose-invert max-w-none py-4 text-foreground leading-7 whitespace-pre">
+      <div className="prose prose-slate dark:prose-invert max-w-none py-4 text-foreground leading-7 whitespace-pre-wrap">
         {article.body}
       </div>
     </article>
