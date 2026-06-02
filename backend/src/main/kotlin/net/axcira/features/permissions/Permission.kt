@@ -1,8 +1,10 @@
 package net.axcira.features.permissions
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@SerialName("Permission")
 sealed interface Permission {
     fun satisfies(required: Permission): Boolean {
         return this is Administrator || check(required)
@@ -14,15 +16,18 @@ sealed interface Permission {
      * Administrator can bypass any permission checks - be careful!
      */
     @Serializable
+    @SerialName("Administrator")
     data object Administrator : Permission
 
     @Serializable
+    @SerialName("ManageUsers")
     data object ManageUsers : Permission
 
     /**
      * ManageArticles permission is a combination of all permissions that can be used to manage articles.
      */
     @Serializable
+    @SerialName("ManageArticles")
     data object ManageArticles : Permission {
         override fun check(required: Permission): Boolean {
             return when (required) {
@@ -33,9 +38,11 @@ sealed interface Permission {
     }
 
     @Serializable
+    @SerialName("CreateArticle")
     data object CreateArticle : Permission
 
     @Serializable
+    @SerialName("UpdateArticle")
     data class UpdateArticle(val allowOthers: Boolean) : Permission {
         override fun check(required: Permission): Boolean {
             if (required !is UpdateArticle) return false
@@ -45,6 +52,7 @@ sealed interface Permission {
     }
 
     @Serializable
+    @SerialName("DeleteArticle")
     data class DeleteArticle(val allowOthers: Boolean) : Permission {
         override fun check(required: Permission): Boolean {
             if (required !is DeleteArticle) return false

@@ -13,7 +13,9 @@ import org.jetbrains.exposed.v1.jdbc.*
 data class CreateUserInput(val email: String, val password: String, val roleId: UInt)
 
 @Serializable
-data class UpdateUserInput(val email: Optional<String>, val password: Optional<String>, val roleId: Optional<UInt>)
+data class UpdateUserInput(
+    val email: Optional<String> = Optional.None, val password: Optional<String> = Optional.None, val roleId: Optional<UInt> = Optional.None
+)
 
 @Serializable
 data class UserDTO(val id: UInt, val email: String, val roleId: UInt? = null)
@@ -56,6 +58,13 @@ class UserService(val database: Database) {
     suspend fun findById(id: UInt): UserDTO? {
         return database.dbQuery {
             Users.selectAll().where { Users.id eq id }.map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+                .singleOrNull()
+        }
+    }
+
+    suspend fun findByEmail(email: String): UserDTO? {
+        return database.dbQuery {
+            Users.selectAll().where { Users.email eq email }.map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
                 .singleOrNull()
         }
     }

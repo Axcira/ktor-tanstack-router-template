@@ -1,9 +1,7 @@
 package net.axcira.features.permissions
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import net.axcira.features.auth.UserSession
 
@@ -11,6 +9,8 @@ class PermissionRouteSelector(private val permission: String) : RouteSelector() 
     override suspend fun evaluate(context: RoutingResolveContext, segmentIndex: Int) = RouteSelectorEvaluation.Constant
     override fun toString() = "(requirePermission: $permission)"
 }
+
+class NoPermissionException(val permission: Permission) : Exception("User does not have permission: $permission")
 
 fun Iterable<Permission>.satisfies(permission: Permission) = any { it.satisfies(permission) }
 
@@ -21,7 +21,7 @@ inline fun <reified T : Permission> permissionPlugin(permission: T) = createRout
         val principal = call.principal<UserSession>() ?: return@on
         val hasPermission = principal.permissions.satisfies(permission)
         if (!hasPermission) {
-            return@on call.respond(HttpStatusCode.Forbidden)
+            throw NoPermissionException(permission)
         }
     }
 }

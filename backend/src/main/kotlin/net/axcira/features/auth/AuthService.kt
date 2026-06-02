@@ -4,6 +4,7 @@ import de.mkammerer.argon2.Argon2Factory
 import kotlinx.coroutines.*
 import net.axcira.db.Role
 import net.axcira.db.Users
+import net.axcira.features.users.UserDTO
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -27,20 +28,22 @@ suspend fun <T> minWait(duration: Duration, block: suspend () -> T): T {
 
 class AuthService(private val database: Database) {
     private data class AuthUserCredential(
-        val id: UInt, val email: String, val passwordHash: String
+        val id: UInt, val email: String, val roleId: UInt, val passwordHash: String
     )
 
     suspend fun login(email: String, password: String): UserSession? = minWait(1.seconds) {
         val credential = database.dbQuery {
             (Users innerJoin Role).selectAll().where { Users.email eq email }.singleOrNull()?.let {
                 Pair(
-                    AuthUserCredential(it[Users.id].value, it[Users.email], it[Users.passwordHash]), it[Role.permissions]
+                    AuthUserCredential(it[Users.id].value, it[Users.email], it[Role.id].value, it[Users.passwordHash]), it[Role.permissions]
                 )
             } ?: return@dbQuery null
         } ?: return@minWait null
 
         val isValid = PasswordHasher.verifyPassword(password, credential.first.passwordHash)
-        return@minWait if (isValid) UserSession(credential.first.id, credential.second) else null
+        return@minWait if (isValid) UserSession(credential.first.let {
+            UserDTO(it.id, it.email, it.roleId)
+        }, credential.second) else null
     }
 }
 
