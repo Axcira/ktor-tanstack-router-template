@@ -44,7 +44,7 @@ function ArticleEditForm({article}: { article: ArticleDTO }) {
   const navigate = useNavigate();
   const articleId = article.id.toString();
   const {isAllowed, isLoading: isLoadingPermission} = useAuthorize({
-    type: "UpdateArticle", allowOthers: article.userId !== session?.user.id,
+    type: "UpdateArticle", allowOthers: article.userId !== session.user.id,
   })
 
   const initialValues: ArticleFormValues = {
