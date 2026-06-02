@@ -31,6 +31,12 @@ class PermissionService(val database: Database) {
         Role.selectAll().map { RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]) }
     }
 
+    suspend fun getRoleByName(name: String): RoleDTO? = database.dbQuery {
+        Role.selectAll().where { Role.name eq name }.firstOrNull()?.let {
+            RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions])
+        }
+    }
+
     suspend fun getRoleById(id: UInt): RoleDTO? = database.dbQuery {
         val role = Role.selectAll().where { Role.id eq id }.singleOrNull() ?: return@dbQuery null
         RoleDTO(role[Role.id].value, role[Role.name], role[Role.description], role[Role.permissions])

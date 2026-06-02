@@ -8,6 +8,8 @@ import net.axcira.features.auth.AuthService
 import net.axcira.features.permissions.PermissionService
 import net.axcira.features.users.UserService
 
+val isDevelopment = System.getProperty("io.ktor.development", "false") == "true"
+
 fun Application.main() {
     dependencies {
         provide<AuthService>(::AuthService)

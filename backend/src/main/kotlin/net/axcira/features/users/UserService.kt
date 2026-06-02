@@ -61,4 +61,11 @@ class UserService(val database: Database) {
                 .singleOrNull()
         }
     }
+
+    suspend fun findByEmail(email: String): UserDTO? {
+        return database.dbQuery {
+            Users.selectAll().where { Users.email eq email }.map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+                .singleOrNull()
+        }
+    }
 }

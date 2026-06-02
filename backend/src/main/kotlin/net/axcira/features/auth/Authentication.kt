@@ -9,6 +9,7 @@ import net.axcira.db.*
 import net.axcira.db.SessionsTable.sessionId
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.UserDTO
+import net.axcira.isDevelopment
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
@@ -47,7 +48,7 @@ fun Application.configureAuthentication() {
         cookie<UserSession>("user_session", DatabaseSessionStorage(database)) {
             cookie.path = "/"
             cookie.httpOnly = true
-            cookie.secure = (System.getenv("environment") ?: "development") == "production"
+            cookie.secure = !isDevelopment
         }
     }
     install(Authentication) {

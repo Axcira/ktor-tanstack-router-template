@@ -9,8 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import net.axcira.*
 import net.axcira.features.auth.UserSession
-import net.axcira.features.permissions.Permission
-import net.axcira.features.permissions.withPermission
+import net.axcira.features.permissions.*
 
 fun Application.articles() {
     val articleService: ArticleService by dependencies
@@ -62,10 +61,14 @@ fun Application.articles() {
              * OperationID: updateArticle
              */
             patch("/{id}") {
+                val session = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
                 val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                 val scheme = call.receive<UpdateArticleInput>()
                 val article = articleService.getById(id) ?: return@patch call.respond(HttpStatusCode.NotFound)
-                if (article.userId != call.principal<UserSession>()?.user?.id) return@patch call.respond(HttpStatusCode.Forbidden)
+
+                val requiredPermission = Permission.UpdateArticle(article.userId == session.user.id)
+                if (!session.permissions.satisfies(requiredPermission)) throw NoPermissionException(requiredPermission)
+
                 when (val updatedArticle = articleService.update(id, scheme)) {
                     is UpdateResult.Success -> call.respond(HttpStatusCode.OK, updatedArticle.value)
                     is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound)
@@ -79,9 +82,13 @@ fun Application.articles() {
              * OperationID: deleteArticle
              */
             delete("/{id}") {
+                val session = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
                 val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                 val article = articleService.getById(id) ?: return@delete call.respond(HttpStatusCode.NotFound)
-                if (article.userId != call.principal<UserSession>()?.user?.id) return@delete call.respond(HttpStatusCode.Forbidden)
+
+                val requiredPermission = Permission.DeleteArticle(article.userId == session.user.id)
+                if (!session.permissions.satisfies(requiredPermission)) throw NoPermissionException(requiredPermission)
+
                 articleService.delete(id)
                 call.respond(HttpStatusCode.NoContent)
             }
