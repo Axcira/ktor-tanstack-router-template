@@ -8,6 +8,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import net.axcira.UpdateResult
 import net.axcira.apiRouting
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.Permission
@@ -51,8 +52,10 @@ fun Application.users() {
                 patch("/update/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val user = call.receive<UpdateUserInput>()
-                    userService.update(id, user)
-                    call.respond(HttpStatusCode.NoContent)
+                    when (userService.update(id, user)) {
+                        is UpdateResult.Success, is UpdateResult.NotModified -> call.respond(HttpStatusCode.NoContent)
+                        is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound, "User not found")
+                    }
                 }
 
                 delete("/delete/{id}") {
