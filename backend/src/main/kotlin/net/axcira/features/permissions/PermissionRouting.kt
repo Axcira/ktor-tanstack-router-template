@@ -68,10 +68,22 @@ fun Application.permissions() {
                     }
                 }
 
+                //retunで抜けるのかthrowを使うのか　
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val fallbackRoleId = call.request.queryParameters["fallbackRoleId"]?.toUIntOrNull()
                         ?: throw IllegalArgumentException("fallbackRoleId is required")
+
+                    if(fallbackRoleId == id){
+                        call.respond(HttpStatusCode.BadRequest, "fallbackRoleId cannot be the same as the role to delete")
+                        return@delete
+                    }
+
+                    if(fallbackRoleId != null && !permissionService.exists(fallbackRoleId)){
+                        call.respond(HttpStatusCode.NotFound, "fallbackRoleId not found")
+                        return@delete
+                    }
+
                     permissionService.delete(id, fallbackRoleId)
                     call.respond(HttpStatusCode.NoContent)
                 }

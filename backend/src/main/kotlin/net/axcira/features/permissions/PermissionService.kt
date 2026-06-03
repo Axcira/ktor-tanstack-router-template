@@ -8,6 +8,7 @@ import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 
 @Serializable
@@ -76,8 +77,18 @@ class PermissionService(val database: Database) {
         } ?: UpdateResult.NotFound
     }
 
-    suspend fun delete(id: UInt, fallbackRoleId: UInt): Int = database.dbQuery {
-        Users.update({ Users.roleId eq id }) { it[roleId] = fallbackRoleId }
-        Role.deleteWhere { Role.id eq id }
+    suspend fun delete(id: UInt, fallbackRoleId: UInt): Int {
+        require(id != fallbackRoleId) { "Cannot fallback to the same role being deleted (id: $id)" }
+        return database.dbQuery {
+            Users.update({ Users.roleId eq id }) { it[roleId] = fallbackRoleId }
+            Role.deleteWhere { Role.id eq id }
+        }
+    }
+
+    fun exists(roleId: UInt): Boolean {
+        return transaction {
+            // RoleTableの中に、指定されたIDと一致するレコードが1件以上あるかチェック
+            Role.selectAll().where{ Role.id eq roleId }.count() > 0
+        }
     }
 }
