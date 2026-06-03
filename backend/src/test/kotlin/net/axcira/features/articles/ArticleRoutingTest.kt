@@ -81,12 +81,14 @@ class ArticleRoutingTest {
         client.patch("/api/articles/${createdArticle.id}") {
             contentType(ContentType.Application.Json)
             setBody(
-                UpdateArticleInput(
-                    "Updated Test Article", "This is an updated test article", body = """
-                        # Updated Test Article
-                        This is an updated test article for automatic testing.
-                    """.trimIndent(), tagList = listOf("updated", "test", "article", "kotlin")
-                )
+                """
+                    {
+                        "title": "Updated Test Article",
+                        "description": "This is an updated test article",
+                        "body": "This is an updated test article for automatic testing.",
+                        "tagList": ["updated", "test", "article", "kotlin"]
+                    }
+                """.trimIndent()
             )
         }.let {
             assertEquals(HttpStatusCode.OK, it.status)

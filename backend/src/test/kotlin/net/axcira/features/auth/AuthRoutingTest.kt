@@ -24,7 +24,7 @@ class AuthRoutingTest {
         }.let {
             assertEquals(HttpStatusCode.OK, it.status)
             val session = it.body<UserSession>()
-            assert(session.userId > 0u)
+            assert(session.user.id > 0u)
         }
 
         // Access to protected resources
