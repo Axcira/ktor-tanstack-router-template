@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Shield,
   Plus,
@@ -10,36 +11,27 @@ import {
   Loader2,
 } from "lucide-react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
-import type { Permission } from "@/api/generated/schemas/permission";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   useGetApiRoles,
-  usePostApiRoles,
-  usePatchApiRolesId,
   useDeleteApiRolesId,
   getGetApiRolesQueryKey,
 } from "@/api/generated/default/default";
 import { RoleCard } from "./RoleCard";
-import { RoleFormSheet } from "./RoleFormSheet";
 import { DeleteRoleDialog } from "./DeleteRoleDialog";
 
 export default function RolesPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: rolesResponse, isLoading } = useGetApiRoles();
   const roles = rolesResponse?.data || [];
 
-  const createRoleMutation = usePostApiRoles();
-  const updateRoleMutation = usePatchApiRolesId();
   const deleteRoleMutation = useDeleteApiRolesId();
-
-  const isSaving = createRoleMutation.isPending || updateRoleMutation.isPending;
   const isDeleting = deleteRoleMutation.isPending;
 
   const [search, setSearch] = useState("");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editingRole, setEditingRole] = useState<RoleDTO | null>(null);
   const [roleToDelete, setRoleToDelete] = useState<RoleDTO | null>(null);
 
   const [notification, setNotification] = useState<{
@@ -56,44 +48,14 @@ export default function RolesPage() {
   };
 
   const handleOpenCreate = () => {
-    setEditingRole(null);
-    setIsSheetOpen(true);
+    navigate({ to: "/permissions/roles/create" });
   };
 
   const handleOpenEdit = (role: RoleDTO) => {
-    setEditingRole(role);
-    setIsSheetOpen(true);
-  };
-
-  const handleSave = async (data: { name: string; description: string; permissions: Permission[] }) => {
-    try {
-      if (editingRole) {
-        await updateRoleMutation.mutateAsync({
-          id: String(editingRole.id),
-          data: {
-            name: data.name,
-            description: data.description,
-            permissions: data.permissions,
-          },
-        });
-        showNotification(`ロール「${data.name}」を更新しました。`);
-      } else {
-        await createRoleMutation.mutateAsync({
-          data: {
-            name: data.name,
-            description: data.description,
-            permissions: data.permissions,
-          },
-        });
-        showNotification(`ロール「${data.name}」を作成しました。`);
-      }
-
-      queryClient.invalidateQueries({ queryKey: getGetApiRolesQueryKey() });
-      setIsSheetOpen(false);
-    } catch (error) {
-      console.error(error);
-      showNotification("保存処理中にエラーが発生しました。", "error");
-    }
+    navigate({
+      to: "/permissions/roles/$roleId/edit",
+      params: { roleId: String(role.id) },
+    });
   };
 
   const executeDelete = async (fallbackRoleId: string) => {
@@ -198,21 +160,12 @@ export default function RolesPage() {
         </div>
       )}
 
-      <RoleFormSheet
-        open={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
-        editingRole={editingRole}
-        onSave={handleSave}
-        onValidationError={(msg) => showNotification(msg, "error")}
-        isSaving={isSaving}
-      />
-
       <DeleteRoleDialog
-        roleToDelete={roleToDelete}
-        onClose={() => setRoleToDelete(null)}
-        onConfirm={executeDelete}
-        roles={roles}
-        isDeleting={isDeleting}
+          roleToDelete={roleToDelete}
+          onClose={() => setRoleToDelete(null)}
+          onConfirm={executeDelete}
+          roles={roles}
+          isDeleting={isDeleting}
       />
     </div>
   );

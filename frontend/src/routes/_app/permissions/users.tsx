@@ -1,5 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import UsersPage from "@/features/users/components/UsersPage";
+import { createFileRoute, redirect, Outlet } from "@tanstack/react-router";
 import { checkPermission } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_app/permissions/users")({
@@ -10,5 +9,5 @@ export const Route = createFileRoute("/_app/permissions/users")({
       });
     }
   },
-  component: UsersPage,
+  component: () => <Outlet />,
 });

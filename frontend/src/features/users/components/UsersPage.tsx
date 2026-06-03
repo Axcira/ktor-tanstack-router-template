@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Users,
   Plus,
@@ -10,26 +11,21 @@ import {
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import {
   useGetApiUsers,
-  usePostApiUsersCreate,
-  usePatchApiUsersUpdateId,
   useDeleteApiUsersDeleteId,
   useGetApiRoles,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UsersTable } from "./UsersTable";
-import { UserFormSheet } from "./UserFormSheet";
 
 export default function UsersPage() {
+  const navigate = useNavigate();
   const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch } = useGetApiUsers();
   const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
 
-  const createUserMutation = usePostApiUsersCreate();
-  const updateUserMutation = usePatchApiUsersUpdateId();
   const deleteUserMutation = useDeleteApiUsersDeleteId();
 
-  const isSubmitting =
-    createUserMutation.isPending || updateUserMutation.isPending;
+  const isSubmitting = deleteUserMutation.isPending;
   const isLoading = isLoadingUsers || isLoadingRoles;
 
   // データ抽出
@@ -46,8 +42,6 @@ export default function UsersPage() {
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserDTO | null>(null);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -63,61 +57,14 @@ export default function UsersPage() {
   };
 
   const handleOpenCreate = () => {
-    setEditingUser(null);
-    setIsSheetOpen(true);
+    navigate({ to: "/permissions/users/create" });
   };
 
   const handleOpenEdit = (user: UserDTO) => {
-    setEditingUser(user);
-    setIsSheetOpen(true);
-  };
-
-  const handleSave = async (data: { email: string; password?: string; roleId: number }) => {
-    if (editingUser) {
-      try {
-        await updateUserMutation.mutateAsync({
-          id: String(editingUser.id),
-          data: {
-            email: data.email,
-            roleId: data.roleId,
-          },
-        });
-
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === editingUser.id
-              ? { ...u, email: data.email, roleId: data.roleId }
-              : u,
-          ),
-        );
-        showNotification(`ユーザー「${data.email}」の情報を更新しました。`);
-        setIsSheetOpen(false);
-        refetch();
-      } catch (error) {
-        console.error("Failed to update user:", error);
-        showNotification("ユーザーの更新に失敗しました。", "error");
-      }
-    } else {
-      try {
-        const response = await createUserMutation.mutateAsync({
-          data: {
-            email: data.email,
-            password: data.password || "",
-            roleId: data.roleId,
-          },
-        });
-
-        if (response.data) {
-          setUsers((prev) => [...prev, response.data]);
-          showNotification(`ユーザー「${data.email}」を作成しました。`);
-          setIsSheetOpen(false);
-          refetch();
-        }
-      } catch (error) {
-        console.error("Failed to create user:", error);
-        showNotification("ユーザーの作成に失敗しました。", "error");
-      }
-    }
+    navigate({
+      to: "/permissions/users/$userId/edit",
+      params: { userId: String(user.id) },
+    });
   };
 
   const handleDelete = async (userId: number, email: string) => {
@@ -191,7 +138,7 @@ export default function UsersPage() {
         <Button
           onClick={handleOpenCreate}
           className="w-full sm:w-auto gap-2 bg-primary text-primary-foreground shadow hover:opacity-90"
-          disabled={isLoading || isSubmitting || availableRoles.length === 0}
+          disabled={isLoading || availableRoles.length === 0}
         >
           <Plus className="h-4 w-4" />
           新規ユーザー招待
@@ -239,17 +186,6 @@ export default function UsersPage() {
         isSubmitting={isSubmitting}
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
-      />
-
-      <UserFormSheet
-        open={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
-        editingUser={editingUser}
-        availableRoles={availableRoles}
-        onSave={handleSave}
-        onValidationError={(msg) => showNotification(msg, "error")}
-        isSubmitting={isSubmitting}
-        isLoadingRoles={isLoadingRoles}
       />
     </div>
   );
