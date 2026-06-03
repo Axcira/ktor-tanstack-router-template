@@ -68,4 +68,9 @@ class UserService(val database: Database) {
                 .singleOrNull()
         }
     }
+
+
+    suspend fun getAllUsers(): List<UserDTO> = database.dbQuery {
+        Users.selectAll().map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+    }
 }

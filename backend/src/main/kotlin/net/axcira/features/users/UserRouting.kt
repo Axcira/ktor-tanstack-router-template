@@ -32,6 +32,12 @@ fun Application.users() {
         }
 
         authenticate {
+
+            get(){
+                val allUsers = userService.getAllUsers()
+                call.respond(allUsers)
+            }
+
             /**
              * Get current user
              *

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Mail,
@@ -9,8 +9,10 @@ import {
   Check,
   ShieldAlert,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
+import { useGetApiUsers } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,7 +25,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-// Mock roles for user assignment
+
 const availableRoles = [
   {
     id: 1,
@@ -51,22 +53,21 @@ const availableRoles = [
   },
 ];
 
-const initialUsers: UserDTO[] = [
-  { id: 1, email: "admin@example.com", roleId: 1 },
-  { id: 2, email: "editor@example.com", roleId: 2 },
-  { id: 3, email: "writer1@example.com", roleId: 3 },
-  { id: 4, email: "writer2@example.com", roleId: 3 },
-  { id: 5, email: "guest@example.com", roleId: 4 },
-];
-
 export default function UsersPage() {
-  const [users, setUsers] = useState<UserDTO[]>(initialUsers);
+  const { data: usersResponse, isLoading, isError } = useGetApiUsers();
+  const [users, setUsers] = useState<UserDTO[]>([]);
+
+  useEffect(() => {
+    if (usersResponse?.data) {
+      setUsers(usersResponse.data);
+    }
+  }, [usersResponse?.data]);
+
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserDTO | null>(null);
 
-  // Form states
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState(""); // Only for creation
   const [userRoleId, setUserRoleId] = useState<number>(3); // Default to Writer
@@ -88,14 +89,14 @@ export default function UsersPage() {
     setEditingUser(null);
     setUserEmail("");
     setUserPassword("");
-    setUserRoleId(3); // Default to Writer
+    setUserRoleId(3);
     setIsSheetOpen(true);
   };
 
   const handleOpenEdit = (user: UserDTO) => {
     setEditingUser(user);
     setUserEmail(user.email);
-    setUserPassword(""); // Don't show password
+    setUserPassword("");
     setUserRoleId(user.roleId || 4);
     setIsSheetOpen(true);
   };
@@ -105,7 +106,6 @@ export default function UsersPage() {
       showNotification("メールアドレスを入力してください。", "error");
       return;
     }
-    // Simple email regex validation
     if (!/\S+@\S+\.\S+/.test(userEmail)) {
       showNotification("有効なメールアドレス形式で入力してください。", "error");
       return;
@@ -117,7 +117,6 @@ export default function UsersPage() {
     }
 
     if (editingUser) {
-      // Edit mode
       setUsers((prev) =>
         prev.map((u) =>
           u.id === editingUser.id
@@ -127,7 +126,6 @@ export default function UsersPage() {
       );
       showNotification(`ユーザー「${userEmail}」の情報を更新しました。`);
     } else {
-      // Create mode
       const newUser: UserDTO = {
         id: users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1,
         email: userEmail,
@@ -165,9 +163,19 @@ export default function UsersPage() {
     return matchesSearch && matchesRole;
   });
 
+  if (isError) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto flex items-center justify-center h-[50vh]">
+        <div className="text-center space-y-4">
+          <ShieldAlert className="h-10 w-10 text-destructive mx-auto" />
+          <p className="text-muted-foreground">ユーザーの取得に失敗しました。</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Toast Notification */}
       {notification && (
         <div
           className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm animate-in fade-in slide-in-from-bottom-5 duration-300 ${
@@ -185,7 +193,6 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="text-2xl font-bold font-heading tracking-tight flex items-center gap-2">
@@ -199,13 +206,13 @@ export default function UsersPage() {
         <Button
           onClick={handleOpenCreate}
           className="w-full sm:w-auto gap-2 bg-primary text-primary-foreground shadow hover:opacity-90"
+          disabled={isLoading}
         >
           <Plus className="h-4 w-4" />
           新規ユーザー招待
         </Button>
       </div>
 
-      {/* Search & Filter Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card p-4 rounded-xl border">
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
           <div className="relative w-full sm:w-80">
@@ -215,11 +222,13 @@ export default function UsersPage() {
               className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
+            disabled={isLoading}
             className="flex h-9 w-full sm:w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-muted-foreground dark:bg-background"
           >
             <option value="all">すべてのロール</option>
@@ -237,93 +246,98 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Users List Card */}
       <Card className="border border-border/80 shadow-sm overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b bg-muted/40 text-muted-foreground font-medium">
-                  <th className="p-4 w-16 text-center">ID</th>
-                  <th className="p-4">ユーザー</th>
-                  <th className="p-4">アサイン済ロール</th>
-                  <th className="p-4 w-28 text-center">操作</th>
-                </tr>
+              <tr className="border-b bg-muted/40 text-muted-foreground font-medium">
+                <th className="p-4 w-16 text-center">ID</th>
+                <th className="p-4">ユーザー</th>
+                <th className="p-4">アサイン済ロール</th>
+                <th className="p-4 w-28 text-center">操作</th>
+              </tr>
               </thead>
               <tbody className="divide-y">
-                {filteredUsers.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="p-8 text-center text-muted-foreground italic bg-background/50"
-                    >
-                      ユーザーが見つかりません。
-                    </td>
-                  </tr>
-                ) : (
-                  filteredUsers.map((user) => {
-                    const roleInfo = getRoleInfo(user.roleId);
-                    const initialLetter = user.email.charAt(0).toUpperCase();
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="p-12 text-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mx-auto" />
+                    <p className="text-muted-foreground mt-2">読み込み中...</p>
+                  </td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="p-8 text-center text-muted-foreground italic bg-background/50"
+                  >
+                    ユーザーが見つかりません。
+                  </td>
+                </tr>
+              ) : (
+                filteredUsers.map((user) => {
+                  const roleInfo = getRoleInfo(user.roleId);
+                  const initialLetter = user.email.charAt(0).toUpperCase();
 
-                    return (
-                      <tr
-                        key={user.id}
-                        className="hover:bg-muted/20 transition-colors"
-                      >
-                        <td className="p-4 text-center font-mono text-muted-foreground">
-                          {user.id}
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/10 flex items-center justify-center font-semibold text-primary">
-                              {initialLetter}
-                            </div>
-                            <div className="flex flex-col">
+                  return (
+                    <tr
+                      key={user.id}
+                      className="hover:bg-muted/20 transition-colors"
+                    >
+                      <td className="p-4 text-center font-mono text-muted-foreground">
+                        {user.id}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/10 flex items-center justify-center font-semibold text-primary">
+                            {initialLetter}
+                          </div>
+                          <div className="flex flex-col">
                               <span className="font-semibold text-foreground flex items-center gap-1.5">
                                 <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                                 {user.email}
                               </span>
-                            </div>
                           </div>
-                        </td>
-                        <td className="p-4">
+                        </div>
+                      </td>
+                      <td className="p-4">
                           <span
                             className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold border ${roleInfo.badgeClass}`}
                           >
                             {roleInfo.name}
                           </span>
-                        </td>
-                        <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-muted"
-                              onClick={() => handleOpenEdit(user)}
-                            >
-                              <Edit2 className="h-3.5 w-3.5 text-foreground" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-                              onClick={() => handleDelete(user.id, user.email)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
+                      </td>
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-muted"
+                            onClick={() => handleOpenEdit(user)}
+                          >
+                            <Edit2 className="h-3.5 w-3.5 text-foreground" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => handleDelete(user.id, user.email)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
 
-      {/* Create / Edit Drawer */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent
           side="right"
@@ -339,7 +353,6 @@ export default function UsersPage() {
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto py-6 space-y-6 pr-1">
-            {/* Account Settings */}
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="user-email">
@@ -389,7 +402,6 @@ export default function UsersPage() {
             </div>
           </div>
 
-          {/* Footer Actions */}
           <div className="border-t pt-4 mt-auto flex items-center justify-end gap-3 bg-card pb-2">
             <Button variant="outline" onClick={() => setIsSheetOpen(false)}>
               キャンセル
