@@ -44,6 +44,20 @@ fun Application.users() {
                 call.respond(HttpStatusCode.Created, createdUser)
             }
 
+            patch ("/update/{id}") {
+                val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                val user = call.receive<UpdateUserInput>()
+                userService.update(id, user)
+                call.respond(HttpStatusCode.NoContent)
+            }
+
+            delete ("/delete/{id}") {
+                val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                userService.delete(id)
+                call.respond(HttpStatusCode.NoContent)
+            }
+
+
             /**
              * Get current user
              *

@@ -12,7 +12,12 @@ import {
   Loader2,
 } from "lucide-react";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
-import { useGetApiUsers, usePostApiUsersCreate } from "@/api/generated/default/default.ts";
+import {
+  useGetApiUsers,
+  usePostApiUsersCreate,
+  usePatchApiUsersUpdateId,
+  useDeleteApiUsersDeleteId,
+} from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,10 +58,16 @@ const availableRoles = [
 ];
 
 export default function UsersPage() {
-  const { data: usersResponse, isLoading, isError } = useGetApiUsers();
+  const { data: usersResponse, isLoading, isError, refetch } = useGetApiUsers();
   const createUserMutation = usePostApiUsersCreate();
+  const updateUserMutation = usePatchApiUsersUpdateId();
+  const deleteUserMutation = useDeleteApiUsersDeleteId();
+
+  const isSubmitting =
+    createUserMutation.isPending || updateUserMutation.isPending;
 
   const [users, setUsers] = useState<UserDTO[]>([]);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     if (usersResponse?.data) {
@@ -118,15 +129,29 @@ export default function UsersPage() {
     }
 
     if (editingUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editingUser.id
-            ? { ...u, email: userEmail, roleId: userRoleId }
-            : u,
-        ),
-      );
-      showNotification(`ユーザー「${userEmail}」の情報を更新しました。`);
-      setIsSheetOpen(false);
+      try {
+        await updateUserMutation.mutateAsync({
+          id: String(editingUser.id),
+          data: {
+            email: userEmail,
+            roleId: userRoleId,
+          },
+        });
+
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === editingUser.id
+              ? { ...u, email: userEmail, roleId: userRoleId }
+              : u,
+          ),
+        );
+        showNotification(`ユーザー「${userEmail}」の情報を更新しました。`);
+        setIsSheetOpen(false);
+        refetch();
+      } catch (error) {
+        console.error("Failed to update user:", error);
+        showNotification("ユーザーの更新に失敗しました。", "error");
+      }
     } else {
       try {
         const response = await createUserMutation.mutateAsync({
@@ -141,6 +166,7 @@ export default function UsersPage() {
           setUsers((prev) => [...prev, response.data]);
           showNotification(`ユーザー「${userEmail}」を作成しました。`);
           setIsSheetOpen(false);
+          refetch();
         }
       } catch (error) {
         console.error("Failed to create user:", error);
@@ -149,10 +175,20 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = (userId: number, email: string) => {
+  const handleDelete = async (userId: number, email: string) => {
     if (confirm(`ユーザー「${email}」を削除してもよろしいですか？`)) {
-      setUsers((prev) => prev.filter((u) => u.id !== userId));
-      showNotification(`ユーザー「${email}」を削除しました。`, "info");
+      setDeletingId(userId);
+      try {
+        await deleteUserMutation.mutateAsync({ id: String(userId) });
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+        showNotification(`ユーザー「${email}」を削除しました。`, "info");
+        refetch();
+      } catch (error) {
+        console.error("Failed to delete user:", error);
+        showNotification("ユーザーの削除に失敗しました。", "error");
+      } finally {
+        setDeletingId(null);
+      }
     }
   };
 
@@ -179,7 +215,9 @@ export default function UsersPage() {
       <div className="p-6 max-w-7xl mx-auto flex items-center justify-center h-[50vh]">
         <div className="text-center space-y-4">
           <ShieldAlert className="h-10 w-10 text-destructive mx-auto" />
-          <p className="text-muted-foreground">ユーザーの取得に失敗しました。</p>
+          <p className="text-muted-foreground">
+            ユーザーの取得に失敗しました。
+          </p>
         </div>
       </div>
     );
@@ -217,7 +255,7 @@ export default function UsersPage() {
         <Button
           onClick={handleOpenCreate}
           className="w-full sm:w-auto gap-2 bg-primary text-primary-foreground shadow hover:opacity-90"
-          disabled={isLoading}
+          disabled={isLoading || isSubmitting}
         >
           <Plus className="h-4 w-4" />
           新規ユーザー招待
@@ -274,7 +312,9 @@ export default function UsersPage() {
                 <tr>
                   <td colSpan={4} className="p-12 text-center">
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mx-auto" />
-                    <p className="text-muted-foreground mt-2">読み込み中...</p>
+                    <p className="text-muted-foreground mt-2">
+                      読み込み中...
+                    </p>
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
@@ -290,6 +330,7 @@ export default function UsersPage() {
                 filteredUsers.map((user) => {
                   const roleInfo = getRoleInfo(user.roleId);
                   const initialLetter = user.email.charAt(0).toUpperCase();
+                  const isDeleting = deletingId === user.id;
 
                   return (
                     <tr
@@ -326,6 +367,7 @@ export default function UsersPage() {
                             size="icon"
                             className="h-8 w-8 hover:bg-muted"
                             onClick={() => handleOpenEdit(user)}
+                            disabled={isDeleting || isSubmitting}
                           >
                             <Edit2 className="h-3.5 w-3.5 text-foreground" />
                           </Button>
@@ -334,8 +376,13 @@ export default function UsersPage() {
                             size="icon"
                             className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => handleDelete(user.id, user.email)}
+                            disabled={isDeleting || isSubmitting}
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            {isDeleting ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-destructive" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
                           </Button>
                         </div>
                       </td>
@@ -375,7 +422,7 @@ export default function UsersPage() {
                   placeholder="例: user@example.com"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
-                  disabled={createUserMutation.isPending}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -390,7 +437,7 @@ export default function UsersPage() {
                     placeholder="パスワードを入力してください"
                     value={userPassword}
                     onChange={(e) => setUserPassword(e.target.value)}
-                    disabled={createUserMutation.isPending}
+                    disabled={isSubmitting}
                   />
                 </div>
               )}
@@ -403,7 +450,7 @@ export default function UsersPage() {
                   id="user-role"
                   value={userRoleId}
                   onChange={(e) => setUserRoleId(Number(e.target.value))}
-                  disabled={createUserMutation.isPending}
+                  disabled={isSubmitting}
                   className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground dark:bg-background disabled:opacity-50"
                 >
                   {availableRoles.map((role) => (
@@ -420,16 +467,18 @@ export default function UsersPage() {
             <Button
               variant="outline"
               onClick={() => setIsSheetOpen(false)}
-              disabled={createUserMutation.isPending}
+              disabled={isSubmitting}
             >
               キャンセル
             </Button>
             <Button
               onClick={handleSave}
               className="bg-primary text-primary-foreground hover:opacity-90"
-              disabled={createUserMutation.isPending}
+              disabled={isSubmitting}
             >
-              {createUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               保存
             </Button>
           </div>
