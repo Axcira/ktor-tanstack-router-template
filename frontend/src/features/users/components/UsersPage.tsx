@@ -12,7 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
-import { useGetApiUsers } from "@/api/generated/default/default.ts";
+import { useGetApiUsers, usePostApiUsersCreate } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-
 
 const availableRoles = [
   {
@@ -55,6 +54,8 @@ const availableRoles = [
 
 export default function UsersPage() {
   const { data: usersResponse, isLoading, isError } = useGetApiUsers();
+  const createUserMutation = usePostApiUsersCreate();
+
   const [users, setUsers] = useState<UserDTO[]>([]);
 
   useEffect(() => {
@@ -69,8 +70,8 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<UserDTO | null>(null);
 
   const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState(""); // Only for creation
-  const [userRoleId, setUserRoleId] = useState<number>(3); // Default to Writer
+  const [userPassword, setUserPassword] = useState("");
+  const [userRoleId, setUserRoleId] = useState<number>(3);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -101,7 +102,7 @@ export default function UsersPage() {
     setIsSheetOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!userEmail.trim()) {
       showNotification("メールアドレスを入力してください。", "error");
       return;
@@ -125,17 +126,27 @@ export default function UsersPage() {
         ),
       );
       showNotification(`ユーザー「${userEmail}」の情報を更新しました。`);
+      setIsSheetOpen(false);
     } else {
-      const newUser: UserDTO = {
-        id: users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1,
-        email: userEmail,
-        roleId: userRoleId,
-      };
-      setUsers((prev) => [...prev, newUser]);
-      showNotification(`ユーザー「${userEmail}」を作成しました。`);
-    }
+      try {
+        const response = await createUserMutation.mutateAsync({
+          data: {
+            email: userEmail,
+            password: userPassword,
+            roleId: userRoleId,
+          },
+        });
 
-    setIsSheetOpen(false);
+        if (response.data) {
+          setUsers((prev) => [...prev, response.data]);
+          showNotification(`ユーザー「${userEmail}」を作成しました。`);
+          setIsSheetOpen(false);
+        }
+      } catch (error) {
+        console.error("Failed to create user:", error);
+        showNotification("ユーザーの作成に失敗しました。", "error");
+      }
+    }
   };
 
   const handleDelete = (userId: number, email: string) => {
@@ -364,6 +375,7 @@ export default function UsersPage() {
                   placeholder="例: user@example.com"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
+                  disabled={createUserMutation.isPending}
                 />
               </div>
 
@@ -378,6 +390,7 @@ export default function UsersPage() {
                     placeholder="パスワードを入力してください"
                     value={userPassword}
                     onChange={(e) => setUserPassword(e.target.value)}
+                    disabled={createUserMutation.isPending}
                   />
                 </div>
               )}
@@ -390,7 +403,8 @@ export default function UsersPage() {
                   id="user-role"
                   value={userRoleId}
                   onChange={(e) => setUserRoleId(Number(e.target.value))}
-                  className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground dark:bg-background"
+                  disabled={createUserMutation.isPending}
+                  className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground dark:bg-background disabled:opacity-50"
                 >
                   {availableRoles.map((role) => (
                     <option key={role.id} value={role.id}>
@@ -403,13 +417,19 @@ export default function UsersPage() {
           </div>
 
           <div className="border-t pt-4 mt-auto flex items-center justify-end gap-3 bg-card pb-2">
-            <Button variant="outline" onClick={() => setIsSheetOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsSheetOpen(false)}
+              disabled={createUserMutation.isPending}
+            >
               キャンセル
             </Button>
             <Button
               onClick={handleSave}
               className="bg-primary text-primary-foreground hover:opacity-90"
+              disabled={createUserMutation.isPending}
             >
+              {createUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               保存
             </Button>
           </div>

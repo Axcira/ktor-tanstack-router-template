@@ -38,6 +38,12 @@ fun Application.users() {
                 call.respond(allUsers)
             }
 
+            post("/create"){
+                val user = call.receive<CreateUserInput>()
+                val createdUser = userService.createUser(user)
+                call.respond(HttpStatusCode.Created, createdUser)
+            }
+
             /**
              * Get current user
              *
