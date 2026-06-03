@@ -36,7 +36,6 @@ export function DeleteRoleDialog({
 }: DeleteRoleDialogProps) {
   const [selectedFallbackId, setSelectedFallbackId] = useState<string>("4");
 
-  // Reset fallback ID when a different role is selected for deletion
   useEffect(() => {
     if (roleToDelete) {
       // Set to "4" as default, or fallback to the first available non-deleted role
