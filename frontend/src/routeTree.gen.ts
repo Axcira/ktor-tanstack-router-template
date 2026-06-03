@@ -23,6 +23,8 @@ import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground
 import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
 import { Route as AppPlaygroundNav111RouteImport } from './routes/_app/playground/nav1-1-1'
 import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
+import { Route as AppPermissionUsersRouteImport } from './routes/_app/permission/users'
+import { Route as AppPermissionRolesRouteImport } from './routes/_app/permission/roles'
 import { Route as AppArticlesCreateRouteImport } from './routes/_app/articles/create'
 import { Route as AppArticlesArticleIdIndexRouteImport } from './routes/_app/articles/$articleId.index'
 import { Route as AppArticlesArticleIdEditRouteImport } from './routes/_app/articles/$articleId.edit'
@@ -96,6 +98,16 @@ const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
   path: '/playground/nav1-1',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPermissionUsersRoute = AppPermissionUsersRouteImport.update({
+  id: '/permission/users',
+  path: '/permission/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPermissionRolesRoute = AppPermissionRolesRouteImport.update({
+  id: '/permission/roles',
+  path: '/permission/roles',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppArticlesCreateRoute = AppArticlesCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -124,6 +136,8 @@ export interface FileRoutesByFullPath {
   '/permissions': typeof AppPermissionsRoute
   '/settings': typeof AppSettingsRoute
   '/articles/create': typeof AppArticlesCreateRoute
+  '/permission/roles': typeof AppPermissionRolesRoute
+  '/permission/users': typeof AppPermissionUsersRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
@@ -141,6 +155,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/articles/create': typeof AppArticlesCreateRoute
+  '/permission/roles': typeof AppPermissionRolesRoute
+  '/permission/users': typeof AppPermissionUsersRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
@@ -161,6 +177,8 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/articles/create': typeof AppArticlesCreateRoute
+  '/_app/permission/roles': typeof AppPermissionRolesRoute
+  '/_app/permission/users': typeof AppPermissionUsersRoute
   '/_app/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/_app/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/_app/playground/nav1-1-2': typeof AppPlaygroundNav112Route
@@ -181,6 +199,8 @@ export interface FileRouteTypes {
     | '/permissions'
     | '/settings'
     | '/articles/create'
+    | '/permission/roles'
+    | '/permission/users'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
@@ -198,6 +218,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/articles/create'
+    | '/permission/roles'
+    | '/permission/users'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
@@ -217,6 +239,8 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/'
     | '/_app/articles/create'
+    | '/_app/permission/roles'
+    | '/_app/permission/users'
     | '/_app/playground/nav1-1'
     | '/_app/playground/nav1-1-1'
     | '/_app/playground/nav1-1-2'
@@ -333,6 +357,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlaygroundNav11RouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/permission/users': {
+      id: '/_app/permission/users'
+      path: '/permission/users'
+      fullPath: '/permission/users'
+      preLoaderRoute: typeof AppPermissionUsersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/permission/roles': {
+      id: '/_app/permission/roles'
+      path: '/permission/roles'
+      fullPath: '/permission/roles'
+      preLoaderRoute: typeof AppPermissionRolesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/articles/create': {
       id: '/_app/articles/create'
       path: '/create'
@@ -381,6 +419,8 @@ interface AppRouteChildren {
   AppPermissionsRoute: typeof AppPermissionsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppPermissionRolesRoute: typeof AppPermissionRolesRoute
+  AppPermissionUsersRoute: typeof AppPermissionUsersRoute
   AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
   AppPlaygroundNav111Route: typeof AppPlaygroundNav111Route
   AppPlaygroundNav112Route: typeof AppPlaygroundNav112Route
@@ -393,6 +433,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppPermissionsRoute: AppPermissionsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
+  AppPermissionRolesRoute: AppPermissionRolesRoute,
+  AppPermissionUsersRoute: AppPermissionUsersRoute,
   AppPlaygroundNav11Route: AppPlaygroundNav11Route,
   AppPlaygroundNav111Route: AppPlaygroundNav111Route,
   AppPlaygroundNav112Route: AppPlaygroundNav112Route,
