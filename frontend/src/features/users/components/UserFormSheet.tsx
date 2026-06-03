@@ -25,15 +25,15 @@ interface UserFormSheetProps {
 }
 
 export function UserFormSheet({
-  open,
-  onOpenChange,
-  editingUser,
-  availableRoles,
-  onSave,
-  onValidationError,
-  isSubmitting,
-  isLoadingRoles,
-}: UserFormSheetProps) {
+                                open,
+                                onOpenChange,
+                                editingUser,
+                                availableRoles,
+                                onSave,
+                                onValidationError,
+                                isSubmitting,
+                                isLoadingRoles,
+                              }: UserFormSheetProps) {
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [userRoleId, setUserRoleId] = useState<number>(0);
@@ -54,7 +54,8 @@ export function UserFormSheet({
         setUserRoleId(defaultRole);
       }
     }
-  }, [open, editingUser, availableRoles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleSaveClick = () => {
     if (!userEmail.trim()) {
