@@ -8,7 +8,6 @@ import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 
 @Serializable
@@ -85,9 +84,8 @@ class PermissionService(val database: Database) {
         }
     }
 
-    fun exists(roleId: UInt): Boolean {
-        return transaction {
-            // RoleTableの中に、指定されたIDと一致するレコードが1件以上あるかチェック
+    suspend fun exists(roleId: UInt): Boolean {
+        return database.dbQuery {
             Role.selectAll().where{ Role.id eq roleId }.count() > 0
         }
     }
