@@ -23,8 +23,8 @@ import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground
 import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
 import { Route as AppPlaygroundNav111RouteImport } from './routes/_app/playground/nav1-1-1'
 import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
-import { Route as AppPermissionUsersRouteImport } from './routes/_app/permission/users'
-import { Route as AppPermissionRolesRouteImport } from './routes/_app/permission/roles'
+import { Route as AppPermissionsUsersRouteImport } from './routes/_app/permissions/users'
+import { Route as AppPermissionsRolesRouteImport } from './routes/_app/permissions/roles'
 import { Route as AppArticlesCreateRouteImport } from './routes/_app/articles/create'
 import { Route as AppArticlesArticleIdIndexRouteImport } from './routes/_app/articles/$articleId.index'
 import { Route as AppArticlesArticleIdEditRouteImport } from './routes/_app/articles/$articleId.edit'
@@ -98,15 +98,15 @@ const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
   path: '/playground/nav1-1',
   getParentRoute: () => AppRoute,
 } as any)
-const AppPermissionUsersRoute = AppPermissionUsersRouteImport.update({
-  id: '/permission/users',
-  path: '/permission/users',
-  getParentRoute: () => AppRoute,
+const AppPermissionsUsersRoute = AppPermissionsUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppPermissionsRoute,
 } as any)
-const AppPermissionRolesRoute = AppPermissionRolesRouteImport.update({
-  id: '/permission/roles',
-  path: '/permission/roles',
-  getParentRoute: () => AppRoute,
+const AppPermissionsRolesRoute = AppPermissionsRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AppPermissionsRoute,
 } as any)
 const AppArticlesCreateRoute = AppArticlesCreateRouteImport.update({
   id: '/create',
@@ -133,11 +133,11 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/articles': typeof AppArticlesRouteWithChildren
   '/documentation': typeof AppDocumentationRoute
-  '/permissions': typeof AppPermissionsRoute
+  '/permissions': typeof AppPermissionsRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/articles/create': typeof AppArticlesCreateRoute
-  '/permission/roles': typeof AppPermissionRolesRoute
-  '/permission/users': typeof AppPermissionUsersRoute
+  '/permissions/roles': typeof AppPermissionsRolesRoute
+  '/permissions/users': typeof AppPermissionsUsersRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
@@ -151,12 +151,12 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/documentation': typeof AppDocumentationRoute
-  '/permissions': typeof AppPermissionsRoute
+  '/permissions': typeof AppPermissionsRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/articles/create': typeof AppArticlesCreateRoute
-  '/permission/roles': typeof AppPermissionRolesRoute
-  '/permission/users': typeof AppPermissionUsersRoute
+  '/permissions/roles': typeof AppPermissionsRolesRoute
+  '/permissions/users': typeof AppPermissionsUsersRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
@@ -173,12 +173,12 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/articles': typeof AppArticlesRouteWithChildren
   '/_app/documentation': typeof AppDocumentationRoute
-  '/_app/permissions': typeof AppPermissionsRoute
+  '/_app/permissions': typeof AppPermissionsRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/articles/create': typeof AppArticlesCreateRoute
-  '/_app/permission/roles': typeof AppPermissionRolesRoute
-  '/_app/permission/users': typeof AppPermissionUsersRoute
+  '/_app/permissions/roles': typeof AppPermissionsRolesRoute
+  '/_app/permissions/users': typeof AppPermissionsUsersRoute
   '/_app/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/_app/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/_app/playground/nav1-1-2': typeof AppPlaygroundNav112Route
@@ -199,8 +199,8 @@ export interface FileRouteTypes {
     | '/permissions'
     | '/settings'
     | '/articles/create'
-    | '/permission/roles'
-    | '/permission/users'
+    | '/permissions/roles'
+    | '/permissions/users'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
@@ -218,8 +218,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/articles/create'
-    | '/permission/roles'
-    | '/permission/users'
+    | '/permissions/roles'
+    | '/permissions/users'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
@@ -239,8 +239,8 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/'
     | '/_app/articles/create'
-    | '/_app/permission/roles'
-    | '/_app/permission/users'
+    | '/_app/permissions/roles'
+    | '/_app/permissions/users'
     | '/_app/playground/nav1-1'
     | '/_app/playground/nav1-1-1'
     | '/_app/playground/nav1-1-2'
@@ -357,19 +357,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlaygroundNav11RouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/permission/users': {
-      id: '/_app/permission/users'
-      path: '/permission/users'
-      fullPath: '/permission/users'
-      preLoaderRoute: typeof AppPermissionUsersRouteImport
-      parentRoute: typeof AppRoute
+    '/_app/permissions/users': {
+      id: '/_app/permissions/users'
+      path: '/users'
+      fullPath: '/permissions/users'
+      preLoaderRoute: typeof AppPermissionsUsersRouteImport
+      parentRoute: typeof AppPermissionsRoute
     }
-    '/_app/permission/roles': {
-      id: '/_app/permission/roles'
-      path: '/permission/roles'
-      fullPath: '/permission/roles'
-      preLoaderRoute: typeof AppPermissionRolesRouteImport
-      parentRoute: typeof AppRoute
+    '/_app/permissions/roles': {
+      id: '/_app/permissions/roles'
+      path: '/roles'
+      fullPath: '/permissions/roles'
+      preLoaderRoute: typeof AppPermissionsRolesRouteImport
+      parentRoute: typeof AppPermissionsRoute
     }
     '/_app/articles/create': {
       id: '/_app/articles/create'
@@ -413,14 +413,26 @@ const AppArticlesRouteWithChildren = AppArticlesRoute._addFileChildren(
   AppArticlesRouteChildren,
 )
 
+interface AppPermissionsRouteChildren {
+  AppPermissionsRolesRoute: typeof AppPermissionsRolesRoute
+  AppPermissionsUsersRoute: typeof AppPermissionsUsersRoute
+}
+
+const AppPermissionsRouteChildren: AppPermissionsRouteChildren = {
+  AppPermissionsRolesRoute: AppPermissionsRolesRoute,
+  AppPermissionsUsersRoute: AppPermissionsUsersRoute,
+}
+
+const AppPermissionsRouteWithChildren = AppPermissionsRoute._addFileChildren(
+  AppPermissionsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppArticlesRoute: typeof AppArticlesRouteWithChildren
   AppDocumentationRoute: typeof AppDocumentationRoute
-  AppPermissionsRoute: typeof AppPermissionsRoute
+  AppPermissionsRoute: typeof AppPermissionsRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
-  AppPermissionRolesRoute: typeof AppPermissionRolesRoute
-  AppPermissionUsersRoute: typeof AppPermissionUsersRoute
   AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
   AppPlaygroundNav111Route: typeof AppPlaygroundNav111Route
   AppPlaygroundNav112Route: typeof AppPlaygroundNav112Route
@@ -430,11 +442,9 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppArticlesRoute: AppArticlesRouteWithChildren,
   AppDocumentationRoute: AppDocumentationRoute,
-  AppPermissionsRoute: AppPermissionsRoute,
+  AppPermissionsRoute: AppPermissionsRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
-  AppPermissionRolesRoute: AppPermissionRolesRoute,
-  AppPermissionUsersRoute: AppPermissionUsersRoute,
   AppPlaygroundNav11Route: AppPlaygroundNav11Route,
   AppPlaygroundNav111Route: AppPlaygroundNav111Route,
   AppPlaygroundNav112Route: AppPlaygroundNav112Route,
