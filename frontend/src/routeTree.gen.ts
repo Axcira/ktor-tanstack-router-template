@@ -15,9 +15,9 @@ import { Route as HeroRouteImport } from './routes/hero'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
-import { Route as AppPermissionsRouteImport } from './routes/_app/permissions'
 import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
+import { Route as AppPermissionsIndexRouteImport } from './routes/_app/permissions/index'
 import { Route as AppArticlesIndexRouteImport } from './routes/_app/articles/index'
 import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground/nav1-2'
 import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
@@ -58,11 +58,6 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
-const AppPermissionsRoute = AppPermissionsRouteImport.update({
-  id: '/permissions',
-  path: '/permissions',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDocumentationRoute = AppDocumentationRouteImport.update({
   id: '/documentation',
   path: '/documentation',
@@ -71,6 +66,11 @@ const AppDocumentationRoute = AppDocumentationRouteImport.update({
 const AppArticlesRoute = AppArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPermissionsIndexRoute = AppPermissionsIndexRouteImport.update({
+  id: '/permissions/',
+  path: '/permissions/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppArticlesIndexRoute = AppArticlesIndexRouteImport.update({
@@ -99,14 +99,14 @@ const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 const AppPermissionsUsersRoute = AppPermissionsUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AppPermissionsRoute,
+  id: '/permissions/users',
+  path: '/permissions/users',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppPermissionsRolesRoute = AppPermissionsRolesRouteImport.update({
-  id: '/roles',
-  path: '/roles',
-  getParentRoute: () => AppPermissionsRoute,
+  id: '/permissions/roles',
+  path: '/permissions/roles',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppArticlesCreateRoute = AppArticlesCreateRouteImport.update({
   id: '/create',
@@ -133,7 +133,6 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/articles': typeof AppArticlesRouteWithChildren
   '/documentation': typeof AppDocumentationRoute
-  '/permissions': typeof AppPermissionsRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/articles/create': typeof AppArticlesCreateRoute
   '/permissions/roles': typeof AppPermissionsRolesRoute
@@ -143,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
   '/articles/': typeof AppArticlesIndexRoute
+  '/permissions/': typeof AppPermissionsIndexRoute
   '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/articles/$articleId/': typeof AppArticlesArticleIdIndexRoute
 }
@@ -151,7 +151,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/documentation': typeof AppDocumentationRoute
-  '/permissions': typeof AppPermissionsRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/articles/create': typeof AppArticlesCreateRoute
@@ -162,6 +161,7 @@ export interface FileRoutesByTo {
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
   '/articles': typeof AppArticlesIndexRoute
+  '/permissions': typeof AppPermissionsIndexRoute
   '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/articles/$articleId': typeof AppArticlesArticleIdIndexRoute
 }
@@ -173,7 +173,6 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/articles': typeof AppArticlesRouteWithChildren
   '/_app/documentation': typeof AppDocumentationRoute
-  '/_app/permissions': typeof AppPermissionsRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/articles/create': typeof AppArticlesCreateRoute
@@ -184,6 +183,7 @@ export interface FileRoutesById {
   '/_app/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/_app/playground/nav1-2': typeof AppPlaygroundNav12Route
   '/_app/articles/': typeof AppArticlesIndexRoute
+  '/_app/permissions/': typeof AppPermissionsIndexRoute
   '/_app/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/_app/articles/$articleId/': typeof AppArticlesArticleIdIndexRoute
 }
@@ -196,7 +196,6 @@ export interface FileRouteTypes {
     | '/register'
     | '/articles'
     | '/documentation'
-    | '/permissions'
     | '/settings'
     | '/articles/create'
     | '/permissions/roles'
@@ -206,6 +205,7 @@ export interface FileRouteTypes {
     | '/playground/nav1-1-2'
     | '/playground/nav1-2'
     | '/articles/'
+    | '/permissions/'
     | '/articles/$articleId/edit'
     | '/articles/$articleId/'
   fileRoutesByTo: FileRoutesByTo
@@ -214,7 +214,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/documentation'
-    | '/permissions'
     | '/settings'
     | '/'
     | '/articles/create'
@@ -225,6 +224,7 @@ export interface FileRouteTypes {
     | '/playground/nav1-1-2'
     | '/playground/nav1-2'
     | '/articles'
+    | '/permissions'
     | '/articles/$articleId/edit'
     | '/articles/$articleId'
   id:
@@ -235,7 +235,6 @@ export interface FileRouteTypes {
     | '/register'
     | '/_app/articles'
     | '/_app/documentation'
-    | '/_app/permissions'
     | '/_app/settings'
     | '/_app/'
     | '/_app/articles/create'
@@ -246,6 +245,7 @@ export interface FileRouteTypes {
     | '/_app/playground/nav1-1-2'
     | '/_app/playground/nav1-2'
     | '/_app/articles/'
+    | '/_app/permissions/'
     | '/_app/articles/$articleId/edit'
     | '/_app/articles/$articleId/'
   fileRoutesById: FileRoutesById
@@ -301,13 +301,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/permissions': {
-      id: '/_app/permissions'
-      path: '/permissions'
-      fullPath: '/permissions'
-      preLoaderRoute: typeof AppPermissionsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/documentation': {
       id: '/_app/documentation'
       path: '/documentation'
@@ -320,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/articles'
       fullPath: '/articles'
       preLoaderRoute: typeof AppArticlesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/permissions/': {
+      id: '/_app/permissions/'
+      path: '/permissions'
+      fullPath: '/permissions/'
+      preLoaderRoute: typeof AppPermissionsIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/articles/': {
@@ -359,17 +359,17 @@ declare module '@tanstack/react-router' {
     }
     '/_app/permissions/users': {
       id: '/_app/permissions/users'
-      path: '/users'
+      path: '/permissions/users'
       fullPath: '/permissions/users'
       preLoaderRoute: typeof AppPermissionsUsersRouteImport
-      parentRoute: typeof AppPermissionsRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/permissions/roles': {
       id: '/_app/permissions/roles'
-      path: '/roles'
+      path: '/permissions/roles'
       fullPath: '/permissions/roles'
       preLoaderRoute: typeof AppPermissionsRolesRouteImport
-      parentRoute: typeof AppPermissionsRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/articles/create': {
       id: '/_app/articles/create'
@@ -413,42 +413,32 @@ const AppArticlesRouteWithChildren = AppArticlesRoute._addFileChildren(
   AppArticlesRouteChildren,
 )
 
-interface AppPermissionsRouteChildren {
-  AppPermissionsRolesRoute: typeof AppPermissionsRolesRoute
-  AppPermissionsUsersRoute: typeof AppPermissionsUsersRoute
-}
-
-const AppPermissionsRouteChildren: AppPermissionsRouteChildren = {
-  AppPermissionsRolesRoute: AppPermissionsRolesRoute,
-  AppPermissionsUsersRoute: AppPermissionsUsersRoute,
-}
-
-const AppPermissionsRouteWithChildren = AppPermissionsRoute._addFileChildren(
-  AppPermissionsRouteChildren,
-)
-
 interface AppRouteChildren {
   AppArticlesRoute: typeof AppArticlesRouteWithChildren
   AppDocumentationRoute: typeof AppDocumentationRoute
-  AppPermissionsRoute: typeof AppPermissionsRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppPermissionsRolesRoute: typeof AppPermissionsRolesRoute
+  AppPermissionsUsersRoute: typeof AppPermissionsUsersRoute
   AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
   AppPlaygroundNav111Route: typeof AppPlaygroundNav111Route
   AppPlaygroundNav112Route: typeof AppPlaygroundNav112Route
   AppPlaygroundNav12Route: typeof AppPlaygroundNav12Route
+  AppPermissionsIndexRoute: typeof AppPermissionsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppArticlesRoute: AppArticlesRouteWithChildren,
   AppDocumentationRoute: AppDocumentationRoute,
-  AppPermissionsRoute: AppPermissionsRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
+  AppPermissionsRolesRoute: AppPermissionsRolesRoute,
+  AppPermissionsUsersRoute: AppPermissionsUsersRoute,
   AppPlaygroundNav11Route: AppPlaygroundNav11Route,
   AppPlaygroundNav111Route: AppPlaygroundNav111Route,
   AppPlaygroundNav112Route: AppPlaygroundNav112Route,
   AppPlaygroundNav12Route: AppPlaygroundNav12Route,
+  AppPermissionsIndexRoute: AppPermissionsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
