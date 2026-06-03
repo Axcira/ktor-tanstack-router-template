@@ -76,8 +76,8 @@ class PermissionService(val database: Database) {
         } ?: UpdateResult.NotFound
     }
 
-    suspend fun delete(id: UInt, deleteRoleInput: DeleteRoleInput): Int = database.dbQuery {
-        Users.update({ Users.roleId eq id }) { it[Users.roleId] = deleteRoleInput.fallbackRoleId }
+    suspend fun delete(id: UInt, fallbackRoleId: UInt): Int = database.dbQuery {
+        Users.update({ Users.roleId eq id }) { it[roleId] = fallbackRoleId }
         Role.deleteWhere { Role.id eq id }
     }
 }

@@ -17,6 +17,7 @@ import {
   usePostApiUsersCreate,
   usePatchApiUsersUpdateId,
   useDeleteApiUsersDeleteId,
+  useGetApiRoles, // ロール取得用のAPIフックを追加
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,41 +31,37 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-const availableRoles = [
-  {
-    id: 1,
-    name: "Administrator",
-    badgeClass:
-      "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900/50",
-  },
-  {
-    id: 2,
-    name: "Editor",
-    badgeClass:
-      "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50",
-  },
-  {
-    id: 3,
-    name: "Writer",
-    badgeClass:
-      "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
-  },
-  {
-    id: 4,
-    name: "Guest Reader",
-    badgeClass:
-      "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950/30 dark:text-slate-400 dark:border-slate-900/50",
-  },
-];
+// APIから取得したロール名に基づいてバッジのスタイルを動的に返すヘルパー関数
+const getRoleBadgeClass = (roleName: string) => {
+  switch (roleName) {
+    case "Administrator":
+      return "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900/50";
+    case "Editor":
+      return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50";
+    case "Writer":
+      return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50";
+    case "Guest Reader":
+      return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950/30 dark:text-slate-400 dark:border-slate-900/50";
+    default:
+      return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950/30 dark:text-gray-400 dark:border-gray-900/50";
+  }
+};
 
 export default function UsersPage() {
-  const { data: usersResponse, isLoading, isError, refetch } = useGetApiUsers();
+  // --- API Fetching ---
+  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch } = useGetApiUsers();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles(); // ロールの取得
+
   const createUserMutation = usePostApiUsersCreate();
   const updateUserMutation = usePatchApiUsersUpdateId();
   const deleteUserMutation = useDeleteApiUsersDeleteId();
 
   const isSubmitting =
     createUserMutation.isPending || updateUserMutation.isPending;
+  const isLoading = isLoadingUsers || isLoadingRoles;
+
+  // データ抽出
+  const availableRoles = rolesResponse?.data || [];
 
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -82,7 +79,7 @@ export default function UsersPage() {
 
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
-  const [userRoleId, setUserRoleId] = useState<number>(3);
+  const [userRoleId, setUserRoleId] = useState<number>(0);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -101,7 +98,9 @@ export default function UsersPage() {
     setEditingUser(null);
     setUserEmail("");
     setUserPassword("");
-    setUserRoleId(3);
+    // 取得したロールの中で標準的なもの（存在しなければ配列の先頭）をデフォルト選択にする
+    const defaultRole = availableRoles.find((r) => r.name === "Writer")?.id || availableRoles[0]?.id || 0;
+    setUserRoleId(defaultRole);
     setIsSheetOpen(true);
   };
 
@@ -109,7 +108,7 @@ export default function UsersPage() {
     setEditingUser(user);
     setUserEmail(user.email);
     setUserPassword("");
-    setUserRoleId(user.roleId || 4);
+    setUserRoleId(user.roleId || availableRoles[0]?.id || 0);
     setIsSheetOpen(true);
   };
 
@@ -125,6 +124,11 @@ export default function UsersPage() {
 
     if (!editingUser && !userPassword.trim()) {
       showNotification("パスワードを入力してください。", "error");
+      return;
+    }
+
+    if (!userRoleId) {
+      showNotification("ロールを選択してください。", "error");
       return;
     }
 
@@ -192,13 +196,19 @@ export default function UsersPage() {
     }
   };
 
+  // APIから取得したロール情報と動的クラスを結合して返す
   const getRoleInfo = (roleId?: number) => {
-    return (
-      availableRoles.find((r) => r.id === roleId) || {
-        name: "未割り当て",
-        badgeClass: "bg-gray-100 text-gray-800",
-      }
-    );
+    const role = availableRoles.find((r) => r.id === roleId);
+    if (role) {
+      return {
+        name: role.name,
+        badgeClass: getRoleBadgeClass(role.name),
+      };
+    }
+    return {
+      name: "未割り当て",
+      badgeClass: "bg-gray-100 text-gray-800",
+    };
   };
 
   const filteredUsers = users.filter((user) => {
@@ -210,7 +220,7 @@ export default function UsersPage() {
     return matchesSearch && matchesRole;
   });
 
-  if (isError) {
+  if (isErrorUsers) {
     return (
       <div className="p-6 max-w-7xl mx-auto flex items-center justify-center h-[50vh]">
         <div className="text-center space-y-4">
@@ -255,7 +265,7 @@ export default function UsersPage() {
         <Button
           onClick={handleOpenCreate}
           className="w-full sm:w-auto gap-2 bg-primary text-primary-foreground shadow hover:opacity-90"
-          disabled={isLoading || isSubmitting}
+          disabled={isLoading || isSubmitting || availableRoles.length === 0}
         >
           <Plus className="h-4 w-4" />
           新規ユーザー招待
@@ -277,7 +287,7 @@ export default function UsersPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            disabled={isLoading}
+            disabled={isLoading || availableRoles.length === 0}
             className="flex h-9 w-full sm:w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-muted-foreground dark:bg-background"
           >
             <option value="all">すべてのロール</option>
@@ -367,7 +377,7 @@ export default function UsersPage() {
                             size="icon"
                             className="h-8 w-8 hover:bg-muted"
                             onClick={() => handleOpenEdit(user)}
-                            disabled={isDeleting || isSubmitting}
+                            disabled={isDeleting || isSubmitting || availableRoles.length === 0}
                           >
                             <Edit2 className="h-3.5 w-3.5 text-foreground" />
                           </Button>
@@ -450,9 +460,10 @@ export default function UsersPage() {
                   id="user-role"
                   value={userRoleId}
                   onChange={(e) => setUserRoleId(Number(e.target.value))}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isLoadingRoles}
                   className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground dark:bg-background disabled:opacity-50"
                 >
+                  <option value={0} disabled>ロールを選択してください</option>
                   {availableRoles.map((role) => (
                     <option key={role.id} value={role.id}>
                       {role.name}
@@ -474,7 +485,7 @@ export default function UsersPage() {
             <Button
               onClick={handleSave}
               className="bg-primary text-primary-foreground hover:opacity-90"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !userRoleId}
             >
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

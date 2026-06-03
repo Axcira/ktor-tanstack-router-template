@@ -41,6 +41,12 @@ fun Application.permissions() {
                 }
             }
             route("/roles") {
+
+                get {
+                    val roles = permissionService.getAllRoles()
+                    call.respond(roles)
+                }
+
                 get("/{roleId}") {
                     val roleId = call.parameters["roleId"]?.toUIntOrNull() ?: throw IllegalArgumentException("No role id found")
                     val role = permissionService.getRoleById(roleId) ?: return@get call.respond(HttpStatusCode.NotFound)
@@ -64,10 +70,12 @@ fun Application.permissions() {
 
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
-                    val deleteRoleInput = call.receive<DeleteRoleInput>()
-                    permissionService.delete(id, deleteRoleInput)
+                    val fallbackRoleId = call.request.queryParameters["fallbackRoleId"]?.toUIntOrNull()
+                        ?: throw IllegalArgumentException("fallbackRoleId is required")
+                    permissionService.delete(id, fallbackRoleId)
                     call.respond(HttpStatusCode.NoContent)
                 }
+
             }
         }
     }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Shield,
   Key,
@@ -9,6 +10,7 @@ import {
   Check,
   X,
   Info,
+  Loader2,
 } from "lucide-react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import type { Permission } from "@/api/generated/schemas/permission";
@@ -30,45 +32,30 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
 
-const initialRoles: RoleDTO[] = [
-  {
-    id: 1,
-    name: "Administrator",
-    description:
-      "全権限を保有する最高管理者です。システム内のすべての操作を実行できます。",
-    permissions: [{ type: "Administrator" }],
-  },
-  {
-    id: 2,
-    name: "Editor",
-    description:
-      "記事の作成、更新、他人の記事を含む削除が可能なコンテンツ管理者です。",
-    permissions: [
-      { type: "CreateArticle" },
-      { type: "UpdateArticle", allowOthers: true },
-      { type: "DeleteArticle", allowOthers: true },
-      { type: "ManageArticles" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Writer",
-    description: "自身の記事の作成と更新が可能な標準ユーザーです。",
-    permissions: [
-      { type: "CreateArticle" },
-      { type: "UpdateArticle", allowOthers: false },
-      { type: "DeleteArticle", allowOthers: false },
-    ],
-  },
-  {
-    id: 4,
-    name: "Guest Reader",
-    description: "記事の閲覧のみが可能な権限です。編集や作成はできません。",
-    permissions: [],
-  },
-];
+import {
+  useGetApiRoles,
+  usePostApiRoles,
+  usePatchApiRolesId,
+  useDeleteApiRolesId,
+  getGetApiRolesQueryKey,
+} from "@/api/generated/default/default";
 
 const permissionEntries = Object.entries(PERMISSION_UI_DEFS) as [
   keyof typeof PERMISSION_UI_DEFS,
@@ -76,17 +63,30 @@ const permissionEntries = Object.entries(PERMISSION_UI_DEFS) as [
 ][];
 
 export default function RolesPage() {
-  const [roles, setRoles] = useState<RoleDTO[]>(initialRoles);
+  const queryClient = useQueryClient();
+
+  const { data: rolesResponse, isLoading } = useGetApiRoles();
+  const roles = rolesResponse?.data || [];
+
+  const createRoleMutation = usePostApiRoles();
+  const updateRoleMutation = usePatchApiRolesId();
+  const deleteRoleMutation = useDeleteApiRolesId();
+
+  const isSaving = createRoleMutation.isPending || updateRoleMutation.isPending;
+  const isDeleting = deleteRoleMutation.isPending;
+
   const [search, setSearch] = useState("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<RoleDTO | null>(null);
 
-  // Form states
   const [roleName, setRoleName] = useState("");
   const [roleDescription, setRoleDescription] = useState("");
   const [permissionStates, setPermissionStates] = useState<
     Record<string, { enabled: boolean; props: Record<string, string | number | boolean> }>
   >({});
+
+  const [roleToDelete, setRoleToDelete] = useState<RoleDTO | null>(null);
+  const [selectedFallbackId, setSelectedFallbackId] = useState<string>("4");
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -106,7 +106,6 @@ export default function RolesPage() {
     setRoleName("");
     setRoleDescription("");
 
-    // Initialize permissions as disabled
     const initialPermStates: typeof permissionStates = {};
     permissionEntries.forEach(([type, def]) => {
       const defaultProps: Record<string, string | number | boolean> = {};
@@ -132,7 +131,7 @@ export default function RolesPage() {
       Object.entries(def.props).forEach(([propKey, propMeta]) => {
         if (propMeta.type === "boolean") {
           defaultProps[propKey] = activePerm
-            ? ((activePerm as Record<string, unknown>)[propKey] as boolean ?? false)
+            ? (((activePerm as unknown) as Record<string, unknown>)[propKey] as boolean ?? false)
             : false;
         }
       });
@@ -147,7 +146,7 @@ export default function RolesPage() {
     setIsSheetOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!roleName.trim()) {
       showNotification("ロール名を入力してください。", "error");
       return;
@@ -164,40 +163,56 @@ export default function RolesPage() {
       }
     });
 
-    if (editingRole) {
-      // Edit mode
-      setRoles((prev) =>
-        prev.map((r) =>
-          r.id === editingRole.id
-            ? {
-                ...r,
-                name: roleName,
-                description: roleDescription,
-                permissions: constructedPermissions,
-              }
-            : r,
-        ),
-      );
-      showNotification(`ロール「${roleName}」を更新しました。`);
-    } else {
-      // Create mode
-      const newRole: RoleDTO = {
-        id: roles.length > 0 ? Math.max(...roles.map((r) => r.id)) + 1 : 1,
-        name: roleName,
-        description: roleDescription,
-        permissions: constructedPermissions,
-      };
-      setRoles((prev) => [...prev, newRole]);
-      showNotification(`ロール「${roleName}」を作成しました。`);
-    }
+    try {
+      if (editingRole) {
+        await updateRoleMutation.mutateAsync({
+          id: String(editingRole.id),
+          data: {
+            name: roleName,
+            description: roleDescription,
+            permissions: constructedPermissions,
+          },
+        });
+        showNotification(`ロール「${roleName}」を更新しました。`);
+      } else {
+        await createRoleMutation.mutateAsync({
+          data: {
+            name: roleName,
+            description: roleDescription,
+            permissions: constructedPermissions,
+          },
+        });
+        showNotification(`ロール「${roleName}」を作成しました。`);
+      }
 
-    setIsSheetOpen(false);
+      queryClient.invalidateQueries({ queryKey: getGetApiRolesQueryKey() });
+      setIsSheetOpen(false);
+    } catch (error) {
+      console.error(error);
+      showNotification("保存処理中にエラーが発生しました。", "error");
+    }
   };
 
-  const handleDelete = (roleId: number, name: string) => {
-    if (confirm(`ロール「${name}」を削除してもよろしいですか？`)) {
-      setRoles((prev) => prev.filter((r) => r.id !== roleId));
-      showNotification(`ロール「${name}」を削除しました。`, "info");
+  const handleTrashClick = (role: RoleDTO) => {
+    setRoleToDelete(role);
+    setSelectedFallbackId("4");
+  };
+
+  const executeDelete = async () => {
+    if (!roleToDelete) return;
+
+    try {
+      await deleteRoleMutation.mutateAsync({
+        id: String(roleToDelete.id),
+        params: { fallbackRoleId: selectedFallbackId },
+      });
+
+      queryClient.invalidateQueries({ queryKey: getGetApiRolesQueryKey() });
+      showNotification(`ロール「${roleToDelete.name}」を削除しました。`, "info");
+      setRoleToDelete(null);
+    } catch (error) {
+      console.error(error);
+      showNotification("削除処理中にエラーが発生しました。", "error");
     }
   };
 
@@ -232,7 +247,6 @@ export default function RolesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Toast Notification */}
       {notification && (
         <div
           className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm animate-in fade-in slide-in-from-bottom-5 duration-300 ${
@@ -250,7 +264,6 @@ export default function RolesPage() {
         </div>
       )}
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="text-2xl font-bold font-heading tracking-tight flex items-center gap-2">
@@ -270,7 +283,6 @@ export default function RolesPage() {
         </Button>
       </div>
 
-      {/* Search & Statistics */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-xl border">
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -284,101 +296,111 @@ export default function RolesPage() {
         <div className="flex gap-4 text-sm text-muted-foreground w-full md:w-auto justify-end">
           <span>
             登録ロール数:{" "}
-            <strong className="text-foreground">{roles.length}</strong>
+            {isLoading ? (
+              <Loader2 className="inline h-3 w-3 animate-spin ml-1" />
+            ) : (
+              <strong className="text-foreground">{roles.length}</strong>
+            )}
           </span>
         </div>
       </div>
 
-      {/* Roles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {filteredRoles.map((role) => {
-          const isAdministrator = role.permissions.some(
-            (p) => p.type === "Administrator",
-          );
-          return (
-            <Card
-              key={role.id}
-              className="relative flex flex-col justify-between hover:shadow-md transition-all border border-border/80 bg-gradient-to-br from-card to-background"
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg font-bold flex items-center gap-2">
-                      <Key className="h-4 w-4 text-primary" />
-                      {role.name}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-2 min-h-10">
-                      {role.description || "説明はありません。"}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 hover:bg-muted"
-                      onClick={() => handleOpenEdit(role)}
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    {role.id !== 1 && ( // Disable deletion of Admin role
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {filteredRoles.map((role) => {
+            const isAdministrator = role.permissions.some(
+              (p) => p.type === "Administrator",
+            );
+            return (
+              <Card
+                key={role.id}
+                className="relative flex flex-col justify-between hover:shadow-md transition-all border border-border/80 bg-gradient-to-br from-card to-background"
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg font-bold flex items-center gap-2">
+                        <Key className="h-4 w-4 text-primary" />
+                        {role.name}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 min-h-10">
+                        {role.description || "説明はありません。"}
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => handleDelete(role.id, role.name)}
+                        className="h-8 w-8 hover:bg-muted"
+                        onClick={() => handleOpenEdit(role)}
+                        disabled={isDeleting}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Edit2 className="h-3.5 w-3.5" />
                       </Button>
+                      {role.name !== "Administrator" && role.name !== "Guest Reader" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => handleTrashClick(role)}
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0 flex-1 flex flex-col justify-end">
+                  <div className="border-t border-border/50 pt-3">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                      権限構成
+                    </div>
+                    {isAdministrator ? (
+                      <span className="inline-flex items-center rounded-md bg-violet-50 dark:bg-violet-950/30 px-2 py-1 text-xs font-semibold text-violet-700 dark:text-violet-400 border border-violet-200/50">
+                        全機能アクセス (Administrator)
+                      </span>
+                    ) : role.permissions.length === 0 ? (
+                      <span className="text-xs text-muted-foreground italic">
+                        権限はありません（読み取り専用）
+                      </span>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                        {role.permissions.map((p) => {
+                          const def = PERMISSION_UI_DEFS[p.type];
+                          const propsStr = Object.entries(p)
+                            .filter(([key]) => key !== "type")
+                            .map(([key, val]) => `${key}: ${val}`)
+                            .join(", ");
+                          return (
+                            <span
+                              key={p.type}
+                              className="inline-flex items-center rounded-md bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary border border-primary/10"
+                              title={def?.description}
+                            >
+                              {def?.label || p.type}
+                              {propsStr && (
+                                <span className="text-[10px] text-muted-foreground ml-1">
+                                  ({propsStr})
+                                </span>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0 flex-1 flex flex-col justify-end">
-                <div className="border-t border-border/50 pt-3">
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                    権限構成
-                  </div>
-                  {isAdministrator ? (
-                    <span className="inline-flex items-center rounded-md bg-violet-50 dark:bg-violet-950/30 px-2 py-1 text-xs font-semibold text-violet-700 dark:text-violet-400 border border-violet-200/50">
-                      全機能アクセス (Administrator)
-                    </span>
-                  ) : role.permissions.length === 0 ? (
-                    <span className="text-xs text-muted-foreground italic">
-                      権限はありません（読み取り専用）
-                    </span>
-                  ) : (
-                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
-                      {role.permissions.map((p) => {
-                        const def = PERMISSION_UI_DEFS[p.type];
-                        const propsStr = Object.entries(p)
-                          .filter(([key]) => key !== "type")
-                          .map(([key, val]) => `${key}: ${val}`)
-                          .join(", ");
-                        return (
-                          <span
-                            key={p.type}
-                            className="inline-flex items-center rounded-md bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary border border-primary/10"
-                            title={def?.description}
-                          >
-                            {def?.label || p.type}
-                            {propsStr && (
-                              <span className="text-[10px] text-muted-foreground ml-1">
-                                ({propsStr})
-                              </span>
-                            )}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Create / Edit Drawer */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent
           side="right"
@@ -394,7 +416,6 @@ export default function RolesPage() {
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto py-6 space-y-6 pr-1">
-            {/* Basic Info */}
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="role-name">
@@ -405,6 +426,7 @@ export default function RolesPage() {
                   placeholder="例: ContentModerator"
                   value={roleName}
                   onChange={(e) => setRoleName(e.target.value)}
+                  disabled={isSaving}
                 />
               </div>
               <div className="space-y-2">
@@ -414,11 +436,11 @@ export default function RolesPage() {
                   placeholder="このロールの役割についての説明..."
                   value={roleDescription}
                   onChange={(e) => setRoleDescription(e.target.value)}
+                  disabled={isSaving}
                 />
               </div>
             </div>
 
-            {/* Permissions Toggles */}
             <div className="space-y-4">
               <div className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
                 権限アサイン
@@ -451,10 +473,10 @@ export default function RolesPage() {
                           onCheckedChange={(checked) =>
                             handleTogglePermission(type, checked)
                           }
+                          disabled={isSaving}
                         />
                       </div>
 
-                      {/* Permission-specific options */}
                       {isEnabled && hasProps && (
                         <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
                           <span className="text-xs font-semibold text-muted-foreground">
@@ -475,10 +497,11 @@ export default function RolesPage() {
                                 {propMeta.type === "boolean" && (
                                   <Switch
                                     id={`prop-${type}-${propKey}`}
-                                    checked={state.props[propKey] || false}
+                                    checked={(state.props[propKey] as boolean) || false}
                                     onCheckedChange={(checked) =>
                                       handlePropChange(type, propKey, checked)
                                     }
+                                    disabled={isSaving}
                                   />
                                 )}
                               </div>
@@ -493,20 +516,65 @@ export default function RolesPage() {
             </div>
           </div>
 
-          {/* Footer Actions */}
           <div className="border-t pt-4 mt-auto flex items-center justify-end gap-3 bg-card pb-2">
-            <Button variant="outline" onClick={() => setIsSheetOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsSheetOpen(false)}
+              disabled={isSaving}
+            >
               キャンセル
             </Button>
             <Button
               onClick={handleSave}
               className="bg-primary text-primary-foreground hover:opacity-90"
+              disabled={isSaving}
             >
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               保存
             </Button>
           </div>
         </SheetContent>
       </Sheet>
+
+      <Dialog open={!!roleToDelete} onOpenChange={(open) => !open && setRoleToDelete(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>ロールの削除</DialogTitle>
+            <DialogDescription>
+              「{roleToDelete?.name}」を削除します。
+              このロールを持つユーザーの新しい移行先（フォールバック）を選択してください。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="fallback-role">移行先ロール</Label>
+              <Select value={selectedFallbackId} onValueChange={setSelectedFallbackId}>
+                <SelectTrigger id="fallback-role" className="w-full">
+                  <SelectValue placeholder="ロールを選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles
+                    .filter((r) => r.id !== roleToDelete?.id)
+                    .map((r) => (
+                      <SelectItem key={r.id} value={String(r.id)}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRoleToDelete(null)} disabled={isDeleting}>
+              キャンセル
+            </Button>
+            <Button variant="destructive" onClick={executeDelete} disabled={isDeleting}>
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              削除を実行
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
