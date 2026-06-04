@@ -79,10 +79,10 @@ fun Application.permissions() {
                         return@delete
                     }
 
-                    if(fallbackRoleId != null && !permissionService.exists(fallbackRoleId)){
-                        call.respond(HttpStatusCode.NotFound, "fallbackRoleId not found")
-                        return@delete
-                    }
+                   if(!permissionService.exists(fallbackRoleId)) {
+                       call.respond(HttpStatusCode.BadRequest, "fallbackRoleId does not exist")
+                       return@delete
+                   }
 
                     permissionService.delete(id, fallbackRoleId)
                     call.respond(HttpStatusCode.NoContent)
