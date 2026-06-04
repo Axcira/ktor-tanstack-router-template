@@ -45,7 +45,7 @@ export function RoleCard({ role, onEdit, onDelete, isDeleting }: RoleCardProps) 
             >
               <Edit2 className="h-3.5 w-3.5" />
             </Button>
-            {role.name !== "Administrator" && role.name !== "Guest Reader" && (
+            {role.name !== "Administrator" && (
               <Button
                 variant="ghost"
                 size="icon"
