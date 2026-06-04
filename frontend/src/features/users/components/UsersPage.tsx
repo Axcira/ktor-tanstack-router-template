@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import {
-  useGetApiUsers,
-  useDeleteApiUsersDeleteId,
+  useGetUsers,
+  useDeleteUser,
   useGetApiRoles,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
@@ -25,13 +25,13 @@ export default function UsersPage() {
   const limit = 10;
   const offset = (page - 1) * limit;
 
-  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch } = useGetApiUsers({
+  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch } = useGetUsers({
     limit: String(limit),
     offset: String(offset)
   });
   const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
 
-  const deleteUserMutation = useDeleteApiUsersDeleteId();
+  const deleteUserMutation = useDeleteUser();
 
   const isSubmitting = deleteUserMutation.isPending;
   const isLoading = isLoadingUsers || isLoadingRoles;

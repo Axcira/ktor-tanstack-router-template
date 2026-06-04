@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Users, Loader2 } from "lucide-react";
 import {
-  useGetApiUsers,
+  useGetUsers,
   useGetApiRoles,
-  usePatchApiUsersUpdateId,
+  useUpdateUser,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Route } from "@/routes/_app/permissions/users/$userId.edit.tsx";
@@ -13,10 +13,10 @@ export default function UserEditPage() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
 
-  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers } = useGetApiUsers();
+  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers } = useGetUsers();
   const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
 
-  const updateUser = usePatchApiUsersUpdateId();
+  const updateUser = useUpdateUser();
 
   const availableRoles = rolesResponse?.data || [];
   const user = usersResponse?.data?.find((u) => String(u.id) === userId);
