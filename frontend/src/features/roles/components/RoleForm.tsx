@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import type { Permission } from "@/api/generated/schemas/permission";
 import { Button } from "@/components/ui/button";
@@ -34,46 +34,47 @@ interface RoleFormProps {
   submitLabel: string;
 }
 
-export default function RoleForm({
-  initialValues,
-  onSubmit,
-  onCancel,
-  isSubmitting,
-  submitLabel,
-}: RoleFormProps) {
+// 初期化ロジックを再利用できるようにヘルパー関数として切り出し
+const computeInitialPermissionStates = (permissions?: Permission[]): PermissionStates => {
+  const states: PermissionStates = {};
+  permissionEntries.forEach(([type, def]) => {
+    const activePerm = permissions?.find((p) => p.type === type);
+    const defaultProps: Record<string, string | number | boolean> = {};
+
+    Object.entries(def.props).forEach(([propKey, propMeta]) => {
+      if (propMeta.type === "boolean") {
+        defaultProps[propKey] = activePerm
+          ? (((activePerm as unknown) as Record<string, unknown>)[
+          propKey
+          ] as boolean) ?? false
+          : false;
+      }
+    });
+
+    states[type] = {
+      enabled: !!activePerm,
+      props: defaultProps,
+    };
+  });
+  return states;
+};
+
+export default function RoleForm({initialValues, onSubmit, onCancel, isSubmitting, submitLabel,}: RoleFormProps) {
   const [roleName, setRoleName] = useState(initialValues?.name || "");
   const [roleDescription, setRoleDescription] = useState(
     initialValues?.description || "",
   );
-  const [permissionStates, setPermissionStates] = useState<PermissionStates>(
-    () => {
-      const initialPermStates: PermissionStates = {};
-      permissionEntries.forEach(([type, def]) => {
-        const activePerm = initialValues?.permissions.find(
-          (p) => p.type === type,
-        );
-        const defaultProps: Record<string, string | number | boolean> = {};
-
-        Object.entries(def.props).forEach(([propKey, propMeta]) => {
-          if (propMeta.type === "boolean") {
-            defaultProps[propKey] = activePerm
-              ? (((activePerm as unknown) as Record<string, unknown>)[
-                  propKey
-                ] as boolean) ?? false
-              : false;
-          }
-        });
-
-        initialPermStates[type] = {
-          enabled: !!activePerm,
-          props: defaultProps,
-        };
-      });
-      return initialPermStates;
-    },
+  const [permissionStates, setPermissionStates] = useState<PermissionStates>(() =>
+    computeInitialPermissionStates(initialValues?.permissions)
   );
-
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // initialValuesが外部から変更されたらstateを同期する
+  useEffect(() => {
+    setRoleName(initialValues?.name || "");
+    setRoleDescription(initialValues?.description || "");
+    setPermissionStates(computeInitialPermissionStates(initialValues?.permissions));
+  }, [initialValues]);
 
   const handleTogglePermission = (type: string, checked: boolean) => {
     setPermissionStates((prev) => ({
