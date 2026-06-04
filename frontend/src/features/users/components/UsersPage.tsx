@@ -52,6 +52,10 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, roleFilter]);
+
   const [notification, setNotification] = useState<{
     message: string;
     type: "success" | "info" | "error";
