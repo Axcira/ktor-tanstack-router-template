@@ -13,8 +13,8 @@ export default function UserEditPage() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
 
-  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers } = useGetUsers();
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
+  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch: refetchUsers, } = useGetUsers();
+  const { data: rolesResponse, isLoading: isLoadingRoles, isError: isErrorRoles, refetch: refetchRoles, } = useGetRoles();
 
   const updateUser = useUpdateUser();
 
@@ -46,10 +46,36 @@ export default function UserEditPage() {
     );
   }
 
-  if (isErrorUsers || !user) {
+  if (isErrorUsers || isErrorRoles) {
+    return (
+      <div className="space-y-4 p-6 text-center">
+        <p className="text-destructive">
+          {isErrorUsers
+            ? "ユーザー情報の取得に失敗しました。"
+            : "ロール一覧の取得に失敗しました。"}
+        </p>
+        <div className="flex justify-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (isErrorUsers) refetchUsers();
+              if (isErrorRoles) refetchRoles();
+            }}
+          >
+            再試行
+          </Button>
+          <Button asChild variant="ghost">
+            <Link to="/permissions/users">ユーザー一覧に戻る</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="p-6 text-center space-y-4">
-        <p className="text-destructive">ユーザーの読み込みに失敗しました。</p>
+        <p className="text-destructive">指定されたユーザーが見つかりません。</p>
         <Button asChild variant="outline">
           <Link to="/permissions/users">ユーザー一覧に戻る</Link>
         </Button>
