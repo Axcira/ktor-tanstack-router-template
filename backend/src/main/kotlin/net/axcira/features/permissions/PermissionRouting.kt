@@ -17,6 +17,11 @@ fun Application.permissions() {
     apiRouting {
         authenticate {
             route("/permissions") {
+                /**
+                 * Get permissions for a specific user
+                 *
+                 * OperationID: getUserPermissions
+                 */
                 get {
                     val userid =
                         call.request.queryParameters["userid"]?.toUIntOrNull() ?: throw IllegalArgumentException("No user id found")
@@ -41,23 +46,42 @@ fun Application.permissions() {
                 }
             }
             route("/roles") {
-
+                /**
+                 * Get all roles
+                 *
+                 * OperationID: getRoles
+                 */
                 get {
                     val roles = permissionService.getAllRoles()
                     call.respond(roles)
                 }
 
+                /**
+                 * Get role by ID
+                 *
+                 * OperationID: getRoleById
+                 */
                 get("/{roleId}") {
                     val roleId = call.parameters["roleId"]?.toUIntOrNull() ?: throw IllegalArgumentException("No role id found")
                     val role = permissionService.getRoleById(roleId) ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respond(role)
                 }
+                /**
+                 * Create a new role
+                 *
+                 * OperationID: createRole
+                 */
                 post {
                     val role = call.receive<CreateRoleInput>()
                     val createdRole = permissionService.create(role)
                     call.respond(HttpStatusCode.Created, createdRole)
                 }
 
+                /**
+                 * Update a role by ID
+                 *
+                 * OperationID: updateRole
+                 */
                 patch("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val scheme = call.receive<UpdateRoleInput>()
@@ -68,7 +92,11 @@ fun Application.permissions() {
                     }
                 }
 
-                //retunで抜けるのかthrowを使うのか　
+                /**
+                 * Delete a role by ID with a fallback role
+                 *
+                 * OperationID: deleteRole
+                 */
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val fallbackRoleId = call.request.queryParameters["fallbackRoleId"]?.toUIntOrNull()

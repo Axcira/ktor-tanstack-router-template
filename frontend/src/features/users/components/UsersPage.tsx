@@ -12,7 +12,7 @@ import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import {
   useGetUsers,
   useDeleteUser,
-  useGetApiRoles,
+  useGetRoles,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ export default function UsersPage() {
     limit: String(limit),
     offset: String(offset)
   });
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
 
   const deleteUserMutation = useDeleteUser();
 

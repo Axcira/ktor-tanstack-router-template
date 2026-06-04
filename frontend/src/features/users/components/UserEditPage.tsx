@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Users, Loader2 } from "lucide-react";
 import {
   useGetUsers,
-  useGetApiRoles,
+  useGetRoles,
   useUpdateUser,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ export default function UserEditPage() {
   const navigate = useNavigate();
 
   const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers } = useGetUsers();
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
 
   const updateUser = useUpdateUser();
 

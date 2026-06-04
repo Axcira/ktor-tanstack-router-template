@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Shield, Loader2 } from "lucide-react";
 import {
-  useGetApiRolesRoleId,
-  usePatchApiRolesId,
+  useGetRoleById,
+  useUpdateRole,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Route } from "@/routes/_app/permissions/roles/$roleId.edit.tsx";
@@ -13,10 +13,10 @@ export default function RoleEditPage() {
   const { roleId } = Route.useParams();
   const navigate = useNavigate();
 
-  const { data, isLoading, isError } = useGetApiRolesRoleId(roleId);
+  const { data, isLoading, isError } = useGetRoleById(roleId);
   const role = data?.data;
 
-  const updateRole = usePatchApiRolesId();
+  const updateRole = useUpdateRole();
 
   const handleSubmit = async (values: {
     name: string;

@@ -14,9 +14,9 @@ import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  useGetApiRoles,
-  useDeleteApiRolesId,
-  getGetApiRolesQueryKey,
+  useGetRoles,
+  useDeleteRole,
+  getGetRolesQueryKey,
 } from "@/api/generated/default/default";
 import { RoleCard } from "./RoleCard";
 import { DeleteRoleDialog } from "./DeleteRoleDialog";
@@ -25,10 +25,11 @@ export default function RolesPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: rolesResponse, isLoading } = useGetApiRoles();
+  const { data: rolesResponse, isLoading } = useGetRoles(
+  );
   const roles = rolesResponse?.data || [];
 
-  const deleteRoleMutation = useDeleteApiRolesId();
+  const deleteRoleMutation = useDeleteRole();
   const isDeleting = deleteRoleMutation.isPending;
 
   const [search, setSearch] = useState("");
@@ -67,7 +68,7 @@ export default function RolesPage() {
         params: { fallbackRoleId },
       });
 
-      queryClient.invalidateQueries({ queryKey: getGetApiRolesQueryKey() });
+      queryClient.invalidateQueries({ queryKey: getGetRolesQueryKey() });
       showNotification(`ロール「${roleToDelete.name}」を削除しました。`, "info");
       setRoleToDelete(null);
     } catch (error) {

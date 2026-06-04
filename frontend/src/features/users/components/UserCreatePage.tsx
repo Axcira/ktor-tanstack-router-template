@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Users, Loader2 } from "lucide-react";
 import {
   useCreateUser,
-  useGetApiRoles,
+  useGetRoles,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import UserForm from "./UserForm";
@@ -11,7 +11,7 @@ export default function UserCreatePage() {
   const navigate = useNavigate();
   const createUser = useCreateUser();
 
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
   const availableRoles = rolesResponse?.data || [];
 
   const handleSubmit = async (values: {

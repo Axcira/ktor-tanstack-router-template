@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Route } from "@/routes/_app";
-import { useGetApiRoles } from "@/api/generated/default/default";
+import { useGetRoles } from "@/api/generated/default/default";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
 import {
   DropdownMenu,
@@ -19,7 +19,7 @@ import {
 export default function AppHeader() {
   const { toggleSidebar } = useSidebar();
   const { session } = Route.useRouteContext();
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
 
   const userEmail = session?.user?.email || "User";
   const fallbackChar = userEmail[0].toUpperCase();
