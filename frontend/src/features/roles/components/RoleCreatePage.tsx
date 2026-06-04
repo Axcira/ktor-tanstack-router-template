@@ -3,6 +3,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { usePostApiRoles } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import RoleForm from "./RoleForm";
+import type { Permission } from "@/api/generated/schemas/permission";
 
 export default function RoleCreatePage() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function RoleCreatePage() {
   const handleSubmit = async (values: {
     name: string;
     description: string;
-    permissions: any[];
+    permissions: Permission[];
   }) => {
     await createRole.mutateAsync({
       data: {

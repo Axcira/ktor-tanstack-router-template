@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Route } from "@/routes/_app/permissions/roles/$roleId.edit.tsx";
 import RoleForm from "./RoleForm";
+import type { Permission } from "@/api/generated/schemas/permission";
 
 export default function RoleEditPage() {
   const { roleId } = Route.useParams();
@@ -20,7 +21,7 @@ export default function RoleEditPage() {
   const handleSubmit = async (values: {
     name: string;
     description: string;
-    permissions: any[];
+    permissions: Permission[];
   }) => {
     if (!role) return;
     await updateRole.mutateAsync({
