@@ -11,7 +11,13 @@ export default function UserCreatePage() {
   const navigate = useNavigate();
   const createUser = useCreateUser();
 
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
+  const {
+    data: rolesResponse,
+    isLoading: isLoadingRoles,
+    isError: isErrorRoles,
+    refetch: refetchRoles,
+  } = useGetRoles();
+
   const availableRoles = rolesResponse?.data || [];
 
   const handleSubmit = async (values: {
@@ -33,6 +39,22 @@ export default function UserCreatePage() {
     return (
       <div className="flex justify-center items-center py-20 text-muted-foreground">
         <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (isErrorRoles) {
+    return (
+      <div className="space-y-4 p-6 text-center">
+        <p className="text-destructive">ロール一覧の取得に失敗しました。</p>
+        <div className="flex justify-center gap-2">
+          <Button variant="outline" onClick={() => refetchRoles()}>
+            再試行
+          </Button>
+          <Button asChild variant="ghost">
+            <Link to="/permissions/users">ユーザー一覧に戻る</Link>
+          </Button>
+        </div>
       </div>
     );
   }
