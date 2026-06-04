@@ -8,6 +8,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import net.axcira.Pagination
 import net.axcira.UpdateResult
 import net.axcira.apiRouting
 import net.axcira.features.auth.UserSession
@@ -39,7 +40,11 @@ fun Application.users() {
             withPermission<Permission>(Permission.ManageUsers) {
 
                 get() {
-                    val allUsers = userService.getAllUsers()
+                    val pagination = Pagination(
+                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                    )
+                    val allUsers = userService.getAllUsers(pagination)
                     call.respond(allUsers)
                 }
 

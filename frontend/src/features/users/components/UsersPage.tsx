@@ -20,7 +20,15 @@ import { UsersTable } from "./UsersTable";
 
 export default function UsersPage() {
   const navigate = useNavigate();
-  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch } = useGetApiUsers();
+
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch } = useGetApiUsers({
+    limit: String(limit),
+    offset: String(offset)
+  });
   const { data: rolesResponse, isLoading: isLoadingRoles } = useGetApiRoles();
 
   const deleteUserMutation = useDeleteApiUsersDeleteId();
@@ -28,11 +36,12 @@ export default function UsersPage() {
   const isSubmitting = deleteUserMutation.isPending;
   const isLoading = isLoadingUsers || isLoadingRoles;
 
-  // データ抽出
   const availableRoles = rolesResponse?.data || [];
 
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const meta = (usersResponse as any)?.meta;
 
   useEffect(() => {
     if (usersResponse?.data) {
@@ -72,9 +81,8 @@ export default function UsersPage() {
       setDeletingId(userId);
       try {
         await deleteUserMutation.mutateAsync({ id: String(userId) });
-        setUsers((prev) => prev.filter((u) => u.id !== userId));
-        showNotification(`ユーザー「${email}」を削除しました。`, "info");
         refetch();
+        showNotification(`ユーザー「${email}」を削除しました。`, "info");
       } catch (error) {
         console.error("Failed to delete user:", error);
         showNotification("ユーザーの削除に失敗しました。", "error");
@@ -173,8 +181,8 @@ export default function UsersPage() {
         </div>
         <div className="text-sm text-muted-foreground self-end sm:self-center shrink-0">
           該当ユーザー数:{" "}
-          <strong className="text-foreground">{filteredUsers.length}</strong> /{" "}
-          {users.length}
+          <strong className="text-foreground">{filteredUsers.length}</strong>
+          {meta?.totalCount ? ` / ${meta.totalCount} (全体)` : ` / ${users.length} (現在ページ)`}
         </div>
       </div>
 
@@ -187,6 +195,35 @@ export default function UsersPage() {
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
       />
+
+      <div className="flex items-center justify-between border-t pt-4">
+        <div className="text-sm text-muted-foreground">
+          {meta?.totalPages && (
+            <span>全 {meta.totalPages} ページ中 {page} ページ目を表示</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1 || isLoading}
+          >
+            前へ
+          </Button>
+          <div className="text-sm font-medium px-4">
+            {page}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={(meta?.totalPages ? page >= meta.totalPages : users.length < limit) || isLoading}
+          >
+            次へ
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

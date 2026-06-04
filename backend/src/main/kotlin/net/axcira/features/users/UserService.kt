@@ -1,9 +1,11 @@
 package net.axcira.features.users
 
 import kotlinx.serialization.Serializable
+import net.axcira.Pagination
 import net.axcira.UpdateResult
 import net.axcira.db.Users
 import net.axcira.features.auth.PasswordHasher
+import net.axcira.paginate
 import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
@@ -70,7 +72,8 @@ class UserService(val database: Database) {
     }
 
 
-    suspend fun getAllUsers(): List<UserDTO> = database.dbQuery {
-        Users.selectAll().map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+    suspend fun getAllUsers(pagination: Pagination): List<UserDTO> = database.dbQuery {
+        Users.selectAll().paginate(pagination).toList()
+            .map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
     }
 }
