@@ -86,7 +86,7 @@ class PermissionService(val database: Database) {
 
     suspend fun exists(roleId: UInt): Boolean {
         return database.dbQuery {
-            Role.selectAll().where{ Role.id eq roleId }.count() > 0
+            Role.selectAll().where{ Role.id eq roleId }.limit(1).count() > 0
         }
     }
 }
