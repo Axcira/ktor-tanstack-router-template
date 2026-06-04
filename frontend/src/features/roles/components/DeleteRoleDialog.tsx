@@ -34,20 +34,13 @@ export function DeleteRoleDialog({
   roles,
   isDeleting,
 }: DeleteRoleDialogProps) {
-  const [selectedFallbackId, setSelectedFallbackId] = useState<string>("4");
+  const [selectedFallbackId, setSelectedFallbackId] = useState<string>("");
 
   useEffect(() => {
     if (roleToDelete) {
-      // Set to "4" as default, or fallback to the first available non-deleted role
-      const availableRoles = roles.filter((r) => r.id !== roleToDelete.id);
-      const defaultFallback = availableRoles.some((r) => String(r.id) === "4")
-        ? "4"
-        : availableRoles[0]
-          ? String(availableRoles[0].id)
-          : "";
-      setSelectedFallbackId(defaultFallback);
+      setSelectedFallbackId("");
     }
-  }, [roleToDelete, roles]);
+  }, [roleToDelete]);
 
   const handleConfirm = () => {
     onConfirm(selectedFallbackId);
@@ -86,7 +79,11 @@ export function DeleteRoleDialog({
           <Button variant="outline" onClick={onClose} disabled={isDeleting}>
             キャンセル
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isDeleting}>
+          <Button
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isDeleting || !selectedFallbackId}
+          >
             {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             削除を実行
           </Button>
