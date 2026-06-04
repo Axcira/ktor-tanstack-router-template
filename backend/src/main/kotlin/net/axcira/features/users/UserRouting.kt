@@ -39,6 +39,11 @@ fun Application.users() {
         authenticate {
             withPermission<Permission>(Permission.ManageUsers) {
 
+                /**
+                 * Get all users with pagination
+                 *
+                 * OperationID: getUsers
+                 */
                 get() {
                     val pagination = Pagination(
                         call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
@@ -48,12 +53,22 @@ fun Application.users() {
                     call.respond(allUsers)
                 }
 
+                /**
+                 * Create a new user
+                 *
+                 * OperationID: createUser
+                 */
                 post("/create") {
                     val user = call.receive<CreateUserInput>()
                     val createdUser = userService.createUser(user)
                     call.respond(HttpStatusCode.Created, createdUser)
                 }
 
+                /**
+                 * Update a user by ID
+                 *
+                 * OperationID: updateUser
+                 */
                 patch("/update/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val user = call.receive<UpdateUserInput>()
@@ -63,6 +78,11 @@ fun Application.users() {
                     }
                 }
 
+                /**
+                 * Delete a user by ID
+                 *
+                 * OperationID: deleteUser
+                 */
                 delete("/delete/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     userService.delete(id)
