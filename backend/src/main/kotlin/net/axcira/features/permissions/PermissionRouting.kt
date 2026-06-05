@@ -7,8 +7,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import net.axcira.UpdateResult
-import net.axcira.apiRouting
+import net.axcira.*
 import net.axcira.features.auth.UserSession
 
 fun Application.permissions() {
@@ -52,7 +51,11 @@ fun Application.permissions() {
                  * OperationID: getRoles
                  */
                 get {
-                    val roles = permissionService.getAllRoles()
+                    val pagination = Pagination(
+                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                    )
+                    val roles = permissionService.getAllRoles(pagination)
                     call.respond(roles)
                 }
 
@@ -102,15 +105,15 @@ fun Application.permissions() {
                     val fallbackRoleId = call.request.queryParameters["fallbackRoleId"]?.toUIntOrNull()
                         ?: throw IllegalArgumentException("fallbackRoleId is required")
 
-                    if(fallbackRoleId == id){
+                    if (fallbackRoleId == id) {
                         call.respond(HttpStatusCode.BadRequest, "fallbackRoleId cannot be the same as the role to delete")
                         return@delete
                     }
 
-                   if(!permissionService.exists(fallbackRoleId)) {
-                       call.respond(HttpStatusCode.BadRequest, "fallbackRoleId does not exist")
-                       return@delete
-                   }
+                    if (!permissionService.exists(fallbackRoleId)) {
+                        call.respond(HttpStatusCode.BadRequest, "fallbackRoleId does not exist")
+                        return@delete
+                    }
 
                     permissionService.delete(id, fallbackRoleId)
                     call.respond(HttpStatusCode.NoContent)
