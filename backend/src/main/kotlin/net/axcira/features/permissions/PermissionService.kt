@@ -23,9 +23,6 @@ data class UpdateRoleInput(
     val permissions: Optional<List<Permission>> = Optional.None
 )
 
-@Serializable
-data class DeleteRoleInput(val fallbackRoleId: UInt)
-
 class PermissionService(val database: Database) {
     suspend fun getAllRoles(pagination: Pagination): List<RoleDTO> = database.dbQuery {
         Role.selectAll().paginate(pagination).map { RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]) }
