@@ -34,7 +34,7 @@ interface RoleFormProps {
   submitLabel: string;
 }
 
-// 初期化ロジックを再利用できるようにヘルパー関数として切り出し
+
 const computeInitialPermissionStates = (permissions?: Permission[]): PermissionStates => {
   const states: PermissionStates = {};
   permissionEntries.forEach(([type, def]) => {
@@ -69,7 +69,7 @@ export default function RoleForm({initialValues, onSubmit, onCancel, isSubmittin
   );
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // initialValuesが外部から変更されたらstateを同期する
+
   useEffect(() => {
     setRoleName(initialValues?.name || "");
     setRoleDescription(initialValues?.description || "");

@@ -41,6 +41,22 @@ const menuItems: MenuItem[] = [
     to: "/documentation",
     icon: <BookOpen />,
   },
+  {
+    text:"Administration",
+    icon: <Settings2 />,
+    requiredPermission: { type: "Administrator" },
+    children: [
+      {
+        text: "Users",
+        to: "/permissions/users",
+
+      },
+      {
+        text: "Roles",
+        to: "/permissions/roles",
+      }
+    ]
+  }
 ];
 
 export default menuItems;
