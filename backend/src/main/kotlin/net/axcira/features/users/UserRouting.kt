@@ -8,13 +8,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import net.axcira.Pagination
-import net.axcira.UpdateResult
-import net.axcira.apiRouting
+import net.axcira.*
 import net.axcira.features.auth.UserSession
-import net.axcira.features.permissions.Permission
-import net.axcira.features.permissions.PermissionService
-import net.axcira.features.permissions.withPermission
+import net.axcira.features.permissions.*
 
 fun Application.users() {
     val userService: UserService by dependencies
@@ -30,21 +26,19 @@ fun Application.users() {
             val user = call.receive<CreateUserInput>()
             val createdUser = userService.createUser(user)
             val permissions =
-                permissionService.getPermissionsForUser(createdUser.id)
-                    ?: throw IllegalArgumentException("User permissions not found")
+                permissionService.getPermissionsForUser(createdUser.id) ?: throw IllegalArgumentException("User permissions not found")
             call.sessions.set(UserSession(createdUser, permissions))
             call.respond(HttpStatusCode.Created, createdUser)
         }
 
         authenticate {
             withPermission<Permission>(Permission.ManageUsers) {
-
                 /**
                  * Get all users with pagination
                  *
                  * OperationID: getUsers
                  */
-                get() {
+                get {
                     val pagination = Pagination(
                         call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
                         call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
@@ -90,44 +84,41 @@ fun Application.users() {
                 }
             }
 
-                /**
-                 * Get current user
-                 *
-                 * OperationID: getSelf
-                 */
-                get("/me") {
-                    val principal =
-                        call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
-                    call.respond(principal)
-                }
-
-                /**
-                 * Update the current user
-                 *
-                 * OperationID: updateMe
-                 */
-                put("/me") {
-                    val principal =
-                        call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
-                    val userId = principal.user.id
-                    val user = call.receive<UpdateUserInput>()
-                    userService.update(userId, user)
-                    call.respond(HttpStatusCode.NoContent)
-                }
-
-                /**
-                 * Delete the current user
-                 *
-                 * OperationID: deleteMe
-                 */
-                delete("/me") {
-                    val principal =
-                        call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
-                    val userId = principal.user.id
-                    userService.delete(userId)
-                    call.respond(HttpStatusCode.NoContent)
-                }
+            /**
+             * Get current user
+             *
+             * OperationID: getSelf
+             */
+            get("/me") {
+                val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
+                call.respond(principal)
             }
+
+            /**
+             * Update the current user
+             *
+             * OperationID: updateMe
+             */
+            put("/me") {
+                val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
+                val userId = principal.user.id
+                val user = call.receive<UpdateUserInput>()
+                userService.update(userId, user)
+                call.respond(HttpStatusCode.NoContent)
+            }
+
+            /**
+             * Delete the current user
+             *
+             * OperationID: deleteMe
+             */
+            delete("/me") {
+                val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
+                val userId = principal.user.id
+                userService.delete(userId)
+                call.respond(HttpStatusCode.NoContent)
+            }
+        }
     }
-    }
+}
 
