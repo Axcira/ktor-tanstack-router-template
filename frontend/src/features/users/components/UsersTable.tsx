@@ -1,6 +1,6 @@
-import { Loader2, Mail, Edit2, Trash2 } from "lucide-react";
-import type { UserDTO } from "@/api/generated/schemas/userDTO";
+import { Edit2, Loader2, Mail, Trash2 } from "lucide-react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
+import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -119,6 +119,7 @@ export function UsersTable({
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center gap-1">
                           <Button
+                            aria-label="編集"
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 hover:bg-muted"
@@ -132,6 +133,7 @@ export function UsersTable({
                             <Edit2 className="h-3.5 w-3.5 text-foreground" />
                           </Button>
                           <Button
+                            aria-label="削除"
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
