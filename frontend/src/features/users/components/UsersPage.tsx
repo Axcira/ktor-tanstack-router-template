@@ -46,7 +46,9 @@ export default function UsersPage() {
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const meta = (usersResponse as any)?.meta;
+  const meta = (
+    usersResponse as { meta?: { totalCount?: number; totalPages?: number } }
+  )?.meta;
 
   useEffect(() => {
     if (usersResponse?.data) {
@@ -56,10 +58,6 @@ export default function UsersPage() {
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
-
-  useEffect(() => {
-    setPage(1);
-  }, [search, roleFilter]);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -75,14 +73,14 @@ export default function UsersPage() {
   };
 
   const handleOpenCreate = () => {
-    navigate({ to: "/permissions/users/create" });
+    navigate({ to: "/permissions/users/create" }).then();
   };
 
   const handleOpenEdit = (user: UserDTO) => {
     navigate({
       to: "/permissions/users/$userId/edit",
       params: { userId: String(user.id) },
-    });
+    }).then();
   };
 
   const handleDelete = async (userId: number, email: string) => {
@@ -90,7 +88,7 @@ export default function UsersPage() {
       setDeletingId(userId);
       try {
         await deleteUserMutation.mutateAsync({ id: String(userId) });
-        refetch();
+        await refetch();
         showNotification(`ユーザー「${email}」を削除しました。`, "info");
       } catch (error) {
         console.error("Failed to delete user:", error);
@@ -167,16 +165,23 @@ export default function UsersPage() {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
+              aria-label={"ユーザーを検索"}
               placeholder="メールアドレスで検索..."
               className="pl-9"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               disabled={isLoading}
             />
           </div>
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              setPage(1);
+            }}
             disabled={isLoading || availableRoles.length === 0}
             className="flex h-9 w-full sm:w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-muted-foreground dark:bg-background"
           >
