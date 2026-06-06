@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  Users,
+  Check,
   Plus,
   Search,
-  Check,
   ShieldAlert,
   ShieldCheck,
+  Users,
 } from "lucide-react";
-import type { UserDTO } from "@/api/generated/schemas/userDTO";
+import { useEffect, useState } from "react";
 import {
-  useGetUsers,
   useDeleteUser,
   useGetRoles,
+  useGetUsers,
 } from "@/api/generated/default/default.ts";
+import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UsersTable } from "./UsersTable";
@@ -25,9 +25,14 @@ export default function UsersPage() {
   const limit = 10;
   const offset = (page - 1) * limit;
 
-  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch } = useGetUsers({
+  const {
+    data: usersResponse,
+    isLoading: isLoadingUsers,
+    isError: isErrorUsers,
+    refetch,
+  } = useGetUsers({
     limit: String(limit),
-    offset: String(offset)
+    offset: String(offset),
   });
   const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
 
@@ -186,7 +191,9 @@ export default function UsersPage() {
         <div className="text-sm text-muted-foreground self-end sm:self-center shrink-0">
           該当ユーザー数:{" "}
           <strong className="text-foreground">{filteredUsers.length}</strong>
-          {meta?.totalCount ? ` / ${meta.totalCount} (全体)` : ` / ${users.length} (現在ページ)`}
+          {meta?.totalCount
+            ? ` / ${meta.totalCount} (全体)`
+            : ` / ${users.length} (現在ページ)`}
         </div>
       </div>
 
@@ -203,7 +210,9 @@ export default function UsersPage() {
       <div className="flex items-center justify-between border-t pt-4">
         <div className="text-sm text-muted-foreground">
           {meta?.totalPages && (
-            <span>全 {meta.totalPages} ページ中 {page} ページ目を表示</span>
+            <span>
+              全 {meta.totalPages} ページ中 {page} ページ目を表示
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -215,14 +224,16 @@ export default function UsersPage() {
           >
             前へ
           </Button>
-          <div className="text-sm font-medium px-4">
-            {page}
-          </div>
+          <div className="text-sm font-medium px-4">{page}</div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage((p) => p + 1)}
-            disabled={(meta?.totalPages ? page >= meta.totalPages : users.length < limit) || isLoading}
+            disabled={
+              (meta?.totalPages
+                ? page >= meta.totalPages
+                : users.length < limit) || isLoading
+            }
           >
             次へ
           </Button>

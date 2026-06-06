@@ -1,7 +1,8 @@
-import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import type { UserDTO } from "@/api/generated/schemas/userDTO";
+import type * as React from "react";
+import { useState } from "react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
+import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,16 +32,17 @@ export default function UserForm({
   const [userPassword, setUserPassword] = useState("");
   const [userRoleId, setUserRoleId] = useState<number>(() => {
     if (editingUser?.roleId) return editingUser.roleId;
-    const defaultRole =
+
+    return (
       availableRoles.find((r) => r.name === "Writer")?.id ||
       availableRoles[0]?.id ||
-      0;
-    return defaultRole;
+      0
+    );
   });
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setValidationError(null);
 
@@ -85,10 +87,11 @@ export default function UserForm({
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="user-email">
+          <Label htmlFor="user-email" id={"user-email-label"}>
             メールアドレス <span className="text-destructive">*</span>
           </Label>
           <Input
+            aria-labelledby={"user-email-label"}
             id="user-email"
             type="email"
             placeholder="例: user@example.com"
@@ -101,10 +104,11 @@ export default function UserForm({
 
         {!editingUser && (
           <div className="space-y-2">
-            <Label htmlFor="user-password">
+            <Label htmlFor="user-password" id="user-password-label">
               パスワード <span className="text-destructive">*</span>
             </Label>
             <Input
+              aria-labelledby="user-password-label"
               id="user-password"
               type="password"
               placeholder="パスワードを入力してください"
@@ -117,11 +121,12 @@ export default function UserForm({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="user-role">
+          <Label htmlFor="user-role" id="user-role-label">
             割り当てるロール <span className="text-destructive">*</span>
           </Label>
           <select
             id="user-role"
+            aria-labelledby="user-role-label"
             value={userRoleId}
             onChange={(e) => setUserRoleId(Number(e.target.value))}
             disabled={isSubmitting || isLoadingRoles}

@@ -1,9 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Users, Loader2 } from "lucide-react";
-import {
-  useCreateUser,
-  useGetRoles,
-} from "@/api/generated/default/default.ts";
+import { ArrowLeft, Loader2, Users } from "lucide-react";
+import { useCreateUser, useGetRoles } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import UserForm from "./UserForm";
 
@@ -76,7 +73,9 @@ export default function UserCreatePage() {
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Users className="h-8 w-8 text-primary" />
         <div className="space-y-0.5">
-          <h1 className="text-2xl font-bold tracking-tight">新規ユーザー登録</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            新規ユーザー登録
+          </h1>
           <p className="text-muted-foreground">
             システム利用ユーザーのアカウント設定および、ロールの割り当てを行います。
           </p>

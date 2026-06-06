@@ -1,32 +1,23 @@
-import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { Check, Info, Loader2, Plus, Search, Shield, X } from "lucide-react";
+import { useState } from "react";
 import {
-  Shield,
-  Plus,
-  Search,
-  Check,
-  X,
-  Info,
-  Loader2,
-} from "lucide-react";
+  getGetRolesQueryKey,
+  useDeleteRole,
+  useGetRoles,
+} from "@/api/generated/default/default";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  useGetRoles,
-  useDeleteRole,
-  getGetRolesQueryKey,
-} from "@/api/generated/default/default";
-import { RoleCard } from "./RoleCard";
 import { DeleteRoleDialog } from "./DeleteRoleDialog";
+import { RoleCard } from "./RoleCard";
 
 export default function RolesPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: rolesResponse, isLoading } = useGetRoles(
-  );
+  const { data: rolesResponse, isLoading } = useGetRoles();
   const roles = rolesResponse?.data || [];
 
   const deleteRoleMutation = useDeleteRole();
@@ -49,14 +40,14 @@ export default function RolesPage() {
   };
 
   const handleOpenCreate = () => {
-    navigate({ to: "/permissions/roles/create" });
+    navigate({ to: "/permissions/roles/create" }).then();
   };
 
   const handleOpenEdit = (role: RoleDTO) => {
     navigate({
       to: "/permissions/roles/$roleId/edit",
       params: { roleId: String(role.id) },
-    });
+    }).then();
   };
 
   const executeDelete = async (fallbackRoleId: string) => {
@@ -68,8 +59,11 @@ export default function RolesPage() {
         params: { fallbackRoleId },
       });
 
-      queryClient.invalidateQueries({ queryKey: getGetRolesQueryKey() });
-      showNotification(`ロール「${roleToDelete.name}」を削除しました。`, "info");
+      await queryClient.invalidateQueries({ queryKey: getGetRolesQueryKey() });
+      showNotification(
+        `ロール「${roleToDelete.name}」を削除しました。`,
+        "info",
+      );
       setRoleToDelete(null);
     } catch (error) {
       console.error(error);
@@ -125,6 +119,7 @@ export default function RolesPage() {
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
+            aria-label={"ロールを検索"}
             placeholder="ロール名や説明で検索..."
             className="pl-9"
             value={search}
@@ -162,11 +157,11 @@ export default function RolesPage() {
       )}
 
       <DeleteRoleDialog
-          roleToDelete={roleToDelete}
-          onClose={() => setRoleToDelete(null)}
-          onConfirm={executeDelete}
-          roles={roles}
-          isDeleting={isDeleting}
+        roleToDelete={roleToDelete}
+        onClose={() => setRoleToDelete(null)}
+        onConfirm={executeDelete}
+        roles={roles}
+        isDeleting={isDeleting}
       />
     </div>
   );

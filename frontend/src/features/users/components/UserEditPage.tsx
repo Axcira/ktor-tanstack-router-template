@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Users } from "lucide-react";
 import {
-  useGetUsers,
   useGetRoles,
+  useGetUsers,
   useUpdateUser,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
@@ -13,18 +13,25 @@ export default function UserEditPage() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
 
-  const { data: usersResponse, isLoading: isLoadingUsers, isError: isErrorUsers, refetch: refetchUsers, } = useGetUsers();
-  const { data: rolesResponse, isLoading: isLoadingRoles, isError: isErrorRoles, refetch: refetchRoles, } = useGetRoles();
+  const {
+    data: usersResponse,
+    isLoading: isLoadingUsers,
+    isError: isErrorUsers,
+    refetch: refetchUsers,
+  } = useGetUsers();
+  const {
+    data: rolesResponse,
+    isLoading: isLoadingRoles,
+    isError: isErrorRoles,
+    refetch: refetchRoles,
+  } = useGetRoles();
 
   const updateUser = useUpdateUser();
 
   const availableRoles = rolesResponse?.data || [];
   const user = usersResponse?.data?.find((u) => String(u.id) === userId);
 
-  const handleSubmit = async (values: {
-    email: string;
-    roleId: number;
-  }) => {
+  const handleSubmit = async (values: { email: string; roleId: number }) => {
     if (!user) return;
     await updateUser.mutateAsync({
       id: String(user.id),
@@ -58,8 +65,8 @@ export default function UserEditPage() {
           <Button
             variant="outline"
             onClick={() => {
-              if (isErrorUsers) refetchUsers();
-              if (isErrorRoles) refetchRoles();
+              if (isErrorUsers) refetchUsers().then();
+              if (isErrorRoles) refetchRoles().then();
             }}
           >
             再試行
@@ -100,7 +107,9 @@ export default function UserEditPage() {
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Users className="h-8 w-8 text-primary" />
         <div className="space-y-0.5">
-          <h1 className="text-2xl font-bold tracking-tight">ユーザー情報の編集</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            ユーザー情報の編集
+          </h1>
           <p className="text-muted-foreground">
             システム利用ユーザーのアカウント設定および、ロールの割り当てを行います。
           </p>

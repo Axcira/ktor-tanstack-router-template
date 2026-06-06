@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import type * as React from "react";
+import { useEffect, useState } from "react";
 import type { Permission } from "@/api/generated/schemas/permission";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,8 +35,9 @@ interface RoleFormProps {
   submitLabel: string;
 }
 
-
-const computeInitialPermissionStates = (permissions?: Permission[]): PermissionStates => {
+const computeInitialPermissionStates = (
+  permissions?: Permission[],
+): PermissionStates => {
   const states: PermissionStates = {};
   permissionEntries.forEach(([type, def]) => {
     const activePerm = permissions?.find((p) => p.type === type);
@@ -44,9 +46,9 @@ const computeInitialPermissionStates = (permissions?: Permission[]): PermissionS
     Object.entries(def.props).forEach(([propKey, propMeta]) => {
       if (propMeta.type === "boolean") {
         defaultProps[propKey] = activePerm
-          ? (((activePerm as unknown) as Record<string, unknown>)[
-          propKey
-          ] as boolean) ?? false
+          ? (((activePerm as unknown as Record<string, unknown>)[
+              propKey
+            ] as boolean) ?? false)
           : false;
       }
     });
@@ -59,21 +61,28 @@ const computeInitialPermissionStates = (permissions?: Permission[]): PermissionS
   return states;
 };
 
-export default function RoleForm({initialValues, onSubmit, onCancel, isSubmitting, submitLabel,}: RoleFormProps) {
+export default function RoleForm({
+  initialValues,
+  onSubmit,
+  onCancel,
+  isSubmitting,
+  submitLabel,
+}: RoleFormProps) {
   const [roleName, setRoleName] = useState(initialValues?.name || "");
   const [roleDescription, setRoleDescription] = useState(
     initialValues?.description || "",
   );
-  const [permissionStates, setPermissionStates] = useState<PermissionStates>(() =>
-    computeInitialPermissionStates(initialValues?.permissions)
+  const [permissionStates, setPermissionStates] = useState<PermissionStates>(
+    () => computeInitialPermissionStates(initialValues?.permissions),
   );
   const [validationError, setValidationError] = useState<string | null>(null);
-
 
   useEffect(() => {
     setRoleName(initialValues?.name || "");
     setRoleDescription(initialValues?.description || "");
-    setPermissionStates(computeInitialPermissionStates(initialValues?.permissions));
+    setPermissionStates(
+      computeInitialPermissionStates(initialValues?.permissions),
+    );
   }, [initialValues]);
 
   const handleTogglePermission = (type: string, checked: boolean) => {
@@ -99,7 +108,7 @@ export default function RoleForm({initialValues, onSubmit, onCancel, isSubmittin
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setValidationError(null);
 
@@ -141,10 +150,11 @@ export default function RoleForm({initialValues, onSubmit, onCancel, isSubmittin
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="role-name">
+          <Label htmlFor="role-name" id={"role-name-label"}>
             ロール名 <span className="text-destructive">*</span>
           </Label>
           <Input
+            aria-labelledby={"role-name-label"}
             id="role-name"
             placeholder="例: ContentModerator"
             value={roleName}
@@ -154,8 +164,11 @@ export default function RoleForm({initialValues, onSubmit, onCancel, isSubmittin
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="role-desc">説明</Label>
+          <Label htmlFor="role-desc" id={"role-desc-label"}>
+            説明
+          </Label>
           <Input
+            aria-labelledby={"role-desc-label"}
             id="role-desc"
             placeholder="このロールの役割についての説明..."
             value={roleDescription}
