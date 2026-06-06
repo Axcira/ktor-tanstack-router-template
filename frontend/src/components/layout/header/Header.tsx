@@ -1,20 +1,16 @@
-import { Menu, Shield, Key, Mail, ShieldAlert, Check } from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar.tsx";
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Route } from "@/routes/_app";
+import { Check, Key, Mail, Menu, Shield, ShieldAlert } from "lucide-react";
 import { useGetRoles } from "@/api/generated/default/default";
-import { PERMISSION_UI_DEFS } from "@/lib/permissions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSidebar } from "@/components/ui/sidebar.tsx";
+import { PERMISSION_UI_DEFS } from "@/lib/permissions";
+import { Route } from "@/routes/_app";
 
 export default function AppHeader() {
   const { toggleSidebar } = useSidebar();
@@ -26,11 +22,12 @@ export default function AppHeader() {
 
   const roles = rolesResponse?.data || [];
   const userRole = roles.find((role) => role.id === session?.user?.roleId);
-  const roleName = isLoadingRoles ? "読み込み中..." : (userRole?.name || "ゲスト");
+  const roleName = isLoadingRoles
+    ? "読み込み中..."
+    : userRole?.name || "ゲスト";
 
-  const isAdministrator = session?.permissions?.some(
-    (p) => p.type === "Administrator"
-  ) ?? false;
+  const isAdministrator =
+    session?.permissions?.some((p) => p.type === "Administrator") ?? false;
 
   return (
     <header className="w-full h-17 bg-background text-foreground border-b border-border flex items-center justify-between px-6">
@@ -42,9 +39,11 @@ export default function AppHeader() {
           aria-label="メニュー"
           onClick={toggleSidebar}
         >
-          <Menu className="h-6 w-6"/>
+          <Menu className="h-6 w-6" />
         </Button>
-        <span className="text-primary font-medium text-xl">Ktor-Tanstack-Router-Template</span>
+        <span className="text-primary font-medium text-xl">
+          Ktor-Tanstack-Router-Template
+        </span>
       </div>
 
       <DropdownMenu>
@@ -56,24 +55,33 @@ export default function AppHeader() {
             </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80 p-3 rounded-2xl bg-card border shadow-xl">
+        <DropdownMenuContent
+          align="end"
+          className="w-80 p-3 rounded-2xl bg-card border shadow-xl"
+        >
           <div className="flex flex-col space-y-2.5 p-2">
             <div className="flex items-center space-x-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Mail className="h-4 w-4" />
               </div>
               <div className="space-y-0.5 min-w-0">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">メールアドレス</p>
-                <p className="text-sm font-bold text-foreground truncate">{userEmail}</p>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  メールアドレス
+                </p>
+                <p className="text-sm font-bold text-foreground truncate">
+                  {userEmail}
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-500 dark:text-indigo-400">
                 <Shield className="h-4 w-4" />
               </div>
               <div className="space-y-0.5 min-w-0">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">ロール (役割)</p>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  ロール (役割)
+                </p>
                 <div className="flex items-center gap-1.5">
                   <span className="inline-flex items-center rounded-md bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-400 border border-indigo-200/50">
                     {roleName}
@@ -82,18 +90,18 @@ export default function AppHeader() {
               </div>
             </div>
           </div>
-          
+
           <DropdownMenuSeparator className="my-2" />
-          
+
           <div className="space-y-2 p-2">
             <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Key className="h-3.5 w-3.5" />
               付与されている権限一覧
             </div>
-            
+
             <div className="max-h-48 overflow-y-auto space-y-2 pr-1.5">
               {isAdministrator ? (
-                <div className="p-2.5 rounded-xl border border-violet-200/60 bg-gradient-to-r from-violet-500/5 to-purple-500/5 dark:border-violet-900/40">
+                <div className="p-2.5 rounded-xl border border-violet-200/60 bg-linear-to-r from-violet-500/5 to-purple-500/5 dark:border-violet-900/40">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-violet-700 dark:text-violet-400">
                     <ShieldAlert className="h-3.5 w-3.5" />
                     全権限アクセス許可
@@ -110,16 +118,27 @@ export default function AppHeader() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-1.5">
-                  {session.permissions.map((p, idx) => {
+                  {session.permissions.map((p) => {
                     const def = PERMISSION_UI_DEFS[p.type];
                     const propsStr = Object.entries(p)
                       .filter(([key]) => key !== "type")
-                      .map(([key, val]) => `${key}: ${val}`)
+                      .map(([key, val]) => {
+                        const propDef = def?.props?.[
+                          key as keyof typeof def.props
+                        ] as { label: string };
+                        const valueString =
+                          typeof val === "boolean"
+                            ? val
+                              ? "有効"
+                              : "無効"
+                            : val;
+                        return `${propDef?.label || key}: ${valueString}`;
+                      })
                       .join(", ");
-                    
+
                     return (
-                      <div 
-                        key={`${p.type}-${idx}`}
+                      <div
+                        key={p.type}
                         className="p-2 rounded-xl border border-primary/10 bg-primary/5 dark:bg-primary/5 hover:bg-primary/10 transition-all flex flex-col gap-0.5"
                       >
                         <div className="flex items-center gap-1 text-xs font-bold text-primary">

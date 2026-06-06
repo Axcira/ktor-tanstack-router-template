@@ -56,6 +56,7 @@ export type UI_Requirement<T extends { type: string }> = {
       : {
           [K in keyof Omit<P, "type">]: {
             label: string;
+            description: string;
             type: TsToRuntimeType<P[K]>;
           };
         };
@@ -74,7 +75,9 @@ export const PERMISSION_UI_DEFS = {
     description: "記事を削除する権限を与えます。",
     props: {
       allowOthers: {
-        label: "有効にすると、他人の記事も削除できます。",
+        label: "他人の記事の削除",
+        description:
+          "有効にすると、他人の記事も削除できます。無効の場合、自分が作成した記事のみ削除できます。",
         type: "boolean",
       },
     },
@@ -100,7 +103,9 @@ export const PERMISSION_UI_DEFS = {
     description: "記事を更新または編集する権限を与えます。",
     props: {
       allowOthers: {
-        label: "有効にすると、他人の記事も編集できます。",
+        label: "他人の記事の編集",
+        description:
+          "有効にすると、他人の記事も編集できます。無効の場合、自分が作成した記事のみ編集できます。",
         type: "boolean",
       },
     },

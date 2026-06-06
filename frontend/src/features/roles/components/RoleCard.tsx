@@ -1,12 +1,16 @@
-import { Key, Edit2, Trash2 } from "lucide-react";
+import {
+  Edit2,
+  Key,
+  Trash2
+} from "lucide-react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "@/components/ui/card";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
 
@@ -17,13 +21,18 @@ interface RoleCardProps {
   isDeleting: boolean;
 }
 
-export function RoleCard({ role, onEdit, onDelete, isDeleting }: RoleCardProps) {
+export function RoleCard({
+  role,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: RoleCardProps) {
   const isAdministrator = role.permissions.some(
     (p) => p.type === "Administrator",
   );
 
   return (
-    <Card className="relative flex flex-col justify-between hover:shadow-md transition-all border border-border/80 bg-gradient-to-br from-card to-background">
+    <Card className="relative flex flex-col justify-between hover:shadow-md transition-all border border-border/80 bg-linear-to-br from-card to-background">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
@@ -37,6 +46,7 @@ export function RoleCard({ role, onEdit, onDelete, isDeleting }: RoleCardProps) 
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <Button
+              aria-label="編集"
               variant="ghost"
               size="icon"
               className="h-8 w-8 hover:bg-muted"
@@ -47,6 +57,7 @@ export function RoleCard({ role, onEdit, onDelete, isDeleting }: RoleCardProps) 
             </Button>
             {role.name !== "Administrator" && (
               <Button
+                aria-label="削除"
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
@@ -66,11 +77,11 @@ export function RoleCard({ role, onEdit, onDelete, isDeleting }: RoleCardProps) 
           </div>
           {isAdministrator ? (
             <span className="inline-flex items-center rounded-md bg-violet-50 dark:bg-violet-950/30 px-2 py-1 text-xs font-semibold text-violet-700 dark:text-violet-400 border border-violet-200/50">
-              全機能アクセス (Administrator)
+              全ての権限
             </span>
           ) : role.permissions.length === 0 ? (
             <span className="text-xs text-muted-foreground italic">
-              権限はありません（読み取り専用）
+              権限はありません
             </span>
           ) : (
             <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
@@ -78,7 +89,14 @@ export function RoleCard({ role, onEdit, onDelete, isDeleting }: RoleCardProps) 
                 const def = PERMISSION_UI_DEFS[p.type];
                 const propsStr = Object.entries(p)
                   .filter(([key]) => key !== "type")
-                  .map(([key, val]) => `${key}: ${val}`)
+                  .map(([key, val]) => {
+                    const propDef = def?.props?.[
+                      key as keyof typeof def.props
+                    ] as { label: string };
+                    const valueString =
+                      typeof val === "boolean" ? (val ? "有効" : "無効") : val;
+                    return `${propDef?.label || key}: ${valueString}`;
+                  })
                   .join(", ");
                 return (
                   <span
