@@ -1,8 +1,4 @@
-import {
-  Edit2,
-  Key,
-  Trash2
-} from "lucide-react";
+import { Edit2, Key, Trash2 } from "lucide-react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import {
