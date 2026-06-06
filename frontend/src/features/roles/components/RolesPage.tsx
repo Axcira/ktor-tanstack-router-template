@@ -10,14 +10,19 @@ import {
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Route } from "@/routes/_app/permissions/roles.tsx";
 import { DeleteRoleDialog } from "./DeleteRoleDialog";
 import { RoleCard } from "./RoleCard";
 
 export default function RolesPage() {
+  const { page, limit } = Route.useSearch();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: rolesResponse, isLoading } = useGetRoles();
+  const { data: rolesResponse, isLoading } = useGetRoles({
+    limit: limit.toString(),
+    offset: ((page - 1) * limit).toString(),
+  });
   const roles = rolesResponse?.data || [];
 
   const deleteRoleMutation = useDeleteRole();
