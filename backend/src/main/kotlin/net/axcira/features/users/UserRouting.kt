@@ -8,9 +8,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import net.axcira.apiRouting
+import net.axcira.*
 import net.axcira.features.auth.UserSession
-import net.axcira.features.permissions.PermissionService
+import net.axcira.features.permissions.*
 
 fun Application.users() {
     val userService: UserService by dependencies
@@ -32,6 +32,58 @@ fun Application.users() {
         }
 
         authenticate {
+            withPermission<Permission>(Permission.ManageUsers) {
+                /**
+                 * Get all users with pagination
+                 *
+                 * OperationID: getUsers
+                 */
+                get {
+                    val pagination = Pagination(
+                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                    )
+                    val allUsers = userService.getAllUsers(pagination)
+                    call.respond(allUsers)
+                }
+
+                /**
+                 * Create a new user
+                 *
+                 * OperationID: createUser
+                 */
+                post("/create") {
+                    val user = call.receive<CreateUserInput>()
+                    val createdUser = userService.createUser(user)
+                    call.respond(HttpStatusCode.Created, createdUser)
+                }
+
+                /**
+                 * Update a user by ID
+                 *
+                 * OperationID: updateUser
+                 */
+                patch("/update/{id}") {
+                    val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                    val user = call.receive<UpdateUserInput>()
+                    when (userService.update(id, user)) {
+                        is UpdateResult.Success, is UpdateResult.NotModified -> call.respond(HttpStatusCode.NoContent)
+                        is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound, "User not found")
+                    }
+                }
+
+                /**
+                 * Delete a user by ID
+                 *
+                 * OperationID: deleteUser
+                 */
+                delete("/delete/{id}") {
+                    val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                    userService.delete(id)
+                    call.respond(HttpStatusCode.NoContent)
+                }
+            }
+
             /**
              * Get current user
              *

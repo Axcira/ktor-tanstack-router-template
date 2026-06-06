@@ -7,8 +7,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import net.axcira.UpdateResult
-import net.axcira.apiRouting
+import net.axcira.*
 import net.axcira.features.auth.UserSession
 
 fun Application.permissions() {
@@ -17,6 +16,11 @@ fun Application.permissions() {
     apiRouting {
         authenticate {
             route("/permissions") {
+                /**
+                 * Get permissions for a specific user
+                 *
+                 * OperationID: getUserPermissions
+                 */
                 get {
                     val userid =
                         call.request.queryParameters["userid"]?.toUIntOrNull() ?: throw IllegalArgumentException("No user id found")
@@ -41,17 +45,46 @@ fun Application.permissions() {
                 }
             }
             route("/roles") {
+                /**
+                 * Get all roles
+                 *
+                 * OperationID: getRoles
+                 */
+                get {
+                    val pagination = Pagination(
+                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                    )
+                    val roles = permissionService.getAllRoles(pagination)
+                    call.respond(roles)
+                }
+
+                /**
+                 * Get role by ID
+                 *
+                 * OperationID: getRoleById
+                 */
                 get("/{roleId}") {
                     val roleId = call.parameters["roleId"]?.toUIntOrNull() ?: throw IllegalArgumentException("No role id found")
                     val role = permissionService.getRoleById(roleId) ?: return@get call.respond(HttpStatusCode.NotFound)
                     call.respond(role)
                 }
+                /**
+                 * Create a new role
+                 *
+                 * OperationID: createRole
+                 */
                 post {
                     val role = call.receive<CreateRoleInput>()
                     val createdRole = permissionService.create(role)
                     call.respond(HttpStatusCode.Created, createdRole)
                 }
 
+                /**
+                 * Update a role by ID
+                 *
+                 * OperationID: updateRole
+                 */
                 patch("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                     val scheme = call.receive<UpdateRoleInput>()
@@ -62,12 +95,30 @@ fun Application.permissions() {
                     }
                 }
 
+                /**
+                 * Delete a role by ID with a fallback role
+                 *
+                 * OperationID: deleteRole
+                 */
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
-                    val deleteRoleInput = call.receive<DeleteRoleInput>()
-                    permissionService.delete(id, deleteRoleInput)
+                    val fallbackRoleId = call.request.queryParameters["fallbackRoleId"]?.toUIntOrNull()
+                        ?: throw IllegalArgumentException("fallbackRoleId is required")
+
+                    if (fallbackRoleId == id) {
+                        call.respond(HttpStatusCode.BadRequest, "fallbackRoleId cannot be the same as the role to delete")
+                        return@delete
+                    }
+
+                    if (!permissionService.exists(fallbackRoleId)) {
+                        call.respond(HttpStatusCode.BadRequest, "fallbackRoleId does not exist")
+                        return@delete
+                    }
+
+                    permissionService.delete(id, fallbackRoleId)
                     call.respond(HttpStatusCode.NoContent)
                 }
+
             }
         }
     }

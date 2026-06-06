@@ -1,7 +1,7 @@
 package net.axcira.features.permissions
 
 import kotlinx.serialization.Serializable
-import net.axcira.UpdateResult
+import net.axcira.*
 import net.axcira.db.Role
 import net.axcira.db.Users
 import net.axcira.plugins.Optional
@@ -23,12 +23,9 @@ data class UpdateRoleInput(
     val permissions: Optional<List<Permission>> = Optional.None
 )
 
-@Serializable
-data class DeleteRoleInput(val fallbackRoleId: UInt)
-
 class PermissionService(val database: Database) {
-    suspend fun getAllRoles(): List<RoleDTO> = database.dbQuery {
-        Role.selectAll().map { RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]) }
+    suspend fun getAllRoles(pagination: Pagination): List<RoleDTO> = database.dbQuery {
+        Role.selectAll().paginate(pagination).map { RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]) }
     }
 
     suspend fun getRoleByName(name: String): RoleDTO? = database.dbQuery {
@@ -76,8 +73,17 @@ class PermissionService(val database: Database) {
         } ?: UpdateResult.NotFound
     }
 
-    suspend fun delete(id: UInt, deleteRoleInput: DeleteRoleInput): Int = database.dbQuery {
-        Users.update({ Users.roleId eq id }) { it[Users.roleId] = deleteRoleInput.fallbackRoleId }
-        Role.deleteWhere { Role.id eq id }
+    suspend fun delete(id: UInt, fallbackRoleId: UInt): Int {
+        require(id != fallbackRoleId) { "Cannot fallback to the same role being deleted (id: $id)" }
+        return database.dbQuery {
+            Users.update({ Users.roleId eq id }) { it[roleId] = fallbackRoleId }
+            Role.deleteWhere { Role.id eq id }
+        }
+    }
+
+    suspend fun exists(roleId: UInt): Boolean {
+        return database.dbQuery {
+            Role.selectAll().where { Role.id eq roleId }.limit(1).count() > 0
+        }
     }
 }
