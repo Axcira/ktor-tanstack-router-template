@@ -13,10 +13,10 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.containers.PostgreSQLContainer
 
-val isLayden = System.getenv("IS_LAYDEN").also { println(it) } == "true"
+val isLeyden = System.getenv("IS_LEYDEN").also { println(it) } == "true"
 fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
     configure("application.yaml", "test.application.yaml")
-    if (isLayden) {
+    if (isLeyden) {
         client = HttpClient {
             install(ContentNegotiation) {
                 json()
@@ -41,7 +41,7 @@ fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testAppli
     try {
         block(client)
     } finally {
-        if (isLayden) {
+        if (isLeyden) {
             client.post("/api/reset")
         }
     }
@@ -51,7 +51,7 @@ private fun createPostgresContainer(): PostgreSQLContainer<*> {
     return PostgreSQLContainer("postgres:18.4").apply { start() }
 }
 
-val database = if (isLayden) {
+val database = if (isLeyden) {
     val url = "jdbc:postgresql://localhost:5432/postgres"
     val dataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = url

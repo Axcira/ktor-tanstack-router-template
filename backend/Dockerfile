@@ -19,7 +19,7 @@ RUN ./gradlew shadowJar --no-daemon
 
 # The admin password using ARG operation won't preserve on final image (i think)
 ARG ADMIN_PASSWORD=password
-ARG IS_LAYDEN=true
+ARG IS_LEYDEN=true
 
 RUN service postgresql start && \
     su postgres -c "psql -c \"ALTER USER postgres WITH PASSWORD 'password';\"" && \

@@ -16,7 +16,7 @@ fun Application.root() {
         get("/json/kotlinx-serialization") {
             call.respond(mapOf("hello" to "world"))
         }
-        if (System.getenv("IS_LAYDEN") == "true") {
+        if (System.getenv("IS_LEYDEN") == "true") {
             post("/reset") {
                 val flyway = Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").cleanDisabled(false).load()
                 flyway.clean()
