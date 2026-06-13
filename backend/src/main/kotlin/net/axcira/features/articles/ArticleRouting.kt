@@ -66,7 +66,7 @@ fun Application.articles() {
                 val scheme = call.receive<UpdateArticleInput>()
                 val article = articleService.getById(id) ?: return@patch call.respond(HttpStatusCode.NotFound)
 
-                val requiredPermission = Permission.UpdateArticle(article.userId == session.user.id)
+                val requiredPermission = Permission.UpdateArticle(article.userId != session.user.id)
                 if (!session.permissions.satisfies(requiredPermission)) throw NoPermissionException(requiredPermission)
 
                 when (val updatedArticle = articleService.update(id, scheme)) {
@@ -86,7 +86,7 @@ fun Application.articles() {
                 val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
                 val article = articleService.getById(id) ?: return@delete call.respond(HttpStatusCode.NotFound)
 
-                val requiredPermission = Permission.DeleteArticle(article.userId == session.user.id)
+                val requiredPermission = Permission.DeleteArticle(article.userId != session.user.id)
                 if (!session.permissions.satisfies(requiredPermission)) throw NoPermissionException(requiredPermission)
 
                 articleService.delete(id)

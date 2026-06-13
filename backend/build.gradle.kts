@@ -77,6 +77,8 @@ tasks.register<Exec>("generateClient") {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("io.ktor.development", "true")
+    environment("ADMIN_PASSWORD", "password")
 }
 
 exposed {

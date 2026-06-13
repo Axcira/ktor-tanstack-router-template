@@ -13,36 +13,42 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.containers.PostgreSQLContainer
 
-val isLeyden = System.getenv("IS_LEYDEN").also { println(it) } == "true"
-fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
-    configure("application.yaml", "test.application.yaml")
-    if (isLeyden) {
-        client = HttpClient {
-            install(ContentNegotiation) {
-                json()
-            }
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-            }
-            defaultRequest(replace = true) {
-                url("http://localhost:8080")
-            }
-        }
-    } else {
-        client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-            }
-        }
+val isLeyden = System.getenv("IS_LEYDEN") == "true"
+
+fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) {
+    if (!isLeyden) {
+        resetDatabase()
     }
-    try {
-        block(client)
-    } finally {
+    testApplication {
+        configure("application.yaml", "test.application.yaml")
         if (isLeyden) {
-            client.post("/api/reset")
+            client = HttpClient {
+                install(ContentNegotiation) {
+                    json()
+                }
+                install(HttpCookies) {
+                    storage = AcceptAllCookiesStorage()
+                }
+                defaultRequest(replace = true) {
+                    url("http://localhost:8080")
+                }
+            }
+        } else {
+            client = createClient {
+                install(ContentNegotiation) {
+                    json()
+                }
+                install(HttpCookies) {
+                    storage = AcceptAllCookiesStorage()
+                }
+            }
+        }
+        try {
+            block(client)
+        } finally {
+            if (isLeyden) {
+                client.post("/api/reset")
+            }
         }
     }
 }
@@ -51,25 +57,34 @@ private fun createPostgresContainer(): PostgreSQLContainer<*> {
     return PostgreSQLContainer("postgres:18.4").apply { start() }
 }
 
-val database = if (isLeyden) {
-    val url = "jdbc:postgresql://localhost:5432/postgres"
-    val dataSource = HikariDataSource(HikariConfig().apply {
-        jdbcUrl = url
+private val postgresContainer = if (isLeyden) null else createPostgresContainer()
+
+private val testDataSource = HikariDataSource(HikariConfig().apply {
+    if (isLeyden) {
+        jdbcUrl = "jdbc:postgresql://localhost:5432/postgres"
         driverClassName = "org.postgresql.Driver"
         username = "postgres"
         password = "password"
-    })
-    Database.connect(dataSource)
-} else {
-    val postgres = createPostgresContainer()
-    val dataSource = HikariDataSource(HikariConfig().apply {
-        jdbcUrl = postgres.jdbcUrl
-        driverClassName = postgres.driverClassName
-        username = postgres.username
-        password = postgres.password
-    })
-    Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate()
-    Database.connect(dataSource)
+    } else {
+        jdbcUrl = postgresContainer!!.jdbcUrl
+        driverClassName = postgresContainer.driverClassName
+        username = postgresContainer.username
+        password = postgresContainer.password
+    }
+})
+
+val database = run {
+    if (!isLeyden) {
+        Flyway.configure().dataSource(testDataSource).locations("classpath:db/migration").load().migrate()
+    }
+    Database.connect(testDataSource)
+}
+
+private fun resetDatabase() {
+    Flyway.configure().dataSource(testDataSource).locations("classpath:db/migration").cleanDisabled(false).load().apply {
+        clean()
+        migrate()
+    }
 }
 
 fun database() = database

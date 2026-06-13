@@ -80,7 +80,7 @@ class PermissionTest {
         // Ensure admin user can create article
         client.post("/api/users") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("admin@example.com", "password", roleId = adminRole.id))
+            setBody(CreateUserInput("permission-admin@example.com", "password", roleId = adminRole.id))
         }.let {
             assertEquals(HttpStatusCode.Created, it.status)
         }
