@@ -2431,6 +2431,150 @@
         <option name="homepage" value="https://blockus.lndevui.com" />
         <option name="urlTemplate" value="https://blockus.lndevui.com/r/{name}.json" />
       </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-cubby-ui" />
+        <option name="name" value="Cubby-ui" />
+        <option name="namespace" value="@cubby-ui" />
+        <option name="baseUrl" value="https://www.cubby-ui.dev/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="An opinionated component library with curated styling and simplified patterns for common use cases. Built on Base UI and Tailwind CSS 4." />
+        <option name="homepage" value="https://www.cubby-ui.dev" />
+        <option name="urlTemplate" value="https://www.cubby-ui.dev/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-extend" />
+        <option name="name" value="Extend" />
+        <option name="namespace" value="@extend" />
+        <option name="baseUrl" value="https://ui.extend.ai/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="A collection of UI components for building document agents and human-in-the-loop review workflows." />
+        <option name="homepage" value="https://ui.extend.ai" />
+        <option name="urlTemplate" value="https://ui.extend.ai/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-gamekitui" />
+        <option name="name" value="Gamekitui" />
+        <option name="namespace" value="@gamekitui" />
+        <option name="baseUrl" value="https://gamekitui.com/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Drop-in, themeable browser games for shadcn — Snake, 2048, Minesweeper, and more. Each is a single self-contained file with zero dependencies." />
+        <option name="homepage" value="https://gamekitui.com" />
+        <option name="urlTemplate" value="https://gamekitui.com/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-grootstudio" />
+        <option name="name" value="Grootstudio" />
+        <option name="namespace" value="@grootstudio" />
+        <option name="baseUrl" value="https://grootstudio.vercel.app/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="A premium, open source component registry for SEO-friendly, high-performance React applications" />
+        <option name="homepage" value="https://grootstudio.vercel.app" />
+        <option name="urlTemplate" value="https://grootstudio.vercel.app/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-baraile-loader" />
+        <option name="name" value="Baraile-loader" />
+        <option name="namespace" value="@baraile-loader" />
+        <option name="baseUrl" value="https://shadcn-braille-loader.vercel.app/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="A simple braille-inspired loader components for shadcn/ui." />
+        <option name="homepage" value="https://shadcn-braille-loader.vercel.app" />
+        <option name="urlTemplate" value="https://shadcn-braille-loader.vercel.app/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-beui" />
+        <option name="name" value="Beui" />
+        <option name="namespace" value="@beui" />
+        <option name="baseUrl" value="https://beui.saura3h.xyz/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Bespoke motion components for React. Copy-paste components with shadcn-compatible installs, Tailwind CSS v4, and Motion." />
+        <option name="homepage" value="https://beui.saura3h.xyz" />
+        <option name="urlTemplate" value="https://beui.saura3h.xyz/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-delego" />
+        <option name="name" value="Delego" />
+        <option name="namespace" value="@delego" />
+        <option name="baseUrl" value="https://raw.githubusercontent.com/Delego-Dev/registry/main/public/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Design-system registry for Delego — intent-bound action authorization for AI agents. Theme (OKLCH) plus signature components: decision pill, signed receipt, status badge, field." />
+        <option name="homepage" value="https://github.com/Delego-Dev/registry" />
+        <option name="urlTemplate" value="https://raw.githubusercontent.com/Delego-Dev/registry/main/public/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-gpt-vis" />
+        <option name="name" value="Gpt-vis" />
+        <option name="namespace" value="@gpt-vis" />
+        <option name="baseUrl" value="https://gpt-vis.antv.vision/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="AI-native visualization components for LLM projects. Render 26 chart types from vis syntax strings or config objects." />
+        <option name="homepage" value="https://gpt-vis.antv.vision" />
+        <option name="urlTemplate" value="https://gpt-vis.antv.vision/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-ogimagecn" />
+        <option name="name" value="Ogimagecn" />
+        <option name="namespace" value="@ogimagecn" />
+        <option name="baseUrl" value="https://ogimagecn.vercel.app/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Beautiful OG images, made simple. Ready to use, customizable Open Graph image components for React." />
+        <option name="homepage" value="https://ogimagecn.vercel.app" />
+        <option name="urlTemplate" value="https://ogimagecn.vercel.app/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-soralabs" />
+        <option name="name" value="Soralabs" />
+        <option name="namespace" value="@soralabs" />
+        <option name="baseUrl" value="https://ui.soralabs.io.vn/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Motion-first React primitives and animated UI components for shadcn/ui. Copy, customize, and ship fluid interfaces." />
+        <option name="homepage" value="https://ui.soralabs.io.vn" />
+        <option name="urlTemplate" value="https://ui.soralabs.io.vn/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-untld" />
+        <option name="name" value="Untld" />
+        <option name="namespace" value="@untld" />
+        <option name="baseUrl" value="https://ui.untldlabs.com/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="A set of beautifully designed components for modern web applications." />
+        <option name="homepage" value="https://ui.untldlabs.com" />
+        <option name="urlTemplate" value="https://ui.untldlabs.com/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-saaskit" />
+        <option name="name" value="Saaskit" />
+        <option name="namespace" value="@saaskit" />
+        <option name="baseUrl" value="https://saaskit-theta.vercel.app/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="10 essential shadcn/ui components for B2B SaaS: Pricing, Billing, Usage, and Onboarding. Minimalist Soft Brutalist design." />
+        <option name="homepage" value="https://saaskit-theta.vercel.app" />
+        <option name="urlTemplate" value="https://saaskit-theta.vercel.app/r/{name}.json" />
+      </RegistryConfigState>
     </registryConfigs>
   </component>
 </project>
