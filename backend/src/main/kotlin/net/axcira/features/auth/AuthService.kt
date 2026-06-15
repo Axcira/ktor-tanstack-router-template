@@ -9,6 +9,7 @@ import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.slf4j.LoggerFactory
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
@@ -27,6 +28,8 @@ suspend fun <T> minWait(duration: Duration, block: suspend () -> T): T {
 }
 
 class AuthService(private val database: Database) {
+    private val log = LoggerFactory.getLogger(AuthService::class.java)
+
     private data class AuthUserCredential(
         val id: UInt, val email: String, val roleId: UInt, val passwordHash: String
     )
@@ -41,9 +44,15 @@ class AuthService(private val database: Database) {
         } ?: return@minWait null
 
         val isValid = PasswordHasher.verifyPassword(password, credential.first.passwordHash)
-        return@minWait if (isValid) UserSession(credential.first.let {
-            UserDTO(it.id, it.email, it.roleId)
-        }, credential.second) else null
+        if (isValid) {
+            log.info("User logged in: ${credential.first.email}")
+            return@minWait UserSession(credential.first.let {
+                UserDTO(it.id, it.email, it.roleId)
+            }, credential.second)
+        } else {
+            log.warn("Failed login attempt for email: ${credential.first.email}")
+            return@minWait null
+        }
     }
 }
 

@@ -7,6 +7,7 @@ ktor:
     modules:
       # Main Plugins
       - net.axcira.ApplicationKt.main
+      - net.axcira.plugins.LoggingKt.configureLogging
       - net.axcira.plugins.SerializationKt.configureSerialization
       - net.axcira.features.auth.AuthenticationKt.configureAuthentication
       - net.axcira.plugins.OpenApiKt.configureOpenApi

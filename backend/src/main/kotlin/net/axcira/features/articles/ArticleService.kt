@@ -7,6 +7,7 @@ import net.axcira.db.Articles.title
 import net.axcira.plugins.*
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
+import org.slf4j.LoggerFactory
 
 @Serializable
 data class CreateArticleInput(val title: String, val description: String, val body: String, val tagList: List<String>)
@@ -37,6 +38,7 @@ private fun upsertTags(tags: List<String>) = run {
 }
 
 class ArticleService(val database: Database) {
+    private val log = LoggerFactory.getLogger(ArticleService::class.java)
     suspend fun get(pagination: Pagination): List<ArticleDTO> = database.dbQuery {
         val articles = Articles.selectAll().paginate(pagination).toList()
         val tagsByArticle = (ArticleTags innerJoin Tags).selectAll().where { ArticleTags.articleId inList articles.map { it[Articles.id] } }
@@ -89,7 +91,9 @@ class ArticleService(val database: Database) {
         }
         ArticleDTO(
             articleId, createdArticle[Articles.userId].value, article.title, article.description, article.body, tags
-        )
+        ).also {
+            log.info("Article created: id=$articleId, title=\"${article.title}\"")
+        }
     }
 
     suspend fun update(id: UInt, article: UpdateArticleInput): UpdateResult<ArticleDTO> = database.dbQuery {
@@ -152,5 +156,6 @@ class ArticleService(val database: Database) {
             ArticleTags.deleteWhere { ArticleTags.articleId eq id }
             Articles.deleteWhere { Articles.id eq id }
         }
+        log.info("Article deleted: id=$id")
     }
 }

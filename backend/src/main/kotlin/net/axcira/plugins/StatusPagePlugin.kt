@@ -8,8 +8,14 @@ import net.axcira.features.permissions.NoPermissionException
 
 fun Application.statusPage() {
     install(StatusPages) {
-        exception<NoPermissionException> { call, _ ->
+        val appLog = this@statusPage.log
+        exception<NoPermissionException> { call, cause ->
+            appLog.warn("Access denied: ${call.request.local.uri}", cause)
             call.respond(HttpStatusCode.Forbidden)
+        }
+        exception<Throwable> { call, cause ->
+            appLog.error("Unhandled exception: ${call.request.local.uri}", cause)
+            call.respond(HttpStatusCode.InternalServerError)
         }
     }
 }

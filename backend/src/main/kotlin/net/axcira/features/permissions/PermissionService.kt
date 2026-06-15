@@ -8,6 +8,7 @@ import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
+import org.slf4j.LoggerFactory
 
 
 @Serializable
@@ -24,6 +25,7 @@ data class UpdateRoleInput(
 )
 
 class PermissionService(val database: Database) {
+    private val log = LoggerFactory.getLogger(PermissionService::class.java)
     suspend fun getAllRoles(pagination: Pagination): List<RoleDTO> = database.dbQuery {
         Role.selectAll().paginate(pagination).map { RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]) }
     }
@@ -50,7 +52,9 @@ class PermissionService(val database: Database) {
             it[description] = role.description
             it[permissions] = role.permissions
         }.single()
-        RoleDTO(createdRole[Role.id].value, createdRole[Role.name], createdRole[Role.description], createdRole[Role.permissions])
+        val dto = RoleDTO(createdRole[Role.id].value, createdRole[Role.name], createdRole[Role.description], createdRole[Role.permissions])
+        log.info("Role created: id=${dto.id}, name=\"${dto.name}\"")
+        dto
     }
 
     suspend fun update(id: UInt, updateRoleInput: UpdateRoleInput): UpdateResult<RoleDTO> = database.dbQuery {
@@ -78,6 +82,8 @@ class PermissionService(val database: Database) {
         return database.dbQuery {
             Users.update({ Users.roleId eq id }) { it[roleId] = fallbackRoleId }
             Role.deleteWhere { Role.id eq id }
+        }.also {
+            log.info("Role deleted: id=$id, fallbackRoleId=$fallbackRoleId")
         }
     }
 

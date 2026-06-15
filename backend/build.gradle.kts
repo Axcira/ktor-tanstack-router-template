@@ -22,6 +22,7 @@ kotlin {
 dependencies {
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.auth)
+    implementation(ktorLibs.server.callLogging)
     implementation(ktorLibs.server.cio)
     implementation(ktorLibs.server.config.yaml)
     implementation(ktorLibs.server.contentNegotiation)
