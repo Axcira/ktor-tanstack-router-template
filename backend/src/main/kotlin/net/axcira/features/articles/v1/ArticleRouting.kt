@@ -1,4 +1,4 @@
-package net.axcira.features.articles
+package net.axcira.features.articles.v1
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -8,6 +8,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import net.axcira.*
+import net.axcira.features.articles.ArticleService
+import net.axcira.features.articles.CreateArticleInput
+import net.axcira.features.articles.UpdateArticleInput
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.*
 
@@ -19,7 +22,7 @@ fun Application.articles() {
             /**
              * List articles
              *
-             * OperationID: listArticles
+             * OperationID: listArticlesV1
              */
             get {
                 val pagination = Pagination(
@@ -33,7 +36,7 @@ fun Application.articles() {
             /**
              * Get a single article
              *
-             * OperationID: getArticle
+             * OperationID: getArticleV1
              */
             get("/{id}") {
                 val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
@@ -45,7 +48,7 @@ fun Application.articles() {
                 /**
                  * Create an article
                  *
-                 * OperationID: createArticle
+                 * OperationID: createArticleV1
                  */
                 post {
                     val article = call.receive<CreateArticleInput>()
@@ -58,7 +61,7 @@ fun Application.articles() {
             /**
              * Update an article
              *
-             * OperationID: updateArticle
+             * OperationID: updateArticleV1
              */
             patch("/{id}") {
                 val session = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
@@ -79,7 +82,7 @@ fun Application.articles() {
             /**
              * Delete an article
              *
-             * OperationID: deleteArticle
+             * OperationID: deleteArticleV1
              */
             delete("/{id}") {
                 val session = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
@@ -95,4 +98,3 @@ fun Application.articles() {
         }
     }
 }
-

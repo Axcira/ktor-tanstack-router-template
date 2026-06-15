@@ -30,13 +30,13 @@ class ArticleRoutingTest {
             }
         }
         // Create test user
-        val user = client.post("/api/users") {
+        val user = client.post("/api/v1/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("article-admin@example.com", "password", role.value))
         }.body<UserDTO>()
 
         // Create test article
-        val createdArticle = client.post("/api/articles") {
+        val createdArticle = client.post("/api/v1/articles") {
             contentType(ContentType.Application.Json)
             setBody(
                 CreateArticleInput(
@@ -60,11 +60,11 @@ class ArticleRoutingTest {
         }
 
         // Get created article
-        val article = client.get("/api/articles/${createdArticle.id}").body<ArticleDTO>()
+        val article = client.get("/api/v1/articles/${createdArticle.id}").body<ArticleDTO>()
         assertEquals(createdArticle, article)
 
         // Create another article
-        client.post("/api/articles") {
+        client.post("/api/v1/articles") {
             contentType(ContentType.Application.Json)
             setBody(
                 CreateArticleInput(
@@ -74,11 +74,11 @@ class ArticleRoutingTest {
         }
 
         // Get all articles
-        val articles = client.get("/api/articles").body<List<ArticleDTO>>()
+        val articles = client.get("/api/v1/articles").body<List<ArticleDTO>>()
         assertEquals(2, articles.size)
 
         // Update article
-        client.patch("/api/articles/${createdArticle.id}") {
+        client.patch("/api/v1/articles/${createdArticle.id}") {
             contentType(ContentType.Application.Json)
             setBody(
                 """
@@ -94,7 +94,7 @@ class ArticleRoutingTest {
             assertEquals(HttpStatusCode.OK, it.status)
         }
 
-        client.get("/api/articles/${createdArticle.id}").let {
+        client.get("/api/v1/articles/${createdArticle.id}").let {
             assertEquals(HttpStatusCode.OK, it.status)
             val article = it.body<ArticleDTO>()
             assertContains(article.title, "Updated")
@@ -104,8 +104,8 @@ class ArticleRoutingTest {
         }
 
         // Delete article
-        assertEquals(HttpStatusCode.NoContent, client.delete("/api/articles/${createdArticle.id}").status)
-        assertEquals(HttpStatusCode.NotFound, client.get("/api/articles/${createdArticle.id}").status)
-        assertEquals(1, client.get("/api/articles").body<List<ArticleDTO>>().size)
+        assertEquals(HttpStatusCode.NoContent, client.delete("/api/v1/articles/${createdArticle.id}").status)
+        assertEquals(HttpStatusCode.NotFound, client.get("/api/v1/articles/${createdArticle.id}").status)
+        assertEquals(1, client.get("/api/v1/articles").body<List<ArticleDTO>>().size)
     }
 }

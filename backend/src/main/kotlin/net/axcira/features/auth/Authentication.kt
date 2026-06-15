@@ -18,6 +18,9 @@ import org.jetbrains.exposed.v1.jdbc.*
 @Serializable
 data class UserSession(val user: UserDTO, val permissions: List<Permission>)
 
+@Serializable
+data class LoginRequest(val email: String, val password: String)
+
 class DatabaseSessionStorage(private val database: Database) : SessionStorage {
     override suspend fun invalidate(id: String) {
         database.dbQuery {

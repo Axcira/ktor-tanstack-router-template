@@ -15,9 +15,9 @@ ktor:
 
       # Features
       - net.axcira.ApplicationInitializerKt.subscribe
-      - net.axcira.features.auth.AuthRoutingKt.auth
-      - net.axcira.features.users.UserRoutingKt.users
-      - net.axcira.features.articles.ArticleRoutingKt.articles
-      - net.axcira.features.permissions.PermissionRoutingKt.permissions
+      - net.axcira.features.auth.v1.AuthRoutingKt.auth
+      - net.axcira.features.users.v1.UserRoutingKt.users
+      - net.axcira.features.articles.v1.ArticleRoutingKt.articles
+      - net.axcira.features.permissions.v1.PermissionRoutingKt.permissions
     dependencies:
       - net.axcira.plugins.DatabasesKt.database

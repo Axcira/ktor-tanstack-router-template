@@ -21,18 +21,19 @@ fun Application.main() {
 }
 
 /**
- * /api 以下にルーティングを設定する。
- * 指定されたパスを基にルーティングを作成し、ブロック内で個別のエンドポイントを定義可能。
+ * /api/v{version} 以下にルーティングを設定する。
+ * 指定されたバージョンとパスを基にルーティングを作成し、ブロック内で個別のエンドポイントを定義可能。
  *
- * @param route ルートのパス。指定された場合、"/api/<path>" の形でルーティングが設定される。デフォルトはnull。
+ * @param route ルートのパス。指定された場合、"/api/v{version}/<path>" の形でルーティングが設定される。デフォルトはnull。
+ * @param version APIバージョン。デフォルトは1。
  * @param block ルーティングブロック。Routeスコープ内でエンドポイントを定義可能。
  */
-fun Application.apiRouting(route: String? = null, block: Route.() -> Unit) {
+fun Application.apiRouting(route: String? = null, version: Int = 1, block: Route.() -> Unit) {
     val path = route?.let {
         if (it.startsWith("/")) it else "/$it"
     } ?: ""
     routing {
-        route("/api${path}") {
+        route("/api/v${version}${path}") {
             block()
         }
     }

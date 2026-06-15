@@ -32,14 +32,14 @@ class PermissionTest {
         }
 
         // Create test user
-        client.post("/api/users") {
+        client.post("/api/v1/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("test@example.com", "password", roleId = adminRole.id))
         }.let {
             assertEquals(HttpStatusCode.Created, it.status)
         }
 
-        val staffRole = client.post("/api/roles") {
+        val staffRole = client.post("/api/v1/roles") {
             contentType(ContentType.Application.Json)
             setBody(
                 CreateRoleInput(
@@ -50,7 +50,7 @@ class PermissionTest {
             assertEquals(HttpStatusCode.Created, it.status)
             it.body<RoleDTO>()
         }
-        val userRole = client.post("/api/roles") {
+        val userRole = client.post("/api/v1/roles") {
             contentType(ContentType.Application.Json)
             setBody(
                 CreateRoleInput(
@@ -66,11 +66,11 @@ class PermissionTest {
             title = "Test Article", description = "This is a test article", body = "", tagList = emptyList()
         )
         // Ensure normal user can't create article
-        client.post("/api/users") {
+        client.post("/api/v1/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("user@example.com", "password", roleId = userRole.id))
         }
-        client.post("/api/articles") {
+        client.post("/api/v1/articles") {
             contentType(ContentType.Application.Json)
             setBody(article)
         }.let {
@@ -78,13 +78,13 @@ class PermissionTest {
         }
 
         // Ensure admin user can create article
-        client.post("/api/users") {
+        client.post("/api/v1/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("permission-admin@example.com", "password", roleId = adminRole.id))
         }.let {
             assertEquals(HttpStatusCode.Created, it.status)
         }
-        val createdArticle = client.post("/api/articles") {
+        val createdArticle = client.post("/api/v1/articles") {
             contentType(ContentType.Application.Json)
             setBody(article)
         }.let {
@@ -93,13 +93,13 @@ class PermissionTest {
         }
 
         // Ensure staff user can't edit others' article
-        client.post("/api/users") {
+        client.post("/api/v1/users") {
             contentType(ContentType.Application.Json)
             setBody(CreateUserInput("staff@example.com", "password", roleId = staffRole.id))
         }.let {
             assertEquals(HttpStatusCode.Created, it.status)
         }
-        client.patch("/api/articles/${createdArticle.id}") {
+        client.patch("/api/v1/articles/${createdArticle.id}") {
             contentType(ContentType.Application.Json)
             setBody(article)
         }.let {
