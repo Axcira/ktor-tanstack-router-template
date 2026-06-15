@@ -1,4 +1,4 @@
-package net.axcira.features.users
+package net.axcira.features.users.v1
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -11,6 +11,9 @@ import io.ktor.server.sessions.*
 import net.axcira.*
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.*
+import net.axcira.features.users.CreateUserInput
+import net.axcira.features.users.UpdateUserInput
+import net.axcira.features.users.UserService
 
 fun Application.users() {
     val userService: UserService by dependencies
@@ -20,7 +23,7 @@ fun Application.users() {
         /**
          * Create a new user
          *
-         * OperationID: createUser
+         * OperationID: createUserV1
          */
         post {
             val user = call.receive<CreateUserInput>()
@@ -36,7 +39,7 @@ fun Application.users() {
                 /**
                  * Get all users with pagination
                  *
-                 * OperationID: getUsers
+                 * OperationID: getUsersV1
                  */
                 get {
                     val pagination = Pagination(
@@ -50,7 +53,7 @@ fun Application.users() {
                 /**
                  * Create a new user
                  *
-                 * OperationID: createUser
+                 * OperationID: createUserV1
                  */
                 post("/create") {
                     val user = call.receive<CreateUserInput>()
@@ -61,7 +64,7 @@ fun Application.users() {
                 /**
                  * Update a user by ID
                  *
-                 * OperationID: updateUser
+                 * OperationID: updateUserV1
                  */
                 patch("/update/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
@@ -75,7 +78,7 @@ fun Application.users() {
                 /**
                  * Delete a user by ID
                  *
-                 * OperationID: deleteUser
+                 * OperationID: deleteUserV1
                  */
                 delete("/delete/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
@@ -87,7 +90,7 @@ fun Application.users() {
             /**
              * Get current user
              *
-             * OperationID: getSelf
+             * OperationID: getSelfV1
              */
             get("/me") {
                 val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
@@ -97,7 +100,7 @@ fun Application.users() {
             /**
              * Update the current user
              *
-             * OperationID: updateMe
+             * OperationID: updateMeV1
              */
             put("/me") {
                 val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
@@ -110,7 +113,7 @@ fun Application.users() {
             /**
              * Delete the current user
              *
-             * OperationID: deleteMe
+             * OperationID: deleteMeV1
              */
             delete("/me") {
                 val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
@@ -121,4 +124,3 @@ fun Application.users() {
         }
     }
 }
-

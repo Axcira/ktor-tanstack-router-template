@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalKtorApi::class)
 
-package net.axcira.features.auth
+package net.axcira.features.auth.v1
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -10,11 +10,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.utils.io.*
-import kotlinx.serialization.Serializable
 import net.axcira.apiRouting
-
-@Serializable
-data class LoginRequest(val email: String, val password: String)
+import net.axcira.features.auth.AuthService
+import net.axcira.features.auth.LoginRequest
+import net.axcira.features.auth.UserSession
 
 fun Application.auth() {
     val authService: AuthService by dependencies
@@ -23,7 +22,7 @@ fun Application.auth() {
         /**
          * Authenticate (Login)
          *
-         * OperationID: login
+         * OperationID: loginV1
          */
         post("/login") {
             val request = call.receive<LoginRequest>()
@@ -35,7 +34,7 @@ fun Application.auth() {
         /**
          * Logout
          *
-         * OperationID: logout
+         * OperationID: logoutV1
          */
         post("/logout") {
             call.sessions.clear<UserSession>()

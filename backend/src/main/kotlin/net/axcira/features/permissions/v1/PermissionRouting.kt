@@ -1,4 +1,4 @@
-package net.axcira.features.permissions
+package net.axcira.features.permissions.v1
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -9,6 +9,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import net.axcira.*
 import net.axcira.features.auth.UserSession
+import net.axcira.features.permissions.CreateRoleInput
+import net.axcira.features.permissions.Permission
+import net.axcira.features.permissions.PermissionService
+import net.axcira.features.permissions.UpdateRoleInput
+import net.axcira.features.permissions.satisfies
 
 fun Application.permissions() {
     val permissionService: PermissionService by dependencies
@@ -19,7 +24,7 @@ fun Application.permissions() {
                 /**
                  * Get permissions for a specific user
                  *
-                 * OperationID: getUserPermissions
+                 * OperationID: getUserPermissionsV1
                  */
                 get {
                     val userid =
@@ -31,7 +36,7 @@ fun Application.permissions() {
                 /**
                  * Check permission for user
                  *
-                 * OperationID: canI
+                 * OperationID: canIV1
                  */
                 post("/can-i") {
                     val permissions = call.principal<UserSession>()?.permissions ?: throw IllegalArgumentException("User not authenticated")
@@ -48,7 +53,7 @@ fun Application.permissions() {
                 /**
                  * Get all roles
                  *
-                 * OperationID: getRoles
+                 * OperationID: getRolesV1
                  */
                 get {
                     val pagination = Pagination(
@@ -62,7 +67,7 @@ fun Application.permissions() {
                 /**
                  * Get role by ID
                  *
-                 * OperationID: getRoleById
+                 * OperationID: getRoleByIdV1
                  */
                 get("/{roleId}") {
                     val roleId = call.parameters["roleId"]?.toUIntOrNull() ?: throw IllegalArgumentException("No role id found")
@@ -72,7 +77,7 @@ fun Application.permissions() {
                 /**
                  * Create a new role
                  *
-                 * OperationID: createRole
+                 * OperationID: createRoleV1
                  */
                 post {
                     val role = call.receive<CreateRoleInput>()
@@ -83,7 +88,7 @@ fun Application.permissions() {
                 /**
                  * Update a role by ID
                  *
-                 * OperationID: updateRole
+                 * OperationID: updateRoleV1
                  */
                 patch("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
@@ -98,7 +103,7 @@ fun Application.permissions() {
                 /**
                  * Delete a role by ID with a fallback role
                  *
-                 * OperationID: deleteRole
+                 * OperationID: deleteRoleV1
                  */
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
