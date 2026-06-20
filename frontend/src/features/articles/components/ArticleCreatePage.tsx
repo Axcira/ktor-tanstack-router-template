@@ -3,7 +3,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useCreateArticle } from "@/api/generated/default/default.ts";
+import { useCreateArticleV1 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import ArticleForm, { type ArticleFormValues } from "./ArticleForm";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
@@ -12,7 +12,7 @@ import LoadingSpinner from "@/components/LoadingSpinner.tsx";
 
 export default function ArticleCreatePage() {
   const navigate = useNavigate();
-  const createArticle = useCreateArticle();
+  const createArticle = useCreateArticleV1();
   const {isAllowed, isLoading} = useAuthorize({type: "CreateArticle"})
 
   if (isLoading) {

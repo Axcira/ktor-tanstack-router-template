@@ -27,7 +27,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip.tsx";
-import { useLogout } from "@/api/generated/default/default.ts";
+import { useLogoutV1 } from "@/api/generated/default/default.ts";
 
 export default function AppSidebarFooter() {
   const router = useRouter()
@@ -35,7 +35,7 @@ export default function AppSidebarFooter() {
   const {state} = useSidebar()
 
 
-  const logoutMutation = useLogout({
+  const logoutMutation = useLogoutV1({
     mutation: {
       onSuccess: async () => {
         console.log("サーバー側のログアウトに成功しました")

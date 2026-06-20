@@ -4,7 +4,7 @@ import {
   Outlet,
   redirect,
 } from "@tanstack/react-router"
-import { getSelf } from "@/api/generated/default/default.ts";
+import { getSelfV1 } from "@/api/generated/default/default.ts";
 import Header from "@/components/layout/header/Header.tsx"
 import { AppSidebar } from "@/components/layout/sidebar/AppSidebar.tsx"
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -12,7 +12,7 @@ import { queryClient } from "@/routes/__root.tsx";
 
 const selfQueryOptions = queryOptions({
   queryKey: ["self"], queryFn: async () => {
-    const self = await getSelf()
+    const self = await getSelfV1()
     if (self.status === 200) return self.data
     throw new Error("Failed to fetch self data")
   }, staleTime: 1000 * 60,

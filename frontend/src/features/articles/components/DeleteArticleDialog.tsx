@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useDeleteArticle } from "@/api/generated/default/default";
+import { useDeleteArticleV1 } from "@/api/generated/default/default";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -26,7 +26,7 @@ export default function DeleteArticleDialog({
 }: DeleteArticleDialogProps) {
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
-  const deleteMutation = useDeleteArticle();
+  const deleteMutation = useDeleteArticleV1();
 
   const handleDelete = async () => {
     setIsDeleting(true);

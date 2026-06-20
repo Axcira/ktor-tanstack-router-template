@@ -9,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { useGetArticle } from "@/api/generated/default/default.ts";
+import { useGetArticleV1 } from "@/api/generated/default/default.ts";
 import type { ArticleDTO } from "@/api/generated/schemas";
 import { Button } from "@/components/ui/button";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
@@ -86,7 +86,7 @@ function ArticleDetail({article}: { article: ArticleDTO }) {
 export default function ArticleDetailPage() {
   const {articleId} = Route.useParams();
 
-  const {data, isLoading, isError} = useGetArticle(articleId);
+  const {data, isLoading, isError} = useGetArticleV1(articleId);
   const article = data?.data;
 
   if (isLoading) {

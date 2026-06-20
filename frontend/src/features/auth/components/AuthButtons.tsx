@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button";
-import { useGetSelf } from "@/api/generated/default/default.ts";
+import { useGetSelfV1 } from "@/api/generated/default/default.ts";
 
 
 export default function AuthButtons() {
-  const {data} = useGetSelf()
+  const {data} = useGetSelfV1()
 
   return (<div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
     {data?.status !== 200 ? (<>

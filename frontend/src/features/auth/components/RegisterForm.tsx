@@ -3,13 +3,13 @@ import { useState, type SubmitEventHandler } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateUser } from "@/api/generated/default/default.ts";
+import { useCreateUserV1 } from "@/api/generated/default/default.ts";
 
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const registerMutation = useCreateUser();
+  const registerMutation = useCreateUserV1();
   const navigate = useNavigate();
 
   const handleSubmit: SubmitEventHandler = (e) => {

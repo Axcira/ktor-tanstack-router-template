@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  useDeleteUser,
-  useGetRoles,
-  useGetUsers,
+  useDeleteUserV1,
+  useGetRolesV1,
+  useGetUsersV1,
 } from "@/api/generated/default/default.ts";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { Button } from "@/components/ui/button";
@@ -30,13 +30,13 @@ export default function UsersPage() {
     isLoading: isLoadingUsers,
     isError: isErrorUsers,
     refetch,
-  } = useGetUsers({
+  } = useGetUsersV1({
     limit: String(limit),
     offset: String(offset),
   });
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRolesV1();
 
-  const deleteUserMutation = useDeleteUser();
+  const deleteUserMutation = useDeleteUserV1();
 
   const isSubmitting = deleteUserMutation.isPending;
   const isLoading = isLoadingUsers || isLoadingRoles;

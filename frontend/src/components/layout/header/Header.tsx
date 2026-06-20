@@ -1,5 +1,5 @@
 import { Check, Key, Mail, Menu, Shield, ShieldAlert } from "lucide-react";
-import { useGetRoles } from "@/api/generated/default/default";
+import { useGetRolesV1 } from "@/api/generated/default/default";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import { Route } from "@/routes/_app";
 export default function AppHeader() {
   const { toggleSidebar } = useSidebar();
   const { session } = Route.useRouteContext();
-  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRoles();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRolesV1();
 
   const userEmail = session?.user?.email || "User";
   const fallbackChar = userEmail[0].toUpperCase();

@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Users } from "lucide-react";
 import {
-  useGetRoles,
-  useGetUsers,
-  useUpdateUser,
+  useGetRolesV1,
+  useGetUsersV1,
+  useUpdateUserV1,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Route } from "@/routes/_app/permissions/users/$userId.edit.tsx";
@@ -18,15 +18,15 @@ export default function UserEditPage() {
     isLoading: isLoadingUsers,
     isError: isErrorUsers,
     refetch: refetchUsers,
-  } = useGetUsers();
+  } = useGetUsersV1();
   const {
     data: rolesResponse,
     isLoading: isLoadingRoles,
     isError: isErrorRoles,
     refetch: refetchRoles,
-  } = useGetRoles();
+  } = useGetRolesV1();
 
-  const updateUser = useUpdateUser();
+  const updateUser = useUpdateUserV1();
 
   const availableRoles = rolesResponse?.data || [];
   const user = usersResponse?.data?.find((u) => String(u.id) === userId);

@@ -8,7 +8,7 @@ import {
   Loader2,
   Plus,
 } from "lucide-react";
-import { useListArticles } from "@/api/generated/default/default.ts";
+import { useListArticlesV1 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 import { Route } from "@/routes/_app/articles/index.tsx";
@@ -18,7 +18,7 @@ export default function ArticlesListPage() {
   const navigate = useNavigate({from: Route.fullPath});
   const {isAllowed: isAllowedCreation} = useAuthorize({type: "CreateArticle"})
 
-  const {data, isLoading, isError} = useListArticles({
+  const {data, isLoading, isError} = useListArticlesV1({
     limit: limit.toString(), offset: ((page - 1) * limit).toString(),
   });
 

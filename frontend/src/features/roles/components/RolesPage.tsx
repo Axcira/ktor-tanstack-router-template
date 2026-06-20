@@ -3,9 +3,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, Info, Loader2, Plus, Search, Shield, X } from "lucide-react";
 import { useState } from "react";
 import {
-  getGetRolesQueryKey,
-  useDeleteRole,
-  useGetRoles,
+  getGetRolesV1QueryKey,
+  useDeleteRoleV1,
+  useGetRolesV1,
 } from "@/api/generated/default/default";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
@@ -19,13 +19,13 @@ export default function RolesPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: rolesResponse, isLoading } = useGetRoles({
+  const { data: rolesResponse, isLoading } = useGetRolesV1({
     limit: limit.toString(),
     offset: ((page - 1) * limit).toString(),
   });
   const roles = rolesResponse?.data || [];
 
-  const deleteRoleMutation = useDeleteRole();
+  const deleteRoleMutation = useDeleteRoleV1();
   const isDeleting = deleteRoleMutation.isPending;
 
   const [search, setSearch] = useState("");
@@ -64,7 +64,7 @@ export default function RolesPage() {
         params: { fallbackRoleId },
       });
 
-      await queryClient.invalidateQueries({ queryKey: getGetRolesQueryKey() });
+      await queryClient.invalidateQueries({ queryKey: getGetRolesV1QueryKey() });
       showNotification(
         `ロール「${roleToDelete.name}」を削除しました。`,
         "info",

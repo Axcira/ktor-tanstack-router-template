@@ -5,8 +5,8 @@ import {
 } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import {
-  useGetArticle,
-  useUpdateArticle,
+  useGetArticleV1,
+  useUpdateArticleV1,
 } from "@/api/generated/default/default.ts";
 import type { ArticleDTO } from "@/api/generated/schemas";
 import LoadingSpinner from "@/components/LoadingSpinner.tsx";
@@ -19,7 +19,7 @@ import NoPermission from "@/components/NoPermission.tsx";
 export default function ArticleEditPage() {
   const {articleId} = Route.useParams();
 
-  const {data, isLoading, isError} = useGetArticle(articleId);
+  const {data, isLoading, isError} = useGetArticleV1(articleId);
   const article = data?.data;
 
   if (isLoading) {
@@ -40,7 +40,7 @@ export default function ArticleEditPage() {
 
 function ArticleEditForm({article}: { article: ArticleDTO }) {
   const {session} = useRouteContext({from: "/_app"});
-  const updateArticle = useUpdateArticle();
+  const updateArticle = useUpdateArticleV1();
   const navigate = useNavigate();
   const articleId = article.id.toString();
   const {isAllowed, isLoading: isLoadingPermission} = useAuthorize({

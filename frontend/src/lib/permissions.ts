@@ -1,4 +1,4 @@
-import { canI } from "@/api/generated/default/default.ts";
+import { canIV1 } from "@/api/generated/default/default.ts";
 import type { Permission, UserSession } from "@/api/generated/schemas";
 
 type StaticPermission = {
@@ -31,7 +31,7 @@ export async function checkPermission(
   }
 
   try {
-    const canIResponse = await canI(permission);
+    const canIResponse = await canIV1(permission);
     console.log("canIResponse", canIResponse);
     return canIResponse.status === 200;
   } catch (error) {
