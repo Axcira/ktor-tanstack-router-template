@@ -17,7 +17,14 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
+import { Route as AppShowcaseIndexRouteImport } from './routes/_app/showcase/index'
 import { Route as AppArticlesIndexRouteImport } from './routes/_app/articles/index'
+import { Route as AppShowcaseUploadRouteImport } from './routes/_app/showcase/upload'
+import { Route as AppShowcaseTableRouteImport } from './routes/_app/showcase/table'
+import { Route as AppShowcaseModalsRouteImport } from './routes/_app/showcase/modals'
+import { Route as AppShowcaseFormRouteImport } from './routes/_app/showcase/form'
+import { Route as AppShowcaseDetailRouteImport } from './routes/_app/showcase/detail'
+import { Route as AppShowcaseChatRouteImport } from './routes/_app/showcase/chat'
 import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground/nav1-2'
 import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
 import { Route as AppPlaygroundNav111RouteImport } from './routes/_app/playground/nav1-1-1'
@@ -73,10 +80,45 @@ const AppArticlesRoute = AppArticlesRouteImport.update({
   path: '/articles',
   getParentRoute: () => AppRoute,
 } as any)
+const AppShowcaseIndexRoute = AppShowcaseIndexRouteImport.update({
+  id: '/showcase/',
+  path: '/showcase/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppArticlesIndexRoute = AppArticlesIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppArticlesRoute,
+} as any)
+const AppShowcaseUploadRoute = AppShowcaseUploadRouteImport.update({
+  id: '/showcase/upload',
+  path: '/showcase/upload',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseTableRoute = AppShowcaseTableRouteImport.update({
+  id: '/showcase/table',
+  path: '/showcase/table',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseModalsRoute = AppShowcaseModalsRouteImport.update({
+  id: '/showcase/modals',
+  path: '/showcase/modals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseFormRoute = AppShowcaseFormRouteImport.update({
+  id: '/showcase/form',
+  path: '/showcase/form',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseDetailRoute = AppShowcaseDetailRouteImport.update({
+  id: '/showcase/detail',
+  path: '/showcase/detail',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseChatRoute = AppShowcaseChatRouteImport.update({
+  id: '/showcase/chat',
+  path: '/showcase/chat',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppPlaygroundNav12Route = AppPlaygroundNav12RouteImport.update({
   id: '/playground/nav1-2',
@@ -177,7 +219,14 @@ export interface FileRoutesByFullPath {
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
+  '/showcase/chat': typeof AppShowcaseChatRoute
+  '/showcase/detail': typeof AppShowcaseDetailRoute
+  '/showcase/form': typeof AppShowcaseFormRoute
+  '/showcase/modals': typeof AppShowcaseModalsRoute
+  '/showcase/table': typeof AppShowcaseTableRoute
+  '/showcase/upload': typeof AppShowcaseUploadRoute
   '/articles/': typeof AppArticlesIndexRoute
+  '/showcase/': typeof AppShowcaseIndexRoute
   '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/permissions/roles/create': typeof AppPermissionsRolesCreateRoute
   '/permissions/users/create': typeof AppPermissionsUsersCreateRoute
@@ -199,7 +248,14 @@ export interface FileRoutesByTo {
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/playground/nav1-2': typeof AppPlaygroundNav12Route
+  '/showcase/chat': typeof AppShowcaseChatRoute
+  '/showcase/detail': typeof AppShowcaseDetailRoute
+  '/showcase/form': typeof AppShowcaseFormRoute
+  '/showcase/modals': typeof AppShowcaseModalsRoute
+  '/showcase/table': typeof AppShowcaseTableRoute
+  '/showcase/upload': typeof AppShowcaseUploadRoute
   '/articles': typeof AppArticlesIndexRoute
+  '/showcase': typeof AppShowcaseIndexRoute
   '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/permissions/roles/create': typeof AppPermissionsRolesCreateRoute
   '/permissions/users/create': typeof AppPermissionsUsersCreateRoute
@@ -226,7 +282,14 @@ export interface FileRoutesById {
   '/_app/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/_app/playground/nav1-1-2': typeof AppPlaygroundNav112Route
   '/_app/playground/nav1-2': typeof AppPlaygroundNav12Route
+  '/_app/showcase/chat': typeof AppShowcaseChatRoute
+  '/_app/showcase/detail': typeof AppShowcaseDetailRoute
+  '/_app/showcase/form': typeof AppShowcaseFormRoute
+  '/_app/showcase/modals': typeof AppShowcaseModalsRoute
+  '/_app/showcase/table': typeof AppShowcaseTableRoute
+  '/_app/showcase/upload': typeof AppShowcaseUploadRoute
   '/_app/articles/': typeof AppArticlesIndexRoute
+  '/_app/showcase/': typeof AppShowcaseIndexRoute
   '/_app/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/_app/permissions/roles/create': typeof AppPermissionsRolesCreateRoute
   '/_app/permissions/users/create': typeof AppPermissionsUsersCreateRoute
@@ -253,7 +316,14 @@ export interface FileRouteTypes {
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
     | '/playground/nav1-2'
+    | '/showcase/chat'
+    | '/showcase/detail'
+    | '/showcase/form'
+    | '/showcase/modals'
+    | '/showcase/table'
+    | '/showcase/upload'
     | '/articles/'
+    | '/showcase/'
     | '/articles/$articleId/edit'
     | '/permissions/roles/create'
     | '/permissions/users/create'
@@ -275,7 +345,14 @@ export interface FileRouteTypes {
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
     | '/playground/nav1-2'
+    | '/showcase/chat'
+    | '/showcase/detail'
+    | '/showcase/form'
+    | '/showcase/modals'
+    | '/showcase/table'
+    | '/showcase/upload'
     | '/articles'
+    | '/showcase'
     | '/articles/$articleId/edit'
     | '/permissions/roles/create'
     | '/permissions/users/create'
@@ -301,7 +378,14 @@ export interface FileRouteTypes {
     | '/_app/playground/nav1-1-1'
     | '/_app/playground/nav1-1-2'
     | '/_app/playground/nav1-2'
+    | '/_app/showcase/chat'
+    | '/_app/showcase/detail'
+    | '/_app/showcase/form'
+    | '/_app/showcase/modals'
+    | '/_app/showcase/table'
+    | '/_app/showcase/upload'
     | '/_app/articles/'
+    | '/_app/showcase/'
     | '/_app/articles/$articleId/edit'
     | '/_app/permissions/roles/create'
     | '/_app/permissions/users/create'
@@ -377,12 +461,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppArticlesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/showcase/': {
+      id: '/_app/showcase/'
+      path: '/showcase'
+      fullPath: '/showcase/'
+      preLoaderRoute: typeof AppShowcaseIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/articles/': {
       id: '/_app/articles/'
       path: '/'
       fullPath: '/articles/'
       preLoaderRoute: typeof AppArticlesIndexRouteImport
       parentRoute: typeof AppArticlesRoute
+    }
+    '/_app/showcase/upload': {
+      id: '/_app/showcase/upload'
+      path: '/showcase/upload'
+      fullPath: '/showcase/upload'
+      preLoaderRoute: typeof AppShowcaseUploadRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/table': {
+      id: '/_app/showcase/table'
+      path: '/showcase/table'
+      fullPath: '/showcase/table'
+      preLoaderRoute: typeof AppShowcaseTableRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/modals': {
+      id: '/_app/showcase/modals'
+      path: '/showcase/modals'
+      fullPath: '/showcase/modals'
+      preLoaderRoute: typeof AppShowcaseModalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/form': {
+      id: '/_app/showcase/form'
+      path: '/showcase/form'
+      fullPath: '/showcase/form'
+      preLoaderRoute: typeof AppShowcaseFormRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/detail': {
+      id: '/_app/showcase/detail'
+      path: '/showcase/detail'
+      fullPath: '/showcase/detail'
+      preLoaderRoute: typeof AppShowcaseDetailRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/chat': {
+      id: '/_app/showcase/chat'
+      path: '/showcase/chat'
+      fullPath: '/showcase/chat'
+      preLoaderRoute: typeof AppShowcaseChatRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/playground/nav1-2': {
       id: '/_app/playground/nav1-2'
@@ -551,6 +684,13 @@ interface AppRouteChildren {
   AppPlaygroundNav111Route: typeof AppPlaygroundNav111Route
   AppPlaygroundNav112Route: typeof AppPlaygroundNav112Route
   AppPlaygroundNav12Route: typeof AppPlaygroundNav12Route
+  AppShowcaseChatRoute: typeof AppShowcaseChatRoute
+  AppShowcaseDetailRoute: typeof AppShowcaseDetailRoute
+  AppShowcaseFormRoute: typeof AppShowcaseFormRoute
+  AppShowcaseModalsRoute: typeof AppShowcaseModalsRoute
+  AppShowcaseTableRoute: typeof AppShowcaseTableRoute
+  AppShowcaseUploadRoute: typeof AppShowcaseUploadRoute
+  AppShowcaseIndexRoute: typeof AppShowcaseIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -564,6 +704,13 @@ const AppRouteChildren: AppRouteChildren = {
   AppPlaygroundNav111Route: AppPlaygroundNav111Route,
   AppPlaygroundNav112Route: AppPlaygroundNav112Route,
   AppPlaygroundNav12Route: AppPlaygroundNav12Route,
+  AppShowcaseChatRoute: AppShowcaseChatRoute,
+  AppShowcaseDetailRoute: AppShowcaseDetailRoute,
+  AppShowcaseFormRoute: AppShowcaseFormRoute,
+  AppShowcaseModalsRoute: AppShowcaseModalsRoute,
+  AppShowcaseTableRoute: AppShowcaseTableRoute,
+  AppShowcaseUploadRoute: AppShowcaseUploadRoute,
+  AppShowcaseIndexRoute: AppShowcaseIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "@/components/ui/sonner"
 import "../styles.css"
 import {
   QueryClient,
@@ -26,6 +27,7 @@ function RootComponent() {
           <main className="min-h-screen bg-background">
             <Outlet/>
           </main>
+          <Toaster richColors position="bottom-right" />
         </TooltipProvider>
       </QueryClientProvider>
 
