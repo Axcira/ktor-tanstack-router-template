@@ -1,17 +1,17 @@
-# AGENTS.md
+# Development Template
 
 ## Dev startup order
 
 ```bash
 docker compose up -d                  # Postgres on :5432
-cd backend && ./gradlew run           # Ktor dev server on :8080 (auto-reload via watch classes)
+cd backend && ./gradlew run           # Ktor dev server on :8080 (auto reload enabled)
 cd frontend && bun run dev            # Vite dev server on :3000 (HMR, proxies /api -> :8080)
 ```
 
 For full DX, also run in separate terminals:
 
 ```bash
-cd backend && ./gradlew generateOpenApiJson -t -i   # continuous OpenAPI spec generation
+cd backend && ./gradlew generateOpenApiJson -t -i   # continuous OpenAPI spec generation. this task depends on compileKotlin, so you can combine it with Ktor dev server to achieve auto reloading
 cd frontend && bun run orval:watch                  # watches generated spec -> regenerates TS client
 ```
 
@@ -52,6 +52,8 @@ cd frontend && bun run orval:watch                  # watches generated spec -> 
 - **State**: Jotai (`src/store/theme.ts`) + TanStack Query for server state.
 - **Lint/Format**: Biome. Config ignores `src/routeTree.gen.ts`, `src/styles.css`, `src/components/ui`. `organizeImports` runs on save (`biome.json` `assist.actions.source.organizeImports`). Double quotes enforced.
 - **EditorConfig**: 2-space indent for `.ts`/`.tsx`.
+
+When generating frontend, you SHOULD load appropriate frontend-related skills, then read showcase pages to create beautiful and useful UI.
 
 ## Codegen pipeline
 
