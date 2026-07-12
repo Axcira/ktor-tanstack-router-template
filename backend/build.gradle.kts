@@ -66,6 +66,8 @@ tasks.register<JavaExec>("generateOpenApiJson") {
     dependsOn("compileKotlin")
     classpath = sourceSets["main"].runtimeClasspath
     mainClass.set("net.axcira.GenerateOpenApiKt")
+    environment("SKIP_BOOTSTRAP", "true")
+    environment("SKIP_DATABASE", "true")
 }
 
 tasks.register<Exec>("generateClient") {
@@ -73,19 +75,20 @@ tasks.register<Exec>("generateClient") {
     dependsOn("generateOpenApiJson")
 
     workingDir = file("../frontend")
-    commandLine("npx", "orval")
+    commandLine("bun", "run", "orval:gen")
 }
 
 tasks.test {
     useJUnitPlatform()
     systemProperty("io.ktor.development", "true")
-    environment("ADMIN_PASSWORD", "password")
+    environment("SKIP_BOOTSTRAP", "true")
+    environment("SKIP_DATABASE", "true")
 }
 
 exposed {
     migrations {
         tablesPackage.set("net.axcira.db")
-        testContainersImageName.set("postgres:latest")
+        testContainersImageName.set("postgres:18.4")
         fileVersionFormat.set(VersionFormat.MAJOR_ONLY)
     }
 }

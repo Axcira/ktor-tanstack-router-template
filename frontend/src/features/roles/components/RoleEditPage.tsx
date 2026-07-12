@@ -1,13 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Shield, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Shield } from "lucide-react";
 import {
   useGetRoleByIdV1,
   useUpdateRoleV1,
 } from "@/api/generated/default/default.ts";
+import type { Permission } from "@/api/generated/schemas/permission";
 import { Button } from "@/components/ui/button";
 import { Route } from "@/routes/_app/permissions/roles/$roleId.edit.tsx";
 import RoleForm from "./RoleForm";
-import type { Permission } from "@/api/generated/schemas/permission";
 
 export default function RoleEditPage() {
   const { roleId } = Route.useParams();

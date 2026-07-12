@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { MenuItem } from "@/components/layout/sidebar/MenuItems";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover.tsx";
 import { SidebarMenuSubButton } from "@/components/ui/sidebar.tsx";
 

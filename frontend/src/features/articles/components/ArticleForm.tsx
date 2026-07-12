@@ -1,9 +1,9 @@
+import { Loader2 } from "lucide-react";
+import type * as React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import * as React from "react";
 
 export interface ArticleFormValues {
   title: string;
@@ -31,11 +31,11 @@ export default function ArticleForm({
       description: "",
       body: "",
       tagList: "",
-    }
+    },
   );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));

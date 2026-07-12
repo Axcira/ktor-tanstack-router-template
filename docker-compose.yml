@@ -14,3 +14,9 @@ services:
       -c full_page_writes=off
       -c shared_buffers=128MB
       -c work_mem=16MB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s

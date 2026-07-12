@@ -13,7 +13,11 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "orval:watch": "orval --watch"
+    "orval:gen": "orval",
+    "orval:drift": "orval && git diff --exit-code -- src/api/generated/ && untracked=$(git ls-files --others --exclude-standard -- src/api/generated/) && test -z \"$untracked\"",
+    "orval:watch": "orval --watch",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "bun run build && wrangler deploy"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
@@ -52,7 +56,8 @@
     "orval": "^8.12.3",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "wrangler": "4.110.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

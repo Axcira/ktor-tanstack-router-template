@@ -2,8 +2,16 @@
 
 ## Dev startup order
 
+### Fast path
+
 ```bash
-docker compose up -d                  # Postgres on :5432
+./dev.sh                              # Starts PostgreSQL, prints next commands
+```
+
+### Manual steps
+
+```bash
+docker compose up -d --wait           # Postgres on :5432 (--wait waits for healthcheck)
 cd backend && ./gradlew run           # Ktor dev server on :8080 (auto-reload via watch classes)
 cd frontend && bun run dev            # Vite dev server on :3000 (HMR, proxies /api -> :8080)
 ```
@@ -31,8 +39,9 @@ cd frontend && bun run orval:watch                  # watches generated spec -> 
 - **Database**: Exposed ORM + HikariCP + Flyway migrations. Env vars: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Dev defaults: localhost:5432, user/pass `postgres`/`password`.
 - **Init**: `ApplicationInitializer.kt` runs on `ApplicationStarted` — seeds admin role + user from env vars (`ADMIN_ROLE_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`). `ADMIN_PASSWORD` defaults to `"password"` in dev mode.
 - **OpenAPI**: Served at `/openapi.json` via Ktor plugin; generated Standalone runner in `GenerateOpenApi.kt`.
-- **Testing**: `test()` helper from `BaseTest.kt` spins up a Testcontainers PostgreSQL + Flyway migrate + HTTP client. Set `IS_LEYDEN=true` env var to use a persistent local PG + `/api/reset` endpoint instead (CI mode).
-- **Docker build**: `docker build ./ -t backend` (uses JDK 25, AOT cache). Entrypoint uses `--enable-native-access=ALL-UNNAMED` + `-XX:AOTCache`.
+- **Testing**: `test()` helper from `BaseTest.kt` spins up a Testcontainers PostgreSQL + Flyway migrate + HTTP client. Set `IS_LEYDEN=true` to test against an already-running local backend + persistent PostgreSQL via `/api/reset` instead.
+  Local reuse: set `TESTCONTAINERS_REUSE=true` (and `testcontainers.reuse.enable=true` in `~/.testcontainers.properties`) to keep the container across test runs for faster iteration.
+- **Docker build**: `docker build ./ -t backend` (3-stage: JDK 21 builder, JDK 25 AOT profiling with DB-free smoke workload, JDK 25 runtime). Entrypoint uses `--enable-native-access=ALL-UNNAMED` + `-XX:AOTCache`.
 
 ## Frontend (TanStack Router / React / Vite / Bun)
 
@@ -43,6 +52,8 @@ cd frontend && bun run orval:watch                  # watches generated spec -> 
   - `bun run test` — Vitest
   - `bun run check` — Biome lint + format in one pass
   - `bun run lint` / `bun run format`
+  - `bun run cf:dev` — local Wrangler dev server with Static Assets
+  - `bun run cf:deploy` — build + deploy to Cloudflare Workers Static Assets
 - **Path alias**: `@/*` maps to `./src/*` (both Vite and tsconfig). Use `import Foo from "@/components/Foo"`.
 - **Generated files — DO NOT EDIT**:
   - `src/routeTree.gen.ts` — TanStack Router auto-generates from `src/routes/`
@@ -62,6 +73,20 @@ Ktor routes + OpenAPI annotations -> /openapi.json -> Orval -> frontend/src/api/
                     ↓
               routeTree.gen.ts (TanStack Router vite plugin, auto on save)
 ```
+
+## Rename project
+
+Use the automated rename script at the repository root:
+
+```bash
+# Dry-run first (safe, prints planned changes)
+bun scripts/rename.ts --package com.example.myapp --slug my-app --name "My App"
+
+# Apply with --write (requires clean Git worktree unless --allow-dirty)
+bun scripts/rename.ts --package com.example.myapp --slug my-app --name "My App" --write
+```
+
+See `bun scripts/rename.ts --help` for full options. The package option is required; slug and display name are optional but recommended.
 
 ## Conventions
 

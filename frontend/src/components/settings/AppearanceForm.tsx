@@ -1,10 +1,10 @@
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { useAtom } from "jotai"
-import { themeAtom } from "@/store/theme"
+import { useAtom } from "jotai";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { themeAtom } from "@/store/theme";
 
 export default function AppearanceForm() {
-  const [theme, setTheme] = useAtom(themeAtom)
+  const [theme, setTheme] = useAtom(themeAtom);
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -19,7 +19,7 @@ export default function AppearanceForm() {
         value={theme}
         onValueChange={(v) => {
           if (v === "light" || v === "dark" || v === "system") {
-            setTheme(v)
+            setTheme(v);
           }
         }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
@@ -51,7 +51,9 @@ export default function AppearanceForm() {
               <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-state=checked])]:border-primary transition-colors">
                 <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-state=checked])]:opacity-100" />
               </div>
-              <span className="font-semibold text-sm text-card-foreground">ライト</span>
+              <span className="font-semibold text-sm text-card-foreground">
+                ライト
+              </span>
             </div>
             <div className="ml-7 text-xs text-muted-foreground leading-relaxed">
               十分なコントラストと明るさを持つ標準的なライトテーマです。
@@ -86,7 +88,9 @@ export default function AppearanceForm() {
               <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-state=checked])]:border-primary transition-colors">
                 <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-state=checked])]:opacity-100" />
               </div>
-              <span className="font-semibold text-sm text-card-foreground">ダーク</span>
+              <span className="font-semibold text-sm text-card-foreground">
+                ダーク
+              </span>
             </div>
             <div className="ml-7 text-xs text-muted-foreground leading-relaxed">
               暗い場所での眼精疲労を軽減するように設計されたダークテーマです。
@@ -130,7 +134,9 @@ export default function AppearanceForm() {
               <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-state=checked])]:border-primary transition-colors">
                 <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-state=checked])]:opacity-100" />
               </div>
-              <span className="font-semibold text-sm text-card-foreground">システム同期</span>
+              <span className="font-semibold text-sm text-card-foreground">
+                システム同期
+              </span>
             </div>
             <div className="ml-7 text-xs text-muted-foreground leading-relaxed">
               システムの設定に基づいて、昼夜のテーマを自動的に切り替えます。
@@ -139,5 +145,5 @@ export default function AppearanceForm() {
         </Label>
       </RadioGroup>
     </div>
-  )
+  );
 }

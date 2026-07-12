@@ -64,7 +64,9 @@ export default function RolesPage() {
         params: { fallbackRoleId },
       });
 
-      await queryClient.invalidateQueries({ queryKey: getGetRolesV1QueryKey() });
+      await queryClient.invalidateQueries({
+        queryKey: getGetRolesV1QueryKey(),
+      });
       showNotification(
         `ロール「${roleToDelete.name}」を削除しました。`,
         "info",

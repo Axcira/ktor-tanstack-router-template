@@ -12,7 +12,15 @@ import io.ktor.server.testing.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.containers.PostgreSQLContainer
+import java.time.Duration
 
+/**
+ * Shared-schema test infrastructure.
+ *
+ * All tests in this project share a single PostgreSQL schema and run sequentially
+ * (no parallel execution). Each test gets a clean schema via Flyway clean+migrate
+ * before it runs.  Tests MUST NOT be parallelized without per-test schema isolation.
+ */
 val isLeyden = System.getenv("IS_LEYDEN") == "true"
 
 fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) {
@@ -53,8 +61,15 @@ fun test(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) {
     }
 }
 
+/** Whether to reuse the Testcontainers PostgreSQL between local runs (opt-in). */
+private val containerReuse = System.getenv("TESTCONTAINERS_REUSE")?.toBoolean() ?: false
+
 private fun createPostgresContainer(): PostgreSQLContainer<*> {
-    return PostgreSQLContainer("postgres:18.4").apply { start() }
+    return PostgreSQLContainer("postgres:18.4").apply {
+        withStartupTimeout(Duration.ofMinutes(2))
+        withReuse(containerReuse)
+        start()
+    }
 }
 
 private val postgresContainer = if (isLeyden) null else createPostgresContainer()

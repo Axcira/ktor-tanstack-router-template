@@ -2,23 +2,25 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { MenuItem } from "@/components/layout/sidebar/MenuItems";
 import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
 } from "@/components/ui/collapsible.tsx";
 import {
-    SidebarMenuSub,
-    SidebarMenuSubButton,
-    SidebarMenuSubItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar.tsx";
-
 
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 
 function CollapsibleMenuItem({
   item,
   depth,
-}: { item: MenuItem; depth: number }) {
+}: {
+  item: MenuItem;
+  depth: number;
+}) {
   const { isAllowed } = useAuthorize(item.requiredPermission);
 
   if (!isAllowed) {
