@@ -1,26 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { createFileRoute } from "@tanstack/react-router";
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Users,
-  ShoppingCart,
-  Package,
-  Loader2,
   AlertCircle,
+  DollarSign,
+  Loader2,
+  Package,
   RefreshCw,
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart"
+  ShoppingCart,
+  TrendingDown,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useState } from "react";
 import {
   Area,
   AreaChart,
@@ -29,12 +19,28 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-} from "recharts"
-import { toast } from "sonner"
+} from "recharts";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_app/showcase/")({
   component: DashboardPage,
-})
+});
 
 const monthlySales = [
   { month: "1月", sales: 2400000, orders: 186 },
@@ -49,7 +55,7 @@ const monthlySales = [
   { month: "10月", sales: 4580000, orders: 347 },
   { month: "11月", sales: 5120000, orders: 389 },
   { month: "12月", sales: 5680000, orders: 431 },
-]
+];
 
 const weeklySales = [
   { day: "月", sales: 820000, orders: 62 },
@@ -59,12 +65,12 @@ const weeklySales = [
   { day: "金", sales: 1120000, orders: 85 },
   { day: "土", sales: 1340000, orders: 102 },
   { day: "日", sales: 760000, orders: 58 },
-]
+];
 
 const salesChartConfig = {
   sales: { label: "売上", color: "var(--chart-1)" },
   orders: { label: "件数", color: "var(--chart-2)" },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 const kpiCards = [
   {
@@ -99,20 +105,20 @@ const kpiCards = [
     icon: Package,
     description: "前月比",
   },
-]
+];
 
-type ViewState = "loaded" | "loading" | "error" | "empty"
+type ViewState = "loaded" | "loading" | "error" | "empty";
 
 function DashboardPage() {
-  const [viewState, setViewState] = useState<ViewState>("loaded")
+  const [viewState, setViewState] = useState<ViewState>("loaded");
 
   const handleRefresh = () => {
-    setViewState("loading")
+    setViewState("loading");
     setTimeout(() => {
-      setViewState("loaded")
-      toast.success("データを更新しました")
-    }, 1500)
-  }
+      setViewState("loaded");
+      toast.success("データを更新しました");
+    }, 1500);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -130,7 +136,13 @@ function DashboardPage() {
                 size="xs"
                 onClick={() => setViewState(s)}
               >
-                {s === "loaded" ? "通常" : s === "loading" ? "読込中" : s === "error" ? "エラー" : "空"}
+                {s === "loaded"
+                  ? "通常"
+                  : s === "loading"
+                    ? "読込中"
+                    : s === "error"
+                      ? "エラー"
+                      : "空"}
               </Button>
             ))}
           </div>
@@ -161,8 +173,15 @@ function DashboardPage() {
                 <Card key={i} className="border-destructive/30">
                   <CardContent className="flex flex-col items-center justify-center py-6 text-center">
                     <AlertCircle className="size-8 text-destructive mb-2" />
-                    <p className="text-sm text-destructive">データの取得に失敗しました</p>
-                    <Button variant="ghost" size="xs" className="mt-2" onClick={handleRefresh}>
+                    <p className="text-sm text-destructive">
+                      データの取得に失敗しました
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="mt-2"
+                      onClick={handleRefresh}
+                    >
                       再試行
                     </Button>
                   </CardContent>
@@ -172,7 +191,9 @@ function DashboardPage() {
               ? Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i}>
                     <CardContent className="flex flex-col items-center justify-center py-6 text-center">
-                      <p className="text-sm text-muted-foreground">データがありません</p>
+                      <p className="text-sm text-muted-foreground">
+                        データがありません
+                      </p>
                     </CardContent>
                   </Card>
                 ))
@@ -188,7 +209,9 @@ function DashboardPage() {
                       <div className="text-2xl font-bold">{kpi.value}</div>
                       <div className="flex items-center gap-1 mt-1">
                         <Badge
-                          variant={kpi.trend === "up" ? "default" : "destructive"}
+                          variant={
+                            kpi.trend === "up" ? "default" : "destructive"
+                          }
                           className="text-xs px-1.5 py-0"
                         >
                           {kpi.trend === "up" ? (
@@ -198,7 +221,9 @@ function DashboardPage() {
                           )}
                           {kpi.change}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">{kpi.description}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {kpi.description}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -220,20 +245,34 @@ function DashboardPage() {
             ) : viewState === "error" ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <AlertCircle className="size-8 text-destructive mb-2" />
-                <p className="text-sm text-destructive">グラフの読み込みに失敗しました</p>
-                <Button variant="ghost" size="sm" className="mt-2" onClick={handleRefresh}>
+                <p className="text-sm text-destructive">
+                  グラフの読み込みに失敗しました
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2"
+                  onClick={handleRefresh}
+                >
                   再試行
                 </Button>
               </div>
             ) : viewState === "empty" ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
-                <p className="text-sm text-muted-foreground">表示するデータがありません</p>
+                <p className="text-sm text-muted-foreground">
+                  表示するデータがありません
+                </p>
               </div>
             ) : (
               <ChartContainer config={salesChartConfig} className="h-64 w-full">
                 <AreaChart data={monthlySales} accessibilityLayer>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={12} />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                  />
                   <YAxis
                     tickLine={false}
                     axisLine={false}
@@ -276,23 +315,41 @@ function DashboardPage() {
             ) : viewState === "error" ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <AlertCircle className="size-8 text-destructive mb-2" />
-                <p className="text-sm text-destructive">グラフの読み込みに失敗しました</p>
-                <Button variant="ghost" size="sm" className="mt-2" onClick={handleRefresh}>
+                <p className="text-sm text-destructive">
+                  グラフの読み込みに失敗しました
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2"
+                  onClick={handleRefresh}
+                >
                   再試行
                 </Button>
               </div>
             ) : viewState === "empty" ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
-                <p className="text-sm text-muted-foreground">表示するデータがありません</p>
+                <p className="text-sm text-muted-foreground">
+                  表示するデータがありません
+                </p>
               </div>
             ) : (
               <ChartContainer config={salesChartConfig} className="h-64 w-full">
                 <BarChart data={weeklySales} accessibilityLayer>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={12} />
+                  <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                  />
                   <YAxis tickLine={false} axisLine={false} fontSize={12} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="orders" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="orders"
+                    fill="var(--chart-2)"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ChartContainer>
             )}
@@ -300,5 +357,5 @@ function DashboardPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

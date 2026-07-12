@@ -7,6 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.tanstack" />
       <excludeFolder url="file://$MODULE_DIR$/.vscode" />
       <excludeFolder url="file://$MODULE_DIR$/src/api" />
+      <excludeFolder url="file://$MODULE_DIR$/.wrangler" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

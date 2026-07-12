@@ -1,4 +1,10 @@
-import { BookOpen, FileText, LayoutDashboard, Palette, Settings2 } from "lucide-react";
+import {
+  BookOpen,
+  FileText,
+  LayoutDashboard,
+  Palette,
+  Settings2,
+} from "lucide-react";
 import type * as React from "react";
 import type { Permission } from "@/api/generated/schemas";
 
