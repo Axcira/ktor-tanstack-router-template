@@ -1,0 +1,37 @@
+# https://github.com/evilmartians/lefthook
+pre-commit:
+  jobs:
+    - name: ktlint
+      run: |
+        # Collect staged non-deleted .kt/.kts files under backend/
+        FILES=$(git diff --cached --name-only --diff-filter=ACMR -- backend/ | grep -E '\.kt$|\.kts$' || true)
+        [ -z "$FILES" ] && exit 0
+
+        # Exclude files that also have unstaged changes (partial-stage / dirty worktree)
+        CLEAN=""
+        while IFS= read -r f; do
+          if [ -f "$f" ] && [ -z "$(git diff --name-only -- "$f")" ]; then
+            CLEAN="$CLEAN$f"$'\n'
+          fi
+        done <<< "$FILES"
+        [ -z "$CLEAN" ] && exit 0
+        CLEAN="${CLEAN%$'\n'}"
+
+        # Remove stale ktlint incremental snapshot so that internalKtlintGitFilter
+        # produces a correct (non-contaminated) file set.
+        rm -rf backend/build/intermediates/ktLint/
+
+        # Run ktlintFormat scoped exclusively to the staged files via the plugin's
+        # built-in -PinternalKtlintGitFilter mechanism (newline-separated paths).
+        #
+        # ktlintFormat exits 1 when auto-unfixable violations are found
+        # (wildcard imports, max-line-length, etc.), but still applies auto-fixes.
+        # We intentionally ignore the exit code to let the commit proceed;
+        # the output is still visible so the user knows what was flagged.
+        ./backend/gradlew -p backend --quiet ktlintFormat \
+          -PinternalKtlintGitFilter="$CLEAN" 2>&1 || true
+
+        # Re-stage files that may have been reformatted
+        echo "$CLEAN" | while IFS= read -r f; do
+          [ -f "$f" ] && git add -- "$f"
+        done

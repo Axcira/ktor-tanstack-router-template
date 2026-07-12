@@ -1,0 +1,10 @@
+{
+  "name": "ktor-tanstack-router-template",
+  "private": true,
+  "devDependencies": {
+    "lefthook": "2.1.6"
+  },
+  "scripts": {
+    "prepare": "lefthook install"
+  }
+}

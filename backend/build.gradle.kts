@@ -6,6 +6,7 @@ plugins {
     alias(ktorLibs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.exposed)
+    alias(libs.plugins.ktlint)
 }
 
 group = "net.axcira"
@@ -19,6 +20,11 @@ application {
 kotlin {
     jvmToolchain(21)
 }
+
+ktlint {
+    version.set(libs.versions.ktlintEngine.get())
+}
+
 dependencies {
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.auth)
