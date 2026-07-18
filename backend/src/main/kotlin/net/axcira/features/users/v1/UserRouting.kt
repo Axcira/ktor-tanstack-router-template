@@ -7,7 +7,6 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
 import net.axcira.*
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.*

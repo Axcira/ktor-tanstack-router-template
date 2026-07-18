@@ -8,7 +8,6 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
-val isLeyden = System.getenv("IS_LEYDEN")?.toBoolean() ?: false
 val skipDatabase = System.getenv("SKIP_DATABASE") == "true"
 val host = System.getenv("DB_HOST") ?: "localhost"
 val port = System.getenv("DB_PORT")?.toInt() ?: 5432
@@ -33,12 +32,50 @@ val dataSource = HikariDataSource(hikariConfig)
 
 val database by lazy {
     if (!skipDatabase) {
-        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").cleanDisabled(!isLeyden).load().migrate()
+        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate()
     }
     Database.connect(dataSource)
 }
 
 fun database() = database
+
+/**
+ * Truncates all application tables in the public schema while keeping the schema and
+ * Flyway history intact. Faster than Flyway clean + migrate for test isolation.
+ */
+fun javax.sql.DataSource.truncateAllTables() {
+    connection.use { connection ->
+        val previousAutoCommit = connection.autoCommit
+        try {
+            // autoCommit=true so TRUNCATE is its own transaction and cannot race with a
+            // later commit on this connection when returned to a pool with isAutoCommit=false.
+            connection.autoCommit = true
+            connection.createStatement().use { statement ->
+                statement.execute(
+                    """
+                    DO $$
+                    DECLARE
+                        stmt text;
+                    BEGIN
+                        SELECT 'TRUNCATE TABLE ' || string_agg(format('%I', tablename), ', ')
+                                   || ' RESTART IDENTITY CASCADE'
+                        INTO stmt
+                        FROM pg_tables
+                        WHERE schemaname = 'public'
+                          AND tablename <> 'flyway_schema_history';
+
+                        IF stmt IS NOT NULL THEN
+                            EXECUTE stmt;
+                        END IF;
+                    END $$;
+                    """.trimIndent()
+                )
+            }
+        } finally {
+            connection.autoCommit = previousAutoCommit
+        }
+    }
+}
 
 /**
  * データベースで指定されたブロックを非同期的に実行します。

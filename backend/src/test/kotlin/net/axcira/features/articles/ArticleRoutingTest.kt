@@ -5,9 +5,10 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
 import net.axcira.db.Role
+import net.axcira.features.auth.LoginRequest
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
-import net.axcira.features.users.UserDTO
+import net.axcira.features.users.UserService
 import net.axcira.plugins.dbQuery
 import net.axcira.test
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -21,6 +22,8 @@ class ArticleRoutingTest {
     @Test
     fun `test article`() = test { client ->
         val database: Database by application.dependencies
+        val userService = UserService(database)
+
         // Create test role
         val role = database.dbQuery {
             Role.insertAndGetId {
@@ -29,11 +32,14 @@ class ArticleRoutingTest {
                 it[permissions] = listOf(Permission.Administrator)
             }
         }
-        // Create test user
-        val user = client.post("/api/v1/users") {
+        // Create test user and log in
+        val user = userService.createUser(CreateUserInput("article-admin@example.com", "password", role.value))
+        client.post("/api/v1/auth/login") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("article-admin@example.com", "password", role.value))
-        }.body<UserDTO>()
+            setBody(LoginRequest("article-admin@example.com", "password"))
+        }.let {
+            assertEquals(HttpStatusCode.OK, it.status)
+        }
 
         // Create test article
         val createdArticle = client.post("/api/v1/articles") {

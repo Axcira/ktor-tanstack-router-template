@@ -57,13 +57,31 @@ class AuthService(private val database: Database) {
 }
 
 object PasswordHasher {
+    private val log = LoggerFactory.getLogger(PasswordHasher::class.java)
     private val argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id)
     private val pepper = System.getenv("SECRET") ?: "secret"
+
+    // Defaults are production-grade Argon2id. Override via env for tests/local DX.
+    // argon2-jvm signature: hash(iterations, memoryKiB, parallelism, password)
+    private val iterations = envInt("ARGON2_ITERATIONS", 16)
+    private val memoryKiB = envInt("ARGON2_MEMORY_KIB", 65_536)
+    private val parallelism = envInt("ARGON2_PARALLELISM", 1)
+
+    init {
+        if (iterations < 16 || memoryKiB < 65_536) {
+            log.warn(
+                "Using reduced Argon2 parameters: iterations={}, memoryKiB={}, parallelism={}",
+                iterations,
+                memoryKiB,
+                parallelism,
+            )
+        }
+    }
 
     suspend fun hashPassword(password: CharSequence): String = withContext(Dispatchers.Default) {
         val passwordWithPepper = "$password$pepper".toCharArray()
         try {
-            return@withContext argon2.hash(16, 65536, 1, passwordWithPepper)
+            return@withContext argon2.hash(iterations, memoryKiB, parallelism, passwordWithPepper)
         } finally {
             argon2.wipeArray(passwordWithPepper)
         }
@@ -72,9 +90,13 @@ object PasswordHasher {
     suspend fun verifyPassword(password: CharSequence, hash: String): Boolean = withContext(Dispatchers.Default) {
         val passwordWithPepper = "$password$pepper".toCharArray()
         try {
+            // Params are embedded in the encoded hash; verify does not use the configured costs.
             return@withContext argon2.verify(hash, passwordWithPepper)
         } finally {
             argon2.wipeArray(passwordWithPepper)
         }
     }
+
+    private fun envInt(name: String, default: Int): Int =
+        System.getenv(name)?.toIntOrNull()?.takeIf { it > 0 } ?: default
 }

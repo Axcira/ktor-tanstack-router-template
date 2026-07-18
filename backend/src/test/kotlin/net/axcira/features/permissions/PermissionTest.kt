@@ -7,7 +7,9 @@ import io.ktor.server.plugins.di.*
 import net.axcira.db.Role
 import net.axcira.features.articles.ArticleDTO
 import net.axcira.features.articles.CreateArticleInput
+import net.axcira.features.auth.LoginRequest
 import net.axcira.features.users.CreateUserInput
+import net.axcira.features.users.UserService
 import net.axcira.plugins.dbQuery
 import net.axcira.test
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -19,6 +21,7 @@ class PermissionTest {
     @Test
     fun `test permissions`() = test {
         val database: Database by application.dependencies
+        val userService = UserService(database)
 
         // Create test role
         val adminRole = database.dbQuery {
@@ -31,12 +34,13 @@ class PermissionTest {
             }
         }
 
-        // Create test user
-        client.post("/api/v1/users") {
+        // Create admin and log in
+        userService.createUser(CreateUserInput("test@example.com", "password", roleId = adminRole.id))
+        client.post("/api/v1/auth/login") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("test@example.com", "password", roleId = adminRole.id))
+            setBody(LoginRequest("test@example.com", "password"))
         }.let {
-            assertEquals(HttpStatusCode.Created, it.status)
+            assertEquals(HttpStatusCode.OK, it.status)
         }
 
         val staffRole = client.post("/api/v1/roles") {
@@ -66,9 +70,12 @@ class PermissionTest {
             title = "Test Article", description = "This is a test article", body = "", tagList = emptyList()
         )
         // Ensure normal user can't create article
-        client.post("/api/v1/users") {
+        userService.createUser(CreateUserInput("user@example.com", "password", roleId = userRole.id))
+        client.post("/api/v1/auth/login") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("user@example.com", "password", roleId = userRole.id))
+            setBody(LoginRequest("user@example.com", "password"))
+        }.let {
+            assertEquals(HttpStatusCode.OK, it.status)
         }
         client.post("/api/v1/articles") {
             contentType(ContentType.Application.Json)
@@ -78,11 +85,12 @@ class PermissionTest {
         }
 
         // Ensure admin user can create article
-        client.post("/api/v1/users") {
+        userService.createUser(CreateUserInput("permission-admin@example.com", "password", roleId = adminRole.id))
+        client.post("/api/v1/auth/login") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("permission-admin@example.com", "password", roleId = adminRole.id))
+            setBody(LoginRequest("permission-admin@example.com", "password"))
         }.let {
-            assertEquals(HttpStatusCode.Created, it.status)
+            assertEquals(HttpStatusCode.OK, it.status)
         }
         val createdArticle = client.post("/api/v1/articles") {
             contentType(ContentType.Application.Json)
@@ -93,11 +101,12 @@ class PermissionTest {
         }
 
         // Ensure staff user can't edit others' article
-        client.post("/api/v1/users") {
+        userService.createUser(CreateUserInput("staff@example.com", "password", roleId = staffRole.id))
+        client.post("/api/v1/auth/login") {
             contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("staff@example.com", "password", roleId = staffRole.id))
+            setBody(LoginRequest("staff@example.com", "password"))
         }.let {
-            assertEquals(HttpStatusCode.Created, it.status)
+            assertEquals(HttpStatusCode.OK, it.status)
         }
         client.patch("/api/v1/articles/${createdArticle.id}") {
             contentType(ContentType.Application.Json)

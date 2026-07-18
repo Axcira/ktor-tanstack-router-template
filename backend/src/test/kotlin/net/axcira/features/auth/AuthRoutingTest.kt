@@ -7,6 +7,7 @@ import io.ktor.server.plugins.di.*
 import net.axcira.db.Role
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
+import net.axcira.features.users.UserService
 import net.axcira.plugins.dbQuery
 import net.axcira.test
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -18,6 +19,8 @@ class AuthRoutingTest {
     @Test
     fun `test login via api`() = test { client ->
         val database: Database by application.dependencies
+        val userService = UserService(database)
+
         // Create test role
         val roleId = database.dbQuery {
             Role.insertAndGetId {
@@ -27,11 +30,8 @@ class AuthRoutingTest {
             }
         }
 
-        // Prepare user
-        client.post("/api/v1/users") {
-            contentType(ContentType.Application.Json)
-            setBody(CreateUserInput("api-auth@example.com", "password", roleId.value))
-        }
+        // Prepare user (no public registration endpoint)
+        userService.createUser(CreateUserInput("api-auth@example.com", "password", roleId.value))
 
         // Login
         client.post("/api/v1/auth/login") {

@@ -4,14 +4,24 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="DEBUG">
+
+    <!-- Quiet by default: integration tests generate a lot of SQL / HTTP noise at DEBUG. -->
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
+
+    <!-- Exposed uses the bare logger name "Exposed" (not org.jetbrains.exposed.*). -->
+    <logger name="Exposed" level="WARN"/>
+    <logger name="org.jetbrains.exposed" level="WARN"/>
+
+    <logger name="io.ktor" level="WARN"/>
     <logger name="org.eclipse.jetty" level="WARN"/>
     <logger name="io.netty" level="WARN"/>
-    <logger name="io.ktor" level="INFO"/>
-    <logger name="org.jetbrains.exposed" level="INFO"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.flywaydb" level="WARN"/>
     <logger name="org.testcontainers" level="WARN"/>
-    <logger name="tc.postgres" level="WARN"/>
+    <logger name="tc" level="WARN"/>
+    <logger name="docker" level="WARN"/>
+    <logger name="com.github.dockerjava" level="WARN"/>
+    <logger name="org.apache.http" level="WARN"/>
 </configuration>

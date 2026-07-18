@@ -39,9 +39,8 @@ cd frontend && bun run orval:watch                  # watches generated spec -> 
 - **Database**: Exposed ORM + HikariCP + Flyway migrations. Env vars: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Dev defaults: localhost:5432, user/pass `postgres`/`password`.
 - **Init**: `ApplicationInitializer.kt` runs on `ApplicationStarted` — seeds admin role + user from env vars (`ADMIN_ROLE_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`). `ADMIN_PASSWORD` defaults to `"password"` in dev mode.
 - **OpenAPI**: Served at `/openapi.json` via Ktor plugin; generated Standalone runner in `GenerateOpenApi.kt`.
-- **Testing**: `test()` helper from `BaseTest.kt` spins up a Testcontainers PostgreSQL + Flyway migrate + HTTP client. Set `IS_LEYDEN=true` to test against an already-running local backend + persistent PostgreSQL via `/api/reset` instead.
-  Local reuse: set `TESTCONTAINERS_REUSE=true` (and `testcontainers.reuse.enable=true` in `~/.testcontainers.properties`) to keep the container across test runs for faster iteration.
-- **Docker build**: `docker build ./ -t backend` (3-stage: JDK 21 builder, JDK 25 AOT profiling with DB-free smoke workload, JDK 25 runtime). Entrypoint uses `--enable-native-access=ALL-UNNAMED` + `-XX:AOTCache`.
+- **Testing**: `test()` helper from `BaseTest.kt` spins up a suite-scoped Testcontainers PostgreSQL, migrates once, truncates between tests, and reuses a shared Ktor `TestApplication` + per-test HTTP client (**requires Docker**).
+- **Docker build**: `docker build ./ -t backend` (multi-stage: JDK 21 builder → JRE 25 runtime). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI).
 
 ## Frontend (TanStack Router / React / Vite / Bun)
 
@@ -110,4 +109,7 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 | `ADMIN_PASSWORD` | password (dev) / required (prod) | Bootstrap admin password |
 | `ADMIN_EMAIL` | admin@example.com | Bootstrap admin email |
 | `ADMIN_ROLE_NAME` | Administrator | Bootstrap admin role name |
-| `IS_LEYDEN` | (unset) | If `true`, uses persistent local PG instead of Testcontainers |
+| `ARGON2_ITERATIONS` | 16 | Argon2id time cost (tests set to 1 via Gradle) |
+| `ARGON2_MEMORY_KIB` | 65536 | Argon2id memory in KiB (tests set to 1024) |
+| `ARGON2_PARALLELISM` | 1 | Argon2id parallelism |
+| `SECRET` | secret | Password pepper for Argon2 |

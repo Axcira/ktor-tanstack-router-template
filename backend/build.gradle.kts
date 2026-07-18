@@ -89,6 +89,10 @@ tasks.test {
     systemProperty("io.ktor.development", "true")
     environment("SKIP_BOOTSTRAP", "true")
     environment("SKIP_DATABASE", "true")
+    // Fast Argon2 for tests only (production defaults remain 16 / 65536 KiB / 1).
+    environment("ARGON2_ITERATIONS", "1")
+    environment("ARGON2_MEMORY_KIB", "1024")
+    environment("ARGON2_PARALLELISM", "1")
 }
 
 exposed {

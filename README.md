@@ -188,25 +188,15 @@ cd backend
 
 // TODO: フロントエンドをもうちょっとちゃんと詰めてここを書く
 
-## 4. Testcontainers local reuse
+## 4. Backend tests
 
-バックエンドのテストは Testcontainers を使用して PostgreSQL コンテナを起動します。
-テスト実行のたびに新しいコンテナを作成すると時間がかかるため、ローカル開発ではコンテナを再利用することで高速化できます。
+バックエンドのテストは Testcontainers で PostgreSQL を 1 回起動し、スキーマ移行はスイートごとに 1 回だけ行います。
+各テスト間のアイソレーションは `TRUNCATE ... RESTART IDENTITY CASCADE` で行い、Ktor アプリはスイート内で共有されます（Docker が必要）。
 
 ```bash
-# 1) Testcontainers のグローバル設定で reuse を有効化
-echo "testcontainers.reuse.enable=true" >> ~/.testcontainers.properties
-
-# 2) 環境変数を設定してテストを実行
 cd backend
-TESTCONTAINERS_REUSE=true ./gradlew test
+./gradlew test
 ```
-
-一度起動したコンテナは、明示的に削除するまで保持されます。
-再利用を無効にするには、環境変数を外すか、`~/.testcontainers.properties` の設定をコメントアウトしてください。
-
-> [!WARNING]
-> CI では `TESTCONTAINERS_REUSE` を設定せず、常にクリーンなコンテナでテストしてください。
 
 ## 5. Build the project
 
@@ -216,7 +206,7 @@ TESTCONTAINERS_REUSE=true ./gradlew test
 
 #### Docker Container (Recommended)
 
-Dockerfile を使用してビルドすると、起動時間短縮のために AOT Cache によって事前最適化された Docker イメージを作成できます。
+Dockerfile を使用して、本番向けの Docker イメージを作成できます（ビルドは JDK、実行は JRE）。
 
 ```bash
 cd backend
@@ -236,34 +226,8 @@ cd backend
 生成された jar ファイルは、次の方法で起動できます:
 
 ```bash
-java -jar backend-all.jar
+java --enable-native-access=ALL-UNNAMED -jar backend-all.jar
 ```
-
-Java 25以上を使用している場合、起動時間を削減するために AOT Cache を使用できます。
-まず、生成された jar ファイルを `-XX:AOTMode=record` で起動します。
-
-```bash
-java -XX:AOTMode=record -XX:AOTConfiguration=ktor.aot.conf -jar backend-all.jar
-```
-
-サーバーが起動したら、幾つかのエンドポイントを呼び出してコード パスのプロファイリングを行います。（任意）
-十分にコードパスを通ったら、 Ctrl-C でサーバーを停止します。
-
-次に、生成された AOT Configuration を使用して、 AOT Cache を作成します。
-
-```bash
-java -XX:AOTMode=create -XX:AOTConfiguration=ktor.aot.conf -XX:AOTCache=ktor.aot -jar backend-all.jar
-```
-
-最後に、生成された AOT Cache を使用して、サーバーを起動します。
-
-```bash
-java -XX:AOTCache=ktor.aot -jar backend-all.jar
-```
-
-> [!WARNING]
-> プロファイリング、 AOT Cache の作成、サーバーの実行は、全て同じマシン・同じJREで行うようにしてください。
-> さもなければ、 AOT Cache が正しく読み込まれなかったり、クラッシュの原因となります。
 
 ### Build the frontend
 
