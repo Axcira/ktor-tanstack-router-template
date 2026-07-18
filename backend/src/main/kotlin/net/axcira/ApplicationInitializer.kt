@@ -16,6 +16,11 @@ fun Application.subscribe() {
 }
 
 suspend fun Application.initialize() {
+    if (System.getenv("SKIP_BOOTSTRAP") == "true") {
+        log.info("SKIP_BOOTSTRAP is set. Skipping admin user/role initialization.")
+        return
+    }
+
     val userService: UserService by dependencies
     val permissionService: PermissionService by dependencies
 

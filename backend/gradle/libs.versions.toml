@@ -8,6 +8,8 @@ argon2 = "2.12"
 h2 = "2.4.240"
 flyway = "12.6.2"
 testcontainers = "1.21.4"
+ktlint = "14.2.0"
+ktlintEngine = "1.8.0"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -29,3 +31,4 @@ testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 exposed = { id = "org.jetbrains.exposed.plugin", version.ref = "exposed" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

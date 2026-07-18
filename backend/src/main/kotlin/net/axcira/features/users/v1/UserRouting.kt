@@ -17,23 +17,8 @@ import net.axcira.features.users.UserService
 
 fun Application.users() {
     val userService: UserService by dependencies
-    val permissionService: PermissionService by dependencies
 
     apiRouting("/users") {
-        /**
-         * Create a new user
-         *
-         * OperationID: createUserV1
-         */
-        post {
-            val user = call.receive<CreateUserInput>()
-            val createdUser = userService.createUser(user)
-            val permissions =
-                permissionService.getPermissionsForUser(createdUser.id) ?: throw IllegalArgumentException("User permissions not found")
-            call.sessions.set(UserSession(createdUser, permissions))
-            call.respond(HttpStatusCode.Created, createdUser)
-        }
-
         authenticate {
             withPermission<Permission>(Permission.ManageUsers) {
                 /**

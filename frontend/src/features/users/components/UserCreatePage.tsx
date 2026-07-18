@@ -1,6 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Users } from "lucide-react";
-import { useCreateUserV1, useGetRolesV1 } from "@/api/generated/default/default.ts";
+import {
+  useCreateUserV1,
+  useGetRolesV1,
+} from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import UserForm from "./UserForm";
 

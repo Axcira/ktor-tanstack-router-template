@@ -1,3 +1,7 @@
+import { useNavigate } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useDeleteArticleV1 } from "@/api/generated/default/default";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,10 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useDeleteArticleV1 } from "@/api/generated/default/default";
-import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
 
 interface DeleteArticleDialogProps {
   articleId: number;
@@ -51,7 +51,9 @@ export default function DeleteArticleDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>キャンセル</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>
+            キャンセル
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();

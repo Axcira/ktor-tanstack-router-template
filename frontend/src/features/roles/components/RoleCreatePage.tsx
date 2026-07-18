@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Shield } from "lucide-react";
 import { useCreateRoleV1 } from "@/api/generated/default/default.ts";
+import type { Permission } from "@/api/generated/schemas/permission";
 import { Button } from "@/components/ui/button";
 import RoleForm from "./RoleForm";
-import type { Permission } from "@/api/generated/schemas/permission";
 
 export default function RoleCreatePage() {
   const navigate = useNavigate();

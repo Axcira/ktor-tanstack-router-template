@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.5/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -22,6 +22,7 @@
     "indentStyle": "space"
   },
   "assist": {
+    "includes": ["**", "!**/src/api/generated/**"],
     "actions": {
       "source": {
         "organizeImports": "on"
@@ -30,6 +31,7 @@
   },
   "linter": {
     "enabled": true,
+    "includes": ["**", "!**/src/api/generated/**"],
     "rules": {
       "recommended": true
     }

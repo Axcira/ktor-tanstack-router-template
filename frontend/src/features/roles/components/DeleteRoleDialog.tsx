@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,7 +59,10 @@ export function DeleteRoleDialog({
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="fallback-role">移行先ロール</Label>
-            <Select value={selectedFallbackId} onValueChange={setSelectedFallbackId}>
+            <Select
+              value={selectedFallbackId}
+              onValueChange={setSelectedFallbackId}
+            >
               <SelectTrigger id="fallback-role" className="w-full">
                 <SelectValue placeholder="ロールを選択" />
               </SelectTrigger>

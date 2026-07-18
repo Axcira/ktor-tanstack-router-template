@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState, type SubmitEventHandler } from "react";
+import { type SubmitEventHandler, useState } from "react";
+import { useCreateUserV1 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateUserV1 } from "@/api/generated/default/default.ts";
 
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -31,7 +31,7 @@ export default function RegisterForm() {
         onError: () => {
           alert("アカウント登録に失敗しました");
         },
-      }
+      },
     );
   };
 
@@ -96,7 +96,10 @@ export default function RegisterForm() {
           </Link>
         </div>
         <div className="mt-3 text-center">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            to="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
             ホームに戻る
           </Link>
         </div>

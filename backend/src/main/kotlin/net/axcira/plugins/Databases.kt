@@ -9,6 +9,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
 val isLeyden = System.getenv("IS_LEYDEN")?.toBoolean() ?: false
+val skipDatabase = System.getenv("SKIP_DATABASE") == "true"
 val host = System.getenv("DB_HOST") ?: "localhost"
 val port = System.getenv("DB_PORT")?.toInt() ?: 5432
 val dbName = System.getenv("DB_NAME") ?: "postgres"
@@ -24,13 +25,16 @@ val hikariConfig = HikariConfig().apply {
 
     maximumPoolSize = 3
     isAutoCommit = false
+    initializationFailTimeout = if (skipDatabase) 0 else 1
     validate()
 }
 
 val dataSource = HikariDataSource(hikariConfig)
 
 val database by lazy {
-    Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").cleanDisabled(!isLeyden).load().migrate()
+    if (!skipDatabase) {
+        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").cleanDisabled(!isLeyden).load().migrate()
+    }
     Database.connect(dataSource)
 }
 

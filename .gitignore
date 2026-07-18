@@ -1,0 +1,5 @@
+.slim/deepwork/
+
+# Root package manager (lefthook + private root package.json)
+node_modules/
+lefthook-local.yml

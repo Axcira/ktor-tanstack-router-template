@@ -1,109 +1,114 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
-import { Loader2, CheckCircle2 } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
+import { createFileRoute } from "@tanstack/react-router";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_app/showcase/form")({
   component: FormPage,
-})
+});
 
 interface FormErrors {
-  companyName?: string
-  contactName?: string
-  email?: string
-  phone?: string
-  industry?: string
-  budget?: string
-  description?: string
-  agree?: string
+  companyName?: string;
+  contactName?: string;
+  email?: string;
+  phone?: string;
+  industry?: string;
+  budget?: string;
+  description?: string;
+  agree?: string;
 }
 
 function FormPage() {
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [errors, setErrors] = useState<FormErrors>({})
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const [companyName, setCompanyName] = useState("")
-  const [contactName, setContactName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [industry, setIndustry] = useState("")
-  const [budget, setBudget] = useState("")
-  const [description, setDescription] = useState("")
-  const [agree, setAgree] = useState(false)
+  const [companyName, setCompanyName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [budget, setBudget] = useState("");
+  const [description, setDescription] = useState("");
+  const [agree, setAgree] = useState(false);
 
   const validate = (): FormErrors => {
-    const e: FormErrors = {}
-    if (!companyName.trim()) e.companyName = "会社名は必須です"
-    if (!contactName.trim()) e.contactName = "担当者名は必須です"
+    const e: FormErrors = {};
+    if (!companyName.trim()) e.companyName = "会社名は必須です";
+    if (!contactName.trim()) e.contactName = "担当者名は必須です";
     if (!email.trim()) {
-      e.email = "メールアドレスは必須です"
+      e.email = "メールアドレスは必須です";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      e.email = "有効なメールアドレスを入力してください"
+      e.email = "有効なメールアドレスを入力してください";
     }
     if (phone && !/^[\d\-+()]+$/.test(phone)) {
-      e.phone = "有効な電話番号を入力してください"
+      e.phone = "有効な電話番号を入力してください";
     }
-    if (!industry) e.industry = "業種を選択してください"
-    if (!budget) e.budget = "予算規模を選択してください"
+    if (!industry) e.industry = "業種を選択してください";
+    if (!budget) e.budget = "予算規模を選択してください";
     if (!description.trim()) {
-      e.description = "お問い合わせ内容は必須です"
+      e.description = "お問い合わせ内容は必須です";
     } else if (description.trim().length < 10) {
-      e.description = "10文字以上で入力してください"
+      e.description = "10文字以上で入力してください";
     }
-    if (!agree) e.agree = "利用規約への同意が必要です"
-    return e
-  }
+    if (!agree) e.agree = "利用規約への同意が必要です";
+    return e;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const validationErrors = validate()
-    setErrors(validationErrors)
+    e.preventDefault();
+    const validationErrors = validate();
+    setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
       toast.error("入力内容に誤りがあります", {
         description: `${Object.keys(validationErrors).length} 件のエラーを修正してください`,
-      })
-      return
+      });
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
     setTimeout(() => {
-      setSubmitting(false)
-      setSubmitted(true)
+      setSubmitting(false);
+      setSubmitted(true);
       toast.success("登録が完了しました", {
         description: `${companyName} の案件を登録しました`,
-      })
-    }, 1500)
-  }
+      });
+    }, 1500);
+  };
 
   const handleReset = () => {
-    setCompanyName("")
-    setContactName("")
-    setEmail("")
-    setPhone("")
-    setIndustry("")
-    setBudget("")
-    setDescription("")
-    setAgree(false)
-    setErrors({})
-    setSubmitted(false)
-    toast.info("フォームをリセットしました")
-  }
-
+    setCompanyName("");
+    setContactName("");
+    setEmail("");
+    setPhone("");
+    setIndustry("");
+    setBudget("");
+    setDescription("");
+    setAgree(false);
+    setErrors({});
+    setSubmitted(false);
+    toast.info("フォームをリセットしました");
+  };
 
   if (submitted) {
     return (
@@ -113,13 +118,14 @@ function FormPage() {
             <CheckCircle2 className="size-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">登録が完了しました</h2>
             <p className="text-sm text-muted-foreground mb-6">
-              {companyName} 様の案件を受け付けました。担当者より折り返しご連絡いたします。
+              {companyName}{" "}
+              様の案件を受け付けました。担当者より折り返しご連絡いたします。
             </p>
             <Button onClick={handleReset}>新規登録に戻る</Button>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -127,7 +133,9 @@ function FormPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">新規案件登録</h1>
-          <p className="text-sm text-muted-foreground">バリデーション付きフォーム</p>
+          <p className="text-sm text-muted-foreground">
+            バリデーション付きフォーム
+          </p>
         </div>
       </div>
 
@@ -167,7 +175,9 @@ function FormPage() {
                   aria-invalid={!!errors.contactName}
                 />
                 {errors.contactName && (
-                  <p className="text-xs text-destructive">{errors.contactName}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.contactName}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -274,8 +284,12 @@ function FormPage() {
                 aria-invalid={!!errors.agree}
               />
               <div className="space-y-1">
-                <Label htmlFor="agree" className="text-sm font-normal cursor-pointer">
-                  利用規約とプライバシーポリシーに同意する <span className="text-destructive">*</span>
+                <Label
+                  htmlFor="agree"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  利用規約とプライバシーポリシーに同意する{" "}
+                  <span className="text-destructive">*</span>
                 </Label>
                 {errors.agree && (
                   <p className="text-xs text-destructive">{errors.agree}</p>
@@ -296,5 +310,5 @@ function FormPage() {
         </div>
       </form>
     </div>
-  )
+  );
 }
