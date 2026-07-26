@@ -32,9 +32,8 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Install frontend dependencies
+      - name: Install dependencies (root workspace)
         run: bun install --frozen-lockfile
-        working-directory: frontend
 
       - name: Generate OpenAPI spec
         run: ./gradlew generateOpenApiJson

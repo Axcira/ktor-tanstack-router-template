@@ -5,6 +5,13 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_dir"
 
+# ---- dependency install (if not yet run) ----
+if [ ! -d node_modules ]; then
+  echo "Installing dependencies (root workspace)…"
+  bun install
+  echo ""
+fi
+
 # ---- dependency checks ----
 if ! command -v docker &>/dev/null; then
   echo "Error: docker is not installed or not in PATH." >&2
@@ -28,14 +35,18 @@ echo ""
 echo "─── Next steps ──────────────────────────────────────"
 echo ""
 echo "  Backend  (Ktor, port 8080):"
-echo "    cd backend && ./gradlew run"
+echo "    bun run backend:dev"
+echo "    # or: cd backend && ./gradlew run"
 echo ""
 echo "  Frontend (Vite, port 3000):"
-echo "    cd frontend && bun run dev"
+echo "    bun run frontend:dev"
+echo "    # or: cd frontend && bun run dev"
 echo ""
 echo "  Optional – watch-mode codegen:"
-echo "    cd backend  && ./gradlew generateOpenApiJson -t -i"
-echo "    cd frontend && bun run orval:watch"
+echo "    bun run generate:openapi -t -i"
+echo "    # or: cd backend && ./gradlew generateOpenApiJson -t -i"
+echo "    bun run orval:watch"
+echo "    # or: cd frontend && bun run orval:watch"
 echo ""
 echo "─────────────────────────────────────────────────────"
 echo ""

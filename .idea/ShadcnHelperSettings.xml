@@ -2827,6 +2827,30 @@
         <option name="homepage" value="https://threecn.dev" />
         <option name="urlTemplate" value="https://threecn.dev/r/{name}.json" />
       </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-approvals-ui" />
+        <option name="name" value="Approvals-ui" />
+        <option name="namespace" value="@approvals-ui" />
+        <option name="baseUrl" value="https://approvals-ui.vercel.app/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Approval workflow components for React Flow: quorum gates, amount thresholds, a policy lint (segregation of duties, single approver on high value), and plain-language editing behind a human review gate." />
+        <option name="homepage" value="https://approvals-ui.vercel.app" />
+        <option name="urlTemplate" value="https://approvals-ui.vercel.app/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-vllnt-ui" />
+        <option name="name" value="Vllnt-ui" />
+        <option name="namespace" value="@vllnt-ui" />
+        <option name="baseUrl" value="https://ui.vllnt.com/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="VLLNT UI — agent-first React components for AI-native products, from UI primitives to finance and ops domains. Accessible, Radix + Tailwind, you own the code." />
+        <option name="homepage" value="https://ui.vllnt.com" />
+        <option name="urlTemplate" value="https://ui.vllnt.com/r/{name}.json" />
+      </RegistryConfigState>
     </registryConfigs>
   </component>
 </project>

@@ -2,6 +2,12 @@
 
 ## Dev startup order
 
+### Root install (Bun workspace)
+
+```bash
+bun install                              # One-shot: installs frontend deps + Lefthook
+```
+
 ### Fast path
 
 ```bash
@@ -12,6 +18,13 @@
 
 ```bash
 docker compose up -d --wait           # Postgres on :5432 (--wait waits for healthcheck)
+bun run backend:dev                   # Ktor dev server on :8080 (auto-reload via watch classes)
+bun run frontend:dev                  # Vite dev server on :3000 (HMR, proxies /api -> :8080)
+```
+
+Or with legacy cd-into commands:
+
+```bash
 cd backend && ./gradlew run           # Ktor dev server on :8080 (auto-reload via watch classes)
 cd frontend && bun run dev            # Vite dev server on :3000 (HMR, proxies /api -> :8080)
 ```
@@ -19,8 +32,16 @@ cd frontend && bun run dev            # Vite dev server on :3000 (HMR, proxies /
 For full DX, also run in separate terminals:
 
 ```bash
-cd backend && ./gradlew generateOpenApiJson -t -i   # continuous OpenAPI spec generation. this task depends on compileKotlin, so you can combine it with Ktor dev server to achieve auto reloading
-cd frontend && bun run orval:watch                  # watches generated spec -> regenerates TS client
+bun run generate:openapi -t -i        # continuous OpenAPI spec generation
+bun run orval:watch                   # watches generated spec -> regenerates TS client
+```
+
+Or the legacy equivalents:
+
+```bash
+# generateOpenApiJson depends on compileKotlin — combine with Ktor dev for auto reload
+cd backend && ./gradlew generateOpenApiJson -t -i
+cd frontend && bun run orval:watch
 ```
 
 ## Backend (Ktor / Kotlin / Gradle)
@@ -44,7 +65,7 @@ cd frontend && bun run orval:watch                  # watches generated spec -> 
 
 ## Frontend (TanStack Router / React / Vite / Bun)
 
-- **Package manager**: `bun` (not npm/pnpm/yarn). Install deps with `bun i`.
+- **Package manager**: `bun` (not npm/pnpm/yarn). Install deps with `bun i` (root workspace: `bun install` in repo root).
 - **Key scripts** (run from `frontend/`):
   - `bun run dev` — Vite dev on port 3000, proxies `/api` -> `http://localhost:8080`
   - `bun run build` — outputs to `dist/`

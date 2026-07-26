@@ -388,6 +388,7 @@ if (slugActive) {
     }
   }
   ops.push({ path: "backend/settings.gradle.kts", type: "text", description: `Update rootProject.name to "${newProjectName}"` });
+  ops.push({ path: "package.json", type: "text", description: `Update root package.json name to "${newSlug}"` });
   ops.push({ path: "frontend/package.json", type: "text", description: `Update frontend/package.json name to "${newFrontendPkgName}"` });
   ops.push({ path: "frontend/.cta.json", type: "text", description: `Update .cta.json projectName to "${newFrontendPkgName}"` });
 }
@@ -535,6 +536,15 @@ if (slugActive) {
       );
     }
   }
+  const rootPkgJsonPath = resolve("package.json");
+  if (existsSync(rootPkgJsonPath)) {
+    const pkg = JSON.parse(readFileSync(rootPkgJsonPath, "utf-8"));
+    if (pkg.name !== OLD_SLUG) {
+      validationErrors.push(
+        `root package.json name is "${pkg.name}", expected "${OLD_SLUG}".`,
+      );
+    }
+  }
   const pkgJsonPath = resolve("frontend/package.json");
   if (existsSync(pkgJsonPath)) {
     const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
@@ -581,6 +591,7 @@ if (slugActive) {
   console.log(`  New slug:          ${newSlug}`);
   console.log(`  Gradle project:    ${newProjectName}`);
   console.log(`  Artifact:          ${newArtifact}`);
+  console.log(`  Root package name: ${newSlug}`);
   console.log(`  Frontend name:     ${newFrontendPkgName}`);
 }
 if (newName) console.log(`  New display name:  ${newName}`);
@@ -670,6 +681,15 @@ if (slugActive) {
   planReplace("backend/settings.gradle.kts", `rootProject.name = "${OLD_PROJECT_NAME}"`, `rootProject.name = "${newProjectName}"`);
   console.log(`  ✓ Updated rootProject.name to "${newProjectName}"`);
 
+  // root package.json
+  const rootPkgJsonPath = resolve("package.json");
+  if (existsSync(rootPkgJsonPath)) {
+    const pkg = JSON.parse(readFileSync(rootPkgJsonPath, "utf-8"));
+    pkg.name = newSlug;
+    writeMap.set(rootPkgJsonPath, JSON.stringify(pkg, null, 2) + "\n");
+    console.log(`  ✓ Updated root package.json name to "${newSlug}"`);
+  }
+
   // frontend/package.json
   const pkgJsonPath = resolve("frontend/package.json");
   if (existsSync(pkgJsonPath)) {
@@ -758,11 +778,14 @@ if (slugActive) {
   console.log(`       mv "${OLD_SLUG}" "${newSlug}"`);
 }
 console.log("");
-console.log(`  2. Regenerate generated files:`);
+console.log(`  2. Install dependencies (single root install):`);
+console.log(`     bun install`);
+console.log("");
+console.log(`  3. Regenerate generated files:`);
 console.log(`     cd backend  && ./gradlew generateOpenApiJson`);
 console.log(`     cd frontend && bun run orval:gen`);
 console.log("");
-console.log(`  3. Run verification:`);
+console.log(`  4. Run verification:`);
 console.log(`     cd backend  && ./gradlew test`);
 console.log(`     cd frontend && bun run check && bun run build`);
 console.log(`     cd frontend && bunx wrangler deploy --dry-run`);

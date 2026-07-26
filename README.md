@@ -59,11 +59,11 @@ GitHubの "Use this template" ボタンをクリックし、このテンプレ�
 
 ## 1. Install dependencies
 
-フロントエンドの依存関係をインストールします。
+このプロジェクトは [Bun workspace](https://bun.sh/docs/install/workspace) 構成です。
+ルートで `bun install` を実行すると、フロントエンドと Lefthook の依存が一度にインストールされます。
 
 ```bash
-cd frontend
-bun i
+bun install
 ```
 
 ## 2. Start the project
@@ -151,6 +151,32 @@ bun scripts/rename.ts --package com.example.myapp --slug my-app --name "My App" 
 > [!WARNING]
 > 変更を適用するには Git の作業ツリーがクリーンである必要があります。
 > ダーティな状態で実行する場合は `--allow-dirty` フラグを追加してください。
+
+### Root scripts (Bun workspace)
+
+プロジェクトルートから共通操作を実行できます。
+
+```bash
+# Frontend
+bun run frontend:dev        # Vite dev server (HMR, port 3000)
+bun run frontend:build      # Production build
+bun run frontend:test       # Vitest
+bun run frontend:check      # Biome lint + format check
+bun run frontend:format     # Biome format
+bun run frontend:lint       # Biome lint
+
+# Backend
+bun run backend:dev         # Ktor dev server (port 8080, auto-reload)
+bun run backend:build       # Gradle build
+bun run backend:test        # Gradle test
+bun run backend:check       # Gradle check (test + ktlintCheck)
+bun run backend:format      # ktlintFormat
+
+# Code generation
+bun run generate:openapi    # Generate OpenAPI spec
+bun run generate:client     # Generate Orval client from spec
+bun run orval:watch         # Watch OpenAPI → auto-regenerate client
+```
 
 ## 3. Add new features
 
