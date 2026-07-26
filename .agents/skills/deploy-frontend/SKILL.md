@@ -68,5 +68,5 @@ dry-run, and (after explicit confirmation) the live deploy.
 ## See also
 
 - [`AGENTS.md`](../../../AGENTS.md) — SPA-from-Ktor production mode
-- [`backend/Dockerfile`](../../../backend/Dockerfile) — root-context image build
+- [`Dockerfile`](../../../Dockerfile) — root-context image build
 - `~/Projects/mockup-deploy` — personal deploy CLI

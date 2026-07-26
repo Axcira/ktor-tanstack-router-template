@@ -325,7 +325,7 @@ const SLUG_MANIFEST: [string, string][] = [
 ];
 
 const ARTIFACT_MANIFEST: [string, string][] = [
-  ["backend/Dockerfile", OLD_ARTIFACT],
+  ["Dockerfile", OLD_ARTIFACT],
   ["README.md", OLD_ARTIFACT],
   ["AGENTS.md", OLD_ARTIFACT],
 ];

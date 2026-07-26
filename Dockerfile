@@ -1,5 +1,5 @@
-# Build context MUST be the repository root:
-#   podman build -f backend/Dockerfile -t ghcr.io/example/app:1.0 .
+# Build from the repository root:
+#   podman build -t ghcr.io/example/app:1.0 .
 
 # ---- frontend stage ----
 FROM docker.io/oven/bun:1.2 AS frontend

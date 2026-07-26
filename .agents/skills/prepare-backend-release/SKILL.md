@@ -77,8 +77,8 @@ publish anything.  It only verifies, tests, and assembles the deliverable.
    From the **repository root** (not `backend/`):
 
    ```bash
-   podman build -f backend/Dockerfile -t backend .
-   # or: docker build -f backend/Dockerfile -t backend .
+   podman build -t backend .
+   # or: docker build -t backend .
    ```
 
    Multi-stage build:
@@ -127,5 +127,5 @@ overridden as needed.
 ## See also
 
 - [`AGENTS.md`](../../../AGENTS.md) — Dev startup, testing, Docker build commands
-- [`backend/Dockerfile`](../../../backend/Dockerfile) — Multi-stage Docker build
+- [`Dockerfile`](../../../Dockerfile) — Multi-stage Docker build (repo root)
 - [`backend/build.gradle.kts`](../../../backend/build.gradle.kts) — ShadowJar and test configuration
