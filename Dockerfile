@@ -7,7 +7,8 @@ WORKDIR /src
 
 COPY package.json bun.lock ./
 COPY frontend/package.json frontend/package.json
-RUN bun install --frozen-lockfile
+# Skip prepare (lefthook) — git hooks are irrelevant inside the image
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY frontend/ frontend/
 RUN bun run --cwd frontend build
