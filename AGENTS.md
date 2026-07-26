@@ -59,9 +59,9 @@ cd frontend && bun run orval:watch
 - **API root**: All routes are nested under `/api/` via the `apiRouting()` helper in `Application.kt`.
 - **Database**: Exposed ORM + HikariCP + Flyway migrations. Env vars: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Dev defaults: localhost:5432, user/pass `postgres`/`password`.
 - **Init**: `ApplicationInitializer.kt` runs on `ApplicationStarted` — seeds admin role + user from env vars (`ADMIN_ROLE_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`). `ADMIN_PASSWORD` defaults to `"password"` in dev mode.
-- **OpenAPI**: Served at `/openapi.json` via Ktor plugin; generated Standalone runner in `GenerateOpenApi.kt`.
+- **OpenAPI**: Local/API-only mode serves Scalar at `/` and `/openapi.json`. When a production SPA is present under `/app/static` (or `STATIC_DIR` / `./static` with `index.html`), Scalar is disabled and Ktor serves the SPA instead (`configureFrontend`). Set `EXPOSE_OPENAPI=true` to keep `/openapi.json` in production.
 - **Testing**: `test()` helper from `BaseTest.kt` spins up a suite-scoped Testcontainers PostgreSQL, migrates once, truncates between tests, and reuses a shared Ktor `TestApplication` + per-test HTTP client (**requires Docker**).
-- **Docker build**: `docker build ./ -t backend` (multi-stage: JDK 21 builder → JRE 25 runtime). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI).
+- **Docker build**: from **repo root**: `podman build -f backend/Dockerfile -t backend .` (Bun frontend build → JDK 21 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI).
 
 ## Frontend (TanStack Router / React / Vite / Bun)
 
@@ -134,3 +134,6 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 | `ARGON2_MEMORY_KIB` | 65536 | Argon2id memory in KiB (tests set to 1024) |
 | `ARGON2_PARALLELISM` | 1 | Argon2id parallelism |
 | `SECRET` | secret | Password pepper for Argon2 |
+| `STATIC_DIR` | (auto) | SPA root directory override (`index.html` required). Defaults try `/app/static` then `./static` |
+| `SERVE_FRONTEND` | unset | Force frontend-serving mode even if probing (still needs `index.html`) |
+| `EXPOSE_OPENAPI` | unset | When SPA is served, set `true` to also expose `/openapi.json` |

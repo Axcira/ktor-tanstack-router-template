@@ -74,19 +74,21 @@ publish anything.  It only verifies, tests, and assembles the deliverable.
 
 4. **(Optional) Build Docker image**
 
+   From the **repository root** (not `backend/`):
+
    ```bash
-   docker build ./ -t backend
+   podman build -f backend/Dockerfile -t backend .
+   # or: docker build -f backend/Dockerfile -t backend .
    ```
 
-   This three-stage build:
-   - **builder**: Compile and produce the fat JAR using JDK 21.
-   - **aot**: Profile the running application (DB-free smoke workload) and
-     create the AOT cache using JDK 25.
-   - **runtime**: Minimal runtime image with the fat JAR and AOT cache
-     using JDK 25.
+   Multi-stage build:
+   - **frontend**: Bun installs workspace deps and builds the Vite SPA
+   - **builder**: Compile and produce the fat JAR using JDK 21
+   - **runtime**: JRE 25 image with the fat JAR and SPA at `/app/static`
 
-   Skip this step if you are not using Docker for distribution.  The skill
-   does **not** tag with version numbers or push to any registry.
+   Presence of `/app/static/index.html` makes Ktor serve the SPA at `/`
+   instead of Scalar. Skip this step if you are not using containers.
+   The skill does **not** tag with version numbers or push to any registry.
 
 ## Confirmation / destructive boundaries
 

@@ -1,16 +1,36 @@
 ---
 name: deploy-frontend
-description: Use when deploying the frontend application to Cloudflare Workers Static Assets
+description: Use when deploying the frontend — production mockups use mockup-deploy CLI (SPA bundled in Ktor); Workers path is legacy/optional
 ---
 
 # deploy-frontend
 
-Deploy the frontend SPA to Cloudflare Workers using Wrangler Static Assets.
-This skill covers the full pipeline: frozen dependency install, lint/format
-check, production build, Wrangler dry-run, and (after explicit confirmation)
-the live deploy.
+## Preferred path (mockup production)
 
-## Scope
+Mockup production no longer uses Cloudflare Workers. The Vite SPA is
+built into the backend image and served by Ktor at `/` (Scalar is
+disabled when `/app/static/index.html` is present).
+
+Use the personal CLI at `~/Projects/mockup-deploy`:
+
+```bash
+mockup-deploy deploy <path-or-slug>
+```
+
+That pipeline: image build/push → remote compose → Cloudflare Tunnel
+hostname → smoke checks.
+
+Do **not** create Workers, GitHub Cloudflare integrations, or Tunnel
+Host-header rewrites for new mockups.
+
+## Legacy / optional: Cloudflare Workers Static Assets
+
+Only use this when the user explicitly asks to deploy the SPA to Workers
+(e.g. a standalone static preview). This skill then covers: frozen
+dependency install, lint/format check, production build, Wrangler
+dry-run, and (after explicit confirmation) the live deploy.
+
+### Scope (Workers only)
 
 - Install frontend dependencies with `--frozen-lockfile`
 - Run `bun run check` (Biome lint + format check — reports violations, does not auto-format)
@@ -20,119 +40,33 @@ the live deploy.
 - Does **not** configure Cloudflare authentication, create Workers, or set up
   custom domains — those are prerequisites the user must satisfy beforehand.
 
-## Prerequisites
+### Prerequisites (Workers only)
 
 1. **Cloudflare account** — a free Workers plan is sufficient.
 2. **Wrangler authenticated** — use `bunx wrangler login` (interactive OAuth)
    or set `CLOUDFLARE_API_TOKEN` environment variable.  Verify with
-   `bunx wrangler whoami`.  Refer to Wrangler's own output for
-   account-selection and token-scope guidance.
+   `bunx wrangler whoami`.
 3. **Bun** (package manager) — see `../../../frontend/package.json`.
 
-## Steps
+### Steps (Workers only)
 
-1. **Authenticate with Cloudflare (if needed)**
+1. Authenticate with Cloudflare if needed (`bunx wrangler login` / `whoami`).
+2. `cd frontend && bun install --frozen-lockfile`
+3. `bun run check`
+4. `bun run build`
+5. `bunx wrangler deploy --dry-run`
+6. Ask for explicit confirmation before live deploy (default No).
+7. `bun run cf:deploy`
 
-   ```bash
-   bunx wrangler login
-   ```
-
-   This opens a browser window.  Complete the OAuth flow.  Verify with:
-
-   ```bash
-   bunx wrangler whoami
-   ```
-
-   The skill stops here if authentication fails.
-
-2. **Frozen dependency install**
-
-   ```bash
-   cd frontend
-   bun install --frozen-lockfile
-   ```
-
-   This reproduces the exact dependency tree from `bun.lock`.  Failures here
-   typically indicate lockfile drift — resolve intentional drift by running
-   `bun install` and committing the updated lockfile separately.
-
-3. **Lint and format check**
-
-   ```bash
-   bun run check
-   ```
-
-   Biome runs lint rules and checks formatting.  Fix violations before
-   proceeding.
-
-4. **Production build**
-
-   ```bash
-   bun run build
-   ```
-
-   Output goes to `frontend/dist/`.  The build must exit zero — resolve any
-   TypeScript/Vite errors before deploying.
-
-5. **Wrangler dry-run (preview deploy)**
-
-   Continue from `frontend/` (entered in step 2):
-
-   ```bash
-   bunx wrangler deploy --dry-run
-   ```
-
-   This prints what Wrangler **would** upload without actually deploying.
-   Inspect the file list and asset sizes.  If the dry-run shows unexpected
-   files, check your `dist/` contents and `wrangler.jsonc` assets config.
-
-6. **User confirmation**
-
-   ```
-   ?  Ready to deploy to Cloudflare Workers?  (y/N)
-   ```
-
-   The skill **must** pause and require explicit keyboard confirmation.
-   Default is No.  The skill aborts without making any live changes if the
-   response is anything other than an affirmative `y` or `yes`.
-
-7. **Live deploy**
-
-   ```bash
-   bun run cf:deploy
-   ```
-
-   This runs `bun run build` again (idempotent — safe to rebuild) then
-   `wrangler deploy`.  On success Wrangler prints the Worker URL.
-
-## Confirmation / destructive boundaries
+### Confirmation / destructive boundaries
 
 - **Dry-run is mandatory** — never skip the `--dry-run` step.
 - **Explicit user confirmation** required before any live deploy.
 - The skill never invents credentials, creates Workers, or modifies
-  Cloudflare configuration (routes, domains, env vars).
-- If confirmation is denied, the skill exits cleanly with no changes.
-
-## Verification
-
-- Confirm Wrangler output shows `Uploaded` / `Published` with the expected
-  Worker name (from `wrangler.jsonc`).
-- Visit the deployed URL and verify the SPA loads correctly (including SPA
-  fallback for non-root paths).
-- Optionally run `bunx wrangler versions list` to inspect the active version.
-
-## Safe failure
-
-| Failure | Behaviour |
-|---------|-----------|
-| `bun install --frozen-lockfile` fails | Lockfile out of date — run `bun install` and commit new lockfile |
-| `bun run check` fails | Fix Biome violations; re-run |
-| `bun run build` fails | Fix TS / Vite errors; re-run |
-| `wrangler deploy --dry-run` fails | Wrangler misconfigured or auth expired — re-authenticate |
-| User declines confirmation | Clean exit, no live changes |
-| `bun run cf:deploy` fails | Check Wrangler auth and network; inspect error output |
+  Cloudflare configuration (routes, domains, env vars) unless asked.
 
 ## See also
 
-- [`AGENTS.md`](../../../AGENTS.md) — Dev startup order and frontend scripts
-- [`frontend/wrangler.jsonc`](../../../frontend/wrangler.jsonc) — Wrangler config
+- [`AGENTS.md`](../../../AGENTS.md) — SPA-from-Ktor production mode
+- [`backend/Dockerfile`](../../../backend/Dockerfile) — root-context image build
+- `~/Projects/mockup-deploy` — personal deploy CLI

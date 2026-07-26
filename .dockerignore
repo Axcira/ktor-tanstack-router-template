@@ -1,0 +1,17 @@
+.git
+.idea
+.agents
+.devcontainer
+.junie
+.slim
+.codegraph
+**/node_modules
+**/build
+**/.gradle
+**/.wrangler
+**/.tanstack
+**/*.iml
+frontend/dist
+backend/build
+backend/.gradle
+backend/generated

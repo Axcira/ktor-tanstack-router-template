@@ -20,5 +20,8 @@ ktor:
       - net.axcira.features.users.v1.UserRoutingKt.users
       - net.axcira.features.articles.v1.ArticleRoutingKt.articles
       - net.axcira.features.permissions.v1.PermissionRoutingKt.permissions
+
+      # Production SPA (no-op when /app/static is absent — local keeps Scalar at /)
+      - net.axcira.plugins.FrontendKt.configureFrontend
     dependencies:
       - net.axcira.plugins.DatabasesKt.database
