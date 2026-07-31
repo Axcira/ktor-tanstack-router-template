@@ -9,46 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as HeroRouteImport } from './routes/hero'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as HeroRouteImport } from './routes/hero'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
-import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
-import { Route as AppShowcaseIndexRouteImport } from './routes/_app/showcase/index'
+import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppArticlesIndexRouteImport } from './routes/_app/articles/index'
-import { Route as AppShowcaseUploadRouteImport } from './routes/_app/showcase/upload'
-import { Route as AppShowcaseTableRouteImport } from './routes/_app/showcase/table'
-import { Route as AppShowcaseModalsRouteImport } from './routes/_app/showcase/modals'
-import { Route as AppShowcaseFormRouteImport } from './routes/_app/showcase/form'
-import { Route as AppShowcaseDetailRouteImport } from './routes/_app/showcase/detail'
-import { Route as AppShowcaseChatRouteImport } from './routes/_app/showcase/chat'
-import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground/nav1-2'
-import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
-import { Route as AppPlaygroundNav111RouteImport } from './routes/_app/playground/nav1-1-1'
-import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
-import { Route as AppPermissionsUsersRouteImport } from './routes/_app/permissions/users'
-import { Route as AppPermissionsRolesRouteImport } from './routes/_app/permissions/roles'
 import { Route as AppArticlesCreateRouteImport } from './routes/_app/articles/create'
-import { Route as AppPermissionsUsersIndexRouteImport } from './routes/_app/permissions/users/index'
-import { Route as AppPermissionsRolesIndexRouteImport } from './routes/_app/permissions/roles/index'
+import { Route as AppPermissionsRolesRouteImport } from './routes/_app/permissions/roles'
+import { Route as AppPermissionsUsersRouteImport } from './routes/_app/permissions/users'
+import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
+import { Route as AppPlaygroundNav111RouteImport } from './routes/_app/playground/nav1-1-1'
+import { Route as AppPlaygroundNav112RouteImport } from './routes/_app/playground/nav1-1-2'
+import { Route as AppPlaygroundNav12RouteImport } from './routes/_app/playground/nav1-2'
+import { Route as AppShowcaseIndexRouteImport } from './routes/_app/showcase/index'
+import { Route as AppShowcaseChatRouteImport } from './routes/_app/showcase/chat'
+import { Route as AppShowcaseDetailRouteImport } from './routes/_app/showcase/detail'
+import { Route as AppShowcaseFormRouteImport } from './routes/_app/showcase/form'
+import { Route as AppShowcaseModalsRouteImport } from './routes/_app/showcase/modals'
+import { Route as AppShowcaseTableRouteImport } from './routes/_app/showcase/table'
+import { Route as AppShowcaseUploadRouteImport } from './routes/_app/showcase/upload'
 import { Route as AppArticlesArticleIdIndexRouteImport } from './routes/_app/articles/$articleId.index'
-import { Route as AppPermissionsUsersCreateRouteImport } from './routes/_app/permissions/users/create'
-import { Route as AppPermissionsRolesCreateRouteImport } from './routes/_app/permissions/roles/create'
 import { Route as AppArticlesArticleIdEditRouteImport } from './routes/_app/articles/$articleId.edit'
-import { Route as AppPermissionsUsersUserIdEditRouteImport } from './routes/_app/permissions/users/$userId.edit'
+import { Route as AppPermissionsRolesIndexRouteImport } from './routes/_app/permissions/roles/index'
+import { Route as AppPermissionsRolesCreateRouteImport } from './routes/_app/permissions/roles/create'
+import { Route as AppPermissionsUsersIndexRouteImport } from './routes/_app/permissions/users/index'
+import { Route as AppPermissionsUsersCreateRouteImport } from './routes/_app/permissions/users/create'
 import { Route as AppPermissionsRolesRoleIdEditRouteImport } from './routes/_app/permissions/roles/$roleId.edit'
+import { Route as AppPermissionsUsersUserIdEditRouteImport } from './routes/_app/permissions/users/$userId.edit'
 
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HeroRoute = HeroRouteImport.update({
@@ -56,8 +49,9 @@ const HeroRoute = HeroRouteImport.update({
   path: '/hero',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -65,9 +59,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AppArticlesRoute = AppArticlesRouteImport.update({
+  id: '/articles',
+  path: '/articles',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDocumentationRoute = AppDocumentationRouteImport.update({
@@ -75,14 +69,9 @@ const AppDocumentationRoute = AppDocumentationRouteImport.update({
   path: '/documentation',
   getParentRoute: () => AppRoute,
 } as any)
-const AppArticlesRoute = AppArticlesRouteImport.update({
-  id: '/articles',
-  path: '/articles',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppShowcaseIndexRoute = AppShowcaseIndexRouteImport.update({
-  id: '/showcase/',
-  path: '/showcase/',
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppArticlesIndexRoute = AppArticlesIndexRouteImport.update({
@@ -90,54 +79,14 @@ const AppArticlesIndexRoute = AppArticlesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppArticlesRoute,
 } as any)
-const AppShowcaseUploadRoute = AppShowcaseUploadRouteImport.update({
-  id: '/showcase/upload',
-  path: '/showcase/upload',
-  getParentRoute: () => AppRoute,
+const AppArticlesCreateRoute = AppArticlesCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AppArticlesRoute,
 } as any)
-const AppShowcaseTableRoute = AppShowcaseTableRouteImport.update({
-  id: '/showcase/table',
-  path: '/showcase/table',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppShowcaseModalsRoute = AppShowcaseModalsRouteImport.update({
-  id: '/showcase/modals',
-  path: '/showcase/modals',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppShowcaseFormRoute = AppShowcaseFormRouteImport.update({
-  id: '/showcase/form',
-  path: '/showcase/form',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppShowcaseDetailRoute = AppShowcaseDetailRouteImport.update({
-  id: '/showcase/detail',
-  path: '/showcase/detail',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppShowcaseChatRoute = AppShowcaseChatRouteImport.update({
-  id: '/showcase/chat',
-  path: '/showcase/chat',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPlaygroundNav12Route = AppPlaygroundNav12RouteImport.update({
-  id: '/playground/nav1-2',
-  path: '/playground/nav1-2',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPlaygroundNav112Route = AppPlaygroundNav112RouteImport.update({
-  id: '/playground/nav1-1-2',
-  path: '/playground/nav1-1-2',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPlaygroundNav111Route = AppPlaygroundNav111RouteImport.update({
-  id: '/playground/nav1-1-1',
-  path: '/playground/nav1-1-1',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
-  id: '/playground/nav1-1',
-  path: '/playground/nav1-1',
+const AppPermissionsRolesRoute = AppPermissionsRolesRouteImport.update({
+  id: '/permissions/roles',
+  path: '/permissions/roles',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPermissionsUsersRoute = AppPermissionsUsersRouteImport.update({
@@ -145,45 +94,66 @@ const AppPermissionsUsersRoute = AppPermissionsUsersRouteImport.update({
   path: '/permissions/users',
   getParentRoute: () => AppRoute,
 } as any)
-const AppPermissionsRolesRoute = AppPermissionsRolesRouteImport.update({
-  id: '/permissions/roles',
-  path: '/permissions/roles',
+const AppPlaygroundNav11Route = AppPlaygroundNav11RouteImport.update({
+  id: '/playground/nav1-1',
+  path: '/playground/nav1-1',
   getParentRoute: () => AppRoute,
 } as any)
-const AppArticlesCreateRoute = AppArticlesCreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => AppArticlesRoute,
+const AppPlaygroundNav111Route = AppPlaygroundNav111RouteImport.update({
+  id: '/playground/nav1-1-1',
+  path: '/playground/nav1-1-1',
+  getParentRoute: () => AppRoute,
 } as any)
-const AppPermissionsUsersIndexRoute =
-  AppPermissionsUsersIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AppPermissionsUsersRoute,
-  } as any)
-const AppPermissionsRolesIndexRoute =
-  AppPermissionsRolesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AppPermissionsRolesRoute,
-  } as any)
+const AppPlaygroundNav112Route = AppPlaygroundNav112RouteImport.update({
+  id: '/playground/nav1-1-2',
+  path: '/playground/nav1-1-2',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlaygroundNav12Route = AppPlaygroundNav12RouteImport.update({
+  id: '/playground/nav1-2',
+  path: '/playground/nav1-2',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseIndexRoute = AppShowcaseIndexRouteImport.update({
+  id: '/showcase/',
+  path: '/showcase/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseChatRoute = AppShowcaseChatRouteImport.update({
+  id: '/showcase/chat',
+  path: '/showcase/chat',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseDetailRoute = AppShowcaseDetailRouteImport.update({
+  id: '/showcase/detail',
+  path: '/showcase/detail',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseFormRoute = AppShowcaseFormRouteImport.update({
+  id: '/showcase/form',
+  path: '/showcase/form',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseModalsRoute = AppShowcaseModalsRouteImport.update({
+  id: '/showcase/modals',
+  path: '/showcase/modals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseTableRoute = AppShowcaseTableRouteImport.update({
+  id: '/showcase/table',
+  path: '/showcase/table',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppShowcaseUploadRoute = AppShowcaseUploadRouteImport.update({
+  id: '/showcase/upload',
+  path: '/showcase/upload',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppArticlesArticleIdIndexRoute =
   AppArticlesArticleIdIndexRouteImport.update({
     id: '/$articleId/',
     path: '/$articleId/',
     getParentRoute: () => AppArticlesRoute,
-  } as any)
-const AppPermissionsUsersCreateRoute =
-  AppPermissionsUsersCreateRouteImport.update({
-    id: '/create',
-    path: '/create',
-    getParentRoute: () => AppPermissionsUsersRoute,
-  } as any)
-const AppPermissionsRolesCreateRoute =
-  AppPermissionsRolesCreateRouteImport.update({
-    id: '/create',
-    path: '/create',
-    getParentRoute: () => AppPermissionsRolesRoute,
   } as any)
 const AppArticlesArticleIdEditRoute =
   AppArticlesArticleIdEditRouteImport.update({
@@ -191,10 +161,28 @@ const AppArticlesArticleIdEditRoute =
     path: '/$articleId/edit',
     getParentRoute: () => AppArticlesRoute,
   } as any)
-const AppPermissionsUsersUserIdEditRoute =
-  AppPermissionsUsersUserIdEditRouteImport.update({
-    id: '/$userId/edit',
-    path: '/$userId/edit',
+const AppPermissionsRolesIndexRoute =
+  AppPermissionsRolesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppPermissionsRolesRoute,
+  } as any)
+const AppPermissionsRolesCreateRoute =
+  AppPermissionsRolesCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => AppPermissionsRolesRoute,
+  } as any)
+const AppPermissionsUsersIndexRoute =
+  AppPermissionsUsersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppPermissionsUsersRoute,
+  } as any)
+const AppPermissionsUsersCreateRoute =
+  AppPermissionsUsersCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
     getParentRoute: () => AppPermissionsUsersRoute,
   } as any)
 const AppPermissionsRolesRoleIdEditRoute =
@@ -203,12 +191,17 @@ const AppPermissionsRolesRoleIdEditRoute =
     path: '/$roleId/edit',
     getParentRoute: () => AppPermissionsRolesRoute,
   } as any)
+const AppPermissionsUsersUserIdEditRoute =
+  AppPermissionsUsersUserIdEditRouteImport.update({
+    id: '/$userId/edit',
+    path: '/$userId/edit',
+    getParentRoute: () => AppPermissionsUsersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/articles': typeof AppArticlesRouteWithChildren
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
@@ -239,7 +232,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
@@ -270,7 +262,6 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/_app/articles': typeof AppArticlesRouteWithChildren
   '/_app/documentation': typeof AppDocumentationRoute
   '/_app/settings': typeof AppSettingsRoute
@@ -305,7 +296,6 @@ export interface FileRouteTypes {
     | '/'
     | '/hero'
     | '/login'
-    | '/register'
     | '/articles'
     | '/documentation'
     | '/settings'
@@ -336,7 +326,6 @@ export interface FileRouteTypes {
   to:
     | '/hero'
     | '/login'
-    | '/register'
     | '/documentation'
     | '/settings'
     | '/'
@@ -366,7 +355,6 @@ export interface FileRouteTypes {
     | '/_app'
     | '/hero'
     | '/login'
-    | '/register'
     | '/_app/articles'
     | '/_app/documentation'
     | '/_app/settings'
@@ -400,23 +388,15 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   HeroRoute: typeof HeroRoute
   LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hero': {
@@ -426,11 +406,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HeroRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -440,11 +420,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/settings': {
-      id: '/_app/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
+    '/_app/articles': {
+      id: '/_app/articles'
+      path: '/articles'
+      fullPath: '/articles'
+      preLoaderRoute: typeof AppArticlesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/documentation': {
@@ -454,18 +434,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDocumentationRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/articles': {
-      id: '/_app/articles'
-      path: '/articles'
-      fullPath: '/articles'
-      preLoaderRoute: typeof AppArticlesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/showcase/': {
-      id: '/_app/showcase/'
-      path: '/showcase'
-      fullPath: '/showcase/'
-      preLoaderRoute: typeof AppShowcaseIndexRouteImport
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/articles/': {
@@ -475,74 +448,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppArticlesIndexRouteImport
       parentRoute: typeof AppArticlesRoute
     }
-    '/_app/showcase/upload': {
-      id: '/_app/showcase/upload'
-      path: '/showcase/upload'
-      fullPath: '/showcase/upload'
-      preLoaderRoute: typeof AppShowcaseUploadRouteImport
-      parentRoute: typeof AppRoute
+    '/_app/articles/create': {
+      id: '/_app/articles/create'
+      path: '/create'
+      fullPath: '/articles/create'
+      preLoaderRoute: typeof AppArticlesCreateRouteImport
+      parentRoute: typeof AppArticlesRoute
     }
-    '/_app/showcase/table': {
-      id: '/_app/showcase/table'
-      path: '/showcase/table'
-      fullPath: '/showcase/table'
-      preLoaderRoute: typeof AppShowcaseTableRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/showcase/modals': {
-      id: '/_app/showcase/modals'
-      path: '/showcase/modals'
-      fullPath: '/showcase/modals'
-      preLoaderRoute: typeof AppShowcaseModalsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/showcase/form': {
-      id: '/_app/showcase/form'
-      path: '/showcase/form'
-      fullPath: '/showcase/form'
-      preLoaderRoute: typeof AppShowcaseFormRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/showcase/detail': {
-      id: '/_app/showcase/detail'
-      path: '/showcase/detail'
-      fullPath: '/showcase/detail'
-      preLoaderRoute: typeof AppShowcaseDetailRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/showcase/chat': {
-      id: '/_app/showcase/chat'
-      path: '/showcase/chat'
-      fullPath: '/showcase/chat'
-      preLoaderRoute: typeof AppShowcaseChatRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/playground/nav1-2': {
-      id: '/_app/playground/nav1-2'
-      path: '/playground/nav1-2'
-      fullPath: '/playground/nav1-2'
-      preLoaderRoute: typeof AppPlaygroundNav12RouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/playground/nav1-1-2': {
-      id: '/_app/playground/nav1-1-2'
-      path: '/playground/nav1-1-2'
-      fullPath: '/playground/nav1-1-2'
-      preLoaderRoute: typeof AppPlaygroundNav112RouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/playground/nav1-1-1': {
-      id: '/_app/playground/nav1-1-1'
-      path: '/playground/nav1-1-1'
-      fullPath: '/playground/nav1-1-1'
-      preLoaderRoute: typeof AppPlaygroundNav111RouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/playground/nav1-1': {
-      id: '/_app/playground/nav1-1'
-      path: '/playground/nav1-1'
-      fullPath: '/playground/nav1-1'
-      preLoaderRoute: typeof AppPlaygroundNav11RouteImport
+    '/_app/permissions/roles': {
+      id: '/_app/permissions/roles'
+      path: '/permissions/roles'
+      fullPath: '/permissions/roles'
+      preLoaderRoute: typeof AppPermissionsRolesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/permissions/users': {
@@ -552,33 +469,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPermissionsUsersRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/permissions/roles': {
-      id: '/_app/permissions/roles'
-      path: '/permissions/roles'
-      fullPath: '/permissions/roles'
-      preLoaderRoute: typeof AppPermissionsRolesRouteImport
+    '/_app/playground/nav1-1': {
+      id: '/_app/playground/nav1-1'
+      path: '/playground/nav1-1'
+      fullPath: '/playground/nav1-1'
+      preLoaderRoute: typeof AppPlaygroundNav11RouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/articles/create': {
-      id: '/_app/articles/create'
-      path: '/create'
-      fullPath: '/articles/create'
-      preLoaderRoute: typeof AppArticlesCreateRouteImport
-      parentRoute: typeof AppArticlesRoute
+    '/_app/playground/nav1-1-1': {
+      id: '/_app/playground/nav1-1-1'
+      path: '/playground/nav1-1-1'
+      fullPath: '/playground/nav1-1-1'
+      preLoaderRoute: typeof AppPlaygroundNav111RouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_app/permissions/users/': {
-      id: '/_app/permissions/users/'
-      path: '/'
-      fullPath: '/permissions/users/'
-      preLoaderRoute: typeof AppPermissionsUsersIndexRouteImport
-      parentRoute: typeof AppPermissionsUsersRoute
+    '/_app/playground/nav1-1-2': {
+      id: '/_app/playground/nav1-1-2'
+      path: '/playground/nav1-1-2'
+      fullPath: '/playground/nav1-1-2'
+      preLoaderRoute: typeof AppPlaygroundNav112RouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_app/permissions/roles/': {
-      id: '/_app/permissions/roles/'
-      path: '/'
-      fullPath: '/permissions/roles/'
-      preLoaderRoute: typeof AppPermissionsRolesIndexRouteImport
-      parentRoute: typeof AppPermissionsRolesRoute
+    '/_app/playground/nav1-2': {
+      id: '/_app/playground/nav1-2'
+      path: '/playground/nav1-2'
+      fullPath: '/playground/nav1-2'
+      preLoaderRoute: typeof AppPlaygroundNav12RouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/': {
+      id: '/_app/showcase/'
+      path: '/showcase'
+      fullPath: '/showcase/'
+      preLoaderRoute: typeof AppShowcaseIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/chat': {
+      id: '/_app/showcase/chat'
+      path: '/showcase/chat'
+      fullPath: '/showcase/chat'
+      preLoaderRoute: typeof AppShowcaseChatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/detail': {
+      id: '/_app/showcase/detail'
+      path: '/showcase/detail'
+      fullPath: '/showcase/detail'
+      preLoaderRoute: typeof AppShowcaseDetailRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/form': {
+      id: '/_app/showcase/form'
+      path: '/showcase/form'
+      fullPath: '/showcase/form'
+      preLoaderRoute: typeof AppShowcaseFormRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/modals': {
+      id: '/_app/showcase/modals'
+      path: '/showcase/modals'
+      fullPath: '/showcase/modals'
+      preLoaderRoute: typeof AppShowcaseModalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/table': {
+      id: '/_app/showcase/table'
+      path: '/showcase/table'
+      fullPath: '/showcase/table'
+      preLoaderRoute: typeof AppShowcaseTableRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/showcase/upload': {
+      id: '/_app/showcase/upload'
+      path: '/showcase/upload'
+      fullPath: '/showcase/upload'
+      preLoaderRoute: typeof AppShowcaseUploadRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/articles/$articleId/': {
       id: '/_app/articles/$articleId/'
@@ -587,12 +553,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppArticlesArticleIdIndexRouteImport
       parentRoute: typeof AppArticlesRoute
     }
-    '/_app/permissions/users/create': {
-      id: '/_app/permissions/users/create'
-      path: '/create'
-      fullPath: '/permissions/users/create'
-      preLoaderRoute: typeof AppPermissionsUsersCreateRouteImport
-      parentRoute: typeof AppPermissionsUsersRoute
+    '/_app/articles/$articleId/edit': {
+      id: '/_app/articles/$articleId/edit'
+      path: '/$articleId/edit'
+      fullPath: '/articles/$articleId/edit'
+      preLoaderRoute: typeof AppArticlesArticleIdEditRouteImport
+      parentRoute: typeof AppArticlesRoute
+    }
+    '/_app/permissions/roles/': {
+      id: '/_app/permissions/roles/'
+      path: '/'
+      fullPath: '/permissions/roles/'
+      preLoaderRoute: typeof AppPermissionsRolesIndexRouteImport
+      parentRoute: typeof AppPermissionsRolesRoute
     }
     '/_app/permissions/roles/create': {
       id: '/_app/permissions/roles/create'
@@ -601,18 +574,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPermissionsRolesCreateRouteImport
       parentRoute: typeof AppPermissionsRolesRoute
     }
-    '/_app/articles/$articleId/edit': {
-      id: '/_app/articles/$articleId/edit'
-      path: '/$articleId/edit'
-      fullPath: '/articles/$articleId/edit'
-      preLoaderRoute: typeof AppArticlesArticleIdEditRouteImport
-      parentRoute: typeof AppArticlesRoute
+    '/_app/permissions/users/': {
+      id: '/_app/permissions/users/'
+      path: '/'
+      fullPath: '/permissions/users/'
+      preLoaderRoute: typeof AppPermissionsUsersIndexRouteImport
+      parentRoute: typeof AppPermissionsUsersRoute
     }
-    '/_app/permissions/users/$userId/edit': {
-      id: '/_app/permissions/users/$userId/edit'
-      path: '/$userId/edit'
-      fullPath: '/permissions/users/$userId/edit'
-      preLoaderRoute: typeof AppPermissionsUsersUserIdEditRouteImport
+    '/_app/permissions/users/create': {
+      id: '/_app/permissions/users/create'
+      path: '/create'
+      fullPath: '/permissions/users/create'
+      preLoaderRoute: typeof AppPermissionsUsersCreateRouteImport
       parentRoute: typeof AppPermissionsUsersRoute
     }
     '/_app/permissions/roles/$roleId/edit': {
@@ -621,6 +594,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/permissions/roles/$roleId/edit'
       preLoaderRoute: typeof AppPermissionsRolesRoleIdEditRouteImport
       parentRoute: typeof AppPermissionsRolesRoute
+    }
+    '/_app/permissions/users/$userId/edit': {
+      id: '/_app/permissions/users/$userId/edit'
+      path: '/$userId/edit'
+      fullPath: '/permissions/users/$userId/edit'
+      preLoaderRoute: typeof AppPermissionsUsersUserIdEditRouteImport
+      parentRoute: typeof AppPermissionsUsersRoute
     }
   }
 }
@@ -719,7 +699,6 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   HeroRoute: HeroRoute,
   LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -77,14 +77,6 @@ function LoginForm() {
         </form>
         <div className="mt-6 text-center">
           <Link
-            to="/register"
-            className="text-sm text-primary hover:text-primary/80 transition-colors"
-          >
-            アカウントをお持ちでない方はこちら
-          </Link>
-        </div>
-        <div className="mt-3 text-center">
-          <Link
             to="/"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
