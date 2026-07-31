@@ -16,5 +16,6 @@
         "**/.gradle/**": true,
         "**/.kotlin/**": true,
         "**/build/**": true
-    }
+    },
+    "biome.enabled": false
 }
