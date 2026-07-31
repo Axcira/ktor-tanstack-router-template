@@ -56,10 +56,11 @@ fun Application.permissions() {
                  * OperationID: getRolesV1
                  */
                 get {
-                    val pagination = Pagination(
-                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
-                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
-                    )
+                    val pagination =
+                        Pagination(
+                            call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                            call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                        )
                     val roles = permissionService.getAllRoles(pagination)
                     call.respond(roles)
                 }
@@ -107,8 +108,9 @@ fun Application.permissions() {
                  */
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
-                    val fallbackRoleId = call.request.queryParameters["fallbackRoleId"]?.toUIntOrNull()
-                        ?: throw IllegalArgumentException("fallbackRoleId is required")
+                    val fallbackRoleId =
+                        call.request.queryParameters["fallbackRoleId"]?.toUIntOrNull()
+                            ?: throw IllegalArgumentException("fallbackRoleId is required")
 
                     if (fallbackRoleId == id) {
                         call.respond(HttpStatusCode.BadRequest, "fallbackRoleId cannot be the same as the role to delete")

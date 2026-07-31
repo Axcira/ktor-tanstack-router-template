@@ -16,23 +16,29 @@ val user = System.getenv("DB_USER") ?: "postgres"
 val pass = System.getenv("DB_PASSWORD") ?: "password"
 val url = "jdbc:postgresql://$host:$port/$dbName"
 
-val hikariConfig = HikariConfig().apply {
-    this.driverClassName = "org.postgresql.Driver"
-    this.jdbcUrl = url
-    this.username = user
-    this.password = pass
+val hikariConfig =
+    HikariConfig().apply {
+        this.driverClassName = "org.postgresql.Driver"
+        this.jdbcUrl = url
+        this.username = user
+        this.password = pass
 
-    maximumPoolSize = 3
-    isAutoCommit = false
-    initializationFailTimeout = if (skipDatabase) 0 else 1
-    validate()
-}
+        maximumPoolSize = 3
+        isAutoCommit = false
+        initializationFailTimeout = if (skipDatabase) 0 else 1
+        validate()
+    }
 
 val dataSource = HikariDataSource(hikariConfig)
 
 val database by lazy {
     if (!skipDatabase) {
-        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load().migrate()
+        Flyway
+            .configure()
+            .dataSource(dataSource)
+            .locations("classpath:db/migration")
+            .load()
+            .migrate()
     }
     Database.connect(dataSource)
 }
@@ -68,7 +74,7 @@ fun javax.sql.DataSource.truncateAllTables() {
                             EXECUTE stmt;
                         END IF;
                     END $$;
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         } finally {
@@ -85,8 +91,9 @@ fun javax.sql.DataSource.truncateAllTables() {
  * @return ブロックの実行結果
  * @throws Exception 実行中に発生した例外
  */
-suspend fun <T> Database.dbQuery(block: suspend Database.() -> T) = withContext(Dispatchers.IO) {
-    suspendTransaction(this@dbQuery) {
-        block()
+suspend fun <T> Database.dbQuery(block: suspend Database.() -> T) =
+    withContext(Dispatchers.IO) {
+        suspendTransaction(this@dbQuery) {
+            block()
+        }
     }
-}

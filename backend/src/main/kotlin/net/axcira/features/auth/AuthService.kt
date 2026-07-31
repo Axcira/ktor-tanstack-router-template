@@ -14,46 +14,72 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 
-suspend fun <T> minWait(duration: Duration, block: suspend () -> T): T {
+suspend fun <T> minWait(
+    duration: Duration,
+    block: suspend () -> T,
+): T {
     val result: Result<T>
-    val elapsedTime = measureTime {
-        result = runCatching {
-            block()
+    val elapsedTime =
+        measureTime {
+            result =
+                runCatching {
+                    block()
+                }
         }
-    }
     if (elapsedTime < duration) {
         delay(duration - elapsedTime)
     }
     return result.getOrThrow()
 }
 
-class AuthService(private val database: Database) {
+class AuthService(
+    private val database: Database,
+) {
     private val log = LoggerFactory.getLogger(AuthService::class.java)
 
     private data class AuthUserCredential(
-        val id: UInt, val email: String, val roleId: UInt, val passwordHash: String
+        val id: UInt,
+        val email: String,
+        val roleId: UInt,
+        val passwordHash: String,
     )
 
-    suspend fun login(email: String, password: String): UserSession? = minWait(1.seconds) {
-        val credential = database.dbQuery {
-            (Users innerJoin Role).selectAll().where { Users.email eq email }.singleOrNull()?.let {
-                Pair(
-                    AuthUserCredential(it[Users.id].value, it[Users.email], it[Role.id].value, it[Users.passwordHash]), it[Role.permissions]
-                )
-            } ?: return@dbQuery null
-        } ?: return@minWait null
+    suspend fun login(
+        email: String,
+        password: String,
+    ): UserSession? =
+        minWait(1.seconds) {
+            val credential =
+                database.dbQuery {
+                    val row =
+                        (Users innerJoin Role)
+                            .selectAll()
+                            .where { Users.email eq email }
+                            .singleOrNull()
+                            ?: return@dbQuery null
 
-        val isValid = PasswordHasher.verifyPassword(password, credential.first.passwordHash)
-        if (isValid) {
-            log.info("User logged in: ${credential.first.email}")
-            return@minWait UserSession(credential.first.let {
-                UserDTO(it.id, it.email, it.roleId)
-            }, credential.second)
-        } else {
-            log.warn("Failed login attempt for email: ${credential.first.email}")
-            return@minWait null
+                    AuthUserCredential(
+                        id = row[Users.id].value,
+                        email = row[Users.email],
+                        roleId = row[Role.id].value,
+                        passwordHash = row[Users.passwordHash],
+                    ) to row[Role.permissions]
+                } ?: return@minWait null
+
+            val isValid = PasswordHasher.verifyPassword(password, credential.first.passwordHash)
+            if (isValid) {
+                log.info("User logged in: ${credential.first.email}")
+                return@minWait UserSession(
+                    credential.first.let {
+                        UserDTO(it.id, it.email, it.roleId)
+                    },
+                    credential.second,
+                )
+            } else {
+                log.warn("Failed login attempt for email: ${credential.first.email}")
+                return@minWait null
+            }
         }
-    }
 }
 
 object PasswordHasher {
@@ -78,25 +104,32 @@ object PasswordHasher {
         }
     }
 
-    suspend fun hashPassword(password: CharSequence): String = withContext(Dispatchers.Default) {
-        val passwordWithPepper = "$password$pepper".toCharArray()
-        try {
-            return@withContext argon2.hash(iterations, memoryKiB, parallelism, passwordWithPepper)
-        } finally {
-            argon2.wipeArray(passwordWithPepper)
+    suspend fun hashPassword(password: CharSequence): String =
+        withContext(Dispatchers.Default) {
+            val passwordWithPepper = "$password$pepper".toCharArray()
+            try {
+                return@withContext argon2.hash(iterations, memoryKiB, parallelism, passwordWithPepper)
+            } finally {
+                argon2.wipeArray(passwordWithPepper)
+            }
         }
-    }
 
-    suspend fun verifyPassword(password: CharSequence, hash: String): Boolean = withContext(Dispatchers.Default) {
-        val passwordWithPepper = "$password$pepper".toCharArray()
-        try {
-            // Params are embedded in the encoded hash; verify does not use the configured costs.
-            return@withContext argon2.verify(hash, passwordWithPepper)
-        } finally {
-            argon2.wipeArray(passwordWithPepper)
+    suspend fun verifyPassword(
+        password: CharSequence,
+        hash: String,
+    ): Boolean =
+        withContext(Dispatchers.Default) {
+            val passwordWithPepper = "$password$pepper".toCharArray()
+            try {
+                // Params are embedded in the encoded hash; verify does not use the configured costs.
+                return@withContext argon2.verify(hash, passwordWithPepper)
+            } finally {
+                argon2.wipeArray(passwordWithPepper)
+            }
         }
-    }
 
-    private fun envInt(name: String, default: Int): Int =
-        System.getenv(name)?.toIntOrNull()?.takeIf { it > 0 } ?: default
+    private fun envInt(
+        name: String,
+        default: Int,
+    ): Int = System.getenv(name)?.toIntOrNull()?.takeIf { it > 0 } ?: default
 }

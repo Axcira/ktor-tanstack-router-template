@@ -26,10 +26,11 @@ fun Application.users() {
                  * OperationID: getUsersV1
                  */
                 get {
-                    val pagination = Pagination(
-                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
-                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
-                    )
+                    val pagination =
+                        Pagination(
+                            call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                            call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                        )
                     val allUsers = userService.getAllUsers(pagination)
                     call.respond(allUsers)
                 }

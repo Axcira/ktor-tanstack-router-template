@@ -6,9 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Permission")
 sealed interface Permission {
-    fun satisfies(required: Permission): Boolean {
-        return this is Administrator || check(required)
-    }
+    fun satisfies(required: Permission): Boolean = this is Administrator || check(required)
 
     fun check(required: Permission): Boolean = this == required
 
@@ -29,12 +27,11 @@ sealed interface Permission {
     @Serializable
     @SerialName("ManageArticles")
     data object ManageArticles : Permission {
-        override fun check(required: Permission): Boolean {
-            return when (required) {
+        override fun check(required: Permission): Boolean =
+            when (required) {
                 is CreateArticle, is UpdateArticle, is DeleteArticle, is ManageArticles -> true
                 else -> false
             }
-        }
     }
 
     @Serializable
@@ -43,7 +40,9 @@ sealed interface Permission {
 
     @Serializable
     @SerialName("UpdateArticle")
-    data class UpdateArticle(val allowOthers: Boolean) : Permission {
+    data class UpdateArticle(
+        val allowOthers: Boolean,
+    ) : Permission {
         override fun check(required: Permission): Boolean {
             if (required !is UpdateArticle) return false
             if (required.allowOthers && !this.allowOthers) return false
@@ -53,7 +52,9 @@ sealed interface Permission {
 
     @Serializable
     @SerialName("DeleteArticle")
-    data class DeleteArticle(val allowOthers: Boolean) : Permission {
+    data class DeleteArticle(
+        val allowOthers: Boolean,
+    ) : Permission {
         override fun check(required: Permission): Boolean {
             if (required !is DeleteArticle) return false
             if (required.allowOthers && !this.allowOthers) return false

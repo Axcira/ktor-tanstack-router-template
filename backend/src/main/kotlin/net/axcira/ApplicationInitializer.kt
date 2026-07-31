@@ -37,21 +37,23 @@ suspend fun Application.initialize() {
         }
     }
 
-    val adminRoleId = when (val role = permissionService.getRoleByName(adminRoleName)) {
-        null -> {
-            log.info("Initializing roles...")
-            permissionService.create(
-                CreateRoleInput(
-                    adminRoleName, "All privileges granted.", listOf(Permission.Administrator)
-                )
-            ).id
-        }
+    val adminRoleId =
+        when (val role = permissionService.getRoleByName(adminRoleName)) {
+            null -> {
+                log.info("Initializing roles...")
+                permissionService
+                    .create(
+                        CreateRoleInput(
+                            adminRoleName, "All privileges granted.", listOf(Permission.Administrator),
+                        ),
+                    ).id
+            }
 
-        else -> {
-            log.info("Admin role already exists. Skipping...")
-            role.id
+            else -> {
+                log.info("Admin role already exists. Skipping...")
+                role.id
+            }
         }
-    }
 
     if (userService.findByEmail(adminEmail) != null) {
         log.info("Admin user already exists. Skipping...")

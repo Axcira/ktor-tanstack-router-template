@@ -17,45 +17,48 @@ import kotlin.test.assertEquals
 
 class AuthRoutingTest {
     @Test
-    fun `test login via api`() = test { client ->
-        val database: Database by application.dependencies
-        val userService = UserService(database)
+    fun `test login via api`() =
+        test { client ->
+            val database: Database by application.dependencies
+            val userService = UserService(database)
 
-        // Create test role
-        val roleId = database.dbQuery {
-            Role.insertAndGetId {
-                it[name] = "auth-test-role"
-                it[description] = "Auth test role"
-                it[permissions] = listOf(Permission.ManageUsers)
+            // Create test role
+            val roleId =
+                database.dbQuery {
+                    Role.insertAndGetId {
+                        it[name] = "auth-test-role"
+                        it[description] = "Auth test role"
+                        it[permissions] = listOf(Permission.ManageUsers)
+                    }
+                }
+
+            // Prepare user (no public registration endpoint)
+            userService.createUser(CreateUserInput("api-auth@example.com", "password", roleId.value))
+
+            // Login
+            client
+                .post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest("api-auth@example.com", "password"))
+                }.let {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                    val session = it.body<UserSession>()
+                    assert(session.user.id > 0u)
+                }
+
+            // Access to protected resources
+            client.get("/api/v1/users/me").let {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            // Logout
+            client.post("/api/v1/auth/logout").let {
+                assertEquals(HttpStatusCode.NoContent, it.status)
+            }
+
+            // Access to protected resources again
+            client.get("/api/v1/users/me").let {
+                assertEquals(HttpStatusCode.Unauthorized, it.status)
             }
         }
-
-        // Prepare user (no public registration endpoint)
-        userService.createUser(CreateUserInput("api-auth@example.com", "password", roleId.value))
-
-        // Login
-        client.post("/api/v1/auth/login") {
-            contentType(ContentType.Application.Json)
-            setBody(LoginRequest("api-auth@example.com", "password"))
-        }.let {
-            assertEquals(HttpStatusCode.OK, it.status)
-            val session = it.body<UserSession>()
-            assert(session.user.id > 0u)
-        }
-
-        // Access to protected resources
-        client.get("/api/v1/users/me").let {
-            assertEquals(HttpStatusCode.OK, it.status)
-        }
-
-        // Logout
-        client.post("/api/v1/auth/logout").let {
-            assertEquals(HttpStatusCode.NoContent, it.status)
-        }
-
-        // Access to protected resources again
-        client.get("/api/v1/users/me").let {
-            assertEquals(HttpStatusCode.Unauthorized, it.status)
-        }
-    }
 }

@@ -15,26 +15,40 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 
 @Serializable
-data class UserSession(val user: UserDTO, val permissions: List<Permission>)
+data class UserSession(
+    val user: UserDTO,
+    val permissions: List<Permission>,
+)
 
 @Serializable
-data class LoginRequest(val email: String, val password: String)
+data class LoginRequest(
+    val email: String,
+    val password: String,
+)
 
-class DatabaseSessionStorage(private val database: Database) : SessionStorage {
+class DatabaseSessionStorage(
+    private val database: Database,
+) : SessionStorage {
     override suspend fun invalidate(id: String) {
         database.dbQuery {
             SessionsTable.deleteWhere { sessionId eq id }
         }
     }
 
-    override suspend fun read(id: String): String {
-        return database.dbQuery {
-            SessionsTable.select(SessionsTable.session).where { sessionId eq id }.singleOrNull()?.get(SessionsTable.session)
+    override suspend fun read(id: String): String =
+        database.dbQuery {
+            SessionsTable
+                .select(SessionsTable.session)
+                .where { sessionId eq id }
+                .singleOrNull()
+                ?.get(SessionsTable.session)
                 ?: throw NoSuchElementException("Session $id not found")
         }
-    }
 
-    override suspend fun write(id: String, value: String) {
+    override suspend fun write(
+        id: String,
+        value: String,
+    ) {
         database.dbQuery {
             SessionsTable.upsert {
                 it[sessionId] = id
@@ -60,8 +74,9 @@ fun Application.configureAuthentication() {
                     (Users innerJoin Role).selectAll().where { Users.id eq session.user.id }.singleOrNull()?.let {
                         UserSession(
                             UserDTO(
-                                it[Users.id].value, it[Users.email], it[Users.roleId].value
-                            ), it[Role.permissions]
+                                it[Users.id].value, it[Users.email], it[Users.roleId].value,
+                            ),
+                            it[Role.permissions],
                         )
                     }
                 }

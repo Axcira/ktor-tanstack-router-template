@@ -63,18 +63,21 @@ private fun sharedTestJdbc(): TestJdbc {
             )
         }
 
-        val container = PostgreSQLContainer("postgres:18.4").apply {
-            withStartupTimeout(Duration.ofMinutes(2))
-            start()
-        }
+        val container =
+            PostgreSQLContainer("postgres:18.4").apply {
+                withStartupTimeout(Duration.ofMinutes(2))
+                start()
+            }
         System.setProperty(PROP_URL, container.jdbcUrl)
         System.setProperty(PROP_DRIVER, container.driverClassName)
         System.setProperty(PROP_USER, container.username)
         System.setProperty(PROP_PASSWORD, container.password)
 
-        Runtime.getRuntime().addShutdownHook(Thread {
-            runCatching { container.stop() }
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                runCatching { container.stop() }
+            },
+        )
 
         return TestJdbc(
             url = container.jdbcUrl,
@@ -90,19 +93,21 @@ private fun sharedTestJdbc(): TestJdbc {
  * Multiple pools are OK; they all hit the same Postgres.
  */
 private fun createTestDataSource(jdbc: TestJdbc): HikariDataSource =
-    HikariDataSource(HikariConfig().apply {
-        jdbcUrl = jdbc.url
-        driverClassName = jdbc.driver
-        username = jdbc.user
-        password = jdbc.password
-        maximumPoolSize = 3
-        minimumIdle = 0
-        connectionTimeout = 5_000
-        validationTimeout = 2_000
-        leakDetectionThreshold = 5_000
-        isAutoCommit = false
-        validate()
-    })
+    HikariDataSource(
+        HikariConfig().apply {
+            jdbcUrl = jdbc.url
+            driverClassName = jdbc.driver
+            username = jdbc.user
+            password = jdbc.password
+            maximumPoolSize = 3
+            minimumIdle = 0
+            connectionTimeout = 5_000
+            validationTimeout = 2_000
+            leakDetectionThreshold = 5_000
+            isAutoCommit = false
+            validate()
+        },
+    )
 
 private val testDataSource: HikariDataSource by lazy {
     val jdbc = sharedTestJdbc()
@@ -110,7 +115,8 @@ private val testDataSource: HikariDataSource by lazy {
         // Migrate once per JVM (not once per classloader pool).
         synchronized(System::class.java) {
             if (System.getProperty(PROP_MIGRATED) != "true") {
-                Flyway.configure()
+                Flyway
+                    .configure()
                     .dataSource(ds)
                     .locations("classpath:db/migration")
                     .load()
@@ -118,9 +124,11 @@ private val testDataSource: HikariDataSource by lazy {
                 System.setProperty(PROP_MIGRATED, "true")
             }
         }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            runCatching { ds.close() }
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                runCatching { ds.close() }
+            },
+        )
     }
 }
 
@@ -131,9 +139,11 @@ private val testDataSource: HikariDataSource by lazy {
  */
 val database: Database by lazy {
     Database.connect(testDataSource).also { db ->
-        Runtime.getRuntime().addShutdownHook(Thread {
-            runCatching { TransactionManager.closeAndUnregister(db) }
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                runCatching { TransactionManager.closeAndUnregister(db) }
+            },
+        )
     }
 }
 
@@ -160,14 +170,15 @@ fun test(block: suspend SharedTestContext.(HttpClient) -> Unit) {
             sharedTestApplication.start()
             val application = sharedTestApplication.application
 
-            val client = sharedTestApplication.createClient {
-                install(ContentNegotiation) {
-                    json()
+            val client =
+                sharedTestApplication.createClient {
+                    install(ContentNegotiation) {
+                        json()
+                    }
+                    install(HttpCookies) {
+                        storage = AcceptAllCookiesStorage()
+                    }
                 }
-                install(HttpCookies) {
-                    storage = AcceptAllCookiesStorage()
-                }
-            }
 
             val context = SharedTestContext(application, client)
             try {
@@ -189,11 +200,13 @@ private val sharedTestApplication: TestApplication by lazy {
     TestApplication {
         configure("application.yaml", "test.application.yaml")
     }.also { app ->
-        Runtime.getRuntime().addShutdownHook(Thread {
-            runBlocking {
-                runCatching { app.stop() }
-            }
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                runBlocking {
+                    runCatching { app.stop() }
+                }
+            },
+        )
     }
 }
 

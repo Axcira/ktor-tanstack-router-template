@@ -25,10 +25,11 @@ fun Application.articles() {
              * OperationID: listArticlesV1
              */
             get {
-                val pagination = Pagination(
-                    call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
-                    call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
-                )
+                val pagination =
+                    Pagination(
+                        call.request.queryParameters["limit"]?.toIntOrNull() ?: 20,
+                        call.request.queryParameters["offset"]?.toIntOrNull() ?: 0,
+                    )
                 val articles = articleService.get(pagination)
                 call.respond(articles)
             }

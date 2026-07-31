@@ -13,48 +13,68 @@ import org.jetbrains.exposed.v1.jdbc.*
 import org.slf4j.LoggerFactory
 
 @Serializable
-data class CreateUserInput(val email: String, val password: String, val roleId: UInt)
-
-@Serializable
-data class UpdateUserInput(
-    val email: Optional<String> = Optional.None, val password: Optional<String> = Optional.None, val roleId: Optional<UInt> = Optional.None
+data class CreateUserInput(
+    val email: String,
+    val password: String,
+    val roleId: UInt,
 )
 
 @Serializable
-data class UserDTO(val id: UInt, val email: String, val roleId: UInt? = null)
+data class UpdateUserInput(
+    val email: Optional<String> = Optional.None,
+    val password: Optional<String> = Optional.None,
+    val roleId: Optional<UInt> = Optional.None,
+)
 
-class UserService(val database: Database) {
+@Serializable
+data class UserDTO(
+    val id: UInt,
+    val email: String,
+    val roleId: UInt? = null,
+)
+
+class UserService(
+    val database: Database,
+) {
     private val log = LoggerFactory.getLogger(UserService::class.java)
 
     suspend fun createUser(user: CreateUserInput): UserDTO {
         val hash = PasswordHasher.hashPassword(user.password)
         return database.dbQuery {
-            val createdUser = Users.insertReturning {
-                it[email] = user.email
-                it[passwordHash] = hash
-                it[roleId] = user.roleId
-            }.single()
+            val createdUser =
+                Users
+                    .insertReturning {
+                        it[email] = user.email
+                        it[passwordHash] = hash
+                        it[roleId] = user.roleId
+                    }.single()
             val dto = UserDTO(createdUser[Users.id].value, createdUser[Users.email], createdUser[Users.roleId].value)
             log.info("User created: id=${dto.id}, email=${dto.email}")
             dto
         }
     }
 
-    suspend fun update(id: UInt, user: UpdateUserInput): UpdateResult<UserDTO> {
+    suspend fun update(
+        id: UInt,
+        user: UpdateUserInput,
+    ): UpdateResult<UserDTO> {
         val (email, password, roleId) = user
         if (arrayOf(email, password, roleId).all { it == Optional.None }) return UpdateResult.NotModified
-        val hash = when (password) {
-            is Optional.Present -> PasswordHasher.hashPassword(password.value)
-            is Optional.None -> null
-        }
+        val hash =
+            when (password) {
+                is Optional.Present -> PasswordHasher.hashPassword(password.value)
+                is Optional.None -> null
+            }
         return database.dbQuery {
-            Users.updateReturning(where = { Users.id eq id }) {
-                if (email is Optional.Present) it[Users.email] = email.value
-                if (hash != null) it[passwordHash] = hash
-                if (roleId is Optional.Present) it[Users.roleId] = roleId.value
-            }.singleOrNull()?.let {
-                UpdateResult.Success(UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value))
-            } ?: UpdateResult.NotFound
+            Users
+                .updateReturning(where = { Users.id eq id }) {
+                    if (email is Optional.Present) it[Users.email] = email.value
+                    if (hash != null) it[passwordHash] = hash
+                    if (roleId is Optional.Present) it[Users.roleId] = roleId.value
+                }.singleOrNull()
+                ?.let {
+                    UpdateResult.Success(UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value))
+                } ?: UpdateResult.NotFound
         }
     }
 
@@ -63,22 +83,30 @@ class UserService(val database: Database) {
         log.info("User deleted: id=$id")
     }
 
-    suspend fun findById(id: UInt): UserDTO? {
-        return database.dbQuery {
-            Users.selectAll().where { Users.id eq id }.map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+    suspend fun findById(id: UInt): UserDTO? =
+        database.dbQuery {
+            Users
+                .selectAll()
+                .where { Users.id eq id }
+                .map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
                 .singleOrNull()
         }
-    }
 
-    suspend fun findByEmail(email: String): UserDTO? {
-        return database.dbQuery {
-            Users.selectAll().where { Users.email eq email }.map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+    suspend fun findByEmail(email: String): UserDTO? =
+        database.dbQuery {
+            Users
+                .selectAll()
+                .where { Users.email eq email }
+                .map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
                 .singleOrNull()
         }
-    }
 
-    suspend fun getAllUsers(pagination: Pagination): List<UserDTO> = database.dbQuery {
-        Users.selectAll().paginate(pagination).toList()
-            .map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
-    }
+    suspend fun getAllUsers(pagination: Pagination): List<UserDTO> =
+        database.dbQuery {
+            Users
+                .selectAll()
+                .paginate(pagination)
+                .toList()
+                .map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
+        }
 }

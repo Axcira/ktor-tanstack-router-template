@@ -7,6 +7,9 @@ import org.slf4j.event.Level
 fun Application.configureLogging() {
     install(CallLogging) {
         level = Level.INFO
-        filter { call -> call.request.local.uri.startsWith("/api/") }
+        filter { call ->
+            call.request.local.uri
+                .startsWith("/api/")
+        }
     }
 }

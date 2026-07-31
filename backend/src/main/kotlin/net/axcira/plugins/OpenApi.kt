@@ -37,10 +37,11 @@ fun Application.configureOpenApi() {
                     }
                     body {
                         unsafe {
-                            +"""
-                            <script id="api-reference" data-url="/openapi.json"></script>
-                            <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-                            """.trimIndent()
+                            +
+                                """
+                                <script id="api-reference" data-url="/openapi.json"></script>
+                                <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+                                """.trimIndent()
                         }
                     }
                 }

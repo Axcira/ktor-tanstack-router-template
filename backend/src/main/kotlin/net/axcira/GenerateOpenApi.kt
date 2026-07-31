@@ -7,9 +7,10 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 
 fun main() {
-    val testApp = TestApplication {
-        configure()
-    }
+    val testApp =
+        TestApplication {
+            configure()
+        }
 
     runBlocking {
         val response = testApp.client.get("/openapi.json")

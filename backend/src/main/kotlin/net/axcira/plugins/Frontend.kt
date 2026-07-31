@@ -12,16 +12,16 @@ import java.io.File
  * Returns null when no built frontend is present (local API/Scalar mode).
  */
 fun resolveStaticDir(): File? {
-    val candidates = buildList {
-        System.getenv("STATIC_DIR")?.takeIf { it.isNotBlank() }?.let { add(File(it)) }
-        add(File("/app/static"))
-        add(File("static"))
-    }
+    val candidates =
+        buildList {
+            System.getenv("STATIC_DIR")?.takeIf { it.isNotBlank() }?.let { add(File(it)) }
+            add(File("/app/static"))
+            add(File("static"))
+        }
     return candidates.firstOrNull { File(it, "index.html").isFile }
 }
 
-fun shouldServeFrontend(): Boolean =
-    System.getenv("SERVE_FRONTEND") == "true" || resolveStaticDir() != null
+fun shouldServeFrontend(): Boolean = System.getenv("SERVE_FRONTEND") == "true" || resolveStaticDir() != null
 
 /**
  * Serves the Vite/TanStack SPA from disk when a build is present.

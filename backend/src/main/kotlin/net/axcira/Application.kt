@@ -28,10 +28,15 @@ fun Application.main() {
  * @param version APIバージョン。デフォルトは1。
  * @param block ルーティングブロック。Routeスコープ内でエンドポイントを定義可能。
  */
-fun Application.apiRouting(route: String? = null, version: Int = 1, block: Route.() -> Unit) {
-    val path = route?.let {
-        if (it.startsWith("/")) it else "/$it"
-    } ?: ""
+fun Application.apiRouting(
+    route: String? = null,
+    version: Int = 1,
+    block: Route.() -> Unit,
+) {
+    val path =
+        route?.let {
+            if (it.startsWith("/")) it else "/$it"
+        } ?: ""
     routing {
         route("/api/v$version$path") {
             block()
