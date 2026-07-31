@@ -4,5 +4,6 @@
         "frontend": true,
         ".codegraph": true,
         ".slim": true,
+        ".idea": true,
     }
 }
