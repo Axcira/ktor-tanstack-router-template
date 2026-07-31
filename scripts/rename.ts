@@ -320,7 +320,8 @@ const PACKAGE_MANIFEST: [string, string][] = [
 
 const SLUG_MANIFEST: [string, string][] = [
   ["frontend/wrangler.jsonc", OLD_SLUG],
-  ["frontend/src/features/dashboard/components/WelcomeMessage.tsx", OLD_SLUG],
+  ["frontend/src/routes/hero.tsx", OLD_SLUG],
+  ["frontend/src/routes/_app/index.tsx", OLD_SLUG],
   ["README.md", OLD_SLUG],
 ];
 

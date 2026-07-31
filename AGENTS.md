@@ -113,7 +113,7 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 ## Conventions
 
 - **New backend feature**: Copy an existing `features/<name>/` package, rename classes and files, add routing to `application.yaml`, add service to `Application.kt` dependencies block.
-- **New frontend route**: Add file in `src/routes/`. TanStack Router plugin auto-generates `routeTree.gen.ts`.
+- **New frontend route**: Add file in `src/routes/`. Put page UI in the route file; colocate shared pieces in a sibling `-components/` folder (TanStack ignores `-` prefixes). Plugin auto-generates `routeTree.gen.ts`.
 - **JS double quotes** (Biome config).
 - **Kotlin**: `kotlin.code.style=official`.
 - **Testing**: Backend tests follow `test { }` pattern from `BaseTest.kt`.
