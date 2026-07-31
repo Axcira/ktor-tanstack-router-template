@@ -1,0 +1,8 @@
+{
+    "files.exclude": {
+        "backend": true,
+        "frontend": true,
+        ".codegraph": true,
+        ".slim": true,
+    }
+}

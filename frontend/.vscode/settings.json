@@ -1,12 +1,27 @@
 {
   "files.watcherExclude": {
-    "**/routeTree.gen.ts": true
+    "**/routeTree.gen.ts": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.tanstack/**": true,
+    "**/.wrangler/**": true
   },
   "search.exclude": {
-    "**/routeTree.gen.ts": true
+    "**/routeTree.gen.ts": true,
+    "node_modules": true,
+    "dist": true,
+    ".tanstack": true,
+    ".wrangler": true
   },
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
+  },
+  "files.exclude": {
+    ".idea": true,
+    "node_modules": true,
+    "dist": true,
+    ".tanstack": true,
+    ".wrangler": true
   },
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
@@ -31,5 +46,5 @@
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports.biome": "explicit"
-  }
+  },
 }

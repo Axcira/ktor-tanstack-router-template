@@ -1,0 +1,22 @@
+{
+    "folders": [
+        {
+            "name": "Project",
+            "path": "."
+        },
+        {
+            "name": "Backend",
+            "path": "backend"
+        },
+        {
+            "name": "Frontend",
+            "path": "frontend"
+        }
+    ],
+    "extensions": {
+        "recommendations": [
+            "biomejs.biome",
+            "jetbrains.kotlin-server",
+        ]
+    }
+}

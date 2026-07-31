@@ -1,0 +1,20 @@
+{
+    "files.exclude": {
+        ".gradle": true,
+        ".kotlin": true,
+        ".idea": true,
+        "*.iml": true,
+        "build": true,
+        "generated": true
+    },
+    "search.exclude": {
+        ".gradle": true,
+        ".kotlin": true,
+        "build": true
+    },
+    "files.watcherExclude": {
+        "**/.gradle/**": true,
+        "**/.kotlin/**": true,
+        "**/build/**": true
+    }
+}
