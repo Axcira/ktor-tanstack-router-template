@@ -1,26 +1,26 @@
 {
   "name": "ktor-tanstack-router-template",
   "private": true,
-  "workspaces": ["frontend"],
+  "workspaces": [
+    "frontend"
+  ],
   "devDependencies": {
-    "lefthook": "2.1.6"
+    "lefthook": "2.1.6",
+    "@types/node": "26.1.2"
   },
   "scripts": {
     "prepare": "lefthook install",
-
     "frontend:dev": "bun run --cwd frontend dev",
     "frontend:build": "bun run --cwd frontend build",
     "frontend:test": "bun run --cwd frontend test",
     "frontend:check": "bun run --cwd frontend check",
     "frontend:format": "bun run --cwd frontend format",
     "frontend:lint": "bun run --cwd frontend lint",
-
     "backend:dev": "cd backend && ./gradlew run",
     "backend:build": "cd backend && ./gradlew build",
     "backend:test": "cd backend && ./gradlew test",
     "backend:check": "cd backend && ./gradlew check",
     "backend:format": "cd backend && ./gradlew ktlintFormat",
-
     "generate:openapi": "cd backend && ./gradlew generateOpenApiJson",
     "generate:client": "cd backend && ./gradlew generateClient",
     "orval:watch": "bun run --cwd frontend orval:watch"

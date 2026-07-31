@@ -48,7 +48,7 @@ if (args.includes("--help") || args.includes("-h")) {
   showHelp();
 }
 
-function showHelp(exitCode = 0) {
+function showHelp(exitCode = 0): never {
   const help = `
 bun scripts/rename.ts — rename project identity
 
