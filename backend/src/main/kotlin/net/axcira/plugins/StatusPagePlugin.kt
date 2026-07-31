@@ -10,7 +10,7 @@ fun Application.statusPage() {
     install(StatusPages) {
         val appLog = this@statusPage.log
         exception<NoPermissionException> { call, cause ->
-            appLog.warn("Access denied: ${call.request.local.uri}", cause)
+            appLog.warn("Access denied: ${call.request.local.uri}: ${cause.message}")
             call.respond(HttpStatusCode.Forbidden)
         }
         exception<Throwable> { call, cause ->
