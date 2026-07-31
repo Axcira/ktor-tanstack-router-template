@@ -10,3 +10,25 @@ trim_trailing_whitespace = false
 ktlint_code_style = ktlint_official
 ktlint_standard_no-unused-imports = enabled
 
+# Allow `import foo.*` (and prefer it in the IDE when many names are used).
+ktlint_standard_no-wildcard-imports = disabled
+ij_kotlin_name_count_to_use_star_import = 5
+ij_kotlin_name_count_to_use_star_import_for_members = 5
+
+# Official style wrapping / signature rules are too aggressive for this codebase.
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_chain-method-continuation = disabled
+ktlint_standard_string-template-indent = disabled
+ktlint_standard_argument-list-wrapping = disabled
+ktlint_standard_parameter-list-wrapping = disabled
+ktlint_standard_class-signature = disabled
+ktlint_standard_function-signature = disabled
+ktlint_standard_function-expression-body = disabled
+ktlint_standard_wrapping = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_no-consecutive-comments = disabled
+ktlint_standard_blank-line-before-declaration = disabled
+# OpenAPI route docs use KDoc inside routing lambdas; filename rule fights intentional names.
+ktlint_standard_kdoc = disabled
+ktlint_standard_filename = disabled
