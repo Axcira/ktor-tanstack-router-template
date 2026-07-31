@@ -14,7 +14,6 @@ import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 
-
 @Serializable
 data class UserSession(val user: UserDTO, val permissions: List<Permission>)
 

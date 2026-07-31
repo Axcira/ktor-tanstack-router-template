@@ -10,7 +10,6 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 import org.slf4j.LoggerFactory
 
-
 @Serializable
 data class RoleDTO(val id: UInt, val name: String, val description: String, val permissions: List<Permission>)
 
@@ -63,7 +62,9 @@ class PermissionService(val database: Database) {
                 updateRoleInput.description,
                 updateRoleInput.permissions,
             ).all { it == Optional.None }
-        ) return@dbQuery UpdateResult.NotModified
+        ) {
+            return@dbQuery UpdateResult.NotModified
+        }
 
         val (name, description, permissions) = updateRoleInput
         return@dbQuery Role.updateReturning(where = { Role.id eq id }) {

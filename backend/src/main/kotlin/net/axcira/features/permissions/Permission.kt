@@ -61,4 +61,3 @@ sealed interface Permission {
         }
     }
 }
-

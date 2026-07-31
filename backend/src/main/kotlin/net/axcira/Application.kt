@@ -33,7 +33,7 @@ fun Application.apiRouting(route: String? = null, version: Int = 1, block: Route
         if (it.startsWith("/")) it else "/$it"
     } ?: ""
     routing {
-        route("/api/v${version}${path}") {
+        route("/api/v$version$path") {
             block()
         }
     }

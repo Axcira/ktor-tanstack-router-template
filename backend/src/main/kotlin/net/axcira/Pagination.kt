@@ -3,7 +3,6 @@ package net.axcira
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.jdbc.Query
 
-
 @Serializable
 data class Pagination(val limit: Int = 10, val offset: Int = 0)
 

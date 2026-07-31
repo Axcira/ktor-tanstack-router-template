@@ -123,7 +123,6 @@ fun Application.permissions() {
                     permissionService.delete(id, fallbackRoleId)
                     call.respond(HttpStatusCode.NoContent)
                 }
-
             }
         }
     }

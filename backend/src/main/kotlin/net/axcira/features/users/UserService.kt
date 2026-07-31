@@ -77,7 +77,6 @@ class UserService(val database: Database) {
         }
     }
 
-
     suspend fun getAllUsers(pagination: Pagination): List<UserDTO> = database.dbQuery {
         Users.selectAll().paginate(pagination).toList()
             .map { UserDTO(it[Users.id].value, it[Users.email], it[Users.roleId].value) }
