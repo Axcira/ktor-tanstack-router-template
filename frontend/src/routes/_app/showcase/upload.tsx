@@ -157,11 +157,12 @@ function UploadPage() {
       {/* Drop zone */}
       <Card>
         <CardContent className="p-0">
-          <div
-            className={`border-2 border-dashed rounded-lg m-4 p-8 text-center transition-colors cursor-pointer ${
+          <button
+            type="button"
+            className={`block w-[calc(100%-2rem)] border-2 border-dashed rounded-lg m-4 p-8 text-center transition-colors cursor-pointer ${
               dragging
                 ? "border-primary bg-primary/5"
-                : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                : "border-muted-foreground/25 hover:border-muted-foreground/50 bg-transparent"
             }`}
             onDragOver={(e) => {
               e.preventDefault();
@@ -179,14 +180,14 @@ function UploadPage() {
             <p className="text-xs text-muted-foreground mt-2">
               PDF, 画像, ドキュメント（最大10MB）
             </p>
-            <input
-              ref={inputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => addFiles(e.target.files)}
-            />
-          </div>
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => addFiles(e.target.files)}
+          />
         </CardContent>
       </Card>
 

@@ -109,6 +109,14 @@ const kpiCards = [
 
 type ViewState = "loaded" | "loading" | "error" | "empty";
 
+// Placeholder slots have no entity IDs; use fixed keys instead of array indexes.
+const KPI_PLACEHOLDER_KEYS = [
+  "kpi-slot-a",
+  "kpi-slot-b",
+  "kpi-slot-c",
+  "kpi-slot-d",
+] as const;
+
 function DashboardPage() {
   const [viewState, setViewState] = useState<ViewState>("loaded");
 
@@ -156,8 +164,8 @@ function DashboardPage() {
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {viewState === "loading"
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i}>
+          ? KPI_PLACEHOLDER_KEYS.map((key) => (
+              <Card key={key}>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="size-4 rounded" />
@@ -169,8 +177,8 @@ function DashboardPage() {
               </Card>
             ))
           : viewState === "error"
-            ? Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="border-destructive/30">
+            ? KPI_PLACEHOLDER_KEYS.map((key) => (
+                <Card key={key} className="border-destructive/30">
                   <CardContent className="flex flex-col items-center justify-center py-6 text-center">
                     <AlertCircle className="size-8 text-destructive mb-2" />
                     <p className="text-sm text-destructive">
@@ -188,8 +196,8 @@ function DashboardPage() {
                 </Card>
               ))
             : viewState === "empty"
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i}>
+              ? KPI_PLACEHOLDER_KEYS.map((key) => (
+                  <Card key={key}>
                     <CardContent className="flex flex-col items-center justify-center py-6 text-center">
                       <p className="text-sm text-muted-foreground">
                         データがありません

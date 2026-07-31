@@ -74,6 +74,14 @@ const initialMessages: Message[] = [
 
 type ViewState = "loaded" | "loading" | "error" | "empty";
 
+// Placeholder slots have no entity IDs; use fixed keys instead of array indexes.
+const CHAT_SKELETON_KEYS = [
+  "chat-sk-0",
+  "chat-sk-1",
+  "chat-sk-2",
+  "chat-sk-3",
+] as const;
+
 function ChatPage() {
   const [viewState, setViewState] = useState<ViewState>("loaded");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -81,6 +89,7 @@ function ChatPage() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll when messages change; effect body only mutates the ref
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -171,9 +180,9 @@ function ChatPage() {
         <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
           {viewState === "loading" ? (
             <div className="flex-1 p-4 space-y-4">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {CHAT_SKELETON_KEYS.map((key, i) => (
                 <div
-                  key={i}
+                  key={key}
                   className={`flex gap-3 ${i % 2 === 0 ? "" : "justify-end"}`}
                 >
                   {i % 2 === 0 && (

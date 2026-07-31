@@ -51,6 +51,40 @@ interface LineItem {
 
 type ViewState = "loaded" | "loading" | "error";
 
+// Placeholder slots have no entity IDs; use fixed keys instead of array indexes.
+const DETAIL_FORM_SKELETON_KEYS = [
+  "detail-form-sk-0",
+  "detail-form-sk-1",
+  "detail-form-sk-2",
+  "detail-form-sk-3",
+] as const;
+const DETAIL_SIDEBAR_SKELETON_KEYS = [
+  "detail-sidebar-sk-0",
+  "detail-sidebar-sk-1",
+  "detail-sidebar-sk-2",
+] as const;
+
+const activityLogs = [
+  {
+    id: "log-status-in-progress",
+    action: "ステータスを「進行中」に変更",
+    user: "田中太郎",
+    date: "2026-06-28",
+  },
+  {
+    id: "log-items-updated",
+    action: "明細を更新",
+    user: "佐藤花子",
+    date: "2026-06-25",
+  },
+  {
+    id: "log-created",
+    action: "案件を作成",
+    user: "田中太郎",
+    date: "2026-04-01",
+  },
+] as const;
+
 function DetailPage() {
   const [viewState, setViewState] = useState<ViewState>("loaded");
   const [title, setTitle] = useState("Webシステム刷新プロジェクト");
@@ -128,8 +162,8 @@ function DetailPage() {
           <div className="lg:col-span-2 space-y-4">
             <Card>
               <CardContent className="p-6 space-y-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="space-y-2">
+                {DETAIL_FORM_SKELETON_KEYS.map((key) => (
+                  <div key={key} className="space-y-2">
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-9 w-full" />
                   </div>
@@ -139,8 +173,8 @@ function DetailPage() {
           </div>
           <Card>
             <CardContent className="p-6 space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-2">
+              {DETAIL_SIDEBAR_SKELETON_KEYS.map((key) => (
+                <div key={key} className="space-y-2">
                   <Skeleton className="h-4 w-16" />
                   <Skeleton className="h-9 w-full" />
                 </div>
@@ -436,24 +470,8 @@ function DetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
-                {[
-                  {
-                    action: "ステータスを「進行中」に変更",
-                    user: "田中太郎",
-                    date: "2026-06-28",
-                  },
-                  {
-                    action: "明細を更新",
-                    user: "佐藤花子",
-                    date: "2026-06-25",
-                  },
-                  {
-                    action: "案件を作成",
-                    user: "田中太郎",
-                    date: "2026-04-01",
-                  },
-                ].map((log, i) => (
-                  <div key={i} className="flex flex-col gap-0.5">
+                {activityLogs.map((log) => (
+                  <div key={log.id} className="flex flex-col gap-0.5">
                     <p className="text-foreground">{log.action}</p>
                     <p className="text-xs text-muted-foreground">
                       {log.user} · {log.date}

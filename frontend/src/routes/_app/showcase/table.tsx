@@ -131,6 +131,15 @@ const statusVariant: Record<Status, "default" | "secondary" | "outline"> = {
 
 type ViewState = "loaded" | "loading" | "error" | "empty";
 
+// Placeholder slots have no entity IDs; use fixed keys instead of array indexes.
+const TABLE_ROW_SKELETON_KEYS = [
+  "table-row-sk-0",
+  "table-row-sk-1",
+  "table-row-sk-2",
+  "table-row-sk-3",
+  "table-row-sk-4",
+] as const;
+
 function TablePage() {
   const [viewState, setViewState] = useState<ViewState>("loaded");
   const [search, setSearch] = useState("");
@@ -275,8 +284,8 @@ function TablePage() {
         <CardContent className="p-0">
           {viewState === "loading" ? (
             <div className="p-4 space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4">
+              {TABLE_ROW_SKELETON_KEYS.map((key) => (
+                <div key={key} className="flex items-center gap-4">
                   <Skeleton className="h-4 w-16" />
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-40 flex-1" />
