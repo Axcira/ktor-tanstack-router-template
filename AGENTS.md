@@ -137,3 +137,11 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 | `STATIC_DIR` | (auto) | SPA root directory override (`index.html` required). Defaults try `/app/static` then `./static` |
 | `SERVE_FRONTEND` | unset | Force frontend-serving mode even if probing (still needs `index.html`) |
 | `EXPOSE_OPENAPI` | unset | When SPA is served, set `true` to also expose `/openapi.json` |
+
+## Learned User Preferences
+
+- Keep the Orval-generated client under `frontend/src/api/generated/` committed; prefer `orval:drift` detection over gitignoring the client or auto-generating it in pre-commit/CI
+
+## Learned Workspace Facts
+
+- CI runs `bun run orval:drift`; after Orval upgrades, pin the package exactly and regenerate/commit the client so drift stays green
