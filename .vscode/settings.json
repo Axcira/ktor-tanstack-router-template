@@ -1,9 +1,10 @@
 {
-    "files.exclude": {
-        "backend": true,
-        "frontend": true,
-        ".codegraph": true,
-        ".slim": true,
-        ".idea": true,
-    }
+	"files.exclude": {
+		"backend": true,
+		"frontend": true,
+		".codegraph": true,
+		".slim": true,
+		".idea": true
+	},
+	"biome.enabled": false
 }
