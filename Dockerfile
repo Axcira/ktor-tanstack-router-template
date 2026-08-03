@@ -22,10 +22,13 @@ COPY backend/gradlew gradlew
 COPY backend/build.gradle.kts build.gradle.kts
 COPY backend/settings.gradle.kts settings.gradle.kts
 COPY backend/gradle.properties gradle.properties
-RUN ./gradlew dependencies --no-daemon
-
 COPY backend/src/ src/
-RUN ./gradlew shadowJar --no-daemon
+# Persist Gradle caches across builds (deps + build cache). A separate
+# dependencies/classes warm-up layer is not worth it once this mount exists:
+# it doubles Gradle startup on buildscript changes and does not speed up
+# source-only rebuilds (measured: ~30s either way for the jar step).
+RUN --mount=type=cache,id=application-gradle,target=/root/.gradle \
+    ./gradlew shadowJar --no-daemon
 
 # ---- runtime ----
 FROM docker.io/eclipse-temurin:25-jre
