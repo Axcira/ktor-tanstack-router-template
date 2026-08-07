@@ -141,7 +141,10 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 ## Learned User Preferences
 
 - Keep the Orval-generated client under `frontend/src/api/generated/` committed; prefer `orval:drift` detection over gitignoring the client or auto-generating it in pre-commit/CI
+- Treat showcase routes as agent-facing reference UI; keep them production-quality (fix lint issues rather than relaxing Biome/CI for showcase)
 
 ## Learned Workspace Facts
 
 - CI runs `bun run orval:drift`; after Orval upgrades, pin the package exactly and regenerate/commit the client so drift stays green
+- No public self-registration API; user creation is admin-only via ManageUsers (`/permissions/users`)
+- CI does not build container images; treat Dependabot Docker/base-image updates as needing local `podman`/`docker build` verification even when other checks are green
