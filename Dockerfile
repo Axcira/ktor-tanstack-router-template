@@ -14,7 +14,7 @@ COPY frontend/ frontend/
 RUN bun run --cwd frontend build
 
 # ---- backend builder ----
-FROM docker.io/eclipse-temurin:21-jdk AS builder
+FROM docker.io/eclipse-temurin:25-jdk AS builder
 WORKDIR /build
 
 COPY backend/gradle/ gradle/
