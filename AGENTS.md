@@ -46,7 +46,7 @@ cd frontend && bun run orval:watch
 
 ## Backend (Ktor / Kotlin / Gradle)
 
-- **JDK**: 21 (toolchain). Main class: `net.axcira.MainKt` (sets `io.ktor.server.sessions.deferred=true` and logback config).
+- **JDK**: 25 (toolchain). Main class: `net.axcira.MainKt` (sets `io.ktor.server.sessions.deferred=true` and logback config).
 - **Key tasks**:
   - `./gradlew run` — dev server with auto-reload (watches `classes`)
   - `./gradlew test` — JUnit Platform (uses Testcontainers PostgreSQL, **requires Docker**)
@@ -61,7 +61,7 @@ cd frontend && bun run orval:watch
 - **Init**: `ApplicationInitializer.kt` runs on `ApplicationStarted` — seeds admin role + user from env vars (`ADMIN_ROLE_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`). `ADMIN_PASSWORD` defaults to `"password"` in dev mode.
 - **OpenAPI**: Local/API-only mode serves Scalar at `/` and `/openapi.json`. When a production SPA is present under `/app/static` (or `STATIC_DIR` / `./static` with `index.html`), Scalar is disabled and Ktor serves the SPA instead (`configureFrontend`). Set `EXPOSE_OPENAPI=true` to keep `/openapi.json` in production.
 - **Testing**: `test()` helper from `BaseTest.kt` spins up a suite-scoped Testcontainers PostgreSQL, migrates once, truncates between tests, and reuses a shared Ktor `TestApplication` + per-test HTTP client (**requires Docker**).
-- **Docker build**: from **repo root**: `podman build -t backend .` (Bun frontend build → JDK 21 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI).
+- **Docker build**: from **repo root**: `podman build -t backend .` (Bun frontend build → JDK 25 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI).
 
 ## Frontend (TanStack Router / React / Vite / Bun)
 
@@ -141,7 +141,10 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 ## Learned User Preferences
 
 - Keep the Orval-generated client under `frontend/src/api/generated/` committed; prefer `orval:drift` detection over gitignoring the client or auto-generating it in pre-commit/CI
+- Treat showcase routes as agent-facing reference UI; keep them production-quality (fix lint issues rather than relaxing Biome/CI for showcase)
 
 ## Learned Workspace Facts
 
 - CI runs `bun run orval:drift`; after Orval upgrades, pin the package exactly and regenerate/commit the client so drift stays green
+- No public self-registration API; user creation is admin-only via ManageUsers (`/permissions/users`)
+- CI does not build container images; treat Dependabot Docker/base-image updates as needing local `podman`/`docker build` verification even when other checks are green
