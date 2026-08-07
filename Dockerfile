@@ -2,7 +2,7 @@
 #   podman build -t ghcr.io/example/app:1.0 .
 
 # ---- frontend stage ----
-FROM docker.io/oven/bun:1.2 AS frontend
+FROM docker.io/oven/bun:1.3 AS frontend
 WORKDIR /src
 
 COPY package.json bun.lock ./
@@ -14,7 +14,7 @@ COPY frontend/ frontend/
 RUN bun run --cwd frontend build
 
 # ---- backend builder ----
-FROM docker.io/eclipse-temurin:21-jdk AS builder
+FROM docker.io/eclipse-temurin:25-jdk AS builder
 WORKDIR /build
 
 COPY backend/gradle/ gradle/
