@@ -34,7 +34,17 @@ export const Route = createFileRoute("/_app/articles/")({
 
 function ArticlesListPage() {
   const { page, limit } = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
+  return <ArticlesListView page={page} limit={limit} />;
+}
+
+export function ArticlesListView({
+  page,
+  limit,
+}: {
+  page: number;
+  limit: number;
+}) {
+  const navigate = useNavigate();
   const { isAllowed: isAllowedCreation } = useAuthorize({
     type: "CreateArticle",
   });
@@ -112,7 +122,6 @@ function ArticlesListPage() {
         )}
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-center space-x-2 py-4">
         <Button
           variant="outline"

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Permission } from "@/api/generated/schemas";
 import { checkPermission } from "@/lib/permissions";
-import { Route } from "../routes/_app";
+import { Route } from "@/routes/_app";
 
 export function useAuthorize(
   permission?: Permission,

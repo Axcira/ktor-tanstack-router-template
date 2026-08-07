@@ -32,7 +32,6 @@ export async function checkPermission(
 
   try {
     const canIResponse = await canIV1(permission);
-    console.log("canIResponse", canIResponse);
     return canIResponse.status === 200;
   } catch (error) {
     console.error("Permission check failed", error);

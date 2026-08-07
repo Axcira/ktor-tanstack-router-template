@@ -48,7 +48,7 @@ jobs:
         working-directory: frontend
 
       - name: Frontend test
-        run: bun run test --passWithNoTests
+        run: bun run test
         working-directory: frontend
 
       - name: Frontend build

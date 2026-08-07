@@ -1,13 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  Check,
-  Plus,
-  Search,
-  ShieldAlert,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import { Plus, Search, ShieldAlert, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   useDeleteUserV1,
   useGetRolesV1,
@@ -16,6 +10,7 @@ import {
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DeleteUserDialog } from "./-components/DeleteUserDialog";
 import { UsersTable } from "./-components/UsersTable";
 
 export const Route = createFileRoute("/_app/permissions/users/")({
@@ -63,18 +58,10 @@ function UsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
 
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "success" | "info" | "error";
+  const [userToDelete, setUserToDelete] = useState<{
+    id: number;
+    email: string;
   } | null>(null);
-
-  const showNotification = (
-    message: string,
-    type: "success" | "info" | "error" = "success",
-  ) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4000);
-  };
 
   const handleOpenCreate = () => {
     navigate({ to: "/permissions/users/create" }).then();
@@ -87,19 +74,24 @@ function UsersPage() {
     }).then();
   };
 
-  const handleDelete = async (userId: number, email: string) => {
-    if (confirm(`ユーザー「${email}」を削除してもよろしいですか？`)) {
-      setDeletingId(userId);
-      try {
-        await deleteUserMutation.mutateAsync({ id: String(userId) });
-        await refetch();
-        showNotification(`ユーザー「${email}」を削除しました。`, "info");
-      } catch (error) {
-        console.error("Failed to delete user:", error);
-        showNotification("ユーザーの削除に失敗しました。", "error");
-      } finally {
-        setDeletingId(null);
-      }
+  const handleDeleteRequest = (userId: number, email: string) => {
+    setUserToDelete({ id: userId, email });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+    const { id: userId, email } = userToDelete;
+    setDeletingId(userId);
+    try {
+      await deleteUserMutation.mutateAsync({ id: String(userId) });
+      setUserToDelete(null);
+      await refetch();
+      toast.success(`ユーザー「${email}」を削除しました。`);
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      toast.error("ユーザーの削除に失敗しました。");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -127,23 +119,6 @@ function UsersPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {notification && (
-        <div
-          className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm animate-in fade-in slide-in-from-bottom-5 duration-300 ${
-            notification.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:text-emerald-400"
-              : notification.type === "info"
-                ? "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/30 dark:border-blue-900/50 dark:text-blue-400"
-                : "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400"
-          }`}
-        >
-          {notification.type === "success" && <Check className="h-4 w-4" />}
-          {notification.type === "info" && <ShieldCheck className="h-4 w-4" />}
-          {notification.type === "error" && <ShieldAlert className="h-4 w-4" />}
-          <span>{notification.message}</span>
-        </div>
-      )}
-
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="text-2xl font-bold font-heading tracking-tight flex items-center gap-2">
@@ -213,7 +188,19 @@ function UsersPage() {
         deletingId={deletingId}
         isSubmitting={isSubmitting}
         onEdit={handleOpenEdit}
-        onDelete={handleDelete}
+        onDelete={handleDeleteRequest}
+      />
+
+      <DeleteUserDialog
+        email={userToDelete?.email ?? null}
+        isOpen={!!userToDelete}
+        isDeleting={deletingId !== null}
+        onOpenChange={(open) => {
+          if (!open && deletingId === null) setUserToDelete(null);
+        }}
+        onConfirm={() => {
+          handleConfirmDelete().then();
+        }}
       />
 
       <div className="flex items-center justify-between border-t pt-4">
