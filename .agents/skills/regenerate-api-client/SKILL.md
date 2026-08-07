@@ -30,7 +30,7 @@ hand-edited** — they are overwritten on every regeneration.
 
 ## Prerequisites
 
-- **JDK 21** (toolchain) — verify with `java --version`.
+- **JDK 25** (toolchain) — verify with `java --version`.
 - **Bun** — verify with `bun --version`.
 - **No Docker or database required** — the OpenAPI generation runs with
   `SKIP_DATABASE=true` and `SKIP_BOOTSTRAP=true`, which skip all
