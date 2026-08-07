@@ -8,5 +8,6 @@
 export interface UserDTO {
   id: number;
   email: string;
-  roleId?: number;
+  /** @nullable */
+  roleId?: number | null;
 }

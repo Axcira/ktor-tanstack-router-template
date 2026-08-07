@@ -4,17 +4,17 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { Administrator } from "./administrator.ts";
-import type { CreateArticle } from "./createArticle.ts";
-import type { DeleteArticle } from "./deleteArticle.ts";
-import type { ManageArticles } from "./manageArticles.ts";
-import type { ManageUsers } from "./manageUsers.ts";
-import type { UpdateArticle } from "./updateArticle.ts";
+import type { PermissionAdministrator } from "./permissionAdministrator.ts";
+import type { PermissionCreateArticle } from "./permissionCreateArticle.ts";
+import type { PermissionDeleteArticle } from "./permissionDeleteArticle.ts";
+import type { PermissionManageArticles } from "./permissionManageArticles.ts";
+import type { PermissionManageUsers } from "./permissionManageUsers.ts";
+import type { PermissionUpdateArticle } from "./permissionUpdateArticle.ts";
 
 export type Permission =
-  | Administrator
-  | CreateArticle
-  | DeleteArticle
-  | ManageArticles
-  | ManageUsers
-  | UpdateArticle;
+  | PermissionAdministrator
+  | PermissionCreateArticle
+  | PermissionDeleteArticle
+  | PermissionManageArticles
+  | PermissionManageUsers
+  | PermissionUpdateArticle;
