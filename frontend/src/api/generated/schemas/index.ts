@@ -5,16 +5,10 @@
  * OpenAPI spec version: 1.0
  */
 
-export * from "./administrator.ts";
-export * from "./administratorType.ts";
 export * from "./articleDTO.ts";
-export * from "./createArticle.ts";
 export * from "./createArticleInput.ts";
-export * from "./createArticleType.ts";
 export * from "./createRoleInput.ts";
 export * from "./createUserInput.ts";
-export * from "./deleteArticle.ts";
-export * from "./deleteArticleType.ts";
 export * from "./deleteRoleV1Params.ts";
 export * from "./getApiJsonKotlinxSerialization200.ts";
 export * from "./getRolesV1Params.ts";
@@ -22,16 +16,22 @@ export * from "./getUserPermissionsV1Params.ts";
 export * from "./getUsersV1Params.ts";
 export * from "./listArticlesV1Params.ts";
 export * from "./loginRequest.ts";
-export * from "./manageArticles.ts";
-export * from "./manageArticlesType.ts";
-export * from "./manageUsers.ts";
-export * from "./manageUsersType.ts";
 export * from "./permission.ts";
+export * from "./permissionAdministrator.ts";
+export * from "./permissionAdministratorType.ts";
+export * from "./permissionCreateArticle.ts";
+export * from "./permissionCreateArticleType.ts";
+export * from "./permissionDeleteArticle.ts";
+export * from "./permissionDeleteArticleType.ts";
+export * from "./permissionManageArticles.ts";
+export * from "./permissionManageArticlesType.ts";
+export * from "./permissionManageUsers.ts";
+export * from "./permissionManageUsersType.ts";
+export * from "./permissionUpdateArticle.ts";
+export * from "./permissionUpdateArticleType.ts";
 export * from "./roleDTO.ts";
 export * from "./tagDTO.ts";
-export * from "./updateArticle.ts";
 export * from "./updateArticleInput.ts";
-export * from "./updateArticleType.ts";
 export * from "./updateRoleInput.ts";
 export * from "./updateUserInput.ts";
 export * from "./userDTO.ts";

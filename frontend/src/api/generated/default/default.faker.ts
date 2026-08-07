@@ -7,16 +7,16 @@
 import { faker } from "@faker-js/faker";
 
 import type {
-  Administrator,
   ArticleDTO,
-  CreateArticle,
-  DeleteArticle,
   GetApiJsonKotlinxSerialization200,
-  ManageArticles,
-  ManageUsers,
   Permission,
+  PermissionAdministrator,
+  PermissionCreateArticle,
+  PermissionDeleteArticle,
+  PermissionManageArticles,
+  PermissionManageUsers,
+  PermissionUpdateArticle,
   RoleDTO,
-  UpdateArticle,
   UserDTO,
   UserSession,
 } from "../schemas";
@@ -28,50 +28,50 @@ export const getGetApiJsonKotlinxSerializationResponseMock =
     }),
   });
 
-export const getLoginV1ResponseAdministratorMock = (
-  overrideResponse: Partial<Administrator> = {},
-): Administrator => ({
+export const getLoginV1ResponsePermissionAdministratorMock = (
+  overrideResponse: Partial<PermissionAdministrator> = {},
+): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
   ...overrideResponse,
 });
 
-export const getLoginV1ResponseCreateArticleMock = (
-  overrideResponse: Partial<CreateArticle> = {},
-): CreateArticle => ({
+export const getLoginV1ResponsePermissionCreateArticleMock = (
+  overrideResponse: Partial<PermissionCreateArticle> = {},
+): PermissionCreateArticle => ({
   ...{ type: faker.helpers.arrayElement(["CreateArticle"] as const) },
   ...overrideResponse,
 });
 
-export const getLoginV1ResponseDeleteArticleMock = (
-  overrideResponse: Partial<DeleteArticle> = {},
-): DeleteArticle => ({
+export const getLoginV1ResponsePermissionDeleteArticleMock = (
+  overrideResponse: Partial<PermissionDeleteArticle> = {},
+): PermissionDeleteArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["DeleteArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
 
-export const getLoginV1ResponseManageArticlesMock = (
-  overrideResponse: Partial<ManageArticles> = {},
-): ManageArticles => ({
+export const getLoginV1ResponsePermissionManageArticlesMock = (
+  overrideResponse: Partial<PermissionManageArticles> = {},
+): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
   ...overrideResponse,
 });
 
-export const getLoginV1ResponseManageUsersMock = (
-  overrideResponse: Partial<ManageUsers> = {},
-): ManageUsers => ({
+export const getLoginV1ResponsePermissionManageUsersMock = (
+  overrideResponse: Partial<PermissionManageUsers> = {},
+): PermissionManageUsers => ({
   ...{ type: faker.helpers.arrayElement(["ManageUsers"] as const) },
   ...overrideResponse,
 });
 
-export const getLoginV1ResponseUpdateArticleMock = (
-  overrideResponse: Partial<UpdateArticle> = {},
-): UpdateArticle => ({
+export const getLoginV1ResponsePermissionUpdateArticleMock = (
+  overrideResponse: Partial<PermissionUpdateArticle> = {},
+): PermissionUpdateArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["UpdateArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
@@ -82,19 +82,22 @@ export const getLoginV1ResponseMock = (
   user: {
     id: faker.number.int(),
     email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    roleId: faker.helpers.arrayElement([faker.number.int(), undefined]),
+    roleId: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([faker.number.int(), null]),
+      undefined,
+    ]),
   },
   permissions: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
   ).map(() =>
     faker.helpers.arrayElement([
-      { ...getLoginV1ResponseAdministratorMock() },
-      { ...getLoginV1ResponseCreateArticleMock() },
-      { ...getLoginV1ResponseDeleteArticleMock() },
-      { ...getLoginV1ResponseManageArticlesMock() },
-      { ...getLoginV1ResponseManageUsersMock() },
-      { ...getLoginV1ResponseUpdateArticleMock() },
+      { ...getLoginV1ResponsePermissionAdministratorMock() },
+      { ...getLoginV1ResponsePermissionCreateArticleMock() },
+      { ...getLoginV1ResponsePermissionDeleteArticleMock() },
+      { ...getLoginV1ResponsePermissionManageArticlesMock() },
+      { ...getLoginV1ResponsePermissionManageUsersMock() },
+      { ...getLoginV1ResponsePermissionUpdateArticleMock() },
     ]),
   ),
   ...overrideResponse,
@@ -107,7 +110,10 @@ export const getGetUsersV1ResponseMock = (): UserDTO[] =>
   ).map(() => ({
     id: faker.number.int(),
     email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    roleId: faker.helpers.arrayElement([faker.number.int(), undefined]),
+    roleId: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([faker.number.int(), null]),
+      undefined,
+    ]),
   }));
 
 export const getCreateUserV1ResponseMock = (
@@ -115,54 +121,57 @@ export const getCreateUserV1ResponseMock = (
 ): UserDTO => ({
   id: faker.number.int(),
   email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  roleId: faker.helpers.arrayElement([faker.number.int(), undefined]),
+  roleId: faker.helpers.arrayElement([
+    faker.helpers.arrayElement([faker.number.int(), null]),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
-export const getGetSelfV1ResponseAdministratorMock = (
-  overrideResponse: Partial<Administrator> = {},
-): Administrator => ({
+export const getGetSelfV1ResponsePermissionAdministratorMock = (
+  overrideResponse: Partial<PermissionAdministrator> = {},
+): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
   ...overrideResponse,
 });
 
-export const getGetSelfV1ResponseCreateArticleMock = (
-  overrideResponse: Partial<CreateArticle> = {},
-): CreateArticle => ({
+export const getGetSelfV1ResponsePermissionCreateArticleMock = (
+  overrideResponse: Partial<PermissionCreateArticle> = {},
+): PermissionCreateArticle => ({
   ...{ type: faker.helpers.arrayElement(["CreateArticle"] as const) },
   ...overrideResponse,
 });
 
-export const getGetSelfV1ResponseDeleteArticleMock = (
-  overrideResponse: Partial<DeleteArticle> = {},
-): DeleteArticle => ({
+export const getGetSelfV1ResponsePermissionDeleteArticleMock = (
+  overrideResponse: Partial<PermissionDeleteArticle> = {},
+): PermissionDeleteArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["DeleteArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
 
-export const getGetSelfV1ResponseManageArticlesMock = (
-  overrideResponse: Partial<ManageArticles> = {},
-): ManageArticles => ({
+export const getGetSelfV1ResponsePermissionManageArticlesMock = (
+  overrideResponse: Partial<PermissionManageArticles> = {},
+): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
   ...overrideResponse,
 });
 
-export const getGetSelfV1ResponseManageUsersMock = (
-  overrideResponse: Partial<ManageUsers> = {},
-): ManageUsers => ({
+export const getGetSelfV1ResponsePermissionManageUsersMock = (
+  overrideResponse: Partial<PermissionManageUsers> = {},
+): PermissionManageUsers => ({
   ...{ type: faker.helpers.arrayElement(["ManageUsers"] as const) },
   ...overrideResponse,
 });
 
-export const getGetSelfV1ResponseUpdateArticleMock = (
-  overrideResponse: Partial<UpdateArticle> = {},
-): UpdateArticle => ({
+export const getGetSelfV1ResponsePermissionUpdateArticleMock = (
+  overrideResponse: Partial<PermissionUpdateArticle> = {},
+): PermissionUpdateArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["UpdateArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
@@ -173,19 +182,22 @@ export const getGetSelfV1ResponseMock = (
   user: {
     id: faker.number.int(),
     email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    roleId: faker.helpers.arrayElement([faker.number.int(), undefined]),
+    roleId: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([faker.number.int(), null]),
+      undefined,
+    ]),
   },
   permissions: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
   ).map(() =>
     faker.helpers.arrayElement([
-      { ...getGetSelfV1ResponseAdministratorMock() },
-      { ...getGetSelfV1ResponseCreateArticleMock() },
-      { ...getGetSelfV1ResponseDeleteArticleMock() },
-      { ...getGetSelfV1ResponseManageArticlesMock() },
-      { ...getGetSelfV1ResponseManageUsersMock() },
-      { ...getGetSelfV1ResponseUpdateArticleMock() },
+      { ...getGetSelfV1ResponsePermissionAdministratorMock() },
+      { ...getGetSelfV1ResponsePermissionCreateArticleMock() },
+      { ...getGetSelfV1ResponsePermissionDeleteArticleMock() },
+      { ...getGetSelfV1ResponsePermissionManageArticlesMock() },
+      { ...getGetSelfV1ResponsePermissionManageUsersMock() },
+      { ...getGetSelfV1ResponsePermissionUpdateArticleMock() },
     ]),
   ),
   ...overrideResponse,
@@ -264,50 +276,50 @@ export const getUpdateArticleV1ResponseMock = (
   ...overrideResponse,
 });
 
-export const getGetUserPermissionsV1ResponseAdministratorMock = (
-  overrideResponse: Partial<Administrator> = {},
-): Administrator => ({
+export const getGetUserPermissionsV1ResponsePermissionAdministratorMock = (
+  overrideResponse: Partial<PermissionAdministrator> = {},
+): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
   ...overrideResponse,
 });
 
-export const getGetUserPermissionsV1ResponseCreateArticleMock = (
-  overrideResponse: Partial<CreateArticle> = {},
-): CreateArticle => ({
+export const getGetUserPermissionsV1ResponsePermissionCreateArticleMock = (
+  overrideResponse: Partial<PermissionCreateArticle> = {},
+): PermissionCreateArticle => ({
   ...{ type: faker.helpers.arrayElement(["CreateArticle"] as const) },
   ...overrideResponse,
 });
 
-export const getGetUserPermissionsV1ResponseDeleteArticleMock = (
-  overrideResponse: Partial<DeleteArticle> = {},
-): DeleteArticle => ({
+export const getGetUserPermissionsV1ResponsePermissionDeleteArticleMock = (
+  overrideResponse: Partial<PermissionDeleteArticle> = {},
+): PermissionDeleteArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["DeleteArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
 
-export const getGetUserPermissionsV1ResponseManageArticlesMock = (
-  overrideResponse: Partial<ManageArticles> = {},
-): ManageArticles => ({
+export const getGetUserPermissionsV1ResponsePermissionManageArticlesMock = (
+  overrideResponse: Partial<PermissionManageArticles> = {},
+): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
   ...overrideResponse,
 });
 
-export const getGetUserPermissionsV1ResponseManageUsersMock = (
-  overrideResponse: Partial<ManageUsers> = {},
-): ManageUsers => ({
+export const getGetUserPermissionsV1ResponsePermissionManageUsersMock = (
+  overrideResponse: Partial<PermissionManageUsers> = {},
+): PermissionManageUsers => ({
   ...{ type: faker.helpers.arrayElement(["ManageUsers"] as const) },
   ...overrideResponse,
 });
 
-export const getGetUserPermissionsV1ResponseUpdateArticleMock = (
-  overrideResponse: Partial<UpdateArticle> = {},
-): UpdateArticle => ({
+export const getGetUserPermissionsV1ResponsePermissionUpdateArticleMock = (
+  overrideResponse: Partial<PermissionUpdateArticle> = {},
+): PermissionUpdateArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["UpdateArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
@@ -318,59 +330,59 @@ export const getGetUserPermissionsV1ResponseMock = (): Permission[] =>
     (_, i) => i + 1,
   ).map(() =>
     faker.helpers.arrayElement([
-      { ...getGetUserPermissionsV1ResponseAdministratorMock() },
-      { ...getGetUserPermissionsV1ResponseCreateArticleMock() },
-      { ...getGetUserPermissionsV1ResponseDeleteArticleMock() },
-      { ...getGetUserPermissionsV1ResponseManageArticlesMock() },
-      { ...getGetUserPermissionsV1ResponseManageUsersMock() },
-      { ...getGetUserPermissionsV1ResponseUpdateArticleMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionAdministratorMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionCreateArticleMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionDeleteArticleMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionManageArticlesMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionManageUsersMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionUpdateArticleMock() },
     ]),
   );
 
-export const getCreateRoleV1ResponseAdministratorMock = (
-  overrideResponse: Partial<Administrator> = {},
-): Administrator => ({
+export const getCreateRoleV1ResponsePermissionAdministratorMock = (
+  overrideResponse: Partial<PermissionAdministrator> = {},
+): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
   ...overrideResponse,
 });
 
-export const getCreateRoleV1ResponseCreateArticleMock = (
-  overrideResponse: Partial<CreateArticle> = {},
-): CreateArticle => ({
+export const getCreateRoleV1ResponsePermissionCreateArticleMock = (
+  overrideResponse: Partial<PermissionCreateArticle> = {},
+): PermissionCreateArticle => ({
   ...{ type: faker.helpers.arrayElement(["CreateArticle"] as const) },
   ...overrideResponse,
 });
 
-export const getCreateRoleV1ResponseDeleteArticleMock = (
-  overrideResponse: Partial<DeleteArticle> = {},
-): DeleteArticle => ({
+export const getCreateRoleV1ResponsePermissionDeleteArticleMock = (
+  overrideResponse: Partial<PermissionDeleteArticle> = {},
+): PermissionDeleteArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["DeleteArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
 
-export const getCreateRoleV1ResponseManageArticlesMock = (
-  overrideResponse: Partial<ManageArticles> = {},
-): ManageArticles => ({
+export const getCreateRoleV1ResponsePermissionManageArticlesMock = (
+  overrideResponse: Partial<PermissionManageArticles> = {},
+): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
   ...overrideResponse,
 });
 
-export const getCreateRoleV1ResponseManageUsersMock = (
-  overrideResponse: Partial<ManageUsers> = {},
-): ManageUsers => ({
+export const getCreateRoleV1ResponsePermissionManageUsersMock = (
+  overrideResponse: Partial<PermissionManageUsers> = {},
+): PermissionManageUsers => ({
   ...{ type: faker.helpers.arrayElement(["ManageUsers"] as const) },
   ...overrideResponse,
 });
 
-export const getCreateRoleV1ResponseUpdateArticleMock = (
-  overrideResponse: Partial<UpdateArticle> = {},
-): UpdateArticle => ({
+export const getCreateRoleV1ResponsePermissionUpdateArticleMock = (
+  overrideResponse: Partial<PermissionUpdateArticle> = {},
+): PermissionUpdateArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["UpdateArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
@@ -386,61 +398,61 @@ export const getCreateRoleV1ResponseMock = (
     (_, i) => i + 1,
   ).map(() =>
     faker.helpers.arrayElement([
-      { ...getCreateRoleV1ResponseAdministratorMock() },
-      { ...getCreateRoleV1ResponseCreateArticleMock() },
-      { ...getCreateRoleV1ResponseDeleteArticleMock() },
-      { ...getCreateRoleV1ResponseManageArticlesMock() },
-      { ...getCreateRoleV1ResponseManageUsersMock() },
-      { ...getCreateRoleV1ResponseUpdateArticleMock() },
+      { ...getCreateRoleV1ResponsePermissionAdministratorMock() },
+      { ...getCreateRoleV1ResponsePermissionCreateArticleMock() },
+      { ...getCreateRoleV1ResponsePermissionDeleteArticleMock() },
+      { ...getCreateRoleV1ResponsePermissionManageArticlesMock() },
+      { ...getCreateRoleV1ResponsePermissionManageUsersMock() },
+      { ...getCreateRoleV1ResponsePermissionUpdateArticleMock() },
     ]),
   ),
   ...overrideResponse,
 });
 
-export const getGetRolesV1ResponseAdministratorMock = (
-  overrideResponse: Partial<Administrator> = {},
-): Administrator => ({
+export const getGetRolesV1ResponsePermissionAdministratorMock = (
+  overrideResponse: Partial<PermissionAdministrator> = {},
+): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRolesV1ResponseCreateArticleMock = (
-  overrideResponse: Partial<CreateArticle> = {},
-): CreateArticle => ({
+export const getGetRolesV1ResponsePermissionCreateArticleMock = (
+  overrideResponse: Partial<PermissionCreateArticle> = {},
+): PermissionCreateArticle => ({
   ...{ type: faker.helpers.arrayElement(["CreateArticle"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRolesV1ResponseDeleteArticleMock = (
-  overrideResponse: Partial<DeleteArticle> = {},
-): DeleteArticle => ({
+export const getGetRolesV1ResponsePermissionDeleteArticleMock = (
+  overrideResponse: Partial<PermissionDeleteArticle> = {},
+): PermissionDeleteArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["DeleteArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
 
-export const getGetRolesV1ResponseManageArticlesMock = (
-  overrideResponse: Partial<ManageArticles> = {},
-): ManageArticles => ({
+export const getGetRolesV1ResponsePermissionManageArticlesMock = (
+  overrideResponse: Partial<PermissionManageArticles> = {},
+): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRolesV1ResponseManageUsersMock = (
-  overrideResponse: Partial<ManageUsers> = {},
-): ManageUsers => ({
+export const getGetRolesV1ResponsePermissionManageUsersMock = (
+  overrideResponse: Partial<PermissionManageUsers> = {},
+): PermissionManageUsers => ({
   ...{ type: faker.helpers.arrayElement(["ManageUsers"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRolesV1ResponseUpdateArticleMock = (
-  overrideResponse: Partial<UpdateArticle> = {},
-): UpdateArticle => ({
+export const getGetRolesV1ResponsePermissionUpdateArticleMock = (
+  overrideResponse: Partial<PermissionUpdateArticle> = {},
+): PermissionUpdateArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["UpdateArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
@@ -458,60 +470,60 @@ export const getGetRolesV1ResponseMock = (): RoleDTO[] =>
       (_, i) => i + 1,
     ).map(() =>
       faker.helpers.arrayElement([
-        { ...getGetRolesV1ResponseAdministratorMock() },
-        { ...getGetRolesV1ResponseCreateArticleMock() },
-        { ...getGetRolesV1ResponseDeleteArticleMock() },
-        { ...getGetRolesV1ResponseManageArticlesMock() },
-        { ...getGetRolesV1ResponseManageUsersMock() },
-        { ...getGetRolesV1ResponseUpdateArticleMock() },
+        { ...getGetRolesV1ResponsePermissionAdministratorMock() },
+        { ...getGetRolesV1ResponsePermissionCreateArticleMock() },
+        { ...getGetRolesV1ResponsePermissionDeleteArticleMock() },
+        { ...getGetRolesV1ResponsePermissionManageArticlesMock() },
+        { ...getGetRolesV1ResponsePermissionManageUsersMock() },
+        { ...getGetRolesV1ResponsePermissionUpdateArticleMock() },
       ]),
     ),
   }));
 
-export const getGetRoleByIdV1ResponseAdministratorMock = (
-  overrideResponse: Partial<Administrator> = {},
-): Administrator => ({
+export const getGetRoleByIdV1ResponsePermissionAdministratorMock = (
+  overrideResponse: Partial<PermissionAdministrator> = {},
+): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRoleByIdV1ResponseCreateArticleMock = (
-  overrideResponse: Partial<CreateArticle> = {},
-): CreateArticle => ({
+export const getGetRoleByIdV1ResponsePermissionCreateArticleMock = (
+  overrideResponse: Partial<PermissionCreateArticle> = {},
+): PermissionCreateArticle => ({
   ...{ type: faker.helpers.arrayElement(["CreateArticle"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRoleByIdV1ResponseDeleteArticleMock = (
-  overrideResponse: Partial<DeleteArticle> = {},
-): DeleteArticle => ({
+export const getGetRoleByIdV1ResponsePermissionDeleteArticleMock = (
+  overrideResponse: Partial<PermissionDeleteArticle> = {},
+): PermissionDeleteArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["DeleteArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
 
-export const getGetRoleByIdV1ResponseManageArticlesMock = (
-  overrideResponse: Partial<ManageArticles> = {},
-): ManageArticles => ({
+export const getGetRoleByIdV1ResponsePermissionManageArticlesMock = (
+  overrideResponse: Partial<PermissionManageArticles> = {},
+): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRoleByIdV1ResponseManageUsersMock = (
-  overrideResponse: Partial<ManageUsers> = {},
-): ManageUsers => ({
+export const getGetRoleByIdV1ResponsePermissionManageUsersMock = (
+  overrideResponse: Partial<PermissionManageUsers> = {},
+): PermissionManageUsers => ({
   ...{ type: faker.helpers.arrayElement(["ManageUsers"] as const) },
   ...overrideResponse,
 });
 
-export const getGetRoleByIdV1ResponseUpdateArticleMock = (
-  overrideResponse: Partial<UpdateArticle> = {},
-): UpdateArticle => ({
+export const getGetRoleByIdV1ResponsePermissionUpdateArticleMock = (
+  overrideResponse: Partial<PermissionUpdateArticle> = {},
+): PermissionUpdateArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["UpdateArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
@@ -527,61 +539,61 @@ export const getGetRoleByIdV1ResponseMock = (
     (_, i) => i + 1,
   ).map(() =>
     faker.helpers.arrayElement([
-      { ...getGetRoleByIdV1ResponseAdministratorMock() },
-      { ...getGetRoleByIdV1ResponseCreateArticleMock() },
-      { ...getGetRoleByIdV1ResponseDeleteArticleMock() },
-      { ...getGetRoleByIdV1ResponseManageArticlesMock() },
-      { ...getGetRoleByIdV1ResponseManageUsersMock() },
-      { ...getGetRoleByIdV1ResponseUpdateArticleMock() },
+      { ...getGetRoleByIdV1ResponsePermissionAdministratorMock() },
+      { ...getGetRoleByIdV1ResponsePermissionCreateArticleMock() },
+      { ...getGetRoleByIdV1ResponsePermissionDeleteArticleMock() },
+      { ...getGetRoleByIdV1ResponsePermissionManageArticlesMock() },
+      { ...getGetRoleByIdV1ResponsePermissionManageUsersMock() },
+      { ...getGetRoleByIdV1ResponsePermissionUpdateArticleMock() },
     ]),
   ),
   ...overrideResponse,
 });
 
-export const getUpdateRoleV1ResponseAdministratorMock = (
-  overrideResponse: Partial<Administrator> = {},
-): Administrator => ({
+export const getUpdateRoleV1ResponsePermissionAdministratorMock = (
+  overrideResponse: Partial<PermissionAdministrator> = {},
+): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
   ...overrideResponse,
 });
 
-export const getUpdateRoleV1ResponseCreateArticleMock = (
-  overrideResponse: Partial<CreateArticle> = {},
-): CreateArticle => ({
+export const getUpdateRoleV1ResponsePermissionCreateArticleMock = (
+  overrideResponse: Partial<PermissionCreateArticle> = {},
+): PermissionCreateArticle => ({
   ...{ type: faker.helpers.arrayElement(["CreateArticle"] as const) },
   ...overrideResponse,
 });
 
-export const getUpdateRoleV1ResponseDeleteArticleMock = (
-  overrideResponse: Partial<DeleteArticle> = {},
-): DeleteArticle => ({
+export const getUpdateRoleV1ResponsePermissionDeleteArticleMock = (
+  overrideResponse: Partial<PermissionDeleteArticle> = {},
+): PermissionDeleteArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["DeleteArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
 
-export const getUpdateRoleV1ResponseManageArticlesMock = (
-  overrideResponse: Partial<ManageArticles> = {},
-): ManageArticles => ({
+export const getUpdateRoleV1ResponsePermissionManageArticlesMock = (
+  overrideResponse: Partial<PermissionManageArticles> = {},
+): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
   ...overrideResponse,
 });
 
-export const getUpdateRoleV1ResponseManageUsersMock = (
-  overrideResponse: Partial<ManageUsers> = {},
-): ManageUsers => ({
+export const getUpdateRoleV1ResponsePermissionManageUsersMock = (
+  overrideResponse: Partial<PermissionManageUsers> = {},
+): PermissionManageUsers => ({
   ...{ type: faker.helpers.arrayElement(["ManageUsers"] as const) },
   ...overrideResponse,
 });
 
-export const getUpdateRoleV1ResponseUpdateArticleMock = (
-  overrideResponse: Partial<UpdateArticle> = {},
-): UpdateArticle => ({
+export const getUpdateRoleV1ResponsePermissionUpdateArticleMock = (
+  overrideResponse: Partial<PermissionUpdateArticle> = {},
+): PermissionUpdateArticle => ({
   ...{
-    allowOthers: faker.datatype.boolean(),
     type: faker.helpers.arrayElement(["UpdateArticle"] as const),
+    allowOthers: faker.datatype.boolean(),
   },
   ...overrideResponse,
 });
@@ -597,12 +609,12 @@ export const getUpdateRoleV1ResponseMock = (
     (_, i) => i + 1,
   ).map(() =>
     faker.helpers.arrayElement([
-      { ...getUpdateRoleV1ResponseAdministratorMock() },
-      { ...getUpdateRoleV1ResponseCreateArticleMock() },
-      { ...getUpdateRoleV1ResponseDeleteArticleMock() },
-      { ...getUpdateRoleV1ResponseManageArticlesMock() },
-      { ...getUpdateRoleV1ResponseManageUsersMock() },
-      { ...getUpdateRoleV1ResponseUpdateArticleMock() },
+      { ...getUpdateRoleV1ResponsePermissionAdministratorMock() },
+      { ...getUpdateRoleV1ResponsePermissionCreateArticleMock() },
+      { ...getUpdateRoleV1ResponsePermissionDeleteArticleMock() },
+      { ...getUpdateRoleV1ResponsePermissionManageArticlesMock() },
+      { ...getUpdateRoleV1ResponsePermissionManageUsersMock() },
+      { ...getUpdateRoleV1ResponsePermissionUpdateArticleMock() },
     ]),
   ),
   ...overrideResponse,
