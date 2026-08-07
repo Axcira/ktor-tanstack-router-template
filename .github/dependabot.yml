@@ -1,0 +1,91 @@
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+
+updates:
+  # Root Bun workspace (package.json + frontend/)
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - bun
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      frontend-production:
+        dependency-type: production
+      frontend-development:
+        dependency-type: development
+
+  # Ktor / Kotlin / Exposed (libs.versions.toml + build.gradle.kts)
+  - package-ecosystem: gradle
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - gradle
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "kotlin*"
+      ktor:
+        patterns:
+          - "io.ktor*"
+      exposed:
+        patterns:
+          - "org.jetbrains.exposed*"
+      flyway:
+        patterns:
+          - "org.flywaydb*"
+      testcontainers:
+        patterns:
+          - "org.testcontainers*"
+
+  # Multi-stage Dockerfile (bun / temurin)
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - docker
+    commit-message:
+      prefix: "chore(docker)"
+
+  # Postgres service image in docker-compose.yml
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - docker
+    commit-message:
+      prefix: "chore(docker)"
+
+  # CI workflow actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
