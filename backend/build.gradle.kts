@@ -21,6 +21,15 @@ kotlin {
     jvmToolchain(25)
 }
 
+// OpenAPI file export needs TestApplication; keep test-host off the production classpath.
+val codegen =
+    sourceSets.create("codegen") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+configurations[codegen.implementationConfigurationName].extendsFrom(configurations.implementation.get())
+configurations[codegen.runtimeOnlyConfigurationName].extendsFrom(configurations.runtimeOnly.get())
+
 ktlint {
     version.set(libs.versions.ktlintEngine.get())
 }
@@ -41,7 +50,6 @@ dependencies {
     implementation(ktorLibs.server.requestValidation)
     implementation(ktorLibs.server.swagger)
     implementation(ktorLibs.server.htmlBuilder)
-    implementation(ktorLibs.server.testHost)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.dao)
@@ -54,7 +62,10 @@ dependencies {
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
 
+    "codegenImplementation"(ktorLibs.server.testHost)
+
     testImplementation(kotlin("test"))
+    testImplementation(ktorLibs.server.testHost)
     testImplementation(libs.h2)
     testImplementation(ktorLibs.client.contentNegotiation)
     testImplementation(ktorLibs.client.serialization)
@@ -70,8 +81,8 @@ ktor {
 
 tasks.register<JavaExec>("generateOpenApiJson") {
     description = "Generate OpenAPI Specification."
-    dependsOn("compileKotlin")
-    classpath = sourceSets["main"].runtimeClasspath
+    dependsOn(codegen.classesTaskName)
+    classpath = codegen.runtimeClasspath
     mainClass.set("net.axcira.GenerateOpenApiKt")
     environment("SKIP_BOOTSTRAP", "true")
     environment("SKIP_DATABASE", "true")

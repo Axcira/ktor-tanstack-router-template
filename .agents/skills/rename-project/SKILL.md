@@ -13,8 +13,8 @@ and a dry-run is **always** required before applying changes.
 ## Scope
 
 - **Package**: Replace `net.axcira` with a new reverse-DNS package name in
-  all Kotlin sources, YAML configs, build configs, and docs.  Package
-  directories are moved accordingly.
+  all Kotlin sources under `main` / `test` / `codegen`, YAML configs, build
+  configs, and docs.  Package directories are moved accordingly.
 - **Slug**: Replace `ktor-tanstack-router-template` in Worker name, docs,
   project name, artifact paths, and metadata.
 - **Display name**: Update `index.html <title>`, `manifest.json`, IntelliJ

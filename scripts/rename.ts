@@ -303,8 +303,14 @@ function collectKtFiles(dir: string): string[] {
   return result;
 }
 
+const KOTLIN_SRC_ROOTS = [
+  "backend/src/main/kotlin",
+  "backend/src/test/kotlin",
+  "backend/src/codegen/kotlin",
+] as const;
+
 const kotlinFiles: string[] = [];
-for (const base of ["backend/src/main/kotlin", "backend/src/test/kotlin"]) {
+for (const base of KOTLIN_SRC_ROOTS) {
   kotlinFiles.push(...collectKtFiles(resolve(base, oldPkgPath)));
 }
 
@@ -357,7 +363,7 @@ if (newPkg !== OLD_PKG) {
     }
   }
 
-  for (const base of ["backend/src/main/kotlin", "backend/src/test/kotlin"]) {
+  for (const base of KOTLIN_SRC_ROOTS) {
     const src = resolve(base, oldPkgPath);
     if (existsSync(src)) {
       ops.push({
@@ -503,14 +509,14 @@ if (newApiTitle !== OLD_API_TITLE) {
 }
 
 // Destination collisions & already-renamed detection
-for (const base of ["backend/src/main/kotlin", "backend/src/test/kotlin"]) {
+for (const base of KOTLIN_SRC_ROOTS) {
   const dst = resolve(base, newPkgPath);
   if (newPkg !== OLD_PKG && existsSync(dst)) {
     validationErrors.push(`Destination already exists: ${base}/${newPkgPath}. Refusing to overwrite.`);
   }
 }
 
-for (const base of ["backend/src/main/kotlin", "backend/src/test/kotlin"]) {
+for (const base of KOTLIN_SRC_ROOTS) {
   const src = resolve(base, oldPkgPath);
   if (newPkg !== OLD_PKG && !existsSync(src)) {
     validationErrors.push(`Source not found: ${base}/${oldPkgPath}. Has the project already been renamed?`);
@@ -758,7 +764,7 @@ writeMap.clear();
 // ── Move package directories ─────────────────────────────────────────────────
 
 if (newPkg !== OLD_PKG) {
-  for (const base of ["backend/src/main/kotlin", "backend/src/test/kotlin"]) {
+  for (const base of KOTLIN_SRC_ROOTS) {
     const src = resolve(base, oldPkgPath);
     const dst = resolve(base, newPkgPath);
     if (existsSync(src)) {

@@ -39,7 +39,7 @@ bun run orval:watch                   # watches generated spec -> regenerates TS
 Or the legacy equivalents:
 
 ```bash
-# generateOpenApiJson depends on compileKotlin — combine with Ktor dev for auto reload
+# generateOpenApiJson compiles the codegen source set — combine with Ktor dev for auto reload
 cd backend && ./gradlew generateOpenApiJson -t -i
 cd frontend && bun run orval:watch
 ```
@@ -52,7 +52,7 @@ cd frontend && bun run orval:watch
   - `./gradlew test` — JUnit Platform (uses Testcontainers PostgreSQL, **requires Docker**)
   - `./gradlew shadowJar` — fat JAR at `build/libs/backend-all.jar`
   - `./gradlew generateMigrations` — creates Flyway SQL in `src/main/resources/db/migration/` from Exposed table objects in `net.axcira.db`
-  - `./gradlew generateOpenApiJson` — writes `generated/openapi.json`
+  - `./gradlew generateOpenApiJson` — runs `src/codegen` (`GenerateOpenApi.kt` + `TestApplication`) and writes `generated/openapi.json`; `ktor-server-test-host` is `codegen`/`test` only (not production)
   - `./gradlew generateClient` — runs Orval in `../frontend` after generating OpenAPI spec
 - **Architecture**: Vertical slice — each feature is a self-contained `features/<name>/` dir with `*Routing.kt` + `*Service.kt`.
 - **Module registration**: Add routing function reference to `src/main/resources/application.yaml` under `ktor.application.modules`. Add `provide<XService>()` call in `Application.kt`'s `dependencies` block. Feature routing is always under `/api/v{version}/<name>` (default `v1`) via `apiRouting()`.
@@ -60,7 +60,7 @@ cd frontend && bun run orval:watch
 - **Request validation**: Ktor `RequestValidation` (`plugins/RequestValidation.kt`) validates request DTOs; failures return `400` with `{ message, reasons }` via StatusPages.
 - **Database**: Exposed ORM + HikariCP + Flyway migrations. Env vars: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Dev defaults: localhost:5432, user/pass `postgres`/`password`.
 - **Init**: `ApplicationInitializer.kt` runs on `ApplicationStarted` — seeds admin role + user from env vars (`ADMIN_ROLE_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`). `ADMIN_PASSWORD` defaults to `"password"` in dev mode.
-- **OpenAPI**: Local/API-only mode serves Scalar at `/` and `/openapi.json`. When a production SPA is present under `/app/static` (or `STATIC_DIR` / `./static` with `index.html`), Scalar is disabled and Ktor serves the SPA instead (`configureFrontend`). Set `EXPOSE_OPENAPI=true` to keep `/openapi.json` in production.
+- **OpenAPI**: Local/API-only mode serves Scalar at `/` and `/openapi.json`. When a production SPA is present under `/app/static` (or `STATIC_DIR` / `./static` with `index.html`), Scalar is disabled and Ktor serves the SPA instead (`configureFrontend`). Set `EXPOSE_OPENAPI=true` to keep `/openapi.json` in production. Spec file export lives in the `codegen` source set (`src/codegen/kotlin/.../GenerateOpenApi.kt`), not `main`.
 - **Testing**: `test()` helper from `BaseTest.kt` spins up a suite-scoped Testcontainers PostgreSQL, migrates once, truncates between tests, and reuses a shared Ktor `TestApplication` + per-test HTTP client (**requires Docker**).
 - **Docker build**: from **repo root**: `podman build -t backend .` or `docker build -t backend .` (Bun frontend build → JDK 25 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI). See root `Dockerfile` (not `backend/Dockerfile`).
 - **Env template**: Root `.env.example` lists supported variables (copy to `.env` for local notes; the app does not auto-load `.env` — export or inject via your runtime).
@@ -93,11 +93,16 @@ When generating frontend, you SHOULD load appropriate frontend-related skills, t
 ```
 Exposed tables -> Flyway migrations (generateMigrations)
                     ↓
-Ktor routes + OpenAPI annotations -> /openapi.json -> Orval -> frontend/src/api/generated/
+Ktor routes + OpenAPI annotations
                     ↓
-              routeTree.gen.ts (TanStack Router vite plugin, auto on save)
+codegen GenerateOpenApi.kt (TestApplication) -> generated/openapi.json
+                    ↓
+Orval -> frontend/src/api/generated/
+                    ↓
+routeTree.gen.ts (TanStack Router vite plugin, auto on save)
 ```
 
+`ktor-server-test-host` is scoped to the `codegen` and `test` configurations only.
 ## Rename project
 
 Use the automated rename script at the repository root:

@@ -19,9 +19,10 @@ hand-edited** — they are overwritten on every regeneration.
 
 ## Scope
 
-- Generate `backend/generated/openapi.json` via Gradle (standalone runner
-  that does **not** require Docker or a running database — `SKIP_DATABASE`
-  and `SKIP_BOOTSTRAP` are already wired in `build.gradle.kts`).
+- Generate `backend/generated/openapi.json` via Gradle (codegen source set
+  runner that does **not** require Docker or a running database —
+  `SKIP_DATABASE` and `SKIP_BOOTSTRAP` are already wired in
+  `build.gradle.kts`).
 - Run Orval to produce typed hooks, schemas, and mocks in
   `frontend/src/api/generated/`.
 - Biome format is applied automatically by Orval's `afterAllFilesWrite` hook.
@@ -35,7 +36,9 @@ hand-edited** — they are overwritten on every regeneration.
 - **No Docker or database required** — the OpenAPI generation runs with
   `SKIP_DATABASE=true` and `SKIP_BOOTSTRAP=true`, which skip all
   database-related initialisation.  The Gradle task `generateOpenApiJson`
-  uses a standalone main class (`net.axcira.GenerateOpenApiKt`).
+  runs `net.axcira.GenerateOpenApiKt` from the `codegen` source set
+  (`src/codegen/kotlin/...`), which depends on `ktor-server-test-host`
+  without putting it on the production classpath.
 
 ## Steps
 
@@ -46,9 +49,10 @@ hand-edited** — they are overwritten on every regeneration.
    ./gradlew generateOpenApiJson
    ```
 
-   This compiles Kotlin sources (if needed) and runs the standalone OpenAPI
-   generator, writing to `backend/generated/openapi.json`.  The task sets
-   `SKIP_BOOTSTRAP=true` and `SKIP_DATABASE=true` automatically.
+   This compiles `main` + `codegen` (if needed) and runs the OpenAPI
+   exporter via `TestApplication`, writing to
+   `backend/generated/openapi.json`.  The task sets `SKIP_BOOTSTRAP=true`
+   and `SKIP_DATABASE=true` automatically.
 
    On success you should see `BUILD SUCCESSFUL` and the file
    `generated/openapi.json` will exist.
@@ -113,7 +117,7 @@ hand-edited** — they are overwritten on every regeneration.
 
 | Failure | Behaviour |
 |---------|-----------|
-| `./gradlew generateOpenApiJson` fails | Compilation error in backend code — fix Kotlin first |
+| `./gradlew generateOpenApiJson` fails | Compilation error in `main`/`codegen` — fix Kotlin first |
 | `bun run orval:gen` fails | Check `openapi.json` validity; malformed spec may cause Orval parse errors |
 | `orval:drift` detects changes | Clean-tree drift audit — **expected** after backend changes (commit intentionally); **failure** in CI where generated output must match committed spec |
 | `bun run build` fails | Inspect generated types and API changes for frontend integration errors |
@@ -122,6 +126,7 @@ hand-edited** — they are overwritten on every regeneration.
 ## See also
 
 - [`AGENTS.md`](../../../AGENTS.md) — Codegen pipeline explanation
-- [`backend/build.gradle.kts`](../../../backend/build.gradle.kts) — `generateOpenApiJson` task definition
+- [`backend/build.gradle.kts`](../../../backend/build.gradle.kts) — `codegen` source set + `generateOpenApiJson` task
+- [`backend/src/codegen/kotlin/net/axcira/GenerateOpenApi.kt`](../../../backend/src/codegen/kotlin/net/axcira/GenerateOpenApi.kt) — OpenAPI exporter entry point
 - [`frontend/orval.config.ts`](../../../frontend/orval.config.ts) — Orval configuration
 - [`frontend/package.json`](../../../frontend/package.json) — `orval:gen` / `orval:drift` scripts

@@ -36,6 +36,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Generate OpenAPI spec
+        # Uses codegen source set (not production classpath); sets SKIP_* in the Gradle task
         run: ./gradlew generateOpenApiJson
         working-directory: backend
 
