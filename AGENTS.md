@@ -62,7 +62,7 @@ cd frontend && bun run orval:watch
 - **Init**: `ApplicationInitializer.kt` runs on `ApplicationStarted` — seeds admin role + user from env vars (`ADMIN_ROLE_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`). `ADMIN_PASSWORD` defaults to `"password"` in dev mode.
 - **OpenAPI**: Local/API-only mode serves Scalar at `/` and `/openapi.json`. When a production SPA is present under `/app/static` (or `STATIC_DIR` / `./static` with `index.html`), Scalar is disabled and Ktor serves the SPA instead (`configureFrontend`). Set `EXPOSE_OPENAPI=true` to keep `/openapi.json` in production. Spec file export lives in the `codegen` source set (`src/codegen/kotlin/.../GenerateOpenApi.kt`), not `main`.
 - **Testing**: `test()` helper from `BaseTest.kt` spins up a suite-scoped Testcontainers PostgreSQL, migrates once, truncates between tests, and reuses a shared Ktor `TestApplication` + per-test HTTP client (**requires Docker**).
-- **Docker build**: from **repo root**: `podman build -t backend .` or `docker build -t backend .` (Bun frontend build → JDK 25 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI). See root `Dockerfile` (not `backend/Dockerfile`).
+- **Docker build**: from **repo root**: `podman build -t backend .` or `docker build -t backend .` (Bun frontend build → JDK 25 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI). See root `Dockerfile` (not `backend/Dockerfile`). Manual GH Actions workflow `Docker` builds and pushes to `ghcr.io/<owner>/<repo>` (`workflow_dispatch`).
 - **Env template**: Root `.env.example` lists supported variables (copy to `.env` for local notes; the app does not auto-load `.env` — export or inject via your runtime).
 
 ## Frontend (TanStack Router / React / Vite / Bun)
@@ -154,12 +154,12 @@ See also root `.env.example`.
 - Keep the Orval-generated client under `frontend/src/api/generated/` committed; prefer `orval:drift` detection over gitignoring the client or auto-generating it in pre-commit/CI
 - Treat showcase routes as agent-facing reference UI; keep them production-quality (fix lint issues rather than relaxing Biome/CI for showcase)
 - Prefer Dialog / AlertDialog / toast over `window.alert` / `confirm` for app error and confirmation UX
-- For Dependabot triage, treat green CI + minor/patch bumps as generally merge-safe (Docker/base-image updates still need local image builds)
+- For Dependabot triage, treat green CI + minor/patch bumps as generally merge-safe (Docker/base-image updates: run the manual `Docker` workflow or a local image build)
 
 ## Learned Workspace Facts
 
 - CI runs `bun run orval:drift`; after Orval upgrades, pin the package exactly and regenerate/commit the client so drift stays green
 - No public self-registration API; user creation is admin-only via ManageUsers (`/permissions/users`)
-- CI does not build container images; treat Dependabot Docker/base-image updates as needing local `podman`/`docker build` verification even when other checks are green
+- Container images publish via manual `Docker` workflow (`.github/workflows/docker.yml`) to `ghcr.io/<owner>/<repo>`; Dependabot Docker/base-image bumps can be verified with that workflow or a local `podman`/`docker build`
 - Frontend authz tests cover session/static shortcuts and `can-i` UI reactions (MSW); permission algebra (`satisfies`, Admin bypass, `allowOthers`) stays in backend tests—do not reimplement compound permission matrices on the frontend
 - Bumping the Ktor version catalog without the Kotlin version required for OpenAPI inference can zero out `operationId`s and rename Orval hooks; keep Kotlin and Ktor bumps paired when inference is involved
