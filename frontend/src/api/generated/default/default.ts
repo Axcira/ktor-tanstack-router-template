@@ -30,6 +30,7 @@ import type {
   GetRolesV1Params,
   GetUserPermissionsV1Params,
   GetUsersV1Params,
+  HealthResponse,
   ListArticlesV1Params,
   LoginRequest,
   Permission,
@@ -3174,3 +3175,161 @@ export const useUpdateRoleV1 = <TError = void, TContext = unknown>(
 > => {
   return useMutation(getUpdateRoleV1MutationOptions(options), queryClient);
 };
+export type healthV1Response200 = {
+  data: HealthResponse;
+  status: 200;
+};
+
+export type healthV1Response503 = {
+  data: HealthResponse;
+  status: 503;
+};
+
+export type healthV1ResponseSuccess = healthV1Response200 & {
+  headers: Headers;
+};
+export type healthV1ResponseError = healthV1Response503 & {
+  headers: Headers;
+};
+
+export type healthV1Response = healthV1ResponseSuccess | healthV1ResponseError;
+
+export const getHealthV1Url = () => {
+  return `/api/v1/health`;
+};
+
+/**
+ * @summary Health check (DB connectivity)
+ */
+export const healthV1 = async (
+  options?: RequestInit,
+): Promise<healthV1Response> => {
+  const res = await fetch(getHealthV1Url(), {
+    ...options,
+    method: "GET",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: healthV1Response["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as healthV1Response;
+};
+
+export const getHealthV1QueryKey = () => {
+  return [`/api/v1/health`] as const;
+};
+
+export const getHealthV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof healthV1>>,
+  TError = HealthResponse,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
+  >;
+  fetch?: RequestInit;
+}) => {
+  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getHealthV1QueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof healthV1>>> = ({
+    signal,
+  }) => healthV1({ signal, ...fetchOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof healthV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type HealthV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof healthV1>>
+>;
+export type HealthV1QueryError = HealthResponse;
+
+export function useHealthV1<
+  TData = Awaited<ReturnType<typeof healthV1>>,
+  TError = HealthResponse,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof healthV1>>,
+          TError,
+          Awaited<ReturnType<typeof healthV1>>
+        >,
+        "initialData"
+      >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useHealthV1<
+  TData = Awaited<ReturnType<typeof healthV1>>,
+  TError = HealthResponse,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof healthV1>>,
+          TError,
+          Awaited<ReturnType<typeof healthV1>>
+        >,
+        "initialData"
+      >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useHealthV1<
+  TData = Awaited<ReturnType<typeof healthV1>>,
+  TError = HealthResponse,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
+    >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Health check (DB connectivity)
+ */
+
+export function useHealthV1<
+  TData = Awaited<ReturnType<typeof healthV1>>,
+  TError = HealthResponse,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
+    >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getHealthV1QueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

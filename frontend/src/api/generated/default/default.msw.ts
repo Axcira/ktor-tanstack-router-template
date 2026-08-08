@@ -10,6 +10,7 @@ import type { RequestHandlerOptions } from "msw";
 import type {
   ArticleDTO,
   GetApiJsonKotlinxSerialization200,
+  HealthResponse,
   Permission,
   RoleDTO,
   UserDTO,
@@ -27,6 +28,7 @@ import {
   getGetSelfV1ResponseMock,
   getGetUserPermissionsV1ResponseMock,
   getGetUsersV1ResponseMock,
+  getHealthV1ResponseMock,
   getListArticlesV1ResponseMock,
   getLoginV1ResponseMock,
   getUpdateArticleV1ResponseMock,
@@ -48,6 +50,7 @@ export {
   getGetRolesV1ResponseMock,
   getGetRoleByIdV1ResponseMock,
   getUpdateRoleV1ResponseMock,
+  getHealthV1ResponseMock,
 } from "./default.faker.ts";
 
 export const getGetApiMockHandler = (
@@ -580,6 +583,30 @@ export const getUpdateRoleV1MockHandler = (
     options,
   );
 };
+
+export const getHealthV1MockHandler = (
+  overrideResponse?:
+    | HealthResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<HealthResponse> | HealthResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/health",
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getHealthV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
 export const getDefaultMock = () => [
   getGetApiMockHandler(),
   getGetApiJsonKotlinxSerializationMockHandler(),
@@ -604,4 +631,5 @@ export const getDefaultMock = () => [
   getGetRoleByIdV1MockHandler(),
   getDeleteRoleV1MockHandler(),
   getUpdateRoleV1MockHandler(),
+  getHealthV1MockHandler(),
 ];

@@ -14,6 +14,7 @@ export * from "./getApiJsonKotlinxSerialization200.ts";
 export * from "./getRolesV1Params.ts";
 export * from "./getUserPermissionsV1Params.ts";
 export * from "./getUsersV1Params.ts";
+export * from "./healthResponse.ts";
 export * from "./listArticlesV1Params.ts";
 export * from "./loginRequest.ts";
 export * from "./permission.ts";

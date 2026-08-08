@@ -5,6 +5,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.routing.*
 import net.axcira.features.articles.ArticleService
 import net.axcira.features.auth.AuthService
+import net.axcira.features.health.HealthService
 import net.axcira.features.permissions.PermissionService
 import net.axcira.features.users.UserService
 
@@ -16,6 +17,7 @@ fun Application.main() {
         provide<UserService>(::UserService)
         provide<ArticleService>(::ArticleService)
         provide<PermissionService>(::PermissionService)
+        provide<HealthService>(::HealthService)
     }
     install(IgnoreTrailingSlash)
 }

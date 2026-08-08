@@ -9,6 +9,7 @@ ktor:
       - net.axcira.ApplicationKt.main
       - net.axcira.plugins.LoggingKt.configureLogging
       - net.axcira.plugins.SerializationKt.configureSerialization
+      - net.axcira.plugins.RequestValidationKt.configureRequestValidation
       - net.axcira.features.auth.AuthenticationKt.configureAuthentication
       - net.axcira.plugins.OpenApiKt.configureOpenApi
       - net.axcira.plugins.StatusPagePluginKt.statusPage
@@ -20,6 +21,7 @@ ktor:
       - net.axcira.features.users.v1.UserRoutingKt.users
       - net.axcira.features.articles.v1.ArticleRoutingKt.articles
       - net.axcira.features.permissions.v1.PermissionRoutingKt.permissions
+      - net.axcira.features.health.v1.HealthRoutingKt.health
 
       # Production SPA (no-op when /app/static is absent — local keeps Scalar at /)
       - net.axcira.plugins.FrontendKt.configureFrontend

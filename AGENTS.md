@@ -55,13 +55,15 @@ cd frontend && bun run orval:watch
   - `./gradlew generateOpenApiJson` — writes `generated/openapi.json`
   - `./gradlew generateClient` — runs Orval in `../frontend` after generating OpenAPI spec
 - **Architecture**: Vertical slice — each feature is a self-contained `features/<name>/` dir with `*Routing.kt` + `*Service.kt`.
-- **Module registration**: Add routing function reference to `src/main/resources/application.yaml` under `ktor.application.modules`. Add `provide<XService>()` call in `Application.kt`'s `dependencies` block. Feature routing is always under `/api/<name>`.
-- **API root**: All routes are nested under `/api/` via the `apiRouting()` helper in `Application.kt`.
+- **Module registration**: Add routing function reference to `src/main/resources/application.yaml` under `ktor.application.modules`. Add `provide<XService>()` call in `Application.kt`'s `dependencies` block. Feature routing is always under `/api/v{version}/<name>` (default `v1`) via `apiRouting()`.
+- **API root**: Versioned API routes use `apiRouting()` in `Application.kt` (`/api/v1/...`). Health: `GET /api/v1/health` (DB ping; `503` when unhealthy).
+- **Request validation**: Ktor `RequestValidation` (`plugins/RequestValidation.kt`) validates request DTOs; failures return `400` with `{ message, reasons }` via StatusPages.
 - **Database**: Exposed ORM + HikariCP + Flyway migrations. Env vars: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Dev defaults: localhost:5432, user/pass `postgres`/`password`.
 - **Init**: `ApplicationInitializer.kt` runs on `ApplicationStarted` — seeds admin role + user from env vars (`ADMIN_ROLE_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`). `ADMIN_PASSWORD` defaults to `"password"` in dev mode.
 - **OpenAPI**: Local/API-only mode serves Scalar at `/` and `/openapi.json`. When a production SPA is present under `/app/static` (or `STATIC_DIR` / `./static` with `index.html`), Scalar is disabled and Ktor serves the SPA instead (`configureFrontend`). Set `EXPOSE_OPENAPI=true` to keep `/openapi.json` in production.
 - **Testing**: `test()` helper from `BaseTest.kt` spins up a suite-scoped Testcontainers PostgreSQL, migrates once, truncates between tests, and reuses a shared Ktor `TestApplication` + per-test HTTP client (**requires Docker**).
-- **Docker build**: from **repo root**: `podman build -t backend .` (Bun frontend build → JDK 25 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI).
+- **Docker build**: from **repo root**: `podman build -t backend .` or `docker build -t backend .` (Bun frontend build → JDK 25 shadowJar → JRE 25 runtime with `/app/static`). Entrypoint runs the fat JAR with `--enable-native-access=ALL-UNNAMED` (for Argon2 JNI). See root `Dockerfile` (not `backend/Dockerfile`).
+- **Env template**: Root `.env.example` lists supported variables (copy to `.env` for local notes; the app does not auto-load `.env` — export or inject via your runtime).
 
 ## Frontend (TanStack Router / React / Vite / Bun)
 
@@ -112,7 +114,7 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 
 ## Conventions
 
-- **New backend feature**: Copy an existing `features/<name>/` package, rename classes and files, add routing to `application.yaml`, add service to `Application.kt` dependencies block.
+- **New backend feature**: Copy an existing `features/<name>/` package, rename classes and files, add routing to `application.yaml`, add service to `Application.kt` dependencies block. Routes land under `/api/v1/<name>` via `apiRouting()`.
 - **New frontend route**: Add file in `src/routes/`. Put page UI in the route file; colocate shared pieces in a sibling `-components/` folder (TanStack ignores `-` prefixes). Plugin auto-generates `routeTree.gen.ts`.
 - **JS double quotes** (Biome config).
 - **Kotlin**: `kotlin.code.style=official`.
@@ -137,14 +139,22 @@ See `bun scripts/rename.ts --help` for full options. The package option is requi
 | `STATIC_DIR` | (auto) | SPA root directory override (`index.html` required). Defaults try `/app/static` then `./static` |
 | `SERVE_FRONTEND` | unset | Force frontend-serving mode even if probing (still needs `index.html`) |
 | `EXPOSE_OPENAPI` | unset | When SPA is served, set `true` to also expose `/openapi.json` |
+| `SKIP_DATABASE` | unset | Skip Flyway migrate; allow Hikari start without live DB (codegen / tests) |
+| `SKIP_BOOTSTRAP` | unset | Skip admin role/user seeding on startup (codegen / tests) |
+
+See also root `.env.example`.
 
 ## Learned User Preferences
 
 - Keep the Orval-generated client under `frontend/src/api/generated/` committed; prefer `orval:drift` detection over gitignoring the client or auto-generating it in pre-commit/CI
 - Treat showcase routes as agent-facing reference UI; keep them production-quality (fix lint issues rather than relaxing Biome/CI for showcase)
+- Prefer Dialog / AlertDialog / toast over `window.alert` / `confirm` for app error and confirmation UX
+- For Dependabot triage, treat green CI + minor/patch bumps as generally merge-safe (Docker/base-image updates still need local image builds)
 
 ## Learned Workspace Facts
 
 - CI runs `bun run orval:drift`; after Orval upgrades, pin the package exactly and regenerate/commit the client so drift stays green
 - No public self-registration API; user creation is admin-only via ManageUsers (`/permissions/users`)
 - CI does not build container images; treat Dependabot Docker/base-image updates as needing local `podman`/`docker build` verification even when other checks are green
+- Frontend authz tests cover session/static shortcuts and `can-i` UI reactions (MSW); permission algebra (`satisfies`, Admin bypass, `allowOthers`) stays in backend tests—do not reimplement compound permission matrices on the frontend
+- Bumping the Ktor version catalog without the Kotlin version required for OpenAPI inference can zero out `operationId`s and rename Orval hooks; keep Kotlin and Ktor bumps paired when inference is involved

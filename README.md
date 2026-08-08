@@ -98,16 +98,16 @@ docker compose up -d --wait
 ⚠️ Java の仕様上、一部の変更は自動で適用されなかったり、オブジェクトが破棄される場合があります。
 
 ```bash
-cd backend
-./gradlew run
+bun run backend:dev
+# or: cd backend && ./gradlew run
 ```
 
 **フロントエンドの起動**
 開発モードで起動するため、ホットリロードに対応しています。
 
 ```bash
-cd frontend
-bun run dev
+bun run frontend:dev
+# or: cd frontend && bun run dev
 ```
 
 開発を本格的に進める場合は、以下の2つのプロセスも立ちあげてください。
@@ -118,18 +118,20 @@ bun run dev
 OpenAPI 仕様も自動生成されます。
 
 ```bash
-cd backend
-./gradlew generateOpenApiJson -t -i
+bun run generate:openapi -t -i
+# or: cd backend && ./gradlew generateOpenApiJson -t -i
 ```
 
 **Orval監視とクライアントライブラリの自動生成**
 OrvalがOpenAPI 仕様を監視し、変更された場合にクライアントライブラリを自動生成します。
 
 ```bash
-cd frontend
 bun run orval:watch
+# or: cd frontend && bun run orval:watch
 ```
 
+環境変数の一覧とデフォルトはルートの [`.env.example`](.env.example) を参照してください（アプリは `.env` を自動読込しません。シェルやオーケストレータ経由で注入してください）。
+ヘルスチェックは `GET /api/v1/health` です（DB 疎通確認。失敗時は `503`）。
 ## Customize project identity
 
 このテンプレートを元に新しいプロジェクトを作成したら、まずプロジェクトの名前やパッケージを変更してください。
@@ -232,11 +234,13 @@ cd backend
 
 #### Docker Container (Recommended)
 
-Dockerfile を使用して、本番向けの Docker イメージを作成できます（ビルドは JDK、実行は JRE）。
+リポジトリルートの `Dockerfile` を使用して、本番向けのイメージを作成できます
+（Bun でフロントエンドをビルド → JDK 25 で shadowJar → JRE 25 実行時に `/app/static` を同梱）。
 
 ```bash
-cd backend
-docker build ./ -t backend
+# from repository root
+podman build -t backend .
+# or: docker build -t backend .
 ```
 
 #### Build manually
@@ -252,20 +256,21 @@ cd backend
 生成された jar ファイルは、次の方法で起動できます:
 
 ```bash
-java --enable-native-access=ALL-UNNAMED -jar backend-all.jar
+java --enable-native-access=ALL-UNNAMED -jar backend/build/libs/backend-all.jar
 ```
+
+フロントエンド静的ファイルを同梱する場合は、先に `bun run frontend:build` し、`STATIC_DIR` などで配信パスを指定してください（ルート Dockerfile はこれを自動化します）。
 
 ### Build the frontend
 
 以下のコマンドを実行して、フロントエンドをビルドします。
 
 ```bash
-cd frontend
-bun run build
+bun run frontend:build
+# or: cd frontend && bun run build
 ```
 
 `frontend/dist/` に静的アセットが生成されます。
-
 ### Deploy the frontend (Cloudflare Workers Static Assets)
 
 このフロントエンドは Cloudflare Workers Static Assets としてデプロイできます。

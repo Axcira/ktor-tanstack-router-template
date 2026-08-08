@@ -38,6 +38,7 @@ dependencies {
     implementation(ktorLibs.server.routingOpenapi)
     implementation(ktorLibs.server.sessions)
     implementation(ktorLibs.server.statusPages)
+    implementation(ktorLibs.server.requestValidation)
     implementation(ktorLibs.server.swagger)
     implementation(ktorLibs.server.htmlBuilder)
     implementation(ktorLibs.server.testHost)

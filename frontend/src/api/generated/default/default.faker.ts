@@ -9,6 +9,7 @@ import { faker } from "@faker-js/faker";
 import type {
   ArticleDTO,
   GetApiJsonKotlinxSerialization200,
+  HealthResponse,
   Permission,
   PermissionAdministrator,
   PermissionCreateArticle,
@@ -617,5 +618,13 @@ export const getUpdateRoleV1ResponseMock = (
       { ...getUpdateRoleV1ResponsePermissionUpdateArticleMock() },
     ]),
   ),
+  ...overrideResponse,
+});
+
+export const getHealthV1ResponseMock = (
+  overrideResponse: Partial<Extract<HealthResponse, object>> = {},
+): HealthResponse => ({
+  status: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  database: faker.string.alpha({ length: { min: 10, max: 20 } }),
   ...overrideResponse,
 });
