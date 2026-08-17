@@ -1,5 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.exposed.v1.gradle.plugin.VersionFormat
+import org.jetbrains.exposed.v1.plugin.core.migration.VersionFormat
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
