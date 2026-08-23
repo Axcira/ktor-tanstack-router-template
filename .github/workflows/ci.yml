@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   BUN_VERSION: "1.3.14"
   JAVA_VERSION: "25"
@@ -73,10 +77,14 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Install dependencies (root workspace)
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Lint & format check
         run: bun run check
+        working-directory: frontend
+
+      - name: Typecheck
+        run: bun run typecheck
         working-directory: frontend
 
       - name: Test
@@ -108,13 +116,13 @@ jobs:
           # MIT-licensed cache; the v6 default ("enhanced") is proprietary.
           cache-provider: basic
 
-      - name: Test
+      - name: Check
         working-directory: backend
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
         run: |
           docker pull --quiet "$POSTGRES_IMAGE" &
-          ./gradlew test
+          ./gradlew check
           wait
 
   api-client:
@@ -143,7 +151,7 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Install dependencies (root workspace)
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Generate OpenAPI spec
         # Uses codegen source set (not production classpath); sets SKIP_* in the Gradle task

@@ -44,7 +44,7 @@ export function ArticlesListView({
   page: number;
   limit: number;
 }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: Route.fullPath });
   const { isAllowed: isAllowedCreation } = useAuthorize({
     type: "CreateArticle",
   });

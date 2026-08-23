@@ -26,6 +26,11 @@ fun Application.configureOpenApi() {
         // Production images ship a static SPA at `/`; keep Scalar only for API-only / local runs.
         if (!serveFrontend) {
             get("/") {
+                val scalarScripts =
+                    """
+                    <script id="api-reference" data-url="/openapi.json"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+                    """.trimIndent()
                 call.respondHtml(HttpStatusCode.OK) {
                     head {
                         title { +"API Reference" }
@@ -37,11 +42,7 @@ fun Application.configureOpenApi() {
                     }
                     body {
                         unsafe {
-                            +
-                                """
-                                <script id="api-reference" data-url="/openapi.json"></script>
-                                <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-                                """.trimIndent()
+                            +scalarScripts
                         }
                     }
                 }

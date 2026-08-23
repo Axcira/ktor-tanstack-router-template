@@ -14,6 +14,7 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
+    "typecheck": "tsc --noEmit",
     "orval:gen": "orval",
     "orval:drift": "orval && git diff --exit-code -- src/api/generated/ && untracked=$(git ls-files --others --exclude-standard -- src/api/generated/) && test -z \"$untracked\"",
     "orval:watch": "orval --watch",
