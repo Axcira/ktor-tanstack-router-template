@@ -14,6 +14,7 @@
     "frontend:build": "bun run --cwd frontend build",
     "frontend:test": "bun run --cwd frontend test",
     "frontend:check": "bun run --cwd frontend check",
+    "frontend:typecheck": "bun run --cwd frontend typecheck",
     "frontend:format": "bun run --cwd frontend format",
     "frontend:lint": "bun run --cwd frontend lint",
     "backend:dev": "cd backend && ./gradlew run",

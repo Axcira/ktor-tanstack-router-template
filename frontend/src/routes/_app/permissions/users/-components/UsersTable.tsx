@@ -38,7 +38,7 @@ export function UsersTable({
   onEdit,
   onDelete,
 }: UsersTableProps) {
-  const getRoleInfo = (roleId?: number) => {
+  const getRoleInfo = (roleId?: number | null) => {
     const role = availableRoles.find((r) => r.id === roleId);
     if (role) {
       return {
