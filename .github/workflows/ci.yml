@@ -6,16 +6,59 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 env:
   BUN_VERSION: "1.3.14"
   JAVA_VERSION: "25"
 
 jobs:
-  ci:
+  frontend:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies (root workspace)
+        run: bun install --frozen-lockfile
+
+      - name: Lint & format check
+        run: bun run check
+        working-directory: frontend
+
+      - name: Test
+        run: bun run test
+        working-directory: frontend
+
+      - name: Build
+        run: bun run build
+        working-directory: frontend
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Test
+        run: ./gradlew test
+        working-directory: backend
+
+  api-client:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -43,23 +86,3 @@ jobs:
       - name: Regenerate Orval client and verify no drift
         run: bun run orval:drift
         working-directory: frontend
-
-      - name: Frontend lint & format check
-        run: bun run check
-        working-directory: frontend
-
-      - name: Frontend test
-        run: bun run test
-        working-directory: frontend
-
-      - name: Frontend build
-        run: bun run build
-        working-directory: frontend
-
-      - name: Backend tests
-        run: ./gradlew test
-        working-directory: backend
-
-      - name: Backend shadowJar
-        run: ./gradlew shadowJar
-        working-directory: backend
