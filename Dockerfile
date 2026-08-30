@@ -2,7 +2,7 @@
 #   podman build -t ghcr.io/example/app:1.0 .
 
 # ---- frontend stage ----
-FROM docker.io/oven/bun:1.3 AS frontend
+FROM docker.io/oven/bun:1.4 AS frontend
 WORKDIR /src
 
 COPY package.json bun.lock ./
