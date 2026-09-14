@@ -407,10 +407,34 @@ export const loginV1 = async (
   loginRequest?: LoginRequest,
   options?: RequestInit,
 ): Promise<loginV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getLoginV1Url(), {
     ...options,
     method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(loginRequest),
   });
 
@@ -420,6 +444,8 @@ export const loginV1 = async (
   return { data, status: res.status, headers: res.headers } as loginV1Response;
 };
 
+export const getLoginV1MutationKey = () => ["loginV1"] as const;
+
 export const getLoginV1MutationOptions = <
   TError = void,
   TContext = unknown,
@@ -427,17 +453,17 @@ export const getLoginV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof loginV1>>,
     TError,
-    { data?: LoginRequest },
+    LoginV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof loginV1>>,
   TError,
-  { data?: LoginRequest },
+  LoginV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["loginV1"];
+  const mutationKey = getLoginV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -448,7 +474,7 @@ export const getLoginV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof loginV1>>,
-    { data?: LoginRequest }
+    LoginV1MutationVariables
   > = (props) => {
     const { data } = props ?? {};
 
@@ -463,6 +489,7 @@ export type LoginV1MutationResult = NonNullable<
 >;
 export type LoginV1MutationBody = LoginRequest | undefined;
 export type LoginV1MutationError = void;
+export type LoginV1MutationVariables = { data?: LoginRequest };
 
 /**
  * @summary Authenticate (Login)
@@ -472,7 +499,7 @@ export const useLoginV1 = <TError = void, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof loginV1>>,
       TError,
-      { data?: LoginRequest },
+      LoginV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -481,7 +508,7 @@ export const useLoginV1 = <TError = void, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof loginV1>>,
   TError,
-  { data?: LoginRequest },
+  LoginV1MutationVariables,
   TContext
 > => {
   return useMutation(getLoginV1MutationOptions(options), queryClient);
@@ -518,6 +545,8 @@ export const logoutV1 = async (
   return { data, status: res.status, headers: res.headers } as logoutV1Response;
 };
 
+export const getLogoutV1MutationKey = () => ["logoutV1"] as const;
+
 export const getLogoutV1MutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -535,7 +564,7 @@ export const getLogoutV1MutationOptions = <
   void,
   TContext
 > => {
-  const mutationKey = ["logoutV1"];
+  const mutationKey = getLogoutV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -779,10 +808,34 @@ export const createUserV1 = async (
   createUserInput?: CreateUserInput,
   options?: RequestInit,
 ): Promise<createUserV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getCreateUserV1Url(), {
     ...options,
     method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(createUserInput),
   });
 
@@ -796,6 +849,8 @@ export const createUserV1 = async (
   } as createUserV1Response;
 };
 
+export const getCreateUserV1MutationKey = () => ["createUserV1"] as const;
+
 export const getCreateUserV1MutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -803,17 +858,17 @@ export const getCreateUserV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createUserV1>>,
     TError,
-    { data?: CreateUserInput },
+    CreateUserV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createUserV1>>,
   TError,
-  { data?: CreateUserInput },
+  CreateUserV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["createUserV1"];
+  const mutationKey = getCreateUserV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -824,7 +879,7 @@ export const getCreateUserV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createUserV1>>,
-    { data?: CreateUserInput }
+    CreateUserV1MutationVariables
   > = (props) => {
     const { data } = props ?? {};
 
@@ -839,6 +894,7 @@ export type CreateUserV1MutationResult = NonNullable<
 >;
 export type CreateUserV1MutationBody = CreateUserInput | undefined;
 export type CreateUserV1MutationError = unknown;
+export type CreateUserV1MutationVariables = { data?: CreateUserInput };
 
 /**
  * @summary Create a new user
@@ -848,7 +904,7 @@ export const useCreateUserV1 = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof createUserV1>>,
       TError,
-      { data?: CreateUserInput },
+      CreateUserV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -857,7 +913,7 @@ export const useCreateUserV1 = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof createUserV1>>,
   TError,
-  { data?: CreateUserInput },
+  CreateUserV1MutationVariables,
   TContext
 > => {
   return useMutation(getCreateUserV1MutationOptions(options), queryClient);
@@ -895,10 +951,34 @@ export const updateUserV1 = async (
   updateUserInput?: UpdateUserInput,
   options?: RequestInit,
 ): Promise<updateUserV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getUpdateUserV1Url(id), {
     ...options,
     method: "PATCH",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(updateUserInput),
   });
 
@@ -914,6 +994,8 @@ export const updateUserV1 = async (
   } as updateUserV1Response;
 };
 
+export const getUpdateUserV1MutationKey = () => ["updateUserV1"] as const;
+
 export const getUpdateUserV1MutationOptions = <
   TError = string,
   TContext = unknown,
@@ -921,17 +1003,17 @@ export const getUpdateUserV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateUserV1>>,
     TError,
-    { id: string; data?: UpdateUserInput },
+    UpdateUserV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateUserV1>>,
   TError,
-  { id: string; data?: UpdateUserInput },
+  UpdateUserV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["updateUserV1"];
+  const mutationKey = getUpdateUserV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -942,7 +1024,7 @@ export const getUpdateUserV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateUserV1>>,
-    { id: string; data?: UpdateUserInput }
+    UpdateUserV1MutationVariables
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -957,6 +1039,10 @@ export type UpdateUserV1MutationResult = NonNullable<
 >;
 export type UpdateUserV1MutationBody = UpdateUserInput | undefined;
 export type UpdateUserV1MutationError = string;
+export type UpdateUserV1MutationVariables = {
+  id: string;
+  data?: UpdateUserInput;
+};
 
 /**
  * @summary Update a user by ID
@@ -966,7 +1052,7 @@ export const useUpdateUserV1 = <TError = string, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateUserV1>>,
       TError,
-      { id: string; data?: UpdateUserInput },
+      UpdateUserV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -975,7 +1061,7 @@ export const useUpdateUserV1 = <TError = string, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateUserV1>>,
   TError,
-  { id: string; data?: UpdateUserInput },
+  UpdateUserV1MutationVariables,
   TContext
 > => {
   return useMutation(getUpdateUserV1MutationOptions(options), queryClient);
@@ -1019,6 +1105,8 @@ export const deleteUserV1 = async (
   } as deleteUserV1Response;
 };
 
+export const getDeleteUserV1MutationKey = () => ["deleteUserV1"] as const;
+
 export const getDeleteUserV1MutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -1026,17 +1114,17 @@ export const getDeleteUserV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteUserV1>>,
     TError,
-    { id: string },
+    DeleteUserV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteUserV1>>,
   TError,
-  { id: string },
+  DeleteUserV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["deleteUserV1"];
+  const mutationKey = getDeleteUserV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1047,7 +1135,7 @@ export const getDeleteUserV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteUserV1>>,
-    { id: string }
+    DeleteUserV1MutationVariables
   > = (props) => {
     const { id } = props ?? {};
 
@@ -1062,6 +1150,7 @@ export type DeleteUserV1MutationResult = NonNullable<
 >;
 
 export type DeleteUserV1MutationError = unknown;
+export type DeleteUserV1MutationVariables = { id: string };
 
 /**
  * @summary Delete a user by ID
@@ -1071,7 +1160,7 @@ export const useDeleteUserV1 = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteUserV1>>,
       TError,
-      { id: string },
+      DeleteUserV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -1080,7 +1169,7 @@ export const useDeleteUserV1 = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteUserV1>>,
   TError,
-  { id: string },
+  DeleteUserV1MutationVariables,
   TContext
 > => {
   return useMutation(getDeleteUserV1MutationOptions(options), queryClient);
@@ -1107,10 +1196,34 @@ export const updateMeV1 = async (
   updateUserInput?: UpdateUserInput,
   options?: RequestInit,
 ): Promise<updateMeV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getUpdateMeV1Url(), {
     ...options,
     method: "PUT",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(updateUserInput),
   });
 
@@ -1124,6 +1237,8 @@ export const updateMeV1 = async (
   } as updateMeV1Response;
 };
 
+export const getUpdateMeV1MutationKey = () => ["updateMeV1"] as const;
+
 export const getUpdateMeV1MutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -1131,17 +1246,17 @@ export const getUpdateMeV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateMeV1>>,
     TError,
-    { data?: UpdateUserInput },
+    UpdateMeV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateMeV1>>,
   TError,
-  { data?: UpdateUserInput },
+  UpdateMeV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["updateMeV1"];
+  const mutationKey = getUpdateMeV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1152,7 +1267,7 @@ export const getUpdateMeV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateMeV1>>,
-    { data?: UpdateUserInput }
+    UpdateMeV1MutationVariables
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1167,6 +1282,7 @@ export type UpdateMeV1MutationResult = NonNullable<
 >;
 export type UpdateMeV1MutationBody = UpdateUserInput | undefined;
 export type UpdateMeV1MutationError = unknown;
+export type UpdateMeV1MutationVariables = { data?: UpdateUserInput };
 
 /**
  * @summary Update the current user
@@ -1176,7 +1292,7 @@ export const useUpdateMeV1 = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateMeV1>>,
       TError,
-      { data?: UpdateUserInput },
+      UpdateMeV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -1185,7 +1301,7 @@ export const useUpdateMeV1 = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateMeV1>>,
   TError,
-  { data?: UpdateUserInput },
+  UpdateMeV1MutationVariables,
   TContext
 > => {
   return useMutation(getUpdateMeV1MutationOptions(options), queryClient);
@@ -1226,6 +1342,8 @@ export const deleteMeV1 = async (
   } as deleteMeV1Response;
 };
 
+export const getDeleteMeV1MutationKey = () => ["deleteMeV1"] as const;
+
 export const getDeleteMeV1MutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -1243,7 +1361,7 @@ export const getDeleteMeV1MutationOptions = <
   void,
   TContext
 > => {
-  const mutationKey = ["deleteMeV1"];
+  const mutationKey = getDeleteMeV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1467,10 +1585,34 @@ export const createArticleV1 = async (
   createArticleInput?: CreateArticleInput,
   options?: RequestInit,
 ): Promise<createArticleV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getCreateArticleV1Url(), {
     ...options,
     method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(createArticleInput),
   });
 
@@ -1484,6 +1626,8 @@ export const createArticleV1 = async (
   } as createArticleV1Response;
 };
 
+export const getCreateArticleV1MutationKey = () => ["createArticleV1"] as const;
+
 export const getCreateArticleV1MutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -1491,17 +1635,17 @@ export const getCreateArticleV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createArticleV1>>,
     TError,
-    { data?: CreateArticleInput },
+    CreateArticleV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createArticleV1>>,
   TError,
-  { data?: CreateArticleInput },
+  CreateArticleV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["createArticleV1"];
+  const mutationKey = getCreateArticleV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1512,7 +1656,7 @@ export const getCreateArticleV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createArticleV1>>,
-    { data?: CreateArticleInput }
+    CreateArticleV1MutationVariables
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1527,6 +1671,7 @@ export type CreateArticleV1MutationResult = NonNullable<
 >;
 export type CreateArticleV1MutationBody = CreateArticleInput | undefined;
 export type CreateArticleV1MutationError = unknown;
+export type CreateArticleV1MutationVariables = { data?: CreateArticleInput };
 
 /**
  * @summary Create an article
@@ -1536,7 +1681,7 @@ export const useCreateArticleV1 = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof createArticleV1>>,
       TError,
-      { data?: CreateArticleInput },
+      CreateArticleV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -1545,7 +1690,7 @@ export const useCreateArticleV1 = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof createArticleV1>>,
   TError,
-  { data?: CreateArticleInput },
+  CreateArticleV1MutationVariables,
   TContext
 > => {
   return useMutation(getCreateArticleV1MutationOptions(options), queryClient);
@@ -1774,6 +1919,8 @@ export const deleteArticleV1 = async (
   } as deleteArticleV1Response;
 };
 
+export const getDeleteArticleV1MutationKey = () => ["deleteArticleV1"] as const;
+
 export const getDeleteArticleV1MutationOptions = <
   TError = void,
   TContext = unknown,
@@ -1781,17 +1928,17 @@ export const getDeleteArticleV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteArticleV1>>,
     TError,
-    { id: string },
+    DeleteArticleV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteArticleV1>>,
   TError,
-  { id: string },
+  DeleteArticleV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["deleteArticleV1"];
+  const mutationKey = getDeleteArticleV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -1802,7 +1949,7 @@ export const getDeleteArticleV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteArticleV1>>,
-    { id: string }
+    DeleteArticleV1MutationVariables
   > = (props) => {
     const { id } = props ?? {};
 
@@ -1817,6 +1964,7 @@ export type DeleteArticleV1MutationResult = NonNullable<
 >;
 
 export type DeleteArticleV1MutationError = void;
+export type DeleteArticleV1MutationVariables = { id: string };
 
 /**
  * @summary Delete an article
@@ -1826,7 +1974,7 @@ export const useDeleteArticleV1 = <TError = void, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteArticleV1>>,
       TError,
-      { id: string },
+      DeleteArticleV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -1835,7 +1983,7 @@ export const useDeleteArticleV1 = <TError = void, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteArticleV1>>,
   TError,
-  { id: string },
+  DeleteArticleV1MutationVariables,
   TContext
 > => {
   return useMutation(getDeleteArticleV1MutationOptions(options), queryClient);
@@ -2059,10 +2207,34 @@ export const updateArticleV1 = async (
   updateArticleInput?: UpdateArticleInput,
   options?: RequestInit,
 ): Promise<updateArticleV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getUpdateArticleV1Url(id), {
     ...options,
     method: "PATCH",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(updateArticleInput),
   });
 
@@ -2076,6 +2248,8 @@ export const updateArticleV1 = async (
   } as updateArticleV1Response;
 };
 
+export const getUpdateArticleV1MutationKey = () => ["updateArticleV1"] as const;
+
 export const getUpdateArticleV1MutationOptions = <
   TError = void,
   TContext = unknown,
@@ -2083,17 +2257,17 @@ export const getUpdateArticleV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateArticleV1>>,
     TError,
-    { id: string; data?: UpdateArticleInput },
+    UpdateArticleV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateArticleV1>>,
   TError,
-  { id: string; data?: UpdateArticleInput },
+  UpdateArticleV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["updateArticleV1"];
+  const mutationKey = getUpdateArticleV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -2104,7 +2278,7 @@ export const getUpdateArticleV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateArticleV1>>,
-    { id: string; data?: UpdateArticleInput }
+    UpdateArticleV1MutationVariables
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -2119,6 +2293,10 @@ export type UpdateArticleV1MutationResult = NonNullable<
 >;
 export type UpdateArticleV1MutationBody = UpdateArticleInput | undefined;
 export type UpdateArticleV1MutationError = void;
+export type UpdateArticleV1MutationVariables = {
+  id: string;
+  data?: UpdateArticleInput;
+};
 
 /**
  * @summary Update an article
@@ -2128,7 +2306,7 @@ export const useUpdateArticleV1 = <TError = void, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateArticleV1>>,
       TError,
-      { id: string; data?: UpdateArticleInput },
+      UpdateArticleV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -2137,7 +2315,7 @@ export const useUpdateArticleV1 = <TError = void, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateArticleV1>>,
   TError,
-  { id: string; data?: UpdateArticleInput },
+  UpdateArticleV1MutationVariables,
   TContext
 > => {
   return useMutation(getUpdateArticleV1MutationOptions(options), queryClient);
@@ -2386,10 +2564,34 @@ export const canIV1 = async (
   permission?: Permission,
   options?: RequestInit,
 ): Promise<canIV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getCanIV1Url(), {
     ...options,
     method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(permission),
   });
 
@@ -2399,6 +2601,8 @@ export const canIV1 = async (
   return { data, status: res.status, headers: res.headers } as canIV1Response;
 };
 
+export const getCanIV1MutationKey = () => ["canIV1"] as const;
+
 export const getCanIV1MutationOptions = <
   TError = void,
   TContext = unknown,
@@ -2406,17 +2610,17 @@ export const getCanIV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof canIV1>>,
     TError,
-    { data?: Permission },
+    CanIV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof canIV1>>,
   TError,
-  { data?: Permission },
+  CanIV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["canIV1"];
+  const mutationKey = getCanIV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -2427,7 +2631,7 @@ export const getCanIV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof canIV1>>,
-    { data?: Permission }
+    CanIV1MutationVariables
   > = (props) => {
     const { data } = props ?? {};
 
@@ -2442,6 +2646,7 @@ export type CanIV1MutationResult = NonNullable<
 >;
 export type CanIV1MutationBody = Permission | undefined;
 export type CanIV1MutationError = void;
+export type CanIV1MutationVariables = { data?: Permission };
 
 /**
  * @summary Check permission for user
@@ -2451,7 +2656,7 @@ export const useCanIV1 = <TError = void, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof canIV1>>,
       TError,
-      { data?: Permission },
+      CanIV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -2460,7 +2665,7 @@ export const useCanIV1 = <TError = void, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof canIV1>>,
   TError,
-  { data?: Permission },
+  CanIV1MutationVariables,
   TContext
 > => {
   return useMutation(getCanIV1MutationOptions(options), queryClient);
@@ -2487,10 +2692,34 @@ export const createRoleV1 = async (
   createRoleInput?: CreateRoleInput,
   options?: RequestInit,
 ): Promise<createRoleV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getCreateRoleV1Url(), {
     ...options,
     method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(createRoleInput),
   });
 
@@ -2504,6 +2733,8 @@ export const createRoleV1 = async (
   } as createRoleV1Response;
 };
 
+export const getCreateRoleV1MutationKey = () => ["createRoleV1"] as const;
+
 export const getCreateRoleV1MutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -2511,17 +2742,17 @@ export const getCreateRoleV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createRoleV1>>,
     TError,
-    { data?: CreateRoleInput },
+    CreateRoleV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createRoleV1>>,
   TError,
-  { data?: CreateRoleInput },
+  CreateRoleV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["createRoleV1"];
+  const mutationKey = getCreateRoleV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -2532,7 +2763,7 @@ export const getCreateRoleV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createRoleV1>>,
-    { data?: CreateRoleInput }
+    CreateRoleV1MutationVariables
   > = (props) => {
     const { data } = props ?? {};
 
@@ -2547,6 +2778,7 @@ export type CreateRoleV1MutationResult = NonNullable<
 >;
 export type CreateRoleV1MutationBody = CreateRoleInput | undefined;
 export type CreateRoleV1MutationError = unknown;
+export type CreateRoleV1MutationVariables = { data?: CreateRoleInput };
 
 /**
  * @summary Create a new role
@@ -2556,7 +2788,7 @@ export const useCreateRoleV1 = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof createRoleV1>>,
       TError,
-      { data?: CreateRoleInput },
+      CreateRoleV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -2565,7 +2797,7 @@ export const useCreateRoleV1 = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof createRoleV1>>,
   TError,
-  { data?: CreateRoleInput },
+  CreateRoleV1MutationVariables,
   TContext
 > => {
   return useMutation(getCreateRoleV1MutationOptions(options), queryClient);
@@ -2985,6 +3217,8 @@ export const deleteRoleV1 = async (
   } as deleteRoleV1Response;
 };
 
+export const getDeleteRoleV1MutationKey = () => ["deleteRoleV1"] as const;
+
 export const getDeleteRoleV1MutationOptions = <
   TError = string,
   TContext = unknown,
@@ -2992,17 +3226,17 @@ export const getDeleteRoleV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteRoleV1>>,
     TError,
-    { id: string; params?: DeleteRoleV1Params },
+    DeleteRoleV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteRoleV1>>,
   TError,
-  { id: string; params?: DeleteRoleV1Params },
+  DeleteRoleV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["deleteRoleV1"];
+  const mutationKey = getDeleteRoleV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3013,7 +3247,7 @@ export const getDeleteRoleV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteRoleV1>>,
-    { id: string; params?: DeleteRoleV1Params }
+    DeleteRoleV1MutationVariables
   > = (props) => {
     const { id, params } = props ?? {};
 
@@ -3028,6 +3262,10 @@ export type DeleteRoleV1MutationResult = NonNullable<
 >;
 
 export type DeleteRoleV1MutationError = string;
+export type DeleteRoleV1MutationVariables = {
+  id: string;
+  params?: DeleteRoleV1Params;
+};
 
 /**
  * @summary Delete a role by ID with a fallback role
@@ -3037,7 +3275,7 @@ export const useDeleteRoleV1 = <TError = string, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteRoleV1>>,
       TError,
-      { id: string; params?: DeleteRoleV1Params },
+      DeleteRoleV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -3046,7 +3284,7 @@ export const useDeleteRoleV1 = <TError = string, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteRoleV1>>,
   TError,
-  { id: string; params?: DeleteRoleV1Params },
+  DeleteRoleV1MutationVariables,
   TContext
 > => {
   return useMutation(getDeleteRoleV1MutationOptions(options), queryClient);
@@ -3092,10 +3330,34 @@ export const updateRoleV1 = async (
   updateRoleInput?: UpdateRoleInput,
   options?: RequestInit,
 ): Promise<updateRoleV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
   const res = await fetch(getUpdateRoleV1Url(id), {
     ...options,
     method: "PATCH",
-    headers: { "Content-Type": "application/json", ...options?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
     body: JSON.stringify(updateRoleInput),
   });
 
@@ -3109,6 +3371,8 @@ export const updateRoleV1 = async (
   } as updateRoleV1Response;
 };
 
+export const getUpdateRoleV1MutationKey = () => ["updateRoleV1"] as const;
+
 export const getUpdateRoleV1MutationOptions = <
   TError = void,
   TContext = unknown,
@@ -3116,17 +3380,17 @@ export const getUpdateRoleV1MutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateRoleV1>>,
     TError,
-    { id: string; data?: UpdateRoleInput },
+    UpdateRoleV1MutationVariables,
     TContext
   >;
   fetch?: RequestInit;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateRoleV1>>,
   TError,
-  { id: string; data?: UpdateRoleInput },
+  UpdateRoleV1MutationVariables,
   TContext
 > => {
-  const mutationKey = ["updateRoleV1"];
+  const mutationKey = getUpdateRoleV1MutationKey();
   const { mutation: mutationOptions, fetch: fetchOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3137,7 +3401,7 @@ export const getUpdateRoleV1MutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateRoleV1>>,
-    { id: string; data?: UpdateRoleInput }
+    UpdateRoleV1MutationVariables
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -3152,6 +3416,10 @@ export type UpdateRoleV1MutationResult = NonNullable<
 >;
 export type UpdateRoleV1MutationBody = UpdateRoleInput | undefined;
 export type UpdateRoleV1MutationError = void;
+export type UpdateRoleV1MutationVariables = {
+  id: string;
+  data?: UpdateRoleInput;
+};
 
 /**
  * @summary Update a role by ID
@@ -3161,7 +3429,7 @@ export const useUpdateRoleV1 = <TError = void, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateRoleV1>>,
       TError,
-      { id: string; data?: UpdateRoleInput },
+      UpdateRoleV1MutationVariables,
       TContext
     >;
     fetch?: RequestInit;
@@ -3170,7 +3438,7 @@ export const useUpdateRoleV1 = <TError = void, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateRoleV1>>,
   TError,
-  { id: string; data?: UpdateRoleInput },
+  UpdateRoleV1MutationVariables,
   TContext
 > => {
   return useMutation(getUpdateRoleV1MutationOptions(options), queryClient);
