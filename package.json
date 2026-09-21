@@ -5,8 +5,8 @@
     "frontend"
   ],
   "devDependencies": {
-    "lefthook": "2.1.12",
-    "@types/node": "26.5.1"
+    "lefthook": "2.1.14",
+    "@types/node": "26.6.1"
   },
   "scripts": {
     "prepare": "lefthook install",
