@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.json.Json
 import net.axcira.plugins.Optional.None
@@ -30,6 +31,12 @@ class OptionalPropertySerializer<T>(
 ) : KSerializer<Optional<T>> {
     override val descriptor: SerialDescriptor = valueSerializer.descriptor
 
+    // Ktor OpenAPI inference reads `elementSerializer` to walk list descriptors.
+    // Optional delegates its descriptor to valueSerializer, so this field keeps
+    // Optional<List<T>> on the same schema as List<T> (avoids a second component such as Permission2).
+    @Suppress("unused")
+    private val elementSerializer: KSerializer<*>? = listElementSerializer(valueSerializer)
+
     override fun deserialize(decoder: Decoder): Optional<T> = Present(valueSerializer.deserialize(decoder))
 
     override fun serialize(
@@ -46,6 +53,19 @@ class OptionalPropertySerializer<T>(
             }
         }
     }
+}
+
+private fun listElementSerializer(serializer: KSerializer<*>): KSerializer<*>? {
+    if (serializer.descriptor.kind != StructureKind.LIST) return null
+    var current: Class<*>? = serializer.javaClass
+    while (current != null) {
+        val field = current.declaredFields.firstOrNull { it.name == "elementSerializer" }
+        if (field != null && field.trySetAccessible()) {
+            return field.get(serializer) as? KSerializer<*>
+        }
+        current = current.superclass
+    }
+    return null
 }
 
 fun Application.configureSerialization() {
