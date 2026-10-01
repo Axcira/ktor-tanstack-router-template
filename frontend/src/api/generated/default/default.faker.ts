@@ -83,10 +83,7 @@ export const getLoginV1ResponseMock = (
   user: {
     id: faker.number.int(),
     email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    roleId: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([faker.number.int(), null]),
-      undefined,
-    ]),
+    roleId: faker.helpers.arrayElement([faker.number.int(), null]),
   },
   permissions: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
@@ -111,10 +108,7 @@ export const getGetUsersV1ResponseMock = (): UserDTO[] =>
   ).map(() => ({
     id: faker.number.int(),
     email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    roleId: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([faker.number.int(), null]),
-      undefined,
-    ]),
+    roleId: faker.helpers.arrayElement([faker.number.int(), null]),
   }));
 
 export const getCreateUserV1ResponseMock = (
@@ -122,10 +116,7 @@ export const getCreateUserV1ResponseMock = (
 ): UserDTO => ({
   id: faker.number.int(),
   email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  roleId: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([faker.number.int(), null]),
-    undefined,
-  ]),
+  roleId: faker.helpers.arrayElement([faker.number.int(), null]),
   ...overrideResponse,
 });
 
@@ -183,10 +174,7 @@ export const getGetSelfV1ResponseMock = (
   user: {
     id: faker.number.int(),
     email: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    roleId: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([faker.number.int(), null]),
-      undefined,
-    ]),
+    roleId: faker.helpers.arrayElement([faker.number.int(), null]),
   },
   permissions: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
