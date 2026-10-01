@@ -86,6 +86,28 @@ tasks.register<JavaExec>("generateOpenApiJson") {
     mainClass.set("net.axcira.GenerateOpenApiKt")
     environment("SKIP_BOOTSTRAP", "true")
     environment("SKIP_DATABASE", "true")
+
+    // JavaExec is not cacheable by default, and its environment map is @Internal.
+    // These inputs are what the spec actually depends on.
+    inputs
+        .files(sourceSets.main.get().allSource)
+        .withPropertyName("mainSources")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs
+        .files(codegen.allSource)
+        .withPropertyName("codegenSources")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs
+        .files(classpath)
+        .withPropertyName("runtimeClasspath")
+        .withNormalizer(ClasspathNormalizer::class)
+    inputs.property("mainClassName", "net.axcira.GenerateOpenApiKt")
+    inputs.property("skipBootstrap", "true")
+    inputs.property("skipDatabase", "true")
+    outputs
+        .file(layout.projectDirectory.file("generated/openapi.json"))
+        .withPropertyName("openApiSpec")
+    outputs.cacheIf { true }
 }
 
 tasks.register<Exec>("generateClient") {

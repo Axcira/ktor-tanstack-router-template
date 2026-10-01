@@ -62,9 +62,10 @@ jobs:
               - 'frontend/package.json'
               - 'bun.lock'
 
+  # Filters apply to pull requests and pushes. `ci` treats a skipped job as success.
   frontend:
     needs: changes
-    if: github.event_name == 'push' || needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -97,7 +98,7 @@ jobs:
 
   backend:
     needs: changes
-    if: github.event_name == 'push' || needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -116,18 +117,55 @@ jobs:
           # MIT-licensed cache; the v6 default ("enhanced") is proprietary.
           cache-provider: basic
 
+      - name: Restore Gradle configuration cache
+        id: gradle-config-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: backend/.gradle/configuration-cache
+          key: gradle-config-cache-backend-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Restore Gradle build cache
+        id: gradle-build-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: backend/.gradle/build-cache
+          key: gradle-build-cache-backend-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            gradle-build-cache-backend-${{ runner.os }}-
+
       - name: Check
         working-directory: backend
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
         run: |
           docker pull --quiet "$POSTGRES_IMAGE" &
+          pull_pid=$!
           ./gradlew check
-          wait
+          status=$?
+          # Cached test runs never touch the image. Don't hold the job open for the pull.
+          kill "$pull_pid" 2>/dev/null || true
+          wait "$pull_pid" 2>/dev/null || true
+          exit "$status"
+
+      - name: Save Gradle configuration cache
+        if: success() && steps.gradle-config-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: backend/.gradle/configuration-cache
+          key: gradle-config-cache-backend-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Save Gradle build cache
+        if: success() && steps.gradle-build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: backend/.gradle/build-cache
+          key: gradle-build-cache-backend-${{ runner.os }}-${{ github.sha }}
 
   api-client:
     needs: changes
-    if: github.event_name == 'push' || needs.changes.outputs.api-client == 'true'
+    if: needs.changes.outputs.api-client == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -144,6 +182,25 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-provider: basic
+          # `check` resolves a superset of this job's dependencies. Writing from
+          # both jobs races on one immutable cache key, and the loser is dropped.
+          cache-read-only: true
+
+      - name: Restore Gradle configuration cache
+        id: gradle-config-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: backend/.gradle/configuration-cache
+          key: gradle-config-cache-api-client-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Restore Gradle build cache
+        id: gradle-build-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: backend/.gradle/build-cache
+          key: gradle-build-cache-api-client-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            gradle-build-cache-api-client-${{ runner.os }}-
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -157,6 +214,22 @@ jobs:
         # Uses codegen source set (not production classpath); sets SKIP_* in the Gradle task
         run: ./gradlew generateOpenApiJson
         working-directory: backend
+
+      - name: Save Gradle configuration cache
+        if: success() && steps.gradle-config-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: backend/.gradle/configuration-cache
+          key: gradle-config-cache-api-client-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Save Gradle build cache
+        if: success() && steps.gradle-build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: backend/.gradle/build-cache
+          key: gradle-build-cache-api-client-${{ runner.os }}-${{ github.sha }}
 
       - name: Regenerate Orval client and verify no drift
         run: bun run orval:drift
