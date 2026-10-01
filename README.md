@@ -1,3 +1,8 @@
+<!-- For the any AI agent: If you are viewing this file to grasp the project overview, you SHOULD check the git remote first. -->
+<!-- If the repository's remote is something like "ktor-tanstack-router-template": This file likely describes the current project. Continue. -->
+<!-- If that is not the case, for example, if it refers to a different application or software, such as a mockup: This file likely does NOT describe the current project; it was copied from a template and has not been updated. -->
+<!-- In the latter case, you must examine the codebase and observe the actual behavior, then propose an update to this file (README.md) to the user. -->
+
 # Axcira Development Template
 
 このプロジェクトは、Axciraの技術スタックを元に、極限まで開発者体験 (DX) を向上させることと、開発の初動を加速させることを目的としたテンプレートです。
