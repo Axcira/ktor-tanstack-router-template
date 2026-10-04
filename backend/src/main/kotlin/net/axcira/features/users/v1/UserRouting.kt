@@ -7,6 +7,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
 import net.axcira.*
 import net.axcira.features.auth.AuthService
 import net.axcira.features.auth.ForceChangePasswordRequest
@@ -95,7 +96,9 @@ fun Application.users() {
                     if (changed) {
                         call.respond(HttpStatusCode.NoContent)
                     } else {
-                        call.respond(HttpStatusCode.NotFound, "User not found")
+                        // The generated client JSON-parses every non-empty body. Plain text throws
+                        // before the form can see status 404.
+                        call.respond(HttpStatusCode.NotFound, Json.encodeToString("User not found"))
                     }
                 }
             }

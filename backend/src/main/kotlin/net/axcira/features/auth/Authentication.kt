@@ -5,6 +5,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import net.axcira.db.*
 import net.axcira.db.SessionsTable.sessionId
 import net.axcira.features.permissions.Permission
@@ -66,6 +67,7 @@ class DatabaseSessionStorage(
             SessionsTable.upsert {
                 it[sessionId] = id
                 it[session] = value
+                it[SessionsTable.userId] = sessionUserId(value)
             }
         }
     }
@@ -96,4 +98,21 @@ fun Application.configureAuthentication() {
             }
         }
     }
+}
+
+private val sessionJson = Json { ignoreUnknownKeys = true }
+
+private val sessionUserIdPattern = Regex(""""id"\s*:\s*(\d+)""")
+
+internal fun sessionUserId(payload: String): UInt? {
+    val decoded =
+        runCatching {
+            sessionJson.decodeFromString(UserSession.serializer(), payload).user.id
+        }.getOrNull()
+    if (decoded != null) return decoded
+    return sessionUserIdPattern
+        .find(payload)
+        ?.groupValues
+        ?.get(1)
+        ?.toUIntOrNull()
 }

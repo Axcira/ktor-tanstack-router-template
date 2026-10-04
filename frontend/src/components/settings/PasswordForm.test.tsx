@@ -116,4 +116,49 @@ describe("Password change settings", () => {
       });
     });
   });
+
+  it("shows server reasons and falls back when a failure has none", async () => {
+    server.use(
+      getGetSelfV1MockHandler(makeSession([{ type: "ChangePassword" }])),
+      denyCanI(),
+      http.post("*/api/v1/auth/password", () =>
+        HttpResponse.json(
+          {
+            message: "Validation failed",
+            reasons: ["newPassword must differ from currentPassword"],
+          },
+          { status: 400 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    await renderApp("/settings");
+    await user.type(
+      await screen.findByLabelText("現在のパスワード"),
+      "password",
+    );
+    await user.type(screen.getByLabelText("新しいパスワード"), "replacement-1");
+    await user.type(
+      screen.getByLabelText("新しいパスワード（確認）"),
+      "replacement-1",
+    );
+    await user.click(screen.getByRole("button", { name: "パスワードを変更" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "newPassword must differ from currentPassword",
+    );
+
+    server.use(
+      http.post(
+        "*/api/v1/auth/password",
+        () => new HttpResponse(null, { status: 403 }),
+      ),
+    );
+    await user.click(screen.getByRole("button", { name: "パスワードを変更" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "パスワードの変更に失敗しました",
+    );
+    expect(
+      screen.queryByText("現在のパスワードが違います"),
+    ).not.toBeInTheDocument();
+  });
 });

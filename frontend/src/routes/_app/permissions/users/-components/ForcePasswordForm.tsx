@@ -43,7 +43,11 @@ export default function ForcePasswordForm({ userId }: { userId: number }) {
             toast.success("パスワードを変更しました");
             return;
           }
-          setErrorMessage("ユーザーが見つかりません");
+          setErrorMessage(
+            response.status === 404
+              ? "ユーザーが見つかりません"
+              : "パスワードの変更に失敗しました",
+          );
         },
         onError: () => {
           setErrorMessage("パスワードの変更に失敗しました");

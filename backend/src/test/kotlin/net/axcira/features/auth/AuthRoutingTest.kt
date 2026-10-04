@@ -6,6 +6,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
 import net.axcira.db.Role
+import net.axcira.db.SessionsTable
 import net.axcira.extraClient
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
@@ -14,8 +15,12 @@ import net.axcira.login
 import net.axcira.plugins.ValidationErrorBody
 import net.axcira.plugins.dbQuery
 import net.axcira.test
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -334,7 +339,10 @@ class AuthRoutingTest {
                     .post("/api/v1/users/999999/password") {
                         contentType(ContentType.Application.Json)
                         setBody(ForceChangePasswordRequest(newPassword = "replacement-4"))
-                    }.let { assertEquals(HttpStatusCode.NotFound, it.status) }
+                    }.let {
+                        assertEquals(HttpStatusCode.NotFound, it.status)
+                        assertEquals(""""User not found"""", it.bodyAsText())
+                    }
             } finally {
                 target.close()
                 targetOther.close()
@@ -351,5 +359,123 @@ class AuthRoutingTest {
                     setBody(ForceChangePasswordRequest(newPassword = "replacement-1"))
                 }
             assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+
+    @Test
+    fun `sessions are deleted by user id and a legacy payload is left intact`() =
+        test { client ->
+            val email = "pw-session@example.com"
+            val user = login(client, email, listOf(Permission.ChangePassword))
+            val other = extraClient()
+            val bystander = extraClient()
+            try {
+                other
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(email, "password"))
+                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                val bystanderUser = login(bystander, "pw-session-other@example.com", listOf(Permission.ChangePassword))
+
+                val database: Database by application.dependencies
+                val legacyId = "legacy-session-row"
+                val legacyPayload =
+                    """{"user":{"id":${user.id},"email":"$email","roleId":${user.roleId}},"permissions":[{"type":"ChangePassword"}]}"""
+
+                data class StoredSession(
+                    val id: String,
+                    val payload: String,
+                    val owner: UInt?,
+                )
+
+                val before =
+                    database.dbQuery {
+                        val owned =
+                            SessionsTable
+                                .selectAll()
+                                .where { SessionsTable.userId eq user.id }
+                                .map {
+                                    StoredSession(
+                                        it[SessionsTable.sessionId],
+                                        it[SessionsTable.session],
+                                        it[SessionsTable.userId],
+                                    )
+                                }
+                        assertTrue(owned.size >= 2)
+                        owned.forEach { stored ->
+                            assertEquals(user.id, stored.owner)
+                            assertTrue(stored.payload.startsWith("{"))
+                            assertTrue(stored.payload.contains(""""id":${user.id}"""))
+                        }
+
+                        SessionsTable.insert {
+                            it[SessionsTable.sessionId] = legacyId
+                            it[SessionsTable.session] = legacyPayload
+                            it[SessionsTable.userId] = null
+                        }
+                        TransactionManager.current().exec(
+                            """
+                            UPDATE sessions
+                            SET user_id = (("session"::jsonb)->'user'->>'id')::bigint
+                            WHERE session_id = '$legacyId'
+                              AND user_id IS NULL
+                            """.trimIndent(),
+                        )
+                        val legacy =
+                            SessionsTable
+                                .selectAll()
+                                .where { SessionsTable.sessionId eq legacyId }
+                                .single()
+                        assertEquals(legacyPayload, legacy[SessionsTable.session])
+                        assertEquals(user.id, legacy[SessionsTable.userId])
+                        owned
+                    }
+
+                client
+                    .post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "password",
+                                newPassword = "replacement-1",
+                                logoutOtherSessions = true,
+                            ),
+                        )
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+
+                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.Unauthorized, other.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, bystander.get("/api/v1/users/me").status)
+
+                database.dbQuery {
+                    val remaining =
+                        SessionsTable
+                            .selectAll()
+                            .where { SessionsTable.userId eq user.id }
+                            .map {
+                                StoredSession(
+                                    it[SessionsTable.sessionId],
+                                    it[SessionsTable.session],
+                                    it[SessionsTable.userId],
+                                )
+                            }
+                    assertEquals(1, remaining.size)
+                    val survivor = remaining.single()
+                    val previous = before.single { it.id == survivor.id }
+                    assertEquals(previous.payload, survivor.payload)
+                    assertEquals(
+                        null,
+                        SessionsTable.selectAll().where { SessionsTable.sessionId eq legacyId }.singleOrNull(),
+                    )
+                    val bystanderSessions =
+                        SessionsTable
+                            .selectAll()
+                            .where { SessionsTable.userId eq bystanderUser.id }
+                            .count()
+                    assertEquals(1L, bystanderSessions)
+                }
+            } finally {
+                other.close()
+                bystander.close()
+            }
         }
 }

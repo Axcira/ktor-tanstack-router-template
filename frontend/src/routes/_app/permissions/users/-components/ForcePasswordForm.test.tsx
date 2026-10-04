@@ -95,4 +95,53 @@ describe("Force password change", () => {
       });
     });
   });
+
+  it("says the user is missing only for 404", async () => {
+    server.use(
+      getGetSelfV1MockHandler(makeSession([{ type: "ManageUsers" }])),
+      denyCanI(),
+      getGetUsersV1MockHandler([
+        { id: 7, email: "other@example.com", roleId: 2 },
+      ]),
+      getGetRolesV1MockHandler([
+        {
+          id: 2,
+          name: "Writer",
+          description: "Writer",
+          permissions: [],
+        },
+      ]),
+      http.post("*/api/v1/users/:id/password", () =>
+        HttpResponse.json("User not found", { status: 404 }),
+      ),
+    );
+    const user = userEvent.setup();
+    await renderApp("/permissions/users/7/edit");
+    await user.type(
+      await screen.findByLabelText("新しいパスワード"),
+      "replacement-1",
+    );
+    await user.type(
+      screen.getByLabelText("新しいパスワード（確認）"),
+      "replacement-1",
+    );
+    await user.click(screen.getByRole("button", { name: "パスワードを変更" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "ユーザーが見つかりません",
+    );
+
+    server.use(
+      http.post(
+        "*/api/v1/users/:id/password",
+        () => new HttpResponse(null, { status: 403 }),
+      ),
+    );
+    await user.click(screen.getByRole("button", { name: "パスワードを変更" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "パスワードの変更に失敗しました",
+    );
+    expect(
+      screen.queryByText("ユーザーが見つかりません"),
+    ).not.toBeInTheDocument();
+  });
 });

@@ -56,9 +56,10 @@ export default function PasswordForm() {
             setErrorMessage("現在のパスワードが違います");
             return;
           }
+          const reasons = (response.data as { reasons?: string[] } | undefined)
+            ?.reasons;
           setErrorMessage(
-            response.data.reasons.join("\n") ||
-              "パスワードの変更に失敗しました",
+            reasons?.join("\n") || "パスワードの変更に失敗しました",
           );
         },
         onError: () => {

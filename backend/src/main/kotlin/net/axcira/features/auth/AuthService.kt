@@ -2,13 +2,14 @@ package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
 import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
 import net.axcira.db.Role
 import net.axcira.db.SessionsTable
 import net.axcira.db.Users
 import net.axcira.features.users.UserDTO
 import net.axcira.plugins.dbQuery
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -167,33 +168,15 @@ class AuthService(
         userId: UInt,
         keepSessionId: String?,
     ) {
-        val rows = SessionsTable.selectAll().toList()
-        rows.forEach { row ->
-            val id = row[SessionsTable.sessionId]
-            if (keepSessionId != null && id == keepSessionId) return@forEach
-            val owner = sessionUserId(row[SessionsTable.session]) ?: return@forEach
-            if (owner == userId) {
-                SessionsTable.deleteWhere { SessionsTable.sessionId eq id }
+        SessionsTable.deleteWhere {
+            val owned = SessionsTable.userId eq userId
+            if (keepSessionId == null) {
+                owned
+            } else {
+                owned and (SessionsTable.sessionId neq keepSessionId)
             }
         }
     }
-}
-
-private val sessionJson = Json { ignoreUnknownKeys = true }
-
-private val sessionUserIdPattern = Regex(""""id"\s*:\s*(\d+)""")
-
-private fun sessionUserId(payload: String): UInt? {
-    val decoded =
-        runCatching {
-            sessionJson.decodeFromString(UserSession.serializer(), payload).user.id
-        }.getOrNull()
-    if (decoded != null) return decoded
-    return sessionUserIdPattern
-        .find(payload)
-        ?.groupValues
-        ?.get(1)
-        ?.toUIntOrNull()
 }
 
 object PasswordHasher {
