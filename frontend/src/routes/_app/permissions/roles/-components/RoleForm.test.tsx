@@ -37,6 +37,7 @@ describe("RoleForm", () => {
       screen.getByText("ロール名を入力してください。"),
     ).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText("パスワードの変更")).toBeInTheDocument();
   });
 
   it("builds permissions from toggles including allowOthers", async () => {

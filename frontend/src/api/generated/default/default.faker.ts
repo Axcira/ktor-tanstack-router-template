@@ -12,6 +12,7 @@ import type {
   HealthResponse,
   Permission,
   PermissionAdministrator,
+  PermissionChangePassword,
   PermissionCreateArticle,
   PermissionDeleteArticle,
   PermissionManageArticles,
@@ -33,6 +34,13 @@ export const getLoginV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},
 ): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
+  ...overrideResponse,
+});
+
+export const getLoginV1ResponsePermissionChangePasswordMock = (
+  overrideResponse: Partial<PermissionChangePassword> = {},
+): PermissionChangePassword => ({
+  ...{ type: faker.helpers.arrayElement(["ChangePassword"] as const) },
   ...overrideResponse,
 });
 
@@ -91,6 +99,7 @@ export const getLoginV1ResponseMock = (
   ).map(() =>
     faker.helpers.arrayElement([
       { ...getLoginV1ResponsePermissionAdministratorMock() },
+      { ...getLoginV1ResponsePermissionChangePasswordMock() },
       { ...getLoginV1ResponsePermissionCreateArticleMock() },
       { ...getLoginV1ResponsePermissionDeleteArticleMock() },
       { ...getLoginV1ResponsePermissionManageArticlesMock() },
@@ -124,6 +133,13 @@ export const getGetSelfV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},
 ): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
+  ...overrideResponse,
+});
+
+export const getGetSelfV1ResponsePermissionChangePasswordMock = (
+  overrideResponse: Partial<PermissionChangePassword> = {},
+): PermissionChangePassword => ({
+  ...{ type: faker.helpers.arrayElement(["ChangePassword"] as const) },
   ...overrideResponse,
 });
 
@@ -182,6 +198,7 @@ export const getGetSelfV1ResponseMock = (
   ).map(() =>
     faker.helpers.arrayElement([
       { ...getGetSelfV1ResponsePermissionAdministratorMock() },
+      { ...getGetSelfV1ResponsePermissionChangePasswordMock() },
       { ...getGetSelfV1ResponsePermissionCreateArticleMock() },
       { ...getGetSelfV1ResponsePermissionDeleteArticleMock() },
       { ...getGetSelfV1ResponsePermissionManageArticlesMock() },
@@ -272,6 +289,13 @@ export const getGetUserPermissionsV1ResponsePermissionAdministratorMock = (
   ...overrideResponse,
 });
 
+export const getGetUserPermissionsV1ResponsePermissionChangePasswordMock = (
+  overrideResponse: Partial<PermissionChangePassword> = {},
+): PermissionChangePassword => ({
+  ...{ type: faker.helpers.arrayElement(["ChangePassword"] as const) },
+  ...overrideResponse,
+});
+
 export const getGetUserPermissionsV1ResponsePermissionCreateArticleMock = (
   overrideResponse: Partial<PermissionCreateArticle> = {},
 ): PermissionCreateArticle => ({
@@ -320,6 +344,7 @@ export const getGetUserPermissionsV1ResponseMock = (): Permission[] =>
   ).map(() =>
     faker.helpers.arrayElement([
       { ...getGetUserPermissionsV1ResponsePermissionAdministratorMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionChangePasswordMock() },
       { ...getGetUserPermissionsV1ResponsePermissionCreateArticleMock() },
       { ...getGetUserPermissionsV1ResponsePermissionDeleteArticleMock() },
       { ...getGetUserPermissionsV1ResponsePermissionManageArticlesMock() },
@@ -332,6 +357,13 @@ export const getCreateRoleV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},
 ): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
+  ...overrideResponse,
+});
+
+export const getCreateRoleV1ResponsePermissionChangePasswordMock = (
+  overrideResponse: Partial<PermissionChangePassword> = {},
+): PermissionChangePassword => ({
+  ...{ type: faker.helpers.arrayElement(["ChangePassword"] as const) },
   ...overrideResponse,
 });
 
@@ -388,6 +420,7 @@ export const getCreateRoleV1ResponseMock = (
   ).map(() =>
     faker.helpers.arrayElement([
       { ...getCreateRoleV1ResponsePermissionAdministratorMock() },
+      { ...getCreateRoleV1ResponsePermissionChangePasswordMock() },
       { ...getCreateRoleV1ResponsePermissionCreateArticleMock() },
       { ...getCreateRoleV1ResponsePermissionDeleteArticleMock() },
       { ...getCreateRoleV1ResponsePermissionManageArticlesMock() },
@@ -402,6 +435,13 @@ export const getGetRolesV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},
 ): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
+  ...overrideResponse,
+});
+
+export const getGetRolesV1ResponsePermissionChangePasswordMock = (
+  overrideResponse: Partial<PermissionChangePassword> = {},
+): PermissionChangePassword => ({
+  ...{ type: faker.helpers.arrayElement(["ChangePassword"] as const) },
   ...overrideResponse,
 });
 
@@ -460,6 +500,7 @@ export const getGetRolesV1ResponseMock = (): RoleDTO[] =>
     ).map(() =>
       faker.helpers.arrayElement([
         { ...getGetRolesV1ResponsePermissionAdministratorMock() },
+        { ...getGetRolesV1ResponsePermissionChangePasswordMock() },
         { ...getGetRolesV1ResponsePermissionCreateArticleMock() },
         { ...getGetRolesV1ResponsePermissionDeleteArticleMock() },
         { ...getGetRolesV1ResponsePermissionManageArticlesMock() },
@@ -473,6 +514,13 @@ export const getGetRoleByIdV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},
 ): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
+  ...overrideResponse,
+});
+
+export const getGetRoleByIdV1ResponsePermissionChangePasswordMock = (
+  overrideResponse: Partial<PermissionChangePassword> = {},
+): PermissionChangePassword => ({
+  ...{ type: faker.helpers.arrayElement(["ChangePassword"] as const) },
   ...overrideResponse,
 });
 
@@ -529,6 +577,7 @@ export const getGetRoleByIdV1ResponseMock = (
   ).map(() =>
     faker.helpers.arrayElement([
       { ...getGetRoleByIdV1ResponsePermissionAdministratorMock() },
+      { ...getGetRoleByIdV1ResponsePermissionChangePasswordMock() },
       { ...getGetRoleByIdV1ResponsePermissionCreateArticleMock() },
       { ...getGetRoleByIdV1ResponsePermissionDeleteArticleMock() },
       { ...getGetRoleByIdV1ResponsePermissionManageArticlesMock() },
@@ -543,6 +592,13 @@ export const getUpdateRoleV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},
 ): PermissionAdministrator => ({
   ...{ type: faker.helpers.arrayElement(["Administrator"] as const) },
+  ...overrideResponse,
+});
+
+export const getUpdateRoleV1ResponsePermissionChangePasswordMock = (
+  overrideResponse: Partial<PermissionChangePassword> = {},
+): PermissionChangePassword => ({
+  ...{ type: faker.helpers.arrayElement(["ChangePassword"] as const) },
   ...overrideResponse,
 });
 
@@ -599,6 +655,7 @@ export const getUpdateRoleV1ResponseMock = (
   ).map(() =>
     faker.helpers.arrayElement([
       { ...getUpdateRoleV1ResponsePermissionAdministratorMock() },
+      { ...getUpdateRoleV1ResponsePermissionChangePasswordMock() },
       { ...getUpdateRoleV1ResponsePermissionCreateArticleMock() },
       { ...getUpdateRoleV1ResponsePermissionDeleteArticleMock() },
       { ...getUpdateRoleV1ResponsePermissionManageArticlesMock() },

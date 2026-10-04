@@ -6,6 +6,7 @@ import {
   useUpdateUserV1,
 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
+import ForcePasswordForm from "./-components/ForcePasswordForm";
 import UserForm from "./-components/UserForm";
 
 export const Route = createFileRoute("/_app/permissions/users/$userId/edit")({
@@ -128,6 +129,10 @@ function UserEditPage() {
           isSubmitting={updateUser.isPending}
           isLoadingRoles={isLoadingRoles}
         />
+      </div>
+
+      <div className="border rounded-xl p-6 bg-card shadow-sm">
+        <ForcePasswordForm userId={user.id} />
       </div>
     </div>
   );

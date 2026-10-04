@@ -210,6 +210,17 @@ private val sharedTestApplication: TestApplication by lazy {
     }
 }
 
+/** A second cookie jar against the shared test app, for multi-session checks. */
+fun SharedTestContext.extraClient(): HttpClient =
+    sharedTestApplication.createClient {
+        install(ContentNegotiation) {
+            json()
+        }
+        install(HttpCookies) {
+            storage = AcceptAllCookiesStorage()
+        }
+    }
+
 private fun resetDatabase() {
     // Drop idle pooled connections so no stale transaction can outlive the previous test.
     testDataSource.hikariPoolMXBean?.softEvictConnections()

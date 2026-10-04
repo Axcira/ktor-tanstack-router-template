@@ -22,6 +22,14 @@ sealed interface Permission {
     data object ManageUsers : Permission
 
     /**
+     * Change the signed-in user's own password after confirming the current one.
+     * ManageUsers does not imply this permission. Administrators bypass it, as with every other check.
+     */
+    @Serializable
+    @SerialName("ChangePassword")
+    data object ChangePassword : Permission
+
+    /**
      * ManageArticles permission is a combination of all permissions that can be used to manage articles.
      */
     @Serializable

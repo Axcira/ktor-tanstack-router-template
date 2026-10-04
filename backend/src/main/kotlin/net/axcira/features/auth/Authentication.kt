@@ -26,6 +26,19 @@ data class LoginRequest(
     val password: String,
 )
 
+@Serializable
+data class ChangePasswordRequest(
+    val currentPassword: String,
+    val newPassword: String,
+    val logoutOtherSessions: Boolean = false,
+)
+
+@Serializable
+data class ForceChangePasswordRequest(
+    val newPassword: String,
+    val logoutSessions: Boolean = false,
+)
+
 class DatabaseSessionStorage(
     private val database: Database,
 ) : SessionStorage {

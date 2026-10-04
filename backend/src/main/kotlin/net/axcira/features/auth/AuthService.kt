@@ -2,17 +2,31 @@ package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import net.axcira.db.Role
+import net.axcira.db.SessionsTable
 import net.axcira.db.Users
 import net.axcira.features.users.UserDTO
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import org.slf4j.LoggerFactory
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
+
+sealed interface ChangePasswordResult {
+    data object Success : ChangePasswordResult
+
+    data object WrongPassword : ChangePasswordResult
+
+    data class Invalid(
+        val reasons: List<String>,
+    ) : ChangePasswordResult
+}
 
 suspend fun <T> minWait(
     duration: Duration,
@@ -80,6 +94,106 @@ class AuthService(
                 return@minWait null
             }
         }
+
+    /**
+     * Replaces the signed-in user's password after the current one verifies.
+     * [keepSessionId] stays valid. Other sessions for the same user are removed only when requested.
+     */
+    suspend fun changePassword(
+        userId: UInt,
+        currentPassword: String,
+        newPassword: String,
+        logoutOtherSessions: Boolean,
+        keepSessionId: String?,
+    ): ChangePasswordResult {
+        val currentHash =
+            database.dbQuery {
+                Users
+                    .selectAll()
+                    .where { Users.id eq userId }
+                    .singleOrNull()
+                    ?.get(Users.passwordHash)
+            } ?: return ChangePasswordResult.WrongPassword
+        if (!PasswordHasher.verifyPassword(currentPassword, currentHash)) {
+            log.warn("Rejected password change for user id=$userId")
+            return ChangePasswordResult.WrongPassword
+        }
+        if (currentPassword == newPassword) {
+            return ChangePasswordResult.Invalid(listOf("newPassword must differ from currentPassword"))
+        }
+        val nextHash = PasswordHasher.hashPassword(newPassword)
+        database.dbQuery {
+            Users.update({ Users.id eq userId }) {
+                it[passwordHash] = nextHash
+            }
+            if (logoutOtherSessions) {
+                invalidateSessions(userId, keepSessionId)
+            }
+        }
+        log.info("Password changed for user id=$userId, logoutOtherSessions=$logoutOtherSessions")
+        return ChangePasswordResult.Success
+    }
+
+    /**
+     * Replaces [userId]'s password without the current one.
+     * When [logoutSessions] is true, every session for that user is removed.
+     * Returns false when the user does not exist.
+     */
+    suspend fun forceChangePassword(
+        userId: UInt,
+        newPassword: String,
+        logoutSessions: Boolean,
+    ): Boolean {
+        val nextHash = PasswordHasher.hashPassword(newPassword)
+        val changed =
+            database.dbQuery {
+                val updated =
+                    Users.update({ Users.id eq userId }) {
+                        it[passwordHash] = nextHash
+                    }
+                if (updated == 0) return@dbQuery false
+                if (logoutSessions) {
+                    invalidateSessions(userId, keepSessionId = null)
+                }
+                true
+            }
+        if (changed) {
+            log.info("Password force-changed for user id=$userId, logoutSessions=$logoutSessions")
+        }
+        return changed
+    }
+
+    private fun invalidateSessions(
+        userId: UInt,
+        keepSessionId: String?,
+    ) {
+        val rows = SessionsTable.selectAll().toList()
+        rows.forEach { row ->
+            val id = row[SessionsTable.sessionId]
+            if (keepSessionId != null && id == keepSessionId) return@forEach
+            val owner = sessionUserId(row[SessionsTable.session]) ?: return@forEach
+            if (owner == userId) {
+                SessionsTable.deleteWhere { SessionsTable.sessionId eq id }
+            }
+        }
+    }
+}
+
+private val sessionJson = Json { ignoreUnknownKeys = true }
+
+private val sessionUserIdPattern = Regex(""""id"\s*:\s*(\d+)""")
+
+private fun sessionUserId(payload: String): UInt? {
+    val decoded =
+        runCatching {
+            sessionJson.decodeFromString(UserSession.serializer(), payload).user.id
+        }.getOrNull()
+    if (decoded != null) return decoded
+    return sessionUserIdPattern
+        .find(payload)
+        ?.groupValues
+        ?.get(1)
+        ?.toUIntOrNull()
 }
 
 object PasswordHasher {

@@ -22,10 +22,12 @@ import type {
 
 import type {
   ArticleDTO,
+  ChangePasswordRequest,
   CreateArticleInput,
   CreateRoleInput,
   CreateUserInput,
   DeleteRoleV1Params,
+  ForceChangePasswordRequest,
   GetApiJsonKotlinxSerialization200,
   GetRolesV1Params,
   GetUserPermissionsV1Params,
@@ -40,6 +42,7 @@ import type {
   UpdateUserInput,
   UserDTO,
   UserSession,
+  ValidationErrorBody,
 } from "../schemas";
 
 const withQueryKey = <T extends object, K>(
@@ -611,6 +614,170 @@ export const useLogoutV1 = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getLogoutV1MutationOptions(options), queryClient);
 };
+export type changePasswordV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type changePasswordV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type changePasswordV1Response401 = {
+  data: void;
+  status: 401;
+};
+
+export type changePasswordV1ResponseSuccess = changePasswordV1Response204 & {
+  headers: Headers;
+};
+export type changePasswordV1ResponseError = (
+  | changePasswordV1Response400
+  | changePasswordV1Response401
+) & {
+  headers: Headers;
+};
+
+export type changePasswordV1Response =
+  | changePasswordV1ResponseSuccess
+  | changePasswordV1ResponseError;
+
+export const getChangePasswordV1Url = () => {
+  return `/api/v1/auth/password`;
+};
+
+/**
+ * @summary Change the signed-in user's password.
+Requires ChangePassword and the current password.
+When logoutOtherSessions is true, other cookie sessions for this user are deleted.
+The current session stays. Omitted or false leaves other sessions in place.
+ */
+export const changePasswordV1 = async (
+  changePasswordRequest?: ChangePasswordRequest,
+  options?: RequestInit,
+): Promise<changePasswordV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  const res = await fetch(getChangePasswordV1Url(), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(changePasswordRequest),
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: changePasswordV1Response["data"] = body
+    ? JSON.parse(body)
+    : undefined;
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as changePasswordV1Response;
+};
+
+export const getChangePasswordV1MutationKey = () =>
+  ["changePasswordV1"] as const;
+
+export const getChangePasswordV1MutationOptions = <
+  TError = ValidationErrorBody | void,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof changePasswordV1>>,
+    TError,
+    ChangePasswordV1MutationVariables,
+    TContext
+  >;
+  fetch?: RequestInit;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof changePasswordV1>>,
+  TError,
+  ChangePasswordV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getChangePasswordV1MutationKey();
+  const { mutation: mutationOptions, fetch: fetchOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, fetch: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof changePasswordV1>>,
+    ChangePasswordV1MutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return changePasswordV1(data, fetchOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ChangePasswordV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof changePasswordV1>>
+>;
+export type ChangePasswordV1MutationBody = ChangePasswordRequest | undefined;
+export type ChangePasswordV1MutationError = ValidationErrorBody | void;
+export type ChangePasswordV1MutationVariables = {
+  data?: ChangePasswordRequest;
+};
+
+/**
+ * @summary Change the signed-in user's password.
+Requires ChangePassword and the current password.
+When logoutOtherSessions is true, other cookie sessions for this user are deleted.
+The current session stays. Omitted or false leaves other sessions in place.
+ */
+export const useChangePasswordV1 = <
+  TError = ValidationErrorBody | void,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof changePasswordV1>>,
+      TError,
+      ChangePasswordV1MutationVariables,
+      TContext
+    >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof changePasswordV1>>,
+  TError,
+  ChangePasswordV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getChangePasswordV1MutationOptions(options), queryClient);
+};
 export type getUsersV1Response200 = {
   data: UserDTO[];
   status: 200;
@@ -1174,16 +1341,186 @@ export const useDeleteUserV1 = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getDeleteUserV1MutationOptions(options), queryClient);
 };
+export type forceChangePasswordV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type forceChangePasswordV1Response404 = {
+  data: string;
+  status: 404;
+};
+
+export type forceChangePasswordV1ResponseSuccess =
+  forceChangePasswordV1Response204 & {
+    headers: Headers;
+  };
+export type forceChangePasswordV1ResponseError =
+  forceChangePasswordV1Response404 & {
+    headers: Headers;
+  };
+
+export type forceChangePasswordV1Response =
+  | forceChangePasswordV1ResponseSuccess
+  | forceChangePasswordV1ResponseError;
+
+export const getForceChangePasswordV1Url = (id: string) => {
+  return `/api/v1/users/${id}/password`;
+};
+
+/**
+ * @summary Replace another user's password without the current one.
+Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+Omitted or false leaves their sessions in place.
+ */
+export const forceChangePasswordV1 = async (
+  id: string,
+  forceChangePasswordRequest?: ForceChangePasswordRequest,
+  options?: RequestInit,
+): Promise<forceChangePasswordV1Response> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  const res = await fetch(getForceChangePasswordV1Url(id), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(forceChangePasswordRequest),
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: forceChangePasswordV1Response["data"] = body
+    ? JSON.parse(body)
+    : undefined;
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as forceChangePasswordV1Response;
+};
+
+export const getForceChangePasswordV1MutationKey = () =>
+  ["forceChangePasswordV1"] as const;
+
+export const getForceChangePasswordV1MutationOptions = <
+  TError = string,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof forceChangePasswordV1>>,
+    TError,
+    ForceChangePasswordV1MutationVariables,
+    TContext
+  >;
+  fetch?: RequestInit;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof forceChangePasswordV1>>,
+  TError,
+  ForceChangePasswordV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getForceChangePasswordV1MutationKey();
+  const { mutation: mutationOptions, fetch: fetchOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, fetch: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof forceChangePasswordV1>>,
+    ForceChangePasswordV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return forceChangePasswordV1(id, data, fetchOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ForceChangePasswordV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof forceChangePasswordV1>>
+>;
+export type ForceChangePasswordV1MutationBody =
+  | ForceChangePasswordRequest
+  | undefined;
+export type ForceChangePasswordV1MutationError = string;
+export type ForceChangePasswordV1MutationVariables = {
+  id: string;
+  data?: ForceChangePasswordRequest;
+};
+
+/**
+ * @summary Replace another user's password without the current one.
+Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+Omitted or false leaves their sessions in place.
+ */
+export const useForceChangePasswordV1 = <TError = string, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof forceChangePasswordV1>>,
+      TError,
+      ForceChangePasswordV1MutationVariables,
+      TContext
+    >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof forceChangePasswordV1>>,
+  TError,
+  ForceChangePasswordV1MutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getForceChangePasswordV1MutationOptions(options),
+    queryClient,
+  );
+};
 export type updateMeV1Response204 = {
   data: void;
   status: 204;
 };
 
+export type updateMeV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
 export type updateMeV1ResponseSuccess = updateMeV1Response204 & {
   headers: Headers;
 };
+export type updateMeV1ResponseError = updateMeV1Response400 & {
+  headers: Headers;
+};
 
-export type updateMeV1Response = updateMeV1ResponseSuccess;
+export type updateMeV1Response =
+  | updateMeV1ResponseSuccess
+  | updateMeV1ResponseError;
 
 export const getUpdateMeV1Url = () => {
   return `/api/v1/users/me`;
@@ -1240,7 +1577,7 @@ export const updateMeV1 = async (
 export const getUpdateMeV1MutationKey = () => ["updateMeV1"] as const;
 
 export const getUpdateMeV1MutationOptions = <
-  TError = unknown,
+  TError = ValidationErrorBody,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1281,13 +1618,13 @@ export type UpdateMeV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof updateMeV1>>
 >;
 export type UpdateMeV1MutationBody = UpdateUserInput | undefined;
-export type UpdateMeV1MutationError = unknown;
+export type UpdateMeV1MutationError = ValidationErrorBody;
 export type UpdateMeV1MutationVariables = { data?: UpdateUserInput };
 
 /**
  * @summary Update the current user
  */
-export const useUpdateMeV1 = <TError = unknown, TContext = unknown>(
+export const useUpdateMeV1 = <TError = ValidationErrorBody, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateMeV1>>,
