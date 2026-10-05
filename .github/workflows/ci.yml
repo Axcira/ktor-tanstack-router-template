@@ -117,13 +117,10 @@ jobs:
           # MIT-licensed cache; the v6 default ("enhanced") is proprietary.
           cache-provider: basic
 
-      - name: Restore Gradle configuration cache
-        id: gradle-config-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: backend/.gradle/configuration-cache
-          key: gradle-config-cache-backend-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
-
+      # Configuration cache entries store absolute jar paths. The dependency
+      # cache is immutable after the first write, so a later job can restore
+      # those paths without the jars and fail compilation. Let Gradle rebuild
+      # the configuration cache in the workspace; the build cache still hits.
       - name: Restore Gradle build cache
         id: gradle-build-cache
         uses: actions/cache/restore@v4
@@ -146,14 +143,6 @@ jobs:
           kill "$pull_pid" 2>/dev/null || true
           wait "$pull_pid" 2>/dev/null || true
           exit "$status"
-
-      - name: Save Gradle configuration cache
-        if: success() && steps.gradle-config-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        continue-on-error: true
-        with:
-          path: backend/.gradle/configuration-cache
-          key: gradle-config-cache-backend-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Save Gradle build cache
         if: success() && steps.gradle-build-cache.outputs.cache-hit != 'true'
@@ -186,13 +175,8 @@ jobs:
           # both jobs races on one immutable cache key, and the loser is dropped.
           cache-read-only: true
 
-      - name: Restore Gradle configuration cache
-        id: gradle-config-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: backend/.gradle/configuration-cache
-          key: gradle-config-cache-api-client-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
-
+      # Same configuration-cache hazard as the backend job, and this job cannot
+      # refresh the read-only dependency cache after it downloads a missing jar.
       - name: Restore Gradle build cache
         id: gradle-build-cache
         uses: actions/cache/restore@v4
@@ -214,14 +198,6 @@ jobs:
         # Uses codegen source set (not production classpath); sets SKIP_* in the Gradle task
         run: ./gradlew generateOpenApiJson
         working-directory: backend
-
-      - name: Save Gradle configuration cache
-        if: success() && steps.gradle-config-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        continue-on-error: true
-        with:
-          path: backend/.gradle/configuration-cache
-          key: gradle-config-cache-api-client-${{ runner.os }}-${{ hashFiles('backend/build.gradle.kts', 'backend/settings.gradle.kts', 'backend/gradle.properties', 'backend/gradle/libs.versions.toml', 'backend/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Save Gradle build cache
         if: success() && steps.gradle-build-cache.outputs.cache-hit != 'true'
