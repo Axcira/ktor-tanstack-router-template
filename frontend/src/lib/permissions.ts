@@ -97,6 +97,12 @@ export const PERMISSION_UI_DEFS = {
     description: "ユーザーの作成、編集、削除などの管理権限を与えます。",
     props: {},
   },
+  ChangePassword: {
+    label: "パスワードの変更",
+    description:
+      "現在のパスワードを確認したうえで、自分のパスワードを変更できます。ユーザー管理権限だけではこの操作はできません。",
+    props: {},
+  },
   UpdateArticle: {
     label: "記事の更新と編集",
     description: "記事を更新または編集する権限を与えます。",

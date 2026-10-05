@@ -4,6 +4,8 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*
 import net.axcira.features.articles.CreateArticleInput
 import net.axcira.features.articles.UpdateArticleInput
+import net.axcira.features.auth.ChangePasswordRequest
+import net.axcira.features.auth.ForceChangePasswordRequest
 import net.axcira.features.auth.LoginRequest
 import net.axcira.features.permissions.CreateRoleInput
 import net.axcira.features.permissions.UpdateRoleInput
@@ -26,6 +28,23 @@ fun Application.configureRequestValidation() {
                 buildList {
                     addAll(emailReasons(request.email))
                     addAll(passwordReasons(request.password))
+                },
+            )
+        }
+
+        validate<ChangePasswordRequest> { request ->
+            validationResult(
+                buildList {
+                    addAll(passwordReasons(request.currentPassword, "currentPassword"))
+                    addAll(passwordReasons(request.newPassword, "newPassword"))
+                },
+            )
+        }
+
+        validate<ForceChangePasswordRequest> { request ->
+            validationResult(
+                buildList {
+                    addAll(passwordReasons(request.newPassword, "newPassword"))
                 },
             )
         }
@@ -123,12 +142,15 @@ private fun emailReasons(email: String): List<String> =
         }
     }
 
-private fun passwordReasons(password: String): List<String> =
+private fun passwordReasons(
+    password: String,
+    field: String = "password",
+): List<String> =
     buildList {
         if (password.isBlank()) {
-            add("password must not be blank")
+            add("$field must not be blank")
         } else if (password.length < PASSWORD_MIN) {
-            add("password must be at least $PASSWORD_MIN characters")
+            add("$field must be at least $PASSWORD_MIN characters")
         }
     }
 

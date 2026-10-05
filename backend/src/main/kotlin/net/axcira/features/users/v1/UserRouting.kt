@@ -7,15 +7,21 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
 import net.axcira.*
+import net.axcira.features.auth.AuthService
+import net.axcira.features.auth.ForceChangePasswordRequest
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.*
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UpdateUserInput
 import net.axcira.features.users.UserService
+import net.axcira.plugins.ValidationErrorBody
+import net.axcira.plugins.isPresent
 
 fun Application.users() {
     val userService: UserService by dependencies
+    val authService: AuthService by dependencies
 
     apiRouting("/users") {
         authenticate {
@@ -70,6 +76,31 @@ fun Application.users() {
                     userService.delete(id)
                     call.respond(HttpStatusCode.NoContent)
                 }
+
+                /**
+                 * Replace another user's password without the current one.
+                 * Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+                 * Omitted or false leaves their sessions in place.
+                 *
+                 * OperationID: forceChangePasswordV1
+                 */
+                post("/{id}/password") {
+                    val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                    val request = call.receive<ForceChangePasswordRequest>()
+                    val changed =
+                        authService.forceChangePassword(
+                            userId = id,
+                            newPassword = request.newPassword,
+                            logoutSessions = request.logoutSessions,
+                        )
+                    if (changed) {
+                        call.respond(HttpStatusCode.NoContent)
+                    } else {
+                        // The generated client JSON-parses every non-empty body. Plain text throws
+                        // before the form can see status 404.
+                        call.respond(HttpStatusCode.NotFound, Json.encodeToString("User not found"))
+                    }
+                }
             }
 
             /**
@@ -91,6 +122,15 @@ fun Application.users() {
                 val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
                 val userId = principal.user.id
                 val user = call.receive<UpdateUserInput>()
+                if (user.password.isPresent()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ValidationErrorBody(
+                            reasons = listOf("password must be changed with POST /api/v1/auth/password"),
+                        ),
+                    )
+                    return@put
+                }
                 userService.update(userId, user)
                 call.respond(HttpStatusCode.NoContent)
             }

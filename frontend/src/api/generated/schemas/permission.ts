@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { PermissionAdministrator } from "./permissionAdministrator.ts";
+import type { PermissionChangePassword } from "./permissionChangePassword.ts";
 import type { PermissionCreateArticle } from "./permissionCreateArticle.ts";
 import type { PermissionDeleteArticle } from "./permissionDeleteArticle.ts";
 import type { PermissionManageArticles } from "./permissionManageArticles.ts";
@@ -13,6 +14,7 @@ import type { PermissionUpdateArticle } from "./permissionUpdateArticle.ts";
 
 export type Permission =
   | PermissionAdministrator
+  | PermissionChangePassword
   | PermissionCreateArticle
   | PermissionDeleteArticle
   | PermissionManageArticles

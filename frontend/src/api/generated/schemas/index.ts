@@ -6,10 +6,12 @@
  */
 
 export * from "./articleDTO.ts";
+export * from "./changePasswordRequest.ts";
 export * from "./createArticleInput.ts";
 export * from "./createRoleInput.ts";
 export * from "./createUserInput.ts";
 export * from "./deleteRoleV1Params.ts";
+export * from "./forceChangePasswordRequest.ts";
 export * from "./getApiJsonKotlinxSerialization200.ts";
 export * from "./getRolesV1Params.ts";
 export * from "./getUserPermissionsV1Params.ts";
@@ -20,6 +22,8 @@ export * from "./loginRequest.ts";
 export * from "./permission.ts";
 export * from "./permissionAdministrator.ts";
 export * from "./permissionAdministratorType.ts";
+export * from "./permissionChangePassword.ts";
+export * from "./permissionChangePasswordType.ts";
 export * from "./permissionCreateArticle.ts";
 export * from "./permissionCreateArticleType.ts";
 export * from "./permissionDeleteArticle.ts";
@@ -37,3 +41,4 @@ export * from "./updateRoleInput.ts";
 export * from "./updateUserInput.ts";
 export * from "./userDTO.ts";
 export * from "./userSession.ts";
+export * from "./validationErrorBody.ts";

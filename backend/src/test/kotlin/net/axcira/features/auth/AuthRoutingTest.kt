@@ -2,18 +2,28 @@ package net.axcira.features.auth
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
 import net.axcira.db.Role
+import net.axcira.db.SessionsTable
+import net.axcira.extraClient
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserService
+import net.axcira.login
+import net.axcira.plugins.ValidationErrorBody
 import net.axcira.plugins.dbQuery
 import net.axcira.test
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class AuthRoutingTest {
     @Test
@@ -59,6 +69,413 @@ class AuthRoutingTest {
             // Access to protected resources again
             client.get("/api/v1/users/me").let {
                 assertEquals(HttpStatusCode.Unauthorized, it.status)
+            }
+        }
+
+    @Test
+    fun `password change requires ChangePassword and manage users does not grant it`() =
+        test { client ->
+            login(client, "pw-manage@example.com", listOf(Permission.ManageUsers))
+            val denied =
+                client.post("/api/v1/auth/password") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        ChangePasswordRequest(
+                            currentPassword = "password",
+                            newPassword = "replacement-1",
+                        ),
+                    )
+                }
+            assertEquals(HttpStatusCode.Forbidden, denied.status)
+
+            client.post("/api/v1/auth/logout").let { assertEquals(HttpStatusCode.NoContent, it.status) }
+            client
+                .post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest("pw-manage@example.com", "password"))
+                }.let { assertEquals(HttpStatusCode.OK, it.status) }
+        }
+
+    @Test
+    fun `password change checks the current password and can drop other sessions`() =
+        test { client ->
+            val email = "pw-change@example.com"
+            login(client, email, listOf(Permission.ChangePassword))
+            val other = extraClient()
+            try {
+                other
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(email, "password"))
+                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                assertEquals(HttpStatusCode.OK, other.get("/api/v1/users/me").status)
+
+                val wrong =
+                    client.post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "not-the-password",
+                                newPassword = "replacement-1",
+                            ),
+                        )
+                    }
+                assertEquals(HttpStatusCode.Unauthorized, wrong.status)
+                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
+
+                val same =
+                    client.post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "password",
+                                newPassword = "password",
+                            ),
+                        )
+                    }
+                assertEquals(HttpStatusCode.BadRequest, same.status)
+                assertTrue(same.body<ValidationErrorBody>().reasons.any { it.contains("differ") })
+
+                val short =
+                    client.post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "password",
+                                newPassword = "short",
+                            ),
+                        )
+                    }
+                assertEquals(HttpStatusCode.BadRequest, short.status)
+
+                val shortCurrent =
+                    client.post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "short",
+                                newPassword = "replacement-1",
+                            ),
+                        )
+                    }
+                assertEquals(HttpStatusCode.BadRequest, shortCurrent.status)
+
+                client
+                    .post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody("""{"currentPassword":"password","newPassword":"replacement-1"}""")
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, other.get("/api/v1/users/me").status)
+
+                client
+                    .post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "replacement-1",
+                                newPassword = "replacement-2",
+                                logoutOtherSessions = false,
+                            ),
+                        )
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, other.get("/api/v1/users/me").status)
+
+                client
+                    .post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "replacement-2",
+                                newPassword = "replacement-3",
+                                logoutOtherSessions = true,
+                            ),
+                        )
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.Unauthorized, other.get("/api/v1/users/me").status)
+
+                client.post("/api/v1/auth/logout").let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                client
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(email, "password"))
+                    }.let { assertEquals(HttpStatusCode.Unauthorized, it.status) }
+                client
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(email, "replacement-3"))
+                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+            } finally {
+                other.close()
+            }
+        }
+
+    @Test
+    fun `password change requires a session`() =
+        test { client ->
+            val response =
+                client.post("/api/v1/auth/password") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        ChangePasswordRequest(
+                            currentPassword = "password",
+                            newPassword = "replacement-1",
+                        ),
+                    )
+                }
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+
+    @Test
+    fun `self update cannot change a password`() =
+        test { client ->
+            login(client, "pw-self@example.com", listOf(Permission.ChangePassword))
+            val response =
+                client.put("/api/v1/users/me") {
+                    contentType(ContentType.Application.Json)
+                    setBody("""{"password":"replacement-1"}""")
+                }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertTrue(response.bodyAsText().contains("password"))
+
+            client.post("/api/v1/auth/logout").let { assertEquals(HttpStatusCode.NoContent, it.status) }
+            client
+                .post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest("pw-self@example.com", "replacement-1"))
+                }.let { assertEquals(HttpStatusCode.Unauthorized, it.status) }
+            client
+                .post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest("pw-self@example.com", "password"))
+                }.let { assertEquals(HttpStatusCode.OK, it.status) }
+        }
+
+    @Test
+    fun `manage users can force a password change and optionally drop every session`() =
+        test { admin ->
+            val targetEmail = "pw-target@example.com"
+            val target = extraClient()
+            val targetOther = extraClient()
+            val bystander = extraClient()
+            try {
+                login(target, targetEmail, listOf(Permission.ChangePassword))
+                targetOther
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(targetEmail, "password"))
+                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                login(admin, "pw-force-admin@example.com", listOf(Permission.ManageUsers))
+                login(bystander, "pw-bystander@example.com", listOf(Permission.ChangePassword))
+
+                val targetId =
+                    target
+                        .get("/api/v1/users/me")
+                        .body<UserSession>()
+                        .user.id
+
+                bystander
+                    .post("/api/v1/users/$targetId/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(ForceChangePasswordRequest(newPassword = "replacement-1"))
+                    }.let { assertEquals(HttpStatusCode.Forbidden, it.status) }
+
+                admin
+                    .post("/api/v1/users/$targetId/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(ForceChangePasswordRequest(newPassword = "short"))
+                    }.let { assertEquals(HttpStatusCode.BadRequest, it.status) }
+
+                admin
+                    .post("/api/v1/users/$targetId/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody("""{"newPassword":"replacement-1"}""")
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                assertEquals(HttpStatusCode.OK, target.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, targetOther.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, admin.get("/api/v1/users/me").status)
+
+                admin
+                    .post("/api/v1/users/$targetId/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ForceChangePasswordRequest(
+                                newPassword = "replacement-2",
+                                logoutSessions = false,
+                            ),
+                        )
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                assertEquals(HttpStatusCode.OK, target.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, targetOther.get("/api/v1/users/me").status)
+
+                admin
+                    .post("/api/v1/users/$targetId/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ForceChangePasswordRequest(
+                                newPassword = "replacement-3",
+                                logoutSessions = true,
+                            ),
+                        )
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                assertEquals(HttpStatusCode.Unauthorized, target.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.Unauthorized, targetOther.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, admin.get("/api/v1/users/me").status)
+
+                target
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(targetEmail, "password"))
+                    }.let { assertEquals(HttpStatusCode.Unauthorized, it.status) }
+                target
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(targetEmail, "replacement-3"))
+                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+
+                admin
+                    .post("/api/v1/users/999999/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(ForceChangePasswordRequest(newPassword = "replacement-4"))
+                    }.let {
+                        assertEquals(HttpStatusCode.NotFound, it.status)
+                        assertEquals(""""User not found"""", it.bodyAsText())
+                    }
+            } finally {
+                target.close()
+                targetOther.close()
+                bystander.close()
+            }
+        }
+
+    @Test
+    fun `force password change requires a session`() =
+        test { client ->
+            val response =
+                client.post("/api/v1/users/1/password") {
+                    contentType(ContentType.Application.Json)
+                    setBody(ForceChangePasswordRequest(newPassword = "replacement-1"))
+                }
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+
+    @Test
+    fun `sessions are deleted by user id and a legacy payload is left intact`() =
+        test { client ->
+            val email = "pw-session@example.com"
+            val user = login(client, email, listOf(Permission.ChangePassword))
+            val other = extraClient()
+            val bystander = extraClient()
+            try {
+                other
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(email, "password"))
+                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                val bystanderUser = login(bystander, "pw-session-other@example.com", listOf(Permission.ChangePassword))
+
+                val database: Database by application.dependencies
+                val legacyId = "legacy-session-row"
+                val legacyPayload =
+                    """{"user":{"id":${user.id},"email":"$email","roleId":${user.roleId}},"permissions":[{"type":"ChangePassword"}]}"""
+
+                data class StoredSession(
+                    val id: String,
+                    val payload: String,
+                    val owner: UInt?,
+                )
+
+                val before =
+                    database.dbQuery {
+                        val owned =
+                            SessionsTable
+                                .selectAll()
+                                .where { SessionsTable.userId eq user.id }
+                                .map {
+                                    StoredSession(
+                                        it[SessionsTable.sessionId],
+                                        it[SessionsTable.session],
+                                        it[SessionsTable.userId],
+                                    )
+                                }
+                        assertTrue(owned.size >= 2)
+                        owned.forEach { stored ->
+                            assertEquals(user.id, stored.owner)
+                            assertTrue(stored.payload.startsWith("{"))
+                            assertTrue(stored.payload.contains(""""id":${user.id}"""))
+                        }
+
+                        SessionsTable.insert {
+                            it[SessionsTable.sessionId] = legacyId
+                            it[SessionsTable.session] = legacyPayload
+                            it[SessionsTable.userId] = null
+                        }
+                        TransactionManager.current().exec(
+                            """
+                            UPDATE sessions
+                            SET user_id = (("session"::jsonb)->'user'->>'id')::bigint
+                            WHERE session_id = '$legacyId'
+                              AND user_id IS NULL
+                            """.trimIndent(),
+                        )
+                        val legacy =
+                            SessionsTable
+                                .selectAll()
+                                .where { SessionsTable.sessionId eq legacyId }
+                                .single()
+                        assertEquals(legacyPayload, legacy[SessionsTable.session])
+                        assertEquals(user.id, legacy[SessionsTable.userId])
+                        owned
+                    }
+
+                client
+                    .post("/api/v1/auth/password") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            ChangePasswordRequest(
+                                currentPassword = "password",
+                                newPassword = "replacement-1",
+                                logoutOtherSessions = true,
+                            ),
+                        )
+                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
+
+                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.Unauthorized, other.get("/api/v1/users/me").status)
+                assertEquals(HttpStatusCode.OK, bystander.get("/api/v1/users/me").status)
+
+                database.dbQuery {
+                    val remaining =
+                        SessionsTable
+                            .selectAll()
+                            .where { SessionsTable.userId eq user.id }
+                            .map {
+                                StoredSession(
+                                    it[SessionsTable.sessionId],
+                                    it[SessionsTable.session],
+                                    it[SessionsTable.userId],
+                                )
+                            }
+                    assertEquals(1, remaining.size)
+                    val survivor = remaining.single()
+                    val previous = before.single { it.id == survivor.id }
+                    assertEquals(previous.payload, survivor.payload)
+                    assertEquals(
+                        null,
+                        SessionsTable.selectAll().where { SessionsTable.sessionId eq legacyId }.singleOrNull(),
+                    )
+                    val bystanderSessions =
+                        SessionsTable
+                            .selectAll()
+                            .where { SessionsTable.userId eq bystanderUser.id }
+                            .count()
+                    assertEquals(1L, bystanderSessions)
+                }
+            } finally {
+                other.close()
+                bystander.close()
             }
         }
 }

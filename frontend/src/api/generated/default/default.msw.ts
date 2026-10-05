@@ -145,6 +145,27 @@ export const getLogoutV1MockHandler = (
   );
 };
 
+export const getChangePasswordV1MockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    "*/api/v1/auth/password",
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
 export const getGetUsersV1MockHandler = (
   overrideResponse?:
     | UserDTO[]
@@ -225,6 +246,27 @@ export const getDeleteUserV1MockHandler = (
   return http.delete(
     "*/api/v1/users/delete/:id",
     async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
+export const getForceChangePasswordV1MockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    "*/api/v1/users/:id/password",
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -612,10 +654,12 @@ export const getDefaultMock = () => [
   getGetApiJsonKotlinxSerializationMockHandler(),
   getLoginV1MockHandler(),
   getLogoutV1MockHandler(),
+  getChangePasswordV1MockHandler(),
   getGetUsersV1MockHandler(),
   getCreateUserV1MockHandler(),
   getUpdateUserV1MockHandler(),
   getDeleteUserV1MockHandler(),
+  getForceChangePasswordV1MockHandler(),
   getUpdateMeV1MockHandler(),
   getDeleteMeV1MockHandler(),
   getGetSelfV1MockHandler(),
