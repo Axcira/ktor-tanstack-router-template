@@ -35,7 +35,7 @@ class ResizeObserverStub {
 globalThis.ResizeObserver = ResizeObserverStub;
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: "bypass" });
+  server.listen({ onUnhandledFrame: "bypass" });
 });
 
 afterEach(() => {
