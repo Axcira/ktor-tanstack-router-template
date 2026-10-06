@@ -27,7 +27,7 @@ Or from this directory:
 - Vertical-slice features live under `src/main/kotlin/net/axcira/features/`
 - Register modules in `src/main/resources/application.yaml` and DI in `Application.kt`
 - OpenAPI file export lives in `src/codegen/` (`generateOpenApiJson`); `ktor-server-test-host` is not a production dependency
-- Container image: build from the **repository root** (`Dockerfile`), not this directory
+- Container image: package prebuilt artifacts from the **repository root** (`Dockerfile` + `image-context/`; see root README). Source-in-image build: `Dockerfile.source`
 - Env vars: see root `.env.example` and `AGENTS.md`
 
 See the repository root [README.md](../README.md) and [AGENTS.md](../AGENTS.md) for full setup.

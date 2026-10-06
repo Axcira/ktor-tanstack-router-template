@@ -239,14 +239,27 @@ cd backend
 
 #### Docker Container (Recommended)
 
-リポジトリルートの `Dockerfile` を使用して、本番向けのイメージを作成できます
-（Bun でフロントエンドをビルド → JDK 25 で shadowJar → JRE 25 実行時に `/app/static` を同梱）。
+CI と同じく、ビルド済み成果物だけを `Dockerfile` でパッケージします（イメージ内ではコンパイルしません）。
+ローカルでは先にバックエンド JAR とフロントの `dist` を作り、`image-context/` に揃えてからビルドします。
 
 ```bash
 # from repository root
-podman build -t backend .
-# or: docker build -t backend .
+cd backend && ./gradlew shadowJar && cd ..
+bun run frontend:build
+rm -rf image-context && mkdir -p image-context/static
+cp backend/build/libs/backend-all.jar image-context/backend-all.jar
+cp -a frontend/dist/. image-context/static/
+podman build -f Dockerfile -t backend image-context
+# or: docker build -f Dockerfile -t backend image-context
 ```
+
+イメージ内でソースからビルドする場合（CI は使いません）:
+
+```bash
+podman build -f Dockerfile.source -t backend .
+```
+
+CI の `docker` ジョブは同じレイアウトでイメージを作り、Orval の drift チェック後に GHCR へ push します（`main` への push、`push-image` ラベル付き PR、`workflow_dispatch` の `push=true`）。詳細は AGENTS.md の Production image を参照してください。
 
 #### Build manually
 
@@ -264,7 +277,7 @@ cd backend
 java --enable-native-access=ALL-UNNAMED -jar backend/build/libs/backend-all.jar
 ```
 
-フロントエンド静的ファイルを同梱する場合は、先に `bun run frontend:build` し、`STATIC_DIR` などで配信パスを指定してください（ルート Dockerfile はこれを自動化します）。
+フロントエンド静的ファイルを同梱する場合は、先に `bun run frontend:build` し、`STATIC_DIR` などで配信パスを指定してください（上記 `image-context/static/` または `Dockerfile.source` が `/app/static` に同梱します）。
 
 ### Build the frontend
 

@@ -81,8 +81,9 @@ hand-edited** — they are overwritten on every regeneration.
 
    A non-zero exit (drift detected) is **expected after intentional backend
    changes** and indicates the generated files need to be committed.  In CI
-   this is a hard failure — generated output must always match the committed
-   spec.  Inspect `git diff -- src/api/generated/` to review what changed.
+   the `docker` job runs this step against the OpenAPI artifact from `backend`
+   (no Gradle) before building the container image — drift is a hard failure.
+   Inspect `git diff -- src/api/generated/` to review what changed.
 
 4. **Verify frontend integration** (optional but recommended)
 

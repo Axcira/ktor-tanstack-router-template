@@ -1,36 +1,9 @@
-# Build from the repository root:
-#   podman build -t ghcr.io/example/app:1.0 .
-
-# ---- frontend stage ----
-FROM docker.io/oven/bun:1.4 AS frontend
-WORKDIR /src
-
-COPY package.json bun.lock ./
-COPY frontend/package.json frontend/package.json
-# Skip prepare (lefthook) — git hooks are irrelevant inside the image
-RUN bun install --frozen-lockfile --ignore-scripts
-
-COPY frontend/ frontend/
-RUN bun run --cwd frontend build
-
-# ---- backend builder ----
-FROM docker.io/eclipse-temurin:25-jdk AS builder
-WORKDIR /build
-
-COPY backend/gradle/ gradle/
-COPY backend/gradlew gradlew
-COPY backend/build.gradle.kts build.gradle.kts
-COPY backend/settings.gradle.kts settings.gradle.kts
-COPY backend/gradle.properties gradle.properties
-COPY backend/src/ src/
-# Persist Gradle caches across builds (deps + build cache). A separate
-# dependencies/classes warm-up layer is not worth it once this mount exists:
-# it doubles Gradle startup on buildscript changes and does not speed up
-# source-only rebuilds (measured: ~30s either way for the jar step).
-RUN --mount=type=cache,id=application-gradle,target=/root/.gradle \
-    ./gradlew shadowJar --no-daemon
-
-# ---- runtime ----
+# Package prebuilt artifacts. This image does not compile anything.
+# Context directory (not the repository root):
+#   backend-all.jar    backend/build/libs/backend-all.jar  (./gradlew shadowJar)
+#   static/            frontend/dist                       (bun run frontend:build)
+# To compile inside the image instead:
+#   podman build -f Dockerfile.source -t backend .
 FROM docker.io/eclipse-temurin:25-jre
 WORKDIR /app
 
@@ -39,8 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r appuser && useradd -r -g appuser appuser
 
-COPY --from=builder /build/build/libs/backend-all.jar /app/app.jar
-COPY --from=frontend /src/frontend/dist /app/static
+COPY backend-all.jar /app/app.jar
+COPY static /app/static
 RUN chown -R appuser:appuser /app
 
 USER appuser
