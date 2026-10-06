@@ -127,6 +127,7 @@ tasks.test {
     environment("ARGON2_ITERATIONS", "1")
     environment("ARGON2_MEMORY_KIB", "1024")
     environment("ARGON2_PARALLELISM", "1")
+    environment("SKIP_LOGIN_MIN_WAIT", "true")
 }
 
 exposed {

@@ -52,6 +52,16 @@ class AuthService(
 ) {
     private val log = LoggerFactory.getLogger(AuthService::class.java)
 
+    companion object {
+        /** Set `SKIP_LOGIN_MIN_WAIT=true` in tests to avoid timing-mitigation delays on every login. */
+        private val loginMinWait: Duration =
+            if (System.getenv("SKIP_LOGIN_MIN_WAIT") == "true") {
+                Duration.ZERO
+            } else {
+                1.seconds
+            }
+    }
+
     private data class AuthUserCredential(
         val id: UInt,
         val email: String,
@@ -63,7 +73,7 @@ class AuthService(
         email: String,
         password: String,
     ): UserSession? =
-        minWait(1.seconds) {
+        minWait(loginMinWait) {
             val credential =
                 database.dbQuery {
                     val row =
