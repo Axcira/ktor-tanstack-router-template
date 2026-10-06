@@ -123,7 +123,7 @@ jobs:
       # the configuration cache in the workspace; the build cache still hits.
       - name: Restore Gradle build cache
         id: gradle-build-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: backend/.gradle/build-cache
           key: gradle-build-cache-backend-${{ runner.os }}-${{ github.sha }}
@@ -146,7 +146,7 @@ jobs:
 
       - name: Save Gradle build cache
         if: success() && steps.gradle-build-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         continue-on-error: true
         with:
           path: backend/.gradle/build-cache
@@ -179,7 +179,7 @@ jobs:
       # refresh the read-only dependency cache after it downloads a missing jar.
       - name: Restore Gradle build cache
         id: gradle-build-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: backend/.gradle/build-cache
           key: gradle-build-cache-api-client-${{ runner.os }}-${{ github.sha }}
@@ -201,7 +201,7 @@ jobs:
 
       - name: Save Gradle build cache
         if: success() && steps.gradle-build-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         continue-on-error: true
         with:
           path: backend/.gradle/build-cache
