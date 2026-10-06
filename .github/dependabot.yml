@@ -50,7 +50,7 @@ updates:
         patterns:
           - "org.testcontainers*"
 
-  # Multi-stage Dockerfile (bun / temurin)
+  # Dockerfile (artifact packaging) and Dockerfile.source (multi-stage source build)
   - package-ecosystem: docker
     directory: /
     schedule:

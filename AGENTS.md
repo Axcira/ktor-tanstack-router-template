@@ -27,7 +27,7 @@ From the repository root, after `bun install`:
 - `frontend/src/api/generated/` — Orval
 - `backend/generated/openapi.json` — `generateOpenApiJson`
 
-Commit the generated client. CI runs `bun run orval:drift` in `frontend/` and fails on drift. After an Orval upgrade, pin the version, regenerate, and commit the client.
+Commit the generated client. CI runs `bun run orval:drift` in the `docker` job (using the OpenAPI artifact from `backend`, without Gradle) and fails on drift. After an Orval upgrade, pin the version, regenerate, and commit the client.
 
 `frontend/src/components/ui/` is shadcn output. Biome ignores it. Change it only to add or refresh a component.
 
@@ -136,13 +136,26 @@ With no SPA on disk, Scalar is served at `/` and the spec at `/openapi.json`. Wh
 
 ## Production image
 
-Build from the repository root, not from `backend/`:
+Package prebuilt artifacts (same layout CI uses). From the repository root:
 
 ```bash
-podman build -t backend .
+cd backend && ./gradlew shadowJar && cd ..
+bun run frontend:build
+rm -rf image-context && mkdir -p image-context/static
+cp backend/build/libs/backend-all.jar image-context/backend-all.jar
+cp -a frontend/dist/. image-context/static/
+podman build -f Dockerfile -t backend image-context
 ```
 
-The image builds the SPA with Bun, the shadow JAR with JDK 25, and runs on JRE 25 with static files at `/app/static`. The entrypoint passes `--enable-native-access=ALL-UNNAMED` for Argon2 JNI. Publishing is the manual `Docker` workflow (`.github/workflows/docker.yml`) to `ghcr.io/<owner>/<repo>`.
+To compile inside the image instead (local only; CI does not use this):
+
+```bash
+podman build -f Dockerfile.source -t backend .
+```
+
+The runtime image is JRE 25 with static files at `/app/static`. The entrypoint passes `--enable-native-access=ALL-UNNAMED` for Argon2 JNI.
+
+CI builds the image in the `docker` job from uploaded artifacts. Pushes to `ghcr.io/<owner>/<repo>` (lowercased) on: push to `main` (`:latest` and `:<sha7>`); PRs with the `push-image` label (`:pr-<n>` and `:<sha7>`, forks never push); `workflow_dispatch` with `push=true` (`:pr-<n>` and `:<sha7>` when an open PR exists for the branch, else `:<sha7>` only).
 
 ## Verify
 

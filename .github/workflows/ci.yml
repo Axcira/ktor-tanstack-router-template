@@ -1,17 +1,30 @@
 name: CI
 
+# Job graph:
+#   backend  ──┐
+#   frontend ──┴─ docker ── CI
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  workflow_dispatch:
+    inputs:
+      push:
+        description: "Push the image to ghcr.io"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+# Label events do not cancel an in-progress validation run (e.g. Dependabot adding
+# labels). They still run the full job graph so CI cannot succeed without checks.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event.action != 'labeled' && github.event.action != 'unlabeled' }}
 
 env:
   BUN_VERSION: "1.3.14"
@@ -20,57 +33,14 @@ env:
   POSTGRES_IMAGE: postgres:18.4
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-    outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
-      backend: ${{ steps.filter.outputs.backend }}
-      api-client: ${{ steps.filter.outputs.api-client }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          # push events need history so paths-filter can diff against github.event.before
-          fetch-depth: 0
-
-      - name: Detect changed paths
-        uses: dorny/paths-filter@v4
-        id: filter
-        with:
-          filters: |
-            frontend:
-              - '.github/workflows/ci.yml'
-              - 'frontend/**'
-              - 'package.json'
-              - 'bun.lock'
-            backend:
-              - '.github/workflows/ci.yml'
-              - 'backend/**'
-            api-client:
-              - '.github/workflows/ci.yml'
-              - 'backend/src/main/**'
-              - 'backend/src/codegen/**'
-              - 'backend/build.gradle.kts'
-              - 'backend/settings.gradle.kts'
-              - 'backend/gradle.properties'
-              - 'backend/gradle/**'
-              - 'frontend/orval.config.ts'
-              - 'frontend/src/api/generated/**'
-              - 'frontend/package.json'
-              - 'bun.lock'
-
-  # Filters apply to pull requests and pushes. `ci` treats a skipped job as success.
   frontend:
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -96,14 +66,22 @@ jobs:
         run: bun run build
         working-directory: frontend
 
+      - name: Upload frontend dist
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 1
+          if-no-files-found: error
+
   backend:
-    needs: changes
-    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Java
         uses: actions/setup-java@v6
@@ -130,16 +108,15 @@ jobs:
           restore-keys: |
             gradle-build-cache-backend-${{ runner.os }}-
 
-      - name: Check
+      - name: Check, shadow jar, and OpenAPI spec
         working-directory: backend
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
         run: |
           docker pull --quiet "$POSTGRES_IMAGE" &
           pull_pid=$!
-          ./gradlew check
+          ./gradlew check shadowJar generateOpenApiJson
           status=$?
-          # Cached test runs never touch the image. Don't hold the job open for the pull.
           kill "$pull_pid" 2>/dev/null || true
           wait "$pull_pid" 2>/dev/null || true
           exit "$status"
@@ -152,39 +129,73 @@ jobs:
           path: backend/.gradle/build-cache
           key: gradle-build-cache-backend-${{ runner.os }}-${{ github.sha }}
 
-  api-client:
-    needs: changes
-    if: needs.changes.outputs.api-client == 'true'
+      - name: Upload backend jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-jar
+          path: backend/build/libs/backend-all.jar
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload OpenAPI spec
+        uses: actions/upload-artifact@v7
+        with:
+          name: openapi
+          path: backend/generated/openapi.json
+          retention-days: 1
+          if-no-files-found: error
+
+  docker:
+    needs: [backend, frontend]
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+      actions: write
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-
-      - name: Setup Java
-        uses: actions/setup-java@v6
         with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: temurin
+          persist-credentials: false
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+      - name: Download backend jar
+        uses: actions/download-artifact@v7
         with:
-          cache-provider: basic
-          # `check` resolves a superset of this job's dependencies. Writing from
-          # both jobs races on one immutable cache key, and the loser is dropped.
-          cache-read-only: true
+          name: backend-jar
+          path: image-context
 
-      # Same configuration-cache hazard as the backend job, and this job cannot
-      # refresh the read-only dependency cache after it downloads a missing jar.
-      - name: Restore Gradle build cache
-        id: gradle-build-cache
-        uses: actions/cache/restore@v6
+      - name: Download OpenAPI spec
+        uses: actions/download-artifact@v7
         with:
-          path: backend/.gradle/build-cache
-          key: gradle-build-cache-api-client-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            gradle-build-cache-api-client-${{ runner.os }}-
+          name: openapi
+          path: image-context
+
+      - name: Download frontend dist
+        uses: actions/download-artifact@v7
+        with:
+          name: frontend-dist
+          path: image-context/static
+
+      - name: Place OpenAPI spec and check image inputs
+        run: |
+          set -euo pipefail
+          test -f image-context/openapi.json || {
+            echo "::error::openapi.json missing from artifacts"
+            exit 1
+          }
+          mkdir -p backend/generated
+          mv image-context/openapi.json backend/generated/openapi.json
+          test -s backend/generated/openapi.json
+          test -f image-context/backend-all.jar || {
+            echo "::error::backend-all.jar missing from artifacts"
+            exit 1
+          }
+          test -f image-context/static/index.html || {
+            echo "::error::frontend dist (index.html) missing from artifacts"
+            exit 1
+          }
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -194,39 +205,97 @@ jobs:
       - name: Install dependencies (root workspace)
         run: bun install --frozen-lockfile --ignore-scripts
 
-      - name: Generate OpenAPI spec
-        # Uses codegen source set (not production classpath); sets SKIP_* in the Gradle task
-        run: ./gradlew generateOpenApiJson
-        working-directory: backend
-
-      - name: Save Gradle build cache
-        if: success() && steps.gradle-build-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
-        continue-on-error: true
-        with:
-          path: backend/.gradle/build-cache
-          key: gradle-build-cache-api-client-${{ runner.os }}-${{ github.sha }}
-
       - name: Regenerate Orval client and verify no drift
-        run: bun run orval:drift
         working-directory: frontend
+        run: bun run orval:drift
 
-  # Single required check: skipped path-filtered jobs must not block merge.
+      - name: Resolve image tags and whether to push
+        id: image
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'push-image') }}
+          IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+          DISPATCH_PUSH: ${{ inputs.push == true }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          sha="${GITHUB_SHA:0:7}"
+          pr=""
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            pr="$PR_NUMBER"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty' || true)"
+          fi
+          push=false
+          if [ "$EVENT_NAME" = "push" ] && [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            push=true
+          elif [ "$EVENT_NAME" = "pull_request" ] && [ "$HAS_LABEL" = "true" ]; then
+            if [ "$IS_FORK" = "true" ]; then
+              echo "::notice title=Fork pull request::push-image is set, but a fork cannot push to ghcr.io."
+            else
+              push=true
+            fi
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$DISPATCH_PUSH" = "true" ]; then
+            push=true
+          fi
+          {
+            echo "push=$push"
+            echo "tags<<EOF"
+            echo "$image:$sha"
+            if [ "$GITHUB_REF" = "refs/heads/main" ] && [ "$EVENT_NAME" != "pull_request" ]; then
+              echo "$image:latest"
+            elif [ -n "$pr" ]; then
+              echo "$image:pr-$pr"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        if: steps.image.outputs.push == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=unused
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: image-context
+          file: ${{ github.workspace }}/Dockerfile
+          push: ${{ steps.image.outputs.push == 'true' }}
+          tags: ${{ steps.image.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max,ignore-error=true
+
   ci:
     name: CI
     if: always()
-    needs: [changes, frontend, backend, api-client]
+    needs: [frontend, backend, docker]
     runs-on: ubuntu-latest
     steps:
       - name: Check job results
         env:
-          CHANGES: ${{ needs.changes.result }}
           FRONTEND: ${{ needs.frontend.result }}
           BACKEND: ${{ needs.backend.result }}
-          API_CLIENT: ${{ needs.api-client.result }}
+          DOCKER: ${{ needs.docker.result }}
         run: |
-          echo "changes=$CHANGES frontend=$FRONTEND backend=$BACKEND api-client=$API_CLIENT"
-          test "$CHANGES" = success
-          for r in "$FRONTEND" "$BACKEND" "$API_CLIENT"; do
-            test "$r" = success -o "$r" = skipped
+          echo "frontend=$FRONTEND backend=$BACKEND docker=$DOCKER"
+          for r in "$FRONTEND" "$BACKEND" "$DOCKER"; do
+            test "$r" = success
           done
