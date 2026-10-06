@@ -161,19 +161,19 @@ jobs:
           persist-credentials: false
 
       - name: Download backend jar
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: backend-jar
           path: image-context
 
       - name: Download OpenAPI spec
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: openapi
           path: image-context
 
       - name: Download frontend dist
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: frontend-dist
           path: image-context/static
