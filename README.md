@@ -244,10 +244,11 @@ CI と同じく、ビルド済み成果物だけを `Dockerfile` でパッケー
 
 ```bash
 # from repository root
-cd backend && ./gradlew shadowJar && cd ..
+cd backend && ./gradlew prepareDockerImageContext && cd ..
 bun run frontend:build
 rm -rf image-context && mkdir -p image-context/static
-cp backend/build/libs/backend-all.jar image-context/backend-all.jar
+cp -a backend/build/docker-image/lib image-context/lib
+cp backend/build/docker-image/app.jar image-context/app.jar
 cp -a frontend/dist/. image-context/static/
 podman build -f Dockerfile -t backend image-context
 # or: docker build -f Dockerfile -t backend image-context

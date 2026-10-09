@@ -19,6 +19,7 @@ Or from this directory:
 ./gradlew run
 ./gradlew test
 ./gradlew shadowJar
+./gradlew prepareDockerImageContext
 ./gradlew generateOpenApiJson
 ```
 
