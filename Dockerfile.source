@@ -24,12 +24,8 @@ COPY backend/build.gradle.kts build.gradle.kts
 COPY backend/settings.gradle.kts settings.gradle.kts
 COPY backend/gradle.properties gradle.properties
 COPY backend/src/ src/
-# Persist Gradle caches across builds (deps + build cache). A separate
-# dependencies/classes warm-up layer is not worth it once this mount exists:
-# it doubles Gradle startup on buildscript changes and does not speed up
-# source-only rebuilds (measured: ~30s either way for the jar step).
 RUN --mount=type=cache,id=application-gradle,target=/root/.gradle \
-    ./gradlew shadowJar --no-daemon
+    ./gradlew prepareDockerImageContext --no-daemon
 
 # ---- runtime ----
 FROM docker.io/eclipse-temurin:25-jre
@@ -40,8 +36,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r appuser && useradd -r -g appuser appuser
 
-COPY --from=builder /build/build/libs/backend-all.jar /app/app.jar
+COPY --from=builder /build/build/docker-image/lib /app/lib
 COPY --from=frontend /src/frontend/dist /app/static
+COPY --from=builder /build/build/docker-image/app.jar /app/app.jar
 RUN chown -R appuser:appuser /app
 
 USER appuser
@@ -51,4 +48,5 @@ EXPOSE 8080
 # Presence of /app/static/index.html disables Scalar and serves the SPA at /.
 ENTRYPOINT ["java", \
     "--enable-native-access=ALL-UNNAMED", \
-    "-jar", "/app/app.jar"]
+    "-cp", "/app/lib/*:/app/app.jar", \
+    "net.axcira.MainKt"]

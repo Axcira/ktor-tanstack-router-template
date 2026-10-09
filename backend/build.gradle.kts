@@ -143,3 +143,30 @@ tasks.named<ShadowJar>("shadowJar") {
     mergeServiceFiles()
     exclude("logback.xml")
 }
+
+val dockerImageContext = layout.buildDirectory.dir("docker-image")
+
+tasks.register<Sync>("prepareDockerImageContext") {
+    description =
+        "Lay out runtime dependency jars and the application jar for the artifact-only Docker image."
+    group = "distribution"
+    dependsOn(tasks.jar)
+
+    val appJar = tasks.jar.flatMap { it.archiveFile }
+
+    into(dockerImageContext)
+
+    from({
+        configurations.runtimeClasspath
+            .get()
+            .filter { file -> file.absolutePath != appJar.get().asFile.absolutePath }
+    }) {
+        into("lib")
+    }
+
+    from(appJar) {
+        rename { "app.jar" }
+    }
+
+    outputs.dir(dockerImageContext)
+}

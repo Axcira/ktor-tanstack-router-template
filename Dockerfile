@@ -1,6 +1,7 @@
 # Package prebuilt artifacts. This image does not compile anything.
 # Context directory (not the repository root):
-#   backend-all.jar    backend/build/libs/backend-all.jar  (./gradlew shadowJar)
+#   lib/               backend/build/docker-image/lib  (./gradlew prepareDockerImageContext)
+#   app.jar            backend/build/docker-image/app.jar
 #   static/            frontend/dist                       (bun run frontend:build)
 # To compile inside the image instead:
 #   podman build -f Dockerfile.source -t backend .
@@ -12,8 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r appuser && useradd -r -g appuser appuser
 
-COPY backend-all.jar /app/app.jar
+# Dependency jars change only when Gradle lockfiles / catalogs change.
+COPY --chown=appuser:appuser lib /app/lib
+# Frontend static assets change independently of backend code.
 COPY static /app/static
+# Thin application jar — small layer on code-only changes.
+COPY app.jar /app/app.jar
 RUN chown -R appuser:appuser /app
 
 USER appuser
@@ -23,4 +28,5 @@ EXPOSE 8080
 # Presence of /app/static/index.html disables Scalar and serves the SPA at /.
 ENTRYPOINT ["java", \
     "--enable-native-access=ALL-UNNAMED", \
-    "-jar", "/app/app.jar"]
+    "-cp", "/app/lib/*:/app/app.jar", \
+    "net.axcira.MainKt"]

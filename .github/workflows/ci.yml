@@ -108,14 +108,14 @@ jobs:
           restore-keys: |
             gradle-build-cache-backend-${{ runner.os }}-
 
-      - name: Check, shadow jar, and OpenAPI spec
+      - name: Check, Docker runtime layout, and OpenAPI spec
         working-directory: backend
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
         run: |
           docker pull --quiet "$POSTGRES_IMAGE" &
           pull_pid=$!
-          ./gradlew check shadowJar generateOpenApiJson
+          ./gradlew check prepareDockerImageContext generateOpenApiJson
           status=$?
           kill "$pull_pid" 2>/dev/null || true
           wait "$pull_pid" 2>/dev/null || true
@@ -129,11 +129,11 @@ jobs:
           path: backend/.gradle/build-cache
           key: gradle-build-cache-backend-${{ runner.os }}-${{ github.sha }}
 
-      - name: Upload backend jar
+      - name: Upload backend runtime layout
         uses: actions/upload-artifact@v7
         with:
-          name: backend-jar
-          path: backend/build/libs/backend-all.jar
+          name: backend-runtime
+          path: backend/build/docker-image
           retention-days: 1
           if-no-files-found: error
 
@@ -160,10 +160,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Download backend jar
+      - name: Download backend runtime layout
         uses: actions/download-artifact@v8
         with:
-          name: backend-jar
+          name: backend-runtime
           path: image-context
 
       - name: Download OpenAPI spec
@@ -188,8 +188,12 @@ jobs:
           mkdir -p backend/generated
           mv image-context/openapi.json backend/generated/openapi.json
           test -s backend/generated/openapi.json
-          test -f image-context/backend-all.jar || {
-            echo "::error::backend-all.jar missing from artifacts"
+          test -f image-context/app.jar || {
+            echo "::error::app.jar missing from backend runtime artifact"
+            exit 1
+          }
+          test -d image-context/lib && test -n "$(ls -A image-context/lib)" || {
+            echo "::error::lib/ missing or empty in backend runtime artifact"
             exit 1
           }
           test -f image-context/static/index.html || {
