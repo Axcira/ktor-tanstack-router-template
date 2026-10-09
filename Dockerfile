@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && groupadd -r appuser && useradd -r -g appuser appuser
 
 # Dependency jars change only when Gradle lockfiles / catalogs change.
-COPY lib /app/lib
+COPY --chown=appuser:appuser lib /app/lib
 # Frontend static assets change independently of backend code.
 COPY static /app/static
 # Thin application jar — small layer on code-only changes.
