@@ -1,6 +1,6 @@
 [versions]
 exposed = "1.5.1"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 logback = "1.6.5"
 hikaricp = "7.1.0"
 postgres = "42.7.14"
