@@ -8,7 +8,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { type RenderOptions, render } from "@testing-library/react";
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement } from "react";
 
 export function createTestQueryClient() {
   return new QueryClient({
@@ -30,17 +30,15 @@ export function renderWithProviders(
     queryClient?: QueryClient;
   },
 ) {
-  const queryClient = options?.queryClient ?? createTestQueryClient();
-
-  function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-  }
+  const { queryClient: optionClient, ...renderOptions } = options ?? {};
+  const queryClient = optionClient ?? createTestQueryClient();
 
   return {
     queryClient,
-    ...render(ui, { ...options, wrapper: Wrapper }),
+    ...render(
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+      renderOptions,
+    ),
   };
 }
 
