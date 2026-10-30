@@ -1,0 +1,6 @@
+[install]
+# Workspaces default to the isolated linker, which symlinks packages into
+# node_modules/.bun. TypeScript realpath-resolves those links and then cannot
+# see sibling @types or packages that only publish a "typings" entry.
+# Hoisted matches npm's node_modules layout.
+linker = "hoisted"
