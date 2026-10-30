@@ -6,6 +6,7 @@ import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formErrorBannerClass } from "@/lib/theme-tokens";
 
 interface UserFormProps {
   editingUser?: UserDTO | null;
@@ -80,7 +81,7 @@ export default function UserForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {validationError && (
-        <div className="p-3 text-sm rounded-lg bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400 animate-in fade-in">
+        <div className={formErrorBannerClass("animate-in fade-in")}>
           {validationError}
         </div>
       )}

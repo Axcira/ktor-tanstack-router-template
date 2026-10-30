@@ -202,14 +202,14 @@ function UploadPage() {
                 {doneCount > 0 && (
                   <>
                     {" "}
-                    · <span className="text-green-600">{doneCount} 完了</span>
+                    · <span className="text-success">{doneCount} 完了</span>
                   </>
                 )}
                 {uploadingCount > 0 && (
                   <>
                     {" "}
                     ·{" "}
-                    <span className="text-blue-600">
+                    <span className="text-info">
                       {uploadingCount} アップロード中
                     </span>
                   </>
@@ -256,7 +256,7 @@ function UploadPage() {
                         {file.name}
                       </p>
                       {file.status === "done" && (
-                        <CheckCircle2 className="size-4 text-green-500 shrink-0" />
+                        <CheckCircle2 className="size-4 text-success shrink-0" />
                       )}
                       {file.status === "error" && (
                         <AlertCircle className="size-4 text-destructive shrink-0" />

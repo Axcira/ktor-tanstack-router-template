@@ -75,7 +75,7 @@ export default function AppHeader() {
             </div>
 
             <div className="flex items-center space-x-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-500 dark:text-indigo-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-info-container text-info">
                 <Shield className="h-4 w-4" />
               </div>
               <div className="space-y-0.5 min-w-0">
@@ -83,7 +83,7 @@ export default function AppHeader() {
                   ロール (役割)
                 </p>
                 <div className="flex items-center gap-1.5">
-                  <span className="inline-flex items-center rounded-md bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:text-indigo-400 border border-indigo-200/50">
+                  <span className="inline-flex items-center rounded-md bg-info-container px-2 py-0.5 text-xs font-bold text-info-container-foreground border border-outline-variant">
                     {roleName}
                   </span>
                 </div>
@@ -101,8 +101,8 @@ export default function AppHeader() {
 
             <div className="max-h-48 overflow-y-auto space-y-2 pr-1.5">
               {isAdministrator ? (
-                <div className="p-2.5 rounded-xl border border-violet-200/60 bg-linear-to-r from-violet-500/5 to-purple-500/5 dark:border-violet-900/40">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-violet-700 dark:text-violet-400">
+                <div className="p-2.5 rounded-xl border border-primary-container bg-primary-container/40">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-on-primary-container">
                     <ShieldAlert className="h-3.5 w-3.5" />
                     全権限アクセス許可
                   </div>

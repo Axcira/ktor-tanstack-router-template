@@ -115,7 +115,7 @@ function FormPage() {
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
         <Card className="max-w-md w-full text-center">
           <CardContent className="py-12">
-            <CheckCircle2 className="size-16 text-green-500 mx-auto mb-4" />
+            <CheckCircle2 className="size-16 text-success mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">登録が完了しました</h2>
             <p className="text-sm text-muted-foreground mb-6">
               {companyName}{" "}

@@ -81,7 +81,7 @@ function ArticleDetail({ article }: { article: ArticleDTO }) {
           )}
         </div>
 
-        <div className="prose prose-slate dark:prose-invert max-w-none py-4 text-foreground leading-7 whitespace-pre-wrap">
+        <div className="prose dark:prose-invert max-w-none py-4 text-foreground leading-7 whitespace-pre-wrap">
           {article.body}
         </div>
       </article>

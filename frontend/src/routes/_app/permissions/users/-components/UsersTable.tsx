@@ -3,21 +3,9 @@ import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { roleBadgeClass } from "@/lib/theme-tokens";
 
-const getRoleBadgeClass = (roleName: string) => {
-  switch (roleName) {
-    case "Administrator":
-      return "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900/50";
-    case "Editor":
-      return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50";
-    case "Writer":
-      return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50";
-    case "Guest Reader":
-      return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950/30 dark:text-slate-400 dark:border-slate-900/50";
-    default:
-      return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-950/30 dark:text-gray-400 dark:border-gray-900/50";
-  }
-};
+const getRoleBadgeClass = roleBadgeClass;
 
 interface UsersTableProps {
   users: UserDTO[];
@@ -48,7 +36,7 @@ export function UsersTable({
     }
     return {
       name: "未割り当て",
-      badgeClass: "bg-gray-100 text-gray-800",
+      badgeClass: "bg-muted text-muted-foreground border-border",
     };
   };
 

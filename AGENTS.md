@@ -15,6 +15,7 @@ From the repository root, after `bun install`:
 | Vite on :3000 (`/api` → :8080) | `bun run frontend:dev` |
 | Backend test + ktlint | `bun run backend:check` |
 | Frontend lint + format | `bun run frontend:check` |
+| Regenerate MD3 theme CSS | `bun run frontend:theme` (`frontend/theme:check` via `frontend:check`) |
 | Frontend types | `bun run frontend:typecheck` |
 | Frontend tests | `bun run frontend:test` |
 | OpenAPI + Orval client | `bun run generate:client` |
@@ -72,6 +73,8 @@ Confirmations and errors use Dialog, AlertDialog, or Sonner. Do not call `window
 `src/routes/_app/showcase/` is the reference UI. Match its density and components. If showcase code fails lint, fix the code. Do not relax Biome or CI for it.
 
 Biome uses double quotes and 2-space indent. Lint and assist skip `src/api/generated/`; format-check still applies. Orval's `afterAllFilesWrite` hook formats generated files.
+
+**Design tokens (MD3-inspired, shadcn/Tailwind):** Do not hand-edit `frontend/src/theme.generated.css`. Regenerate with `bun run --cwd frontend theme [seedHex]` (Material Color Utilities; default seed matches the template primary). `bun run frontend:check` runs `theme:check`. Colors map MD3 roles onto `--primary`, `--background`, containers, outline, error, and status aliases (`--success`, `--info`, `--warning`). Shape uses `--radius` (0.75rem base) and `--radius-pill` in `frontend/src/styles.css`. App code must use semantic token classes only—no raw Tailwind palette colors or ad-hoc hex. See `frontend/README.md` and `frontend/src/lib/theme-tokens.ts`.
 
 Tests are Vitest + Testing Library + MSW. Shared setup is `src/test/`. Cover session shortcuts and `can-i` UI reactions here. Leave compound permission matrices to backend tests.
 

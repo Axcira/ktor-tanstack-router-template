@@ -5,6 +5,7 @@ import { useLoginV1 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formErrorBannerClass } from "@/lib/theme-tokens";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -40,10 +41,7 @@ export function LoginForm() {
         <h1 className="text-2xl font-bold mb-6 text-center">ログイン</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
-            <div
-              role="alert"
-              className="p-3 text-sm rounded-lg bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400"
-            >
+            <div role="alert" className={formErrorBannerClass("p-3")}>
               {errorMessage}
             </div>
           )}
