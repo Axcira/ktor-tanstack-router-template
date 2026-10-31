@@ -295,17 +295,11 @@ function semanticPalette(
   };
 }
 
-function borderColor(scheme: DynamicScheme, isDark: boolean): string {
-  if (isDark) {
-    return "rgba(255, 255, 255, 0.12)";
-  }
+function borderColor(scheme: DynamicScheme): string {
   return pick(scheme, "outlineVariant");
 }
 
-function inputColor(scheme: DynamicScheme, isDark: boolean): string {
-  if (isDark) {
-    return "rgba(255, 255, 255, 0.16)";
-  }
+function inputColor(scheme: DynamicScheme): string {
   return pick(scheme, "surfaceContainerHighest");
 }
 
@@ -338,8 +332,8 @@ function buildSchemeBlock(
     "destructive-foreground": pick(scheme, "onError"),
     "destructive-container": pick(scheme, "errorContainer"),
     "destructive-container-foreground": pick(scheme, "onErrorContainer"),
-    border: borderColor(scheme, isDark),
-    input: inputColor(scheme, isDark),
+    border: borderColor(scheme),
+    input: inputColor(scheme),
     ring: pick(scheme, "primary"),
     success: success.base,
     "success-foreground": success.on,
@@ -375,7 +369,7 @@ function buildSchemeBlock(
     "sidebar-primary-foreground": pick(scheme, "onPrimary"),
     "sidebar-accent": pick(scheme, "secondaryContainer"),
     "sidebar-accent-foreground": pick(scheme, "onSecondaryContainer"),
-    "sidebar-border": borderColor(scheme, isDark),
+    "sidebar-border": borderColor(scheme),
     "sidebar-ring": pick(scheme, "primary"),
   };
 
