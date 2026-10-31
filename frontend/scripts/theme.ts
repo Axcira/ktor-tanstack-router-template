@@ -2,7 +2,7 @@
 /**
  * Material Design 3 theme generator (matugen-style).
  * Usage:
- *   bun run theme [seedHex] [--variant=tonal-spot] [--check]
+ *   bun run theme [primaryHex] [--variant=tonal-spot] [--success=#hex] [--info=#hex] [--warning=#hex] [--check]
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -22,6 +22,7 @@ import {
   alphaFromArgb,
   argbFromHex,
   blueFromArgb,
+  customColor,
   greenFromArgb,
   redFromArgb,
 } from "@material/material-color-utilities";
@@ -30,8 +31,16 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const frontendRoot = join(scriptDir, "..");
 const outputPath = join(frontendRoot, "src/theme.generated.css");
 
-/** Legacy template primary before MD3 migration: oklch(0.541 0.235 259.6) */
-const DEFAULT_SEED_OKLCH = { l: 0.541, c: 0.235, h: 259.6 };
+/** Legacy template primary before MD3 migration (oklch primary → hex). */
+export const DEFAULT_PRIMARY = "#0061f3";
+
+export const DEFAULT_THEME = {
+  primary: DEFAULT_PRIMARY,
+  variant: "tonal-spot" as const,
+  success: "#1b873f",
+  info: "#0277bd",
+  warning: "#f9a825",
+};
 
 const VARIANTS = {
   "tonal-spot": SchemeTonalSpot,
@@ -45,7 +54,15 @@ const VARIANTS = {
   "fruit-salad": SchemeFruitSalad,
 } as const;
 
-type VariantName = keyof typeof VARIANTS;
+export type VariantName = keyof typeof VARIANTS;
+
+export type ThemeConfig = {
+  primary: string;
+  variant: VariantName;
+  success: string;
+  info: string;
+  warning: string;
+};
 
 type Md3Role =
   | "primary"
@@ -72,61 +89,33 @@ type Md3Role =
   | "surfaceContainerHigh"
   | "surfaceContainerHighest"
   | "outline"
-  | "outlineVariant"
-  | "inversePrimary";
+  | "outlineVariant";
 
-function oklchToArgb(l: number, c: number, hDeg: number): number {
-  const h = (hDeg * Math.PI) / 180;
-  const a = c * Math.cos(h);
-  const b = c * Math.sin(h);
-  const l_ = l + 0.3963377774 * a + 0.2158037573 * b;
-  const m_ = l - 0.1055613458 * a - 0.0638541728 * b;
-  const s_ = l - 0.0894841775 * a - 1.291485548 * b;
-  const L = l_ ** 3;
-  const M = m_ ** 3;
-  const S = s_ ** 3;
-  let r = +4.0767416621 * L - 3.3077115913 * M + 0.2309699292 * S;
-  let g = -1.2684380046 * L + 2.6097574011 * M - 0.3413193965 * S;
-  let bl = -0.0041960863 * L - 0.7034186147 * M + 1.707614701 * S;
-  const linearize = (x: number) => {
-    x = Math.max(0, Math.min(1, x));
-    return x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055;
-  };
-  const to8 = (x: number) => Math.round(Math.max(0, Math.min(1, x)) * 255);
-  r = linearize(r);
-  g = linearize(g);
-  bl = linearize(bl);
-  return (255 << 24) | (to8(r) << 16) | (to8(g) << 8) | to8(bl);
+type SemanticPalette = {
+  base: string;
+  on: string;
+  container: string;
+  onContainer: string;
+};
+
+function normalizeHex(hex: string): string {
+  const raw = hex.startsWith("#") ? hex.slice(1) : hex;
+  if (!/^[0-9a-fA-F]{6}$/.test(raw)) {
+    throw new Error(`Invalid hex color: ${hex}`);
+  }
+  return `#${raw.toLowerCase()}`;
 }
 
-function argbToOklch(argb: number): string {
+function argbToCss(argb: number): string {
   const a = alphaFromArgb(argb);
-  let r = redFromArgb(argb) / 255;
-  let g = greenFromArgb(argb) / 255;
-  let b = blueFromArgb(argb) / 255;
-  const toLinear = (c: number) =>
-    c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  r = toLinear(r);
-  g = toLinear(g);
-  b = toLinear(b);
-  const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
-  const m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
-  const s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
-  const l_ = Math.cbrt(l);
-  const m_ = Math.cbrt(m);
-  const s_ = Math.cbrt(s);
-  const L = 0.2104542553 * l_ + 0.793617785 * m_ - 0.0040720468 * s_;
-  const A = 1.9779984951 * l_ - 2.428592205 * m_ + 0.4505937099 * s_;
-  const B = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.808675766 * s_;
-  const C = Math.hypot(A, B);
-  let H = (Math.atan2(B, A) * 180) / Math.PI;
-  if (H < 0) H += 360;
-  const alpha =
-    a < 255 ? ` / ${(a / 255).toFixed(3).replace(/0+$/, "").replace(/\.$/, "") || "0"}` : "";
-  if (C < 0.0001) {
-    return `oklch(${L.toFixed(3)} 0 0${alpha})`;
+  const r = redFromArgb(argb);
+  const g = greenFromArgb(argb);
+  const b = blueFromArgb(argb);
+  if (a === 255) {
+    return `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
   }
-  return `oklch(${L.toFixed(3)} ${C.toFixed(3)} ${H.toFixed(1)}${alpha})`;
+  const alpha = Math.round((a / 255) * 1000) / 1000;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 function resolveRole(scheme: DynamicScheme, role: Md3Role): number {
@@ -157,30 +146,58 @@ function resolveRole(scheme: DynamicScheme, role: Md3Role): number {
     surfaceContainerHighest: () => colors.surfaceContainerHighest(),
     outline: () => colors.outline(),
     outlineVariant: () => colors.outlineVariant(),
-    inversePrimary: () => colors.inversePrimary(),
   };
   return map[role]().getArgb(scheme);
 }
 
 function pick(scheme: DynamicScheme, role: Md3Role): string {
-  return argbToOklch(resolveRole(scheme, role));
+  return argbToCss(resolveRole(scheme, role));
+}
+
+function semanticPalette(
+  sourceArgb: number,
+  seedHex: string,
+  name: string,
+  isDark: boolean,
+): SemanticPalette {
+  const group = customColor(sourceArgb, {
+    value: argbFromHex(normalizeHex(seedHex)),
+    name,
+    blend: true,
+  });
+  const tone = isDark ? group.dark : group.light;
+  return {
+    base: argbToCss(tone.color),
+    on: argbToCss(tone.onColor),
+    container: argbToCss(tone.colorContainer),
+    onContainer: argbToCss(tone.onColorContainer),
+  };
 }
 
 function borderColor(scheme: DynamicScheme, isDark: boolean): string {
   if (isDark) {
-    return "oklch(1 0 0 / 12%)";
+    return "rgba(255, 255, 255, 0.12)";
   }
   return pick(scheme, "outlineVariant");
 }
 
 function inputColor(scheme: DynamicScheme, isDark: boolean): string {
   if (isDark) {
-    return "oklch(1 0 0 / 16%)";
+    return "rgba(255, 255, 255, 0.16)";
   }
   return pick(scheme, "outlineVariant");
 }
 
-function buildSchemeBlock(scheme: DynamicScheme, isDark: boolean): string {
+function buildSchemeBlock(
+  scheme: DynamicScheme,
+  isDark: boolean,
+  sourceArgb: number,
+  seeds: Pick<ThemeConfig, "success" | "info" | "warning">,
+): string {
+  const success = semanticPalette(sourceArgb, seeds.success, "success", isDark);
+  const info = semanticPalette(sourceArgb, seeds.info, "info", isDark);
+  const warning = semanticPalette(sourceArgb, seeds.warning, "warning", isDark);
+
   const lines: Record<string, string> = {
     background: pick(scheme, "surface"),
     foreground: pick(scheme, "onSurface"),
@@ -203,18 +220,18 @@ function buildSchemeBlock(scheme: DynamicScheme, isDark: boolean): string {
     border: borderColor(scheme, isDark),
     input: inputColor(scheme, isDark),
     ring: pick(scheme, "primary"),
-    success: pick(scheme, "tertiary"),
-    "success-foreground": pick(scheme, "onTertiary"),
-    "success-container": pick(scheme, "tertiaryContainer"),
-    "success-container-foreground": pick(scheme, "onTertiaryContainer"),
-    info: pick(scheme, "secondary"),
-    "info-foreground": pick(scheme, "onSecondary"),
-    "info-container": pick(scheme, "secondaryContainer"),
-    "info-container-foreground": pick(scheme, "onSecondaryContainer"),
-    warning: pick(scheme, "primaryContainer"),
-    "warning-foreground": pick(scheme, "onPrimaryContainer"),
-    "warning-container": pick(scheme, "primaryContainer"),
-    "warning-container-foreground": pick(scheme, "onPrimaryContainer"),
+    success: success.base,
+    "success-foreground": success.on,
+    "success-container": success.container,
+    "success-container-foreground": success.onContainer,
+    info: info.base,
+    "info-foreground": info.on,
+    "info-container": info.container,
+    "info-container-foreground": info.onContainer,
+    warning: warning.base,
+    "warning-foreground": warning.on,
+    "warning-container": warning.container,
+    "warning-container-foreground": warning.onContainer,
     "primary-container": pick(scheme, "primaryContainer"),
     "on-primary-container": pick(scheme, "onPrimaryContainer"),
     "secondary-container": pick(scheme, "secondaryContainer"),
@@ -246,21 +263,19 @@ function buildSchemeBlock(scheme: DynamicScheme, isDark: boolean): string {
     .join("\n");
 }
 
-function seedHexFromOklch(): string {
-  const argb = oklchToArgb(
-    DEFAULT_SEED_OKLCH.l,
-    DEFAULT_SEED_OKLCH.c,
-    DEFAULT_SEED_OKLCH.h,
-  );
-  const r = redFromArgb(argb);
-  const g = greenFromArgb(argb);
-  const b = blueFromArgb(argb);
-  return `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
+function parseHexFlag(arg: string, flag: string): string | undefined {
+  if (arg.startsWith(`${flag}=`)) {
+    return normalizeHex(arg.slice(flag.length + 1));
+  }
+  return undefined;
 }
 
-function parseArgs(argv: string[]) {
-  let seedHex: string | undefined;
-  let variant: VariantName = "tonal-spot";
+export function parseThemeArgs(argv: string[]): ThemeConfig & { check: boolean } {
+  let primary: string | undefined;
+  let variant: VariantName = DEFAULT_THEME.variant;
+  let success = DEFAULT_THEME.success;
+  let info = DEFAULT_THEME.info;
+  let warning = DEFAULT_THEME.warning;
   let check = false;
 
   for (const arg of argv) {
@@ -271,73 +286,105 @@ function parseArgs(argv: string[]) {
     if (arg.startsWith("--variant=")) {
       const name = arg.slice("--variant=".length) as VariantName;
       if (!(name in VARIANTS)) {
-        console.error(`Unknown variant "${name}".`);
-        process.exit(1);
+        throw new Error(`Unknown variant "${name}".`);
       }
       variant = name;
       continue;
     }
-    if (arg.startsWith("-")) {
-      console.error(`Unknown flag: ${arg}`);
-      process.exit(1);
+    const successFlag = parseHexFlag(arg, "--success");
+    if (successFlag) {
+      success = successFlag;
+      continue;
     }
-    seedHex = arg;
+    const infoFlag = parseHexFlag(arg, "--info");
+    if (infoFlag) {
+      info = infoFlag;
+      continue;
+    }
+    const warningFlag = parseHexFlag(arg, "--warning");
+    if (warningFlag) {
+      warning = warningFlag;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown flag: ${arg}`);
+    }
+    primary = normalizeHex(arg);
   }
 
-  if (!seedHex) {
-    seedHex = seedHexFromOklch();
-  } else if (!/^#?[0-9a-fA-F]{6}$/.test(seedHex)) {
-    console.error("Seed must be a 6-digit hex color, e.g. #6750A4");
-    process.exit(1);
-  }
-
-  if (!seedHex.startsWith("#")) {
-    seedHex = `#${seedHex}`;
-  }
-
-  return { seedHex, variant, check };
+  return {
+    primary: primary ?? DEFAULT_THEME.primary,
+    variant,
+    success,
+    info,
+    warning,
+    check,
+  };
 }
 
-export function generateThemeCss(seedHex: string, variant: VariantName): string {
-  const SchemeCtor = VARIANTS[variant];
-  const sourceArgb = argbFromHex(seedHex);
+export function generateThemeCss(config: ThemeConfig): string {
+  const primary = normalizeHex(config.primary);
+  const success = normalizeHex(config.success);
+  const info = normalizeHex(config.info);
+  const warning = normalizeHex(config.warning);
+  const SchemeCtor = VARIANTS[config.variant];
+  const sourceArgb = argbFromHex(primary);
   const sourceHct = Hct.fromInt(sourceArgb);
   const lightScheme = new SchemeCtor(sourceHct, false, 0);
   const darkScheme = new SchemeCtor(sourceHct, true, 0);
+  const seeds = { success, info, warning };
+
+  const lightBlock = buildSchemeBlock(lightScheme, false, sourceArgb, seeds);
+  const darkBlock = buildSchemeBlock(darkScheme, true, sourceArgb, seeds);
 
   return `/* Generated by frontend/scripts/theme.ts — do not edit by hand. */
-/* seed: ${seedHex.toLowerCase()}  variant: ${variant} */
+/* primary: ${primary}  variant: ${config.variant}  success: ${success}  info: ${info}  warning: ${warning} */
 
 :root {
-${buildSchemeBlock(lightScheme, false)}
+${lightBlock}
 }
 
 .dark {
-${buildSchemeBlock(darkScheme, true)}
+${darkBlock}
+}
+
+.theme-preview-light {
+${lightBlock}
+}
+
+.theme-preview-dark {
+${darkBlock}
 }
 `;
 }
 
 function main() {
-  const { seedHex, variant, check } = parseArgs(process.argv.slice(2));
-  const css = generateThemeCss(seedHex, variant);
+  try {
+    const args = parseThemeArgs(process.argv.slice(2));
+    const css = generateThemeCss(args);
 
-  if (check) {
-    if (!existsSync(outputPath)) {
-      console.error(`${outputPath} is missing. Run: bun run theme`);
-      process.exit(1);
+    if (args.check) {
+      if (!existsSync(outputPath)) {
+        console.error(`${outputPath} is missing. Run: bun run theme`);
+        process.exit(1);
+      }
+      const existing = readFileSync(outputPath, "utf8");
+      if (existing !== css) {
+        console.error("theme.generated.css is out of date. Run: bun run theme");
+        process.exit(1);
+      }
+      console.log("theme.generated.css is up to date.");
+      return;
     }
-    const existing = readFileSync(outputPath, "utf8");
-    if (existing !== css) {
-      console.error("theme.generated.css is out of date. Run: bun run theme");
-      process.exit(1);
-    }
-    console.log("theme.generated.css is up to date.");
-    return;
+
+    writeFileSync(outputPath, css, "utf8");
+    console.log(
+      `Wrote ${outputPath} (primary ${args.primary}, variant ${args.variant})`,
+    );
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
   }
-
-  writeFileSync(outputPath, css, "utf8");
-  console.log(`Wrote ${outputPath} (seed ${seedHex}, variant ${variant})`);
 }
 
 if (import.meta.main) {

@@ -8,6 +8,7 @@ import {
   useGetUsersV1,
 } from "@/api/generated/default/default.ts";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DeleteUserDialog } from "./-components/DeleteUserDialog";
@@ -155,22 +156,23 @@ function UsersPage() {
               disabled={isLoading}
             />
           </div>
-          <select
+          <ResponsiveSelect
+            aria-label="ロールでフィルター"
             value={roleFilter}
-            onChange={(e) => {
-              setRoleFilter(e.target.value);
+            onValueChange={(value) => {
+              setRoleFilter(value);
               setPage(1);
             }}
             disabled={isLoading || availableRoles.length === 0}
-            className="flex h-9 w-full sm:w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-muted-foreground dark:bg-background"
-          >
-            <option value="all">すべてのロール</option>
-            {availableRoles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.name}
-              </option>
-            ))}
-          </select>
+            triggerClassName="sm:w-48"
+            options={[
+              { value: "all", label: "すべてのロール" },
+              ...availableRoles.map((role) => ({
+                value: String(role.id),
+                label: role.name,
+              })),
+            ]}
+          />
         </div>
         <div className="text-sm text-muted-foreground self-end sm:self-center shrink-0">
           該当ユーザー数:{" "}

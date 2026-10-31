@@ -74,7 +74,7 @@ Confirmations and errors use Dialog, AlertDialog, or Sonner. Do not call `window
 
 Biome uses double quotes and 2-space indent. Lint and assist skip `src/api/generated/`; format-check still applies. Orval's `afterAllFilesWrite` hook formats generated files.
 
-**Design tokens (MD3-inspired, shadcn/Tailwind):** Do not hand-edit `frontend/src/theme.generated.css`. Regenerate with `bun run --cwd frontend theme [seedHex]` (Material Color Utilities; default seed matches the template primary). `bun run frontend:check` runs `theme:check` and `radius:check`. Colors map MD3 roles onto shadcn CSS variables; shape uses a four-step scale (`--radius-sm` 6px, `--radius-md` 8px, `--radius-lg` 12px, `--radius-xl` 20px, plus `--radius-pill`) in `frontend/src/styles.css`. Assign radii by component role (controls → md, containers → lg, modals/sheets → xl, avatars/chips → full). Only `rounded-sm|md|lg|xl|full|none` in app code. See `frontend/README.md` and `frontend/scripts/radius-check.ts`.
+**Design tokens:** Do not hand-edit `frontend/src/theme.generated.css`. Regenerate with `bun run frontend:theme`. Color, shape, generator flags, and UI rules live in [DESIGN.md](../DESIGN.md). `bun run frontend:check` includes `theme:check` and `radius:check`.
 
 Tests are Vitest + Testing Library + MSW. Shared setup is `src/test/`. Cover session shortcuts and `can-i` UI reactions here. Leave compound permission matrices to backend tests.
 

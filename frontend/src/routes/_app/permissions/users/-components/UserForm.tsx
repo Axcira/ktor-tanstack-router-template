@@ -3,6 +3,7 @@ import type * as React from "react";
 import { useState } from "react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,24 +126,26 @@ export default function UserForm({
           <Label htmlFor="user-role" id="user-role-label">
             割り当てるロール <span className="text-destructive">*</span>
           </Label>
-          <select
+          <ResponsiveSelect
             id="user-role"
-            aria-labelledby="user-role-label"
-            value={userRoleId}
-            onChange={(e) => setUserRoleId(Number(e.target.value))}
+            aria-label="割り当てるロール"
+            value={String(userRoleId)}
+            onValueChange={(value) => setUserRoleId(Number(value))}
             disabled={isSubmitting || isLoadingRoles}
-            className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground dark:bg-background disabled:opacity-50"
-            required
-          >
-            <option value={0} disabled>
-              ロールを選択してください
-            </option>
-            {availableRoles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.name}
-              </option>
-            ))}
-          </select>
+            placeholder="ロールを選択してください"
+            triggerClassName="h-10"
+            options={[
+              {
+                value: "0",
+                label: "ロールを選択してください",
+                disabled: true,
+              },
+              ...availableRoles.map((role) => ({
+                value: String(role.id),
+                label: role.name,
+              })),
+            ]}
+          />
         </div>
       </div>
 
