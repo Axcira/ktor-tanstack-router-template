@@ -23,4 +23,19 @@ describe("theme preview CSS scope", () => {
     );
     expect(theme).toMatch(/\.theme-preview-dark \{\s*\n\s*color-scheme: dark;/);
   });
+
+  it("paints each preview scope with its own background token", () => {
+    const theme = readFileSync(
+      join(frontendRoot, "src/theme.generated.css"),
+      "utf8",
+    );
+    for (const selector of [".theme-preview-light", ".theme-preview-dark"]) {
+      const block = theme.match(
+        new RegExp(`${selector.replace(".", "\\.")} \\{[\\s\\S]*?\\n\\}`),
+      );
+      expect(block, selector).toBeTruthy();
+      expect(block?.[0]).toContain("background-color: var(--background);");
+      expect(block?.[0]).toContain("color: var(--foreground);");
+    }
+  });
 });

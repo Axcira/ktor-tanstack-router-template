@@ -13,6 +13,11 @@ describe("AppearanceForm theme previews", () => {
     const { container } = renderWithProviders(<AppearanceForm />);
     expect(container.querySelectorAll(".theme-preview-light").length).toBe(2);
     expect(container.querySelectorAll(".theme-preview-dark").length).toBe(2);
+    for (const preview of container.querySelectorAll(
+      ".theme-preview-light, .theme-preview-dark",
+    )) {
+      expect(preview.className).toContain("bg-background");
+    }
     expect(screen.getByText("ライト")).toBeInTheDocument();
   });
 });

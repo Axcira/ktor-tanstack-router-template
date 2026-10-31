@@ -350,11 +350,15 @@ ${darkBlock}
 
 .theme-preview-light {
     color-scheme: light;
+    background-color: var(--background);
+    color: var(--foreground);
 ${lightBlock}
 }
 
 .theme-preview-dark {
     color-scheme: dark;
+    background-color: var(--background);
+    color: var(--foreground);
 ${darkBlock}
 }
 `;

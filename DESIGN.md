@@ -39,10 +39,12 @@ Each semantic seed is harmonized toward the primary source via MD3 `customColor(
 
 Preview scopes for the settings theme picker:
 
-- `.theme-preview-light` — same variables as `:root`, `color-scheme: light`
-- `.theme-preview-dark` — same variables as `.dark`, `color-scheme: dark`
+- `.theme-preview-light` — same variables as `:root`, `color-scheme: light`, and **`background-color: var(--background)`**
+- `.theme-preview-dark` — same variables as `.dark`, `color-scheme: dark`, and **`background-color: var(--background)`**
 
-Tailwind `dark:` utilities are scoped in `frontend/src/styles.css` so they follow the app theme **except** inside `.theme-preview-light` (light preview stays light when the app is dark). `.theme-preview-dark` is treated as a dark context when the app is light.
+The preview mock sits on a card (`bg-card`). Resetting custom properties is not enough: a preview with no background is transparent, so the card’s color shows through. In a dark app that makes the light preview look black even when its `--background` / `--muted` variables are already the light values. Dark previews looked correct because they also had the `bg-background` utility. Both scopes now paint their own background in generated CSS, and the settings markup uses `bg-background` on every preview pane.
+
+Tailwind `dark:` utilities are scoped in `frontend/src/styles.css` so they follow the app theme **except** inside `.theme-preview-light` (light preview stays light when the app is dark). `.theme-preview-dark` is treated as a dark context when the app is light. That variant scope does not paint the preview surface; the background declarations above do.
 
 ## Color token mapping (MD3 → app)
 
@@ -98,6 +100,16 @@ Enforcement: `frontend/scripts/select-check.ts` (part of `bun run frontend:check
 | `permissions/roles/index.tsx` | Copy-role notification banner via `notificationToastClass` |
 | Showcase upload | Upload stats (`text-success`, `text-info`) and completed-row icon |
 | Showcase form | Success state hero icon (`text-success`) |
-| Showcase dashboard | Reference badges and status banners (success / info / warning containers) |
+| Showcase dashboard | Reference badges, status banners, and Sonner buttons (default / success / info / warning / error) |
 
-Sonner toasts use the Sonner component styling (`toast.success` / `info` / `warning`); they do not use the CSS `--success` / `--info` / `--warning` variables unless wrapped with `notificationToastClass`.
+Sonner (`frontend/src/components/ui/sonner.tsx`) follows the app theme from `themeAtom` and sets toaster CSS variables from `sonnerToastCssVars` in `theme-tokens.ts`:
+
+| Sonner variable | App token |
+| --- | --- |
+| `--normal-bg` / `--normal-text` / `--normal-border` | `--surface-container`, `--foreground`, `--border` |
+| `--success-*` | `--success-container`, `--success-container-foreground`, `--success` |
+| `--info-*` | `--info-container`, `--info-container-foreground`, `--info` |
+| `--warning-*` | `--warning-container`, `--warning-container-foreground`, `--warning` |
+| `--error-*` | `--destructive-container`, `--destructive-container-foreground`, `--destructive` |
+
+`richColors` stays on so those variables paint typed toasts. Description text uses `!text-current` so Sonner’s hardcoded description color does not override the token.

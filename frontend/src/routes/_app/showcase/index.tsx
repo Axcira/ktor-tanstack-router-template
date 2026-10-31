@@ -202,6 +202,43 @@ function DashboardPage() {
               在庫がしきい値を下回りました
             </div>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toast("通常の通知です")}
+            >
+              Default toast
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toast.success("処理が完了しました")}
+            >
+              Success toast
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toast.info("新しいお知らせがあります")}
+            >
+              Info toast
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toast.warning("在庫がしきい値を下回りました")}
+            >
+              Warning toast
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => toast.error("保存に失敗しました")}
+            >
+              Error toast
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

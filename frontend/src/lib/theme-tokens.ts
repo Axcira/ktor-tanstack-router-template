@@ -23,6 +23,30 @@ export function formErrorBannerClass(className?: string): string {
   );
 }
 
+/**
+ * Sonner reads these on `[data-sonner-toaster]`. Inline styles beat Sonner's
+ * built-in light/dark hex palette, and the values follow the app theme
+ * because they reference our semantic custom properties.
+ */
+export const sonnerToastCssVars = {
+  "--normal-bg": "var(--surface-container)",
+  "--normal-text": "var(--foreground)",
+  "--normal-border": "var(--border)",
+  "--success-bg": "var(--success-container)",
+  "--success-text": "var(--success-container-foreground)",
+  "--success-border": "var(--success)",
+  "--info-bg": "var(--info-container)",
+  "--info-text": "var(--info-container-foreground)",
+  "--info-border": "var(--info)",
+  "--warning-bg": "var(--warning-container)",
+  "--warning-text": "var(--warning-container-foreground)",
+  "--warning-border": "var(--warning)",
+  "--error-bg": "var(--destructive-container)",
+  "--error-text": "var(--destructive-container-foreground)",
+  "--error-border": "var(--destructive)",
+  "--border-radius": "var(--radius-lg)",
+} as const;
+
 export function notificationToastClass(
   type: "success" | "info" | "error",
 ): string {
