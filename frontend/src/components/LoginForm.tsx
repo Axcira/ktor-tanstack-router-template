@@ -37,7 +37,7 @@ export function LoginForm() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-      <div className="w-full max-w-md p-8 bg-card text-card-foreground border border-border rounded-xl shadow-sm">
+      <div className="w-full max-w-md p-8 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
         <h1 className="text-2xl font-bold mb-6 text-center">ログイン</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (

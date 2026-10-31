@@ -168,7 +168,7 @@ function DashboardPage() {
               <Card key={key}>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <Skeleton className="h-4 w-20" />
-                  <Skeleton className="size-4 rounded" />
+                  <Skeleton className="size-4 rounded-sm" />
                 </CardHeader>
                 <CardContent>
                   <Skeleton className="h-7 w-28 mb-1" />

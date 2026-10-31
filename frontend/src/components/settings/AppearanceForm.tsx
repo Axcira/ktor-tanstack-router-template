@@ -24,10 +24,10 @@ export default function AppearanceForm() {
         }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
       >
-        <Label className="cursor-pointer group relative flex flex-col rounded-xl border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
           <RadioGroupItem value="light" className="sr-only" />
 
-          <div className="h-[140px] rounded-t-xl bg-background border-b border-border p-4 overflow-hidden">
+          <div className="h-[140px] rounded-t-lg bg-background border-b border-border p-4 overflow-hidden">
             <div className="flex items-center justify-between mb-6">
               <div className="flex gap-2">
                 <div className="h-2 w-10 rounded-full bg-muted" />
@@ -61,10 +61,10 @@ export default function AppearanceForm() {
           </div>
         </Label>
 
-        <Label className="cursor-pointer group relative flex flex-col rounded-xl border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
           <RadioGroupItem value="dark" className="sr-only" />
 
-          <div className="h-[140px] rounded-t-xl bg-foreground border-b border-border p-4 overflow-hidden">
+          <div className="h-[140px] rounded-t-lg bg-foreground border-b border-border p-4 overflow-hidden">
             <div className="flex items-center justify-between mb-6">
               <div className="flex gap-2">
                 <div className="h-2 w-10 rounded-full bg-background/20" />
@@ -98,10 +98,10 @@ export default function AppearanceForm() {
           </div>
         </Label>
 
-        <Label className="cursor-pointer group relative flex flex-col rounded-xl border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
           <RadioGroupItem value="system" className="sr-only" />
 
-          <div className="flex h-[140px] rounded-t-[10px] border-b border-border overflow-hidden">
+          <div className="flex h-[140px] rounded-t-lg border-b border-border overflow-hidden">
             <div className="flex-1 bg-background p-4 border-r border-border">
               <div className="flex items-center mb-6">
                 <div className="h-2 w-8 rounded-full bg-muted" />

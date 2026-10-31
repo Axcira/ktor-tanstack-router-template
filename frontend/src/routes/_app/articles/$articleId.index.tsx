@@ -49,7 +49,7 @@ function ArticleDetail({ article }: { article: ArticleDTO }) {
             {article.tagList.map((tag) => (
               <span
                 key={tag.id}
-                className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs font-medium"
+                className="px-2 py-1 bg-secondary text-secondary-foreground rounded-sm text-xs font-medium"
               >
                 #{tag.name}
               </span>

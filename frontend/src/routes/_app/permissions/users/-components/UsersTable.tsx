@@ -99,7 +99,7 @@ export function UsersTable({
                       </td>
                       <td className="p-4">
                         <span
-                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold border ${roleInfo.badgeClass}`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border ${roleInfo.badgeClass}`}
                         >
                           {roleInfo.name}
                         </span>

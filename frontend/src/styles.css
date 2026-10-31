@@ -22,8 +22,18 @@ body {
 }
 
 :root {
-    /* MD3-inspired shape scale (corner radii). Colors live in theme.generated.css. */
-    --radius: 0.75rem;
+    /*
+     * MD3-inspired shape scale (corner radii).
+     * sm ≈ 6px — checkbox, badge, tag, tooltip
+     * md ≈ 8px — input, button, tabs, menu items
+     * lg ≈ 12px — card, popover, dropdown, toast (base --radius)
+     * xl ≈ 20px — dialog, sheet, drawer, alert-dialog
+     */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius: var(--radius-lg);
+    --radius-xl: 1.25rem;
     --radius-pill: 9999px;
 }
 
@@ -87,13 +97,10 @@ body {
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+    --radius-sm: var(--radius-sm);
+    --radius-md: var(--radius-md);
+    --radius-lg: var(--radius-lg);
+    --radius-xl: var(--radius-xl);
     --radius-pill: var(--radius-pill);
 }
 

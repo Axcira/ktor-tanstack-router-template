@@ -73,7 +73,7 @@ export default function PasswordForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto w-full max-w-md space-y-4 rounded-xl border bg-card p-6 text-left shadow-sm"
+      className="mx-auto w-full max-w-md space-y-4 rounded-lg border bg-card p-6 text-left shadow-sm"
     >
       <div className="space-y-1">
         <h2 className="text-xl font-semibold">パスワード</h2>

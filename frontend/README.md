@@ -34,7 +34,19 @@ See the repository root [README.md](../README.md) and [AGENTS.md](../AGENTS.md) 
 
 ## Design tokens
 
-Semantic colors live in `src/theme.generated.css` (light `:root` and `.dark`). Shape tokens (`--radius`, `--radius-pill`, Tailwind `radius-*`) are in `src/styles.css`.
+Semantic colors live in `src/theme.generated.css` (light `:root` and `.dark`). Shape tokens are in `src/styles.css` (`--radius-sm` … `--radius-xl`, `--radius-pill`).
+
+### Shape scale (corner radius)
+
+| Token / class | Size | Use for |
+| --- | --- | --- |
+| `--radius-sm` / `rounded-sm` | ~6px | Checkbox, badge, tag, tooltip |
+| `--radius-md` / `rounded-md` | ~8px | Input, button, select, tabs, menu items |
+| `--radius-lg` / `rounded-lg` | ~12px | Card, popover, dropdown, toast (`--radius` base) |
+| `--radius-xl` / `rounded-xl` | ~20px | Dialog, sheet, drawer, alert-dialog |
+| `--radius-pill` / `rounded-full` | pill | Avatar, chip, status badge when roundness is semantic |
+
+Inner corners must use a **smaller** step than their container. App code may only use `rounded-sm|md|lg|xl|full|none` (plus directional variants like `rounded-t-lg`). `bun run radius:check` enforces this (also runs in `bun run check`).
 
 ### Regenerate theme
 
@@ -54,7 +66,7 @@ Commit `theme.generated.css` after changing the seed. `bun run check` runs `them
 - Use semantic Tailwind classes backed by CSS variables: `bg-background`, `text-primary`, `border-border`, `bg-primary-container`, `text-success`, etc.
 - Do **not** use raw Tailwind palette utilities (`bg-gray-100`, `text-red-500`, …) or hard-coded hex/rgb in app code.
 - Prefer shared helpers in `src/lib/theme-tokens.ts` for repeated patterns (form errors, toasts, role badges).
-- Corner radius: use `rounded-sm` / `rounded-md` / `rounded-lg` / `rounded-xl` (from `--radius`) or `rounded-full` / `rounded-pill` for chips and avatars—not arbitrary `rounded-[10px]` unless matching a fixed mockup size.
+- Corner radius: follow the [shape scale](#shape-scale-corner-radius)—no `rounded-2xl`/`3xl`/`4xl`, bare `rounded`, or `rounded-[…]`.
 
 ### MD3 → shadcn mapping (summary)
 

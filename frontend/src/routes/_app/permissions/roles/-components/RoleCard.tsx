@@ -72,7 +72,7 @@ export function RoleCard({
             権限構成
           </div>
           {isAdministrator ? (
-            <span className="inline-flex items-center rounded-md bg-primary-container px-2 py-1 text-xs font-semibold text-on-primary-container border border-outline-variant">
+            <span className="inline-flex items-center rounded-full bg-primary-container px-2 py-1 text-xs font-semibold text-on-primary-container border border-outline-variant">
               全ての権限
             </span>
           ) : role.permissions.length === 0 ? (
@@ -97,7 +97,7 @@ export function RoleCard({
                 return (
                   <span
                     key={p.type}
-                    className="inline-flex items-center rounded-md bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary border border-primary/10"
+                    className="inline-flex items-center rounded-sm bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary border border-primary/10"
                     title={def?.description}
                   >
                     {def?.label || p.type}

@@ -33,7 +33,7 @@ function PasswordSection() {
 
   if (!isAllowed) {
     return (
-      <div className="mx-auto mt-16 w-full max-w-md space-y-2 rounded-xl border bg-card p-6 text-left shadow-sm">
+      <div className="mx-auto mt-16 w-full max-w-md space-y-2 rounded-lg border bg-card p-6 text-left shadow-sm">
         <h2 className="text-xl font-semibold">パスワード</h2>
         <p className="text-sm text-muted-foreground">
           自分のパスワードを変更するには「パスワードの変更」権限が必要です。
