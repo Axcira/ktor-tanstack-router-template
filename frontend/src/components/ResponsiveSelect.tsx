@@ -1,3 +1,4 @@
+import type { AriaAttributes, ComponentProps } from "react";
 import {
   Select,
   SelectContent,
@@ -17,47 +18,94 @@ export type ResponsiveSelectOption = {
 const nativeSelectClassName =
   "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:bg-background";
 
-type ResponsiveSelectProps = {
-  value: string;
-  onValueChange: (value: string) => void;
-  options: ResponsiveSelectOption[];
-  placeholder?: string;
-  disabled?: boolean;
+type SelectRootProps = ComponentProps<typeof Select>;
+
+/** DOM props applied to both the native control and the shadcn trigger. */
+type SharedControlProps = {
   id?: string;
   className?: string;
-  triggerClassName?: string;
-  "aria-label"?: string;
-  "aria-invalid"?: boolean;
-  required?: boolean;
-};
+  style?: ComponentProps<"select">["style"];
+  title?: string;
+  tabIndex?: number;
+  autoFocus?: boolean;
+  hidden?: boolean;
+} & AriaAttributes & {
+    [key: `data-${string}`]: string | number | undefined;
+  };
+
+export type ResponsiveSelectProps = Omit<SelectRootProps, "children"> &
+  SharedControlProps & {
+    options: ResponsiveSelectOption[];
+    placeholder?: string;
+    /** Overrides for the shadcn trigger (fine pointer). */
+    triggerProps?: Omit<ComponentProps<typeof SelectTrigger>, "children">;
+    /** Overrides for the shadcn menu (fine pointer). */
+    contentProps?: Omit<ComponentProps<typeof SelectContent>, "children">;
+    /** Overrides for the native select (coarse pointer). */
+    nativeProps?: Omit<ComponentProps<"select">, "children">;
+  };
 
 export function ResponsiveSelect({
-  value,
-  onValueChange,
   options,
   placeholder,
+  triggerProps,
+  contentProps,
+  nativeProps,
+  value,
+  defaultValue,
+  onValueChange,
+  open,
+  defaultOpen,
+  onOpenChange,
+  dir,
+  name,
+  autoComplete,
   disabled,
+  required,
+  form,
   id,
   className,
-  triggerClassName,
-  "aria-label": ariaLabel,
-  "aria-invalid": ariaInvalid,
-  required,
+  style,
+  title,
+  tabIndex,
+  autoFocus,
+  hidden,
+  ...ariaAndData
 }: ResponsiveSelectProps) {
   const coarse = useCoarsePointer();
+  const sharedDom = {
+    id,
+    style,
+    title,
+    tabIndex,
+    autoFocus,
+    hidden,
+    ...ariaAndData,
+  };
+  if (sharedDom["aria-required"] == null && required) {
+    sharedDom["aria-required"] = true;
+  }
 
   if (coarse) {
+    const { className: nativeClassName, ...restNative } = nativeProps ?? {};
+    const valueProps =
+      value !== undefined
+        ? { value }
+        : defaultValue !== undefined
+          ? { defaultValue }
+          : {};
     return (
       <select
-        id={id}
-        aria-label={ariaLabel}
-        aria-invalid={ariaInvalid || undefined}
-        aria-required={required || undefined}
-        required={required}
-        value={value}
+        {...sharedDom}
+        name={name}
+        autoComplete={autoComplete}
         disabled={disabled}
-        onChange={(event) => onValueChange(event.target.value)}
-        className={cn(nativeSelectClassName, className, triggerClassName)}
+        required={required}
+        form={form}
+        {...valueProps}
+        onChange={(event) => onValueChange?.(event.target.value)}
+        className={cn(nativeSelectClassName, className, nativeClassName)}
+        {...restNative}
       >
         {placeholder ? (
           <option value="" disabled hidden>
@@ -77,28 +125,34 @@ export function ResponsiveSelect({
     );
   }
 
+  const { className: triggerClassName, ...restTrigger } = triggerProps ?? {};
+
   return (
-    // `required` is also set on the trigger below. The prop is not in the button
-    // type, so it is passed through a narrow assertion; Radix forwards it.
     <Select
       value={value}
+      defaultValue={defaultValue}
       onValueChange={onValueChange}
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+      dir={dir}
+      name={name}
+      autoComplete={autoComplete}
       disabled={disabled}
       required={required}
+      form={form}
     >
       <SelectTrigger
-        id={id}
-        aria-label={ariaLabel}
-        aria-invalid={ariaInvalid}
-        aria-required={required || undefined}
-        className={cn("w-full", triggerClassName, className)}
+        {...sharedDom}
+        {...restTrigger}
+        className={cn("w-full", className, triggerClassName)}
         {...(required
           ? ({ required: true } as { "aria-required"?: boolean })
           : {})}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent {...contentProps}>
         {options.map((option) => (
           <SelectItem
             key={option.value}

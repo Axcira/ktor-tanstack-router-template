@@ -276,7 +276,7 @@ function TablePage() {
           }}
           options={statusFilterOptions}
           placeholder="ステータス"
-          triggerClassName="w-32"
+          className="w-32"
         />
       </div>
 

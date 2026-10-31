@@ -164,7 +164,7 @@ function UsersPage() {
               setPage(1);
             }}
             disabled={isLoading || availableRoles.length === 0}
-            triggerClassName="sm:w-48"
+            className="sm:w-48"
             options={[
               { value: "all", label: "すべてのロール" },
               ...availableRoles.map((role) => ({

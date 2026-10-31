@@ -133,7 +133,7 @@ export default function UserForm({
             onValueChange={(value) => setUserRoleId(Number(value))}
             disabled={isSubmitting || isLoadingRoles}
             placeholder="ロールを選択してください"
-            triggerClassName="h-10"
+            className="h-10"
             required
             options={[
               {

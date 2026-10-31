@@ -58,7 +58,7 @@ export function DeleteRoleDialog({
               value={selectedFallbackId}
               onValueChange={setSelectedFallbackId}
               placeholder="ロールを選択"
-              triggerClassName="w-full"
+              className="w-full"
               options={roles
                 .filter((r) => r.id !== roleToDelete?.id)
                 .map((r) => ({
