@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
 /**
- * True when the primary pointer is coarse (typical phones / touch).
+ * Track whether the primary pointer is coarse (typical phones / touch).
+ * Returns false until the media query is read after the initial render.
  */
 export function useCoarsePointer(): boolean {
   const [coarse, setCoarse] = useState(false);

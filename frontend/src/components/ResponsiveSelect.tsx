@@ -45,6 +45,12 @@ export type ResponsiveSelectProps = Omit<SelectRootProps, "children"> &
     nativeProps?: Omit<ComponentProps<"select">, "children">;
   };
 
+/**
+ * Render a native select for a coarse primary pointer and a shadcn select otherwise.
+ * Shared DOM props go to the native control or trigger; nativeProps and triggerProps
+ * can override them. Radix-only root props are ignored by the native control.
+ * A native placeholder is a disabled, hidden option with an empty value.
+ */
 export function ResponsiveSelect({
   options,
   placeholder,

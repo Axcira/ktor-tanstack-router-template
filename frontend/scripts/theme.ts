@@ -270,6 +270,11 @@ function parseHexFlag(arg: string, flag: string): string | undefined {
   return undefined;
 }
 
+/**
+ * Parse theme CLI arguments, using default seeds and variant when omitted.
+ * Colors accept six hex digits with an optional `#`; later values replace earlier ones.
+ * Throws for invalid colors, unknown flags, or variant names absent from the variant table.
+ */
 export function parseThemeArgs(argv: string[]): ThemeConfig & { check: boolean } {
   let primary: string | undefined;
   let variant: VariantName = DEFAULT_THEME.variant;
@@ -322,6 +327,10 @@ export function parseThemeArgs(argv: string[]): ThemeConfig & { check: boolean }
   };
 }
 
+/**
+ * Generate light, dark, and preview CSS from the primary and semantic seeds.
+ * Throws if a seed is not a six-digit hex color; generation errors propagate to the caller.
+ */
 export function generateThemeCss(config: ThemeConfig): string {
   const primary = normalizeHex(config.primary);
   const success = normalizeHex(config.success);

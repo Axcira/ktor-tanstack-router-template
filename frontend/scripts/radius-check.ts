@@ -53,7 +53,7 @@ export function classTokens(source: string): string[] {
   return tokens;
 }
 
-/** Utility name after the last top-level variant `:`, without `!`. */
+/** Utility name after the last top-level variant `:`, without `!`, or null if it does not start with `rounded`. */
 export function radiusUtility(classToken: string): string | null {
   let depth = 0;
   let lastColon = -1;
@@ -70,6 +70,10 @@ export function radiusUtility(classToken: string): string | null {
   return segment;
 }
 
+/**
+ * Check an extracted `rounded` utility against the shape scale.
+ * Returns a reason for a disallowed utility, or null when no issue is found.
+ */
 export function validateRadiusUtility(utility: string): string | null {
   if (utility === "rounded") {
     return "use rounded-sm|md|lg|xl|full|none instead of bare rounded";
@@ -96,6 +100,10 @@ export function validateRadiusUtility(utility: string): string | null {
   return `unrecognized radius class "${utility}"`;
 }
 
+/**
+ * Scan source text for disallowed radius tokens, including tokens in comments.
+ * Each issue includes its original token and 1-based line number.
+ */
 export function radiusIssuesInSource(text: string): RadiusIssue[] {
   const issues: RadiusIssue[] = [];
   const lines = text.split("\n");

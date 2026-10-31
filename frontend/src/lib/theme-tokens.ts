@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Semantic role badge styles (MD3 container roles). */
+/** Semantic role badge styles (MD3 container roles); unrecognized names use the neutral fallback. */
 export function roleBadgeClass(roleName: string): string {
   switch (roleName) {
     case "Administrator":
@@ -16,6 +16,7 @@ export function roleBadgeClass(roleName: string): string {
   }
 }
 
+/** Merge optional classes into the semantic form error banner styles. */
 export function formErrorBannerClass(className?: string): string {
   return cn(
     "rounded-lg border border-destructive/30 bg-destructive-container p-3 text-sm text-destructive-container-foreground",
@@ -47,6 +48,7 @@ export const sonnerToastCssVars = {
   "--border-radius": "var(--radius-lg)",
 } as const;
 
+/** Return semantic container styles for an inline notification. */
 export function notificationToastClass(
   type: "success" | "info" | "error",
 ): string {
