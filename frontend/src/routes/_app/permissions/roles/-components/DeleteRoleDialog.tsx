@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,13 +12,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface DeleteRoleDialogProps {
   roleToDelete: RoleDTO | null;
@@ -59,23 +53,19 @@ export function DeleteRoleDialog({
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="fallback-role">移行先ロール</Label>
-            <Select
+            <ResponsiveSelect
+              id="fallback-role"
               value={selectedFallbackId}
               onValueChange={setSelectedFallbackId}
-            >
-              <SelectTrigger id="fallback-role" className="w-full">
-                <SelectValue placeholder="ロールを選択" />
-              </SelectTrigger>
-              <SelectContent>
-                {roles
-                  .filter((r) => r.id !== roleToDelete?.id)
-                  .map((r) => (
-                    <SelectItem key={r.id} value={String(r.id)}>
-                      {r.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+              placeholder="ロールを選択"
+              triggerClassName="w-full"
+              options={roles
+                .filter((r) => r.id !== roleToDelete?.id)
+                .map((r) => ({
+                  value: String(r.id),
+                  label: r.name,
+                }))}
+            />
           </div>
         </div>
         <DialogFooter>

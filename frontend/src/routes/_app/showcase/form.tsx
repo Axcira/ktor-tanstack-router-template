@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,18 +14,28 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_app/showcase/form")({
   component: FormPage,
 });
+
+const industryOptions = [
+  { value: "it", label: "IT・通信" },
+  { value: "manufacturing", label: "製造業" },
+  { value: "retail", label: "小売・流通" },
+  { value: "finance", label: "金融・保険" },
+  { value: "healthcare", label: "医療・福祉" },
+  { value: "education", label: "教育" },
+  { value: "other", label: "その他" },
+];
+
+const budgetOptions = [
+  { value: "small", label: "〜100万円" },
+  { value: "medium", label: "100万〜500万円" },
+  { value: "large", label: "500万〜1000万円" },
+  { value: "enterprise", label: "1000万円〜" },
+];
 
 interface FormErrors {
   companyName?: string;
@@ -217,20 +228,13 @@ function FormPage() {
                 <Label>
                   業種 <span className="text-destructive">*</span>
                 </Label>
-                <Select value={industry} onValueChange={setIndustry}>
-                  <SelectTrigger aria-invalid={!!errors.industry}>
-                    <SelectValue placeholder="選択してください" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="it">IT・通信</SelectItem>
-                    <SelectItem value="manufacturing">製造業</SelectItem>
-                    <SelectItem value="retail">小売・流通</SelectItem>
-                    <SelectItem value="finance">金融・保険</SelectItem>
-                    <SelectItem value="healthcare">医療・福祉</SelectItem>
-                    <SelectItem value="education">教育</SelectItem>
-                    <SelectItem value="other">その他</SelectItem>
-                  </SelectContent>
-                </Select>
+                <ResponsiveSelect
+                  value={industry}
+                  onValueChange={setIndustry}
+                  options={industryOptions}
+                  placeholder="選択してください"
+                  aria-invalid={!!errors.industry}
+                />
                 {errors.industry && (
                   <p className="text-xs text-destructive">{errors.industry}</p>
                 )}
@@ -239,17 +243,13 @@ function FormPage() {
                 <Label>
                   予算規模 <span className="text-destructive">*</span>
                 </Label>
-                <Select value={budget} onValueChange={setBudget}>
-                  <SelectTrigger aria-invalid={!!errors.budget}>
-                    <SelectValue placeholder="選択してください" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="small">〜100万円</SelectItem>
-                    <SelectItem value="medium">100万〜500万円</SelectItem>
-                    <SelectItem value="large">500万〜1000万円</SelectItem>
-                    <SelectItem value="enterprise">1000万円〜</SelectItem>
-                  </SelectContent>
-                </Select>
+                <ResponsiveSelect
+                  value={budget}
+                  onValueChange={setBudget}
+                  options={budgetOptions}
+                  placeholder="選択してください"
+                  aria-invalid={!!errors.budget}
+                />
                 {errors.budget && (
                   <p className="text-xs text-destructive">{errors.budget}</p>
                 )}

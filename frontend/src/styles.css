@@ -5,7 +5,7 @@
 @import "@fontsource-variable/noto-sans";
 @import "./theme.generated.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *, .theme-preview-dark, .theme-preview-dark *):not(:where(.theme-preview-light, .theme-preview-light *)));
 
 * {
     box-sizing: border-box;

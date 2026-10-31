@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,13 +21,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -41,6 +35,14 @@ import { Textarea } from "@/components/ui/textarea";
 export const Route = createFileRoute("/_app/showcase/detail")({
   component: DetailPage,
 });
+
+const projectStatusOptions = [
+  { value: "draft", label: "下書き" },
+  { value: "in_progress", label: "進行中" },
+  { value: "review", label: "レビュー中" },
+  { value: "completed", label: "完了" },
+  { value: "cancelled", label: "キャンセル" },
+];
 
 interface LineItem {
   id: number;
@@ -419,18 +421,11 @@ function DetailPage() {
               <CardTitle className="text-sm">ステータス</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">下書き</SelectItem>
-                  <SelectItem value="in_progress">進行中</SelectItem>
-                  <SelectItem value="review">レビュー中</SelectItem>
-                  <SelectItem value="completed">完了</SelectItem>
-                  <SelectItem value="cancelled">キャンセル</SelectItem>
-                </SelectContent>
-              </Select>
+              <ResponsiveSelect
+                value={status}
+                onValueChange={setStatus}
+                options={projectStatusOptions}
+              />
             </CardContent>
           </Card>
 

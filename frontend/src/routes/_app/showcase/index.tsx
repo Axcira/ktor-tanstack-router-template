@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   AlertCircle,
+  AlertTriangle,
+  Check,
   DollarSign,
+  Info,
   Loader2,
   Package,
   RefreshCw,
@@ -37,6 +40,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { notificationToastClass } from "@/lib/theme-tokens";
 
 export const Route = createFileRoute("/_app/showcase/")({
   component: DashboardPage,
@@ -160,6 +164,46 @@ function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">セマンティックステータス</CardTitle>
+          <CardDescription>
+            success / info / warning トークン（バッジとインライン通知）
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Badge className="bg-success-container text-success-container-foreground border border-outline-variant">
+              成功
+            </Badge>
+            <Badge className="bg-info-container text-info-container-foreground border border-outline-variant">
+              情報
+            </Badge>
+            <Badge className="bg-warning-container text-warning-container-foreground border border-outline-variant">
+              注意
+            </Badge>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div
+              className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${notificationToastClass("success")}`}
+            >
+              <Check className="size-4 shrink-0" />
+              処理が完了しました
+            </div>
+            <div
+              className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${notificationToastClass("info")}`}
+            >
+              <Info className="size-4 shrink-0" />
+              新しいお知らせがあります
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border border-outline-variant bg-warning-container p-3 text-sm text-warning-container-foreground">
+              <AlertTriangle className="size-4 shrink-0" />
+              在庫がしきい値を下回りました
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

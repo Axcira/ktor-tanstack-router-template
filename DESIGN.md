@@ -9,7 +9,7 @@ Material Design 3–inspired **tokens only** — no MD3 components. The stack st
 | `frontend/src/theme.generated.css` | `bun run --cwd frontend theme` | No |
 | `frontend/src/styles.css` (shape tokens) | Maintained in repo | Yes (shape only) |
 
-`bun run frontend:check` runs `theme:check` and `radius:check`.
+`bun run frontend:check` runs `theme:check`, `radius:check`, and `select:check`.
 
 ## Theme generator
 
@@ -39,8 +39,10 @@ Each semantic seed is harmonized toward the primary source via MD3 `customColor(
 
 Preview scopes for the settings theme picker:
 
-- `.theme-preview-light` — same variables as `:root`
-- `.theme-preview-dark` — same variables as `.dark`
+- `.theme-preview-light` — same variables as `:root`, `color-scheme: light`
+- `.theme-preview-dark` — same variables as `.dark`, `color-scheme: dark`
+
+Tailwind `dark:` utilities are scoped in `frontend/src/styles.css` so they follow the app theme **except** inside `.theme-preview-light` (light preview stays light when the app is dark). `.theme-preview-dark` is treated as a dark context when the app is light.
 
 ## Color token mapping (MD3 → app)
 
@@ -82,4 +84,20 @@ Enforcement: `frontend/scripts/radius-check.ts` (part of `bun run frontend:check
 - Use semantic color classes: `bg-background`, `text-primary`, `border-border`, `bg-primary-container`, `text-success`, etc.
 - Do **not** use raw Tailwind palette utilities (`bg-gray-100`, `text-red-500`, …) or hard-coded hex in app code.
 - Prefer `frontend/src/lib/theme-tokens.ts` for repeated patterns (form errors, toasts, role badges).
-- Use `ResponsiveSelect` (`frontend/src/components/ResponsiveSelect.tsx`) instead of raw `<select>` in app code — native on coarse pointers, shadcn Select on fine pointers.
+- Use `ResponsiveSelect` (`frontend/src/components/ResponsiveSelect.tsx`) for every dropdown in app routes and feature components — not raw `<select>` and not direct imports from `@/components/ui/select`. Native `<select>` on coarse pointers, shadcn Select on fine pointers.
+
+Enforcement: `frontend/scripts/select-check.ts` (part of `bun run frontend:check`).
+
+### Semantic status colors (`success`, `info`, `warning`)
+
+| Location | Usage |
+| --- | --- |
+| `lib/theme-tokens.ts` | `roleBadgeClass` (Editor → info, Writer → warning containers); `notificationToastClass` (success/info/error inline banners) |
+| `Header.tsx` | User menu role chip (`bg-info-container`) |
+| `UsersTable.tsx` | Role badges via `roleBadgeClass` |
+| `permissions/roles/index.tsx` | Copy-role notification banner via `notificationToastClass` |
+| Showcase upload | Upload stats (`text-success`, `text-info`) and completed-row icon |
+| Showcase form | Success state hero icon (`text-success`) |
+| Showcase dashboard | Reference badges and status banners (success / info / warning containers) |
+
+Sonner toasts use the Sonner component styling (`toast.success` / `info` / `warning`); they do not use the CSS `--success` / `--info` / `--warning` variables unless wrapped with `notificationToastClass`.

@@ -122,6 +122,7 @@
 }
 
 .theme-preview-light {
+    color-scheme: light;
     --background: #faf8ff;
     --foreground: #1a1b21;
     --card: #f4f3fa;
@@ -182,6 +183,7 @@
 }
 
 .theme-preview-dark {
+    color-scheme: dark;
     --background: #121318;
     --foreground: #e3e2e9;
     --card: #1a1b21;

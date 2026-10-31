@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,13 +36,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -59,6 +53,19 @@ export const Route = createFileRoute("/_app/showcase/table")({
 });
 
 type Status = "active" | "inactive" | "pending";
+
+const statusFilterOptions = [
+  { value: "all", label: "すべて" },
+  { value: "active", label: "有効" },
+  { value: "inactive", label: "無効" },
+  { value: "pending", label: "保留" },
+];
+
+const customerStatusOptions = [
+  { value: "active", label: "有効" },
+  { value: "inactive", label: "無効" },
+  { value: "pending", label: "保留" },
+];
 
 interface Customer {
   id: string;
@@ -260,23 +267,16 @@ function TablePage() {
             className="pl-8"
           />
         </div>
-        <Select
+        <ResponsiveSelect
           value={statusFilter}
           onValueChange={(v) => {
             setStatusFilter(v);
             setPage(1);
           }}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="ステータス" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">すべて</SelectItem>
-            <SelectItem value="active">有効</SelectItem>
-            <SelectItem value="inactive">無効</SelectItem>
-            <SelectItem value="pending">保留</SelectItem>
-          </SelectContent>
-        </Select>
+          options={statusFilterOptions}
+          placeholder="ステータス"
+          triggerClassName="w-32"
+        />
       </div>
 
       {/* Table */}
@@ -607,19 +607,11 @@ function TablePage() {
                     </div>
                     <div className="space-y-2">
                       <Label>ステータス</Label>
-                      <Select
+                      <ResponsiveSelect
                         value={editStatus}
                         onValueChange={(v) => setEditStatus(v as Status)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">有効</SelectItem>
-                          <SelectItem value="inactive">無効</SelectItem>
-                          <SelectItem value="pending">保留</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        options={customerStatusOptions}
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">

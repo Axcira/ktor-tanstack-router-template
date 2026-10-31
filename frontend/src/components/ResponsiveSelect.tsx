@@ -27,6 +27,7 @@ type ResponsiveSelectProps = {
   className?: string;
   triggerClassName?: string;
   "aria-label"?: string;
+  "aria-invalid"?: boolean;
 };
 
 export function ResponsiveSelect({
@@ -39,6 +40,7 @@ export function ResponsiveSelect({
   className,
   triggerClassName,
   "aria-label": ariaLabel,
+  "aria-invalid": ariaInvalid,
 }: ResponsiveSelectProps) {
   const coarse = useCoarsePointer();
 
@@ -47,6 +49,7 @@ export function ResponsiveSelect({
       <select
         id={id}
         aria-label={ariaLabel}
+        aria-invalid={ariaInvalid || undefined}
         value={value}
         disabled={disabled}
         onChange={(event) => onValueChange(event.target.value)}
@@ -75,6 +78,7 @@ export function ResponsiveSelect({
       <SelectTrigger
         id={id}
         aria-label={ariaLabel}
+        aria-invalid={ariaInvalid}
         className={cn("w-full", triggerClassName, className)}
       >
         <SelectValue placeholder={placeholder} />

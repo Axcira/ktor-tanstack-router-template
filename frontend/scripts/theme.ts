@@ -349,10 +349,12 @@ ${darkBlock}
 }
 
 .theme-preview-light {
+    color-scheme: light;
 ${lightBlock}
 }
 
 .theme-preview-dark {
+    color-scheme: dark;
 ${darkBlock}
 }
 `;
