@@ -306,7 +306,7 @@ function inputColor(scheme: DynamicScheme, isDark: boolean): string {
   if (isDark) {
     return "rgba(255, 255, 255, 0.16)";
   }
-  return pick(scheme, "outlineVariant");
+  return pick(scheme, "surfaceContainerHighest");
 }
 
 function buildSchemeBlock(
