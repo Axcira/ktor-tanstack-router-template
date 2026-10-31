@@ -110,7 +110,7 @@ export function ArticlesListView({
                   {article.tagList.map((tag) => (
                     <span
                       key={tag.id}
-                      className="px-2 py-0.5 bg-secondary text-secondary-foreground rounded text-[10px] font-medium"
+                      className="px-2 py-0.5 bg-secondary text-secondary-foreground rounded-sm text-[10px] font-medium"
                     >
                       #{tag.name}
                     </span>

@@ -10,6 +10,8 @@ import {
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { notificationToastClass } from "@/lib/theme-tokens";
+import { cn } from "@/lib/utils";
 import { Route as rolesLayoutRoute } from "../roles";
 import { DeleteRoleDialog } from "./-components/DeleteRoleDialog";
 import { RoleCard } from "./-components/RoleCard";
@@ -92,13 +94,10 @@ function RolesPage() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {notification && (
         <div
-          className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm animate-in fade-in slide-in-from-bottom-5 duration-300 ${
-            notification.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:text-emerald-400"
-              : notification.type === "info"
-                ? "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/30 dark:border-blue-900/50 dark:text-blue-400"
-                : "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400"
-          }`}
+          className={cn(
+            "fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm animate-in fade-in slide-in-from-bottom-5 duration-300",
+            notificationToastClass(notification.type),
+          )}
         >
           {notification.type === "success" && <Check className="h-4 w-4" />}
           {notification.type === "info" && <Info className="h-4 w-4" />}
@@ -126,7 +125,7 @@ function RolesPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-xl border">
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-lg border">
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

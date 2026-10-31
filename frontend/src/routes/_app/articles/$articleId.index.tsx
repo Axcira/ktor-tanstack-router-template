@@ -49,7 +49,7 @@ function ArticleDetail({ article }: { article: ArticleDTO }) {
             {article.tagList.map((tag) => (
               <span
                 key={tag.id}
-                className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs font-medium"
+                className="px-2 py-1 bg-secondary text-secondary-foreground rounded-sm text-xs font-medium"
               >
                 #{tag.name}
               </span>
@@ -81,7 +81,7 @@ function ArticleDetail({ article }: { article: ArticleDTO }) {
           )}
         </div>
 
-        <div className="prose prose-slate dark:prose-invert max-w-none py-4 text-foreground leading-7 whitespace-pre-wrap">
+        <div className="prose dark:prose-invert max-w-none py-4 text-foreground leading-7 whitespace-pre-wrap">
           {article.body}
         </div>
       </article>

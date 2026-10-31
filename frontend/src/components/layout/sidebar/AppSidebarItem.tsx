@@ -44,7 +44,7 @@ export default function AppSidebarItem({ item }: { item: MenuItem }) {
             <PopoverContent
               side="right"
               align="start"
-              className="w-48 p-1 rounded-md gap-1"
+              className="w-48 p-1 rounded-lg gap-1"
             >
               <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                 {item.text}

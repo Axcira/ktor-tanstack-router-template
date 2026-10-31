@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, Info, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,13 +43,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -62,6 +56,14 @@ import { Textarea } from "@/components/ui/textarea";
 export const Route = createFileRoute("/_app/showcase/modals")({
   component: ModalsPage,
 });
+
+const projectStatusOptions = [
+  { value: "draft", label: "下書き" },
+  { value: "in_progress", label: "進行中" },
+  { value: "review", label: "レビュー中" },
+  { value: "completed", label: "完了" },
+  { value: "cancelled", label: "キャンセル" },
+];
 
 function ModalsPage() {
   const [editName, setEditName] = useState("田中太郎");
@@ -257,22 +259,13 @@ function ModalsPage() {
                 <div className="px-4 pb-4">
                   <div className="space-y-4 max-w-sm mx-auto">
                     <div className="space-y-2">
-                      <Label>現在のステータス</Label>
-                      <Select
+                      <Label htmlFor="drawer-status">現在のステータス</Label>
+                      <ResponsiveSelect
+                        id="drawer-status"
                         value={drawerStatus}
                         onValueChange={setDrawerStatus}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">下書き</SelectItem>
-                          <SelectItem value="in_progress">進行中</SelectItem>
-                          <SelectItem value="review">レビュー中</SelectItem>
-                          <SelectItem value="completed">完了</SelectItem>
-                          <SelectItem value="cancelled">キャンセル</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        options={projectStatusOptions}
+                      />
                     </div>
                   </div>
                 </div>

@@ -21,7 +21,7 @@ function WelcomeMessage() {
       </h1>
       <p className="mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
         Edit{" "}
-        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm font-semibold">
+        <code className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-sm font-semibold">
           src/routes/index.tsx
         </code>{" "}
         to get started.
@@ -39,7 +39,7 @@ function AuthButtons() {
         <Button
           asChild
           size="lg"
-          className="h-12 px-8 text-base bg-primary text-primary-foreground rounded hover:opacity-90 shadow-md transition-all"
+          className="h-12 px-8 text-base bg-primary text-primary-foreground rounded-md hover:opacity-90 shadow-md transition-all"
         >
           <Link to="/login">ログイン</Link>
         </Button>

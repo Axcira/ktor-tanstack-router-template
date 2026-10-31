@@ -87,7 +87,7 @@ function RoleEditPage() {
         </div>
       </div>
 
-      <div className="border rounded-xl p-6 bg-card shadow-sm">
+      <div className="border rounded-lg p-6 bg-card shadow-sm">
         <RoleForm
           initialValues={initialValues}
           onSubmit={handleSubmit}

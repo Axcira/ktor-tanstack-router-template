@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formErrorBannerClass } from "@/lib/theme-tokens";
 
 const MIN_LENGTH = 8;
 
@@ -72,7 +73,7 @@ export default function PasswordForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto w-full max-w-md space-y-4 rounded-xl border bg-card p-6 text-left shadow-sm"
+      className="mx-auto w-full max-w-md space-y-4 rounded-lg border bg-card p-6 text-left shadow-sm"
     >
       <div className="space-y-1">
         <h2 className="text-xl font-semibold">パスワード</h2>
@@ -81,10 +82,7 @@ export default function PasswordForm() {
         </p>
       </div>
       {errorMessage && (
-        <div
-          role="alert"
-          className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-400"
-        >
+        <div role="alert" className={formErrorBannerClass()}>
           {errorMessage}
         </div>
       )}

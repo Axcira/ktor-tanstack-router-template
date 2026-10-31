@@ -24,14 +24,14 @@ export default function AppearanceForm() {
         }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
       >
-        <Label className="cursor-pointer group relative flex flex-col rounded-xl border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
           <RadioGroupItem value="light" className="sr-only" />
 
-          <div className="h-[140px] rounded-t-[10px] bg-zinc-100 border-b border-border p-4 overflow-hidden">
+          <div className="theme-preview-light h-[140px] rounded-t-lg border-b border-border bg-background p-4 overflow-hidden text-foreground">
             <div className="flex items-center justify-between mb-6">
               <div className="flex gap-2">
-                <div className="h-2 w-10 rounded-full bg-zinc-300" />
-                <div className="h-2 w-10 rounded-full bg-zinc-300" />
+                <div className="h-2 w-10 rounded-full bg-muted" />
+                <div className="h-2 w-10 rounded-full bg-muted" />
               </div>
               <div className="flex gap-1.5">
                 <div className="h-2 w-2 rounded-sm bg-destructive/80" />
@@ -39,8 +39,8 @@ export default function AppearanceForm() {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="h-2 w-16 rounded-full bg-zinc-300" />
-              <div className="flex h-3 w-full overflow-hidden rounded-sm bg-zinc-300/60">
+              <div className="h-2 w-16 rounded-full bg-muted" />
+              <div className="flex h-3 w-full overflow-hidden rounded-sm bg-muted/60">
                 <div className="h-full w-[40%] bg-primary/90" />
               </div>
             </div>
@@ -61,14 +61,14 @@ export default function AppearanceForm() {
           </div>
         </Label>
 
-        <Label className="cursor-pointer group relative flex flex-col rounded-xl border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
           <RadioGroupItem value="dark" className="sr-only" />
 
-          <div className="h-[140px] rounded-t-[10px] bg-zinc-950 border-b border-border p-4 overflow-hidden">
+          <div className="theme-preview-dark h-[140px] rounded-t-lg bg-background border-b border-border p-4 overflow-hidden text-foreground">
             <div className="flex items-center justify-between mb-6">
               <div className="flex gap-2">
-                <div className="h-2 w-10 rounded-full bg-zinc-800" />
-                <div className="h-2 w-10 rounded-full bg-zinc-800" />
+                <div className="h-2 w-10 rounded-full bg-muted" />
+                <div className="h-2 w-10 rounded-full bg-muted" />
               </div>
               <div className="flex gap-1.5">
                 <div className="h-2 w-2 rounded-sm bg-destructive" />
@@ -76,8 +76,8 @@ export default function AppearanceForm() {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="h-2 w-16 rounded-full bg-zinc-800" />
-              <div className="flex h-3 w-full overflow-hidden rounded-sm bg-zinc-800">
+              <div className="h-2 w-16 rounded-full bg-muted" />
+              <div className="flex h-3 w-full overflow-hidden rounded-sm bg-muted/60">
                 <div className="h-full w-[40%] bg-primary" />
               </div>
             </div>
@@ -98,22 +98,22 @@ export default function AppearanceForm() {
           </div>
         </Label>
 
-        <Label className="cursor-pointer group relative flex flex-col rounded-xl border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
           <RadioGroupItem value="system" className="sr-only" />
 
-          <div className="flex h-[140px] rounded-t-[10px] border-b border-border overflow-hidden">
-            <div className="flex-1 bg-zinc-100 p-4 border-r border-border">
+          <div className="flex h-[140px] rounded-t-lg border-b border-border overflow-hidden">
+            <div className="theme-preview-light flex-1 border-r border-border bg-background p-4 text-foreground">
               <div className="flex items-center mb-6">
-                <div className="h-2 w-8 rounded-full bg-zinc-300" />
+                <div className="h-2 w-8 rounded-full bg-muted" />
               </div>
               <div className="space-y-3">
-                <div className="h-2 w-12 rounded-full bg-zinc-300" />
-                <div className="flex h-3 w-full overflow-hidden rounded-sm bg-zinc-300/60">
+                <div className="h-2 w-12 rounded-full bg-muted" />
+                <div className="flex h-3 w-full overflow-hidden rounded-sm bg-muted/60">
                   <div className="h-full w-[60%] bg-primary/80" />
                 </div>
               </div>
             </div>
-            <div className="flex-1 bg-zinc-950 p-4">
+            <div className="theme-preview-dark flex-1 bg-background p-4 text-foreground">
               <div className="flex items-center justify-end mb-6">
                 <div className="flex gap-1.5">
                   <div className="h-2 w-2 rounded-sm bg-destructive" />
@@ -121,8 +121,8 @@ export default function AppearanceForm() {
                 </div>
               </div>
               <div className="space-y-3">
-                <div className="h-2 w-12 rounded-full bg-zinc-800" />
-                <div className="flex h-3 w-full overflow-hidden rounded-sm bg-zinc-800">
+                <div className="h-2 w-12 rounded-full bg-muted" />
+                <div className="flex h-3 w-full overflow-hidden rounded-sm bg-muted/60">
                   <div className="h-full w-[60%] bg-primary" />
                 </div>
               </div>
