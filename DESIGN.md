@@ -84,6 +84,7 @@ Enforcement: `frontend/scripts/radius-check.ts` (part of `bun run frontend:check
 ## UI coding rules
 
 - Use semantic color classes: `bg-background`, `text-primary`, `border-border`, `bg-primary-container`, `text-success`, etc.
+- `frontend/src/components/ui/` is shadcn code owned by this project. Edit it directly so components follow these rules (semantic tokens, the shape scale). It is not generated output to leave untouched. Biome ignores that directory.
 - Do **not** use raw Tailwind palette utilities (`bg-gray-100`, `text-red-500`, …) or hard-coded hex in app code.
 - Prefer `frontend/src/lib/theme-tokens.ts` for repeated patterns (form errors, toasts, role badges).
 - Use `ResponsiveSelect` (`frontend/src/components/ResponsiveSelect.tsx`) for every dropdown in app routes and feature components — not raw `<select>` and not direct imports from `@/components/ui/select`. Native `<select>` on coarse pointers, shadcn Select on fine pointers.

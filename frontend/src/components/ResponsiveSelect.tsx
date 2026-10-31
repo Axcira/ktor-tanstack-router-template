@@ -28,6 +28,7 @@ type ResponsiveSelectProps = {
   triggerClassName?: string;
   "aria-label"?: string;
   "aria-invalid"?: boolean;
+  required?: boolean;
 };
 
 export function ResponsiveSelect({
@@ -41,6 +42,7 @@ export function ResponsiveSelect({
   triggerClassName,
   "aria-label": ariaLabel,
   "aria-invalid": ariaInvalid,
+  required,
 }: ResponsiveSelectProps) {
   const coarse = useCoarsePointer();
 
@@ -50,6 +52,8 @@ export function ResponsiveSelect({
         id={id}
         aria-label={ariaLabel}
         aria-invalid={ariaInvalid || undefined}
+        aria-required={required || undefined}
+        required={required}
         value={value}
         disabled={disabled}
         onChange={(event) => onValueChange(event.target.value)}
@@ -74,12 +78,23 @@ export function ResponsiveSelect({
   }
 
   return (
-    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+    // `required` is also set on the trigger below. The prop is not in the button
+    // type, so it is passed through a narrow assertion; Radix forwards it.
+    <Select
+      value={value}
+      onValueChange={onValueChange}
+      disabled={disabled}
+      required={required}
+    >
       <SelectTrigger
         id={id}
         aria-label={ariaLabel}
         aria-invalid={ariaInvalid}
+        aria-required={required || undefined}
         className={cn("w-full", triggerClassName, className)}
+        {...(required
+          ? ({ required: true } as { "aria-required"?: boolean })
+          : {})}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

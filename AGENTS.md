@@ -15,7 +15,7 @@ From the repository root, after `bun install`:
 | Vite on :3000 (`/api` → :8080) | `bun run frontend:dev` |
 | Backend test + ktlint | `bun run backend:check` |
 | Frontend lint + format | `bun run frontend:check` |
-| Regenerate MD3 theme CSS | `bun run frontend:theme` (`frontend/theme:check` via `frontend:check`) |
+| Regenerate MD3 theme CSS | `bun run frontend:theme` (`theme:check` runs inside `bun run frontend:check`) |
 | Frontend types | `bun run frontend:typecheck` |
 | Frontend tests | `bun run frontend:test` |
 | OpenAPI + Orval client | `bun run generate:client` |
@@ -30,7 +30,7 @@ From the repository root, after `bun install`:
 
 Commit the generated client. CI runs `bun run orval:drift` in the `docker` job (using the OpenAPI artifact from `backend`, without Gradle) and fails on drift. After an Orval upgrade, pin the version, regenerate, and commit the client.
 
-`frontend/src/components/ui/` is shadcn output. Biome ignores it. Change it only to add or refresh a component.
+`frontend/src/components/ui/` is shadcn code owned by this project by design. Edit those components directly so they follow [DESIGN.md](DESIGN.md) (tokens, radius, and the other UI rules). Biome ignores that directory, so format those edits by hand.
 
 ## Backend
 
@@ -74,7 +74,7 @@ Confirmations and errors use Dialog, AlertDialog, or Sonner. Do not call `window
 
 Biome uses double quotes and 2-space indent. Lint and assist skip `src/api/generated/`; format-check still applies. Orval's `afterAllFilesWrite` hook formats generated files.
 
-**Design tokens:** Do not hand-edit `frontend/src/theme.generated.css`. Regenerate with `bun run frontend:theme`. Color, shape, generator flags, and UI rules live in [DESIGN.md](../DESIGN.md). `bun run frontend:check` includes `theme:check` and `radius:check`.
+**Design tokens:** Do not hand-edit `frontend/src/theme.generated.css`. Regenerate with `bun run frontend:theme`. Color, shape, generator flags, and UI rules live in [DESIGN.md](DESIGN.md). `bun run frontend:check` includes `theme:check` and `radius:check`.
 
 Tests are Vitest + Testing Library + MSW. Shared setup is `src/test/`. Cover session shortcuts and `can-i` UI reactions here. Leave compound permission matrices to backend tests.
 

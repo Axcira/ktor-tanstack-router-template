@@ -28,6 +28,11 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
+/** `<select` opening tag, including a tag name left at end of line. */
+export function lineHasOpenSelect(line: string): boolean {
+  return /<select(?:[\s>/]|$)/.test(line);
+}
+
 function main() {
   const files = walk(srcRoot);
   const issues: string[] = [];
@@ -37,9 +42,9 @@ function main() {
     const text = readFileSync(file, "utf8");
     const lines = text.split("\n");
 
-    if (rel !== ALLOWED_SELECT_TAG && /<select[\s>]/.test(text)) {
+    if (rel !== ALLOWED_SELECT_TAG && lines.some(lineHasOpenSelect)) {
       for (let i = 0; i < lines.length; i++) {
-        if (/<select[\s>]/.test(lines[i])) {
+        if (lineHasOpenSelect(lines[i])) {
           issues.push(`${rel}:${i + 1}  raw <select> — use ResponsiveSelect`);
         }
       }

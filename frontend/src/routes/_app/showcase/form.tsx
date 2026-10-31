@@ -225,10 +225,11 @@ function FormPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="industry">
                   業種 <span className="text-destructive">*</span>
                 </Label>
                 <ResponsiveSelect
+                  id="industry"
                   value={industry}
                   onValueChange={setIndustry}
                   options={industryOptions}
@@ -240,10 +241,11 @@ function FormPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="budget">
                   予算規模 <span className="text-destructive">*</span>
                 </Label>
                 <ResponsiveSelect
+                  id="budget"
                   value={budget}
                   onValueChange={setBudget}
                   options={budgetOptions}

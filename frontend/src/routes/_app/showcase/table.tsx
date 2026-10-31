@@ -268,6 +268,7 @@ function TablePage() {
           />
         </div>
         <ResponsiveSelect
+          aria-label="ステータス"
           value={statusFilter}
           onValueChange={(v) => {
             setStatusFilter(v);
@@ -606,8 +607,9 @@ function TablePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>ステータス</Label>
+                      <Label htmlFor="edit-status">ステータス</Label>
                       <ResponsiveSelect
+                        id="edit-status"
                         value={editStatus}
                         onValueChange={(v) => setEditStatus(v as Status)}
                         options={customerStatusOptions}

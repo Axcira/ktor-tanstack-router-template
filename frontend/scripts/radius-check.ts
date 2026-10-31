@@ -1,6 +1,10 @@
 #!/usr/bin/env bun
 /**
  * Ensures Tailwind radius classes stick to the 4-level scale (+ pill / none).
+ *
+ * Variant prefixes are stripped at the last top-level `:`, so colons inside
+ * `[]` (arbitrary variants, data attributes) stay with the prefix. Leading and
+ * trailing `!` on the utility are ignored.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
@@ -13,8 +17,98 @@ const srcRoot = join(frontendRoot, "src");
 const ALLOWED_SIZE = new Set(["sm", "md", "lg", "xl", "full", "none"]);
 const CORNERS = ["t", "b", "l", "r", "s", "e", "tl", "tr", "bl", "br"];
 
-const ROUNDED_RE =
-  /(?:^|[\s"'`])((?:[a-z0-9_-]+:)*rounded(?:-[a-z0-9\[\]-]+)?)/g;
+export type RadiusIssue = {
+  line: number;
+  token: string;
+  reason: string;
+};
+
+/** Split source into class-like tokens, keeping `[...]` groups intact. */
+export function classTokens(source: string): string[] {
+  const tokens: string[] = [];
+  let depth = 0;
+  let current = "";
+  const flush = () => {
+    if (current) tokens.push(current);
+    current = "";
+  };
+  for (const ch of source) {
+    if (ch === "[") {
+      depth++;
+      current += ch;
+      continue;
+    }
+    if (ch === "]" && depth > 0) {
+      depth--;
+      current += ch;
+      continue;
+    }
+    if (depth === 0 && /[\s"'`{}(),;=]/.test(ch)) {
+      flush();
+      continue;
+    }
+    current += ch;
+  }
+  flush();
+  return tokens;
+}
+
+/** Utility name after the last top-level variant `:`, without `!`. */
+export function radiusUtility(classToken: string): string | null {
+  let depth = 0;
+  let lastColon = -1;
+  for (let i = 0; i < classToken.length; i++) {
+    const ch = classToken[i];
+    if (ch === "[") depth++;
+    else if (ch === "]" && depth > 0) depth--;
+    else if (ch === ":" && depth === 0) lastColon = i;
+  }
+  let segment =
+    lastColon === -1 ? classToken : classToken.slice(lastColon + 1);
+  segment = segment.replace(/^!+/, "").replace(/!+$/, "");
+  if (!segment.startsWith("rounded")) return null;
+  return segment;
+}
+
+export function validateRadiusUtility(utility: string): string | null {
+  if (utility === "rounded") {
+    return "use rounded-sm|md|lg|xl|full|none instead of bare rounded";
+  }
+  if (utility.includes("[")) {
+    return "arbitrary radius is not allowed (rounded-[…])";
+  }
+  const rest = utility.slice("rounded-".length);
+  if (!rest) return null;
+  if (ALLOWED_SIZE.has(rest)) return null;
+  if (["2xl", "3xl", "4xl"].includes(rest)) {
+    return `rounded-${rest} is not in the shape scale`;
+  }
+  for (const corner of CORNERS) {
+    if (rest.startsWith(`${corner}-`)) {
+      const size = rest.slice(corner.length + 1);
+      if (ALLOWED_SIZE.has(size)) return null;
+      if (["2xl", "3xl", "4xl"].includes(size)) {
+        return `rounded-${rest} is not in the shape scale`;
+      }
+      return `rounded-${rest} uses disallowed size "${size}"`;
+    }
+  }
+  return `unrecognized radius class "${utility}"`;
+}
+
+export function radiusIssuesInSource(text: string): RadiusIssue[] {
+  const issues: RadiusIssue[] = [];
+  const lines = text.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    for (const token of classTokens(lines[i])) {
+      const utility = radiusUtility(token);
+      if (!utility) continue;
+      const reason = validateRadiusUtility(utility);
+      if (reason) issues.push({ line: i + 1, token, reason });
+    }
+  }
+  return issues;
+}
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -31,56 +125,12 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-function validateToken(token: string): string | null {
-  const bare = token.replace(/^[a-z0-9_-]+:/, "");
-  if (bare === "rounded") {
-    return "use rounded-sm|md|lg|xl|full|none instead of bare rounded";
-  }
-  if (bare.includes("[")) {
-    return "arbitrary radius is not allowed (rounded-[…])";
-  }
-  const rest = bare.slice("rounded-".length);
-  if (!rest) return null;
-  if (ALLOWED_SIZE.has(rest)) return null;
-  if (["2xl", "3xl", "4xl"].includes(rest)) {
-    return `rounded-${rest} is not in the shape scale`;
-  }
-  for (const corner of CORNERS) {
-    if (rest.startsWith(`${corner}-`)) {
-      const size = rest.slice(corner.length + 1);
-      if (ALLOWED_SIZE.has(size)) return null;
-      if (["2xl", "3xl", "4xl"].includes(size)) {
-        return `rounded-${rest} is not in the shape scale`;
-      }
-      return `rounded-${rest} uses disallowed size "${size}"`;
-    }
-  }
-  return `unrecognized radius class "${bare}"`;
-}
-
-function checkFile(path: string): { line: number; token: string; reason: string }[] {
-  const text = readFileSync(path, "utf8");
-  const lines = text.split("\n");
-  const issues: { line: number; token: string; reason: string }[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    for (const match of line.matchAll(ROUNDED_RE)) {
-      const token = match[1];
-      const reason = validateToken(token);
-      if (reason) {
-        issues.push({ line: i + 1, token, reason });
-      }
-    }
-  }
-  return issues;
-}
-
 function main() {
   const files = walk(srcRoot);
-  const all: { file: string; line: number; token: string; reason: string }[] =
-    [];
+  const all: (RadiusIssue & { file: string })[] = [];
   for (const file of files) {
-    for (const issue of checkFile(file)) {
+    const text = readFileSync(file, "utf8");
+    for (const issue of radiusIssuesInSource(text)) {
       all.push({ file: relative(frontendRoot, file), ...issue });
     }
   }

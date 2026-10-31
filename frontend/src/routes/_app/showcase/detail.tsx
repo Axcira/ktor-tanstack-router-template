@@ -422,6 +422,7 @@ function DetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <ResponsiveSelect
+                aria-label="ステータス"
                 value={status}
                 onValueChange={setStatus}
                 options={projectStatusOptions}

@@ -134,6 +134,7 @@ export default function UserForm({
             disabled={isSubmitting || isLoadingRoles}
             placeholder="ロールを選択してください"
             triggerClassName="h-10"
+            required
             options={[
               {
                 value: "0",

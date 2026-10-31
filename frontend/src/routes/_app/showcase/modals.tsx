@@ -259,8 +259,9 @@ function ModalsPage() {
                 <div className="px-4 pb-4">
                   <div className="space-y-4 max-w-sm mx-auto">
                     <div className="space-y-2">
-                      <Label>現在のステータス</Label>
+                      <Label htmlFor="drawer-status">現在のステータス</Label>
                       <ResponsiveSelect
+                        id="drawer-status"
                         value={drawerStatus}
                         onValueChange={setDrawerStatus}
                         options={projectStatusOptions}

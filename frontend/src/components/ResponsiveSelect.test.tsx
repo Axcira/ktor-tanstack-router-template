@@ -52,4 +52,40 @@ describe("ResponsiveSelect", () => {
     );
     expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
+
+  it("forwards id, required, and aria-required to the native select", () => {
+    mockCoarsePointer(true);
+    render(
+      <ResponsiveSelect
+        id="user-role"
+        value=""
+        onValueChange={() => {}}
+        options={options}
+        required
+      />,
+    );
+    const select = screen.getByRole("combobox");
+    expect(select.tagName).toBe("SELECT");
+    expect(select).toHaveAttribute("id", "user-role");
+    expect(select).toBeRequired();
+    expect(select).toHaveAttribute("aria-required", "true");
+  });
+
+  it("forwards id, required, and aria-required to the shadcn trigger", () => {
+    mockCoarsePointer(false);
+    render(
+      <ResponsiveSelect
+        id="user-role"
+        value="all"
+        onValueChange={() => {}}
+        options={options}
+        aria-label="割り当てるロール"
+        required
+      />,
+    );
+    const trigger = screen.getByRole("combobox");
+    expect(trigger).toHaveAttribute("id", "user-role");
+    expect(trigger).toHaveAttribute("required");
+    expect(trigger).toHaveAttribute("aria-required", "true");
+  });
 });
