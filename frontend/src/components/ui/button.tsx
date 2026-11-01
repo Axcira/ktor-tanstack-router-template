@@ -7,10 +7,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        elevated: "bg-surface-container text-primary hover:bg-primary hover:text-primary-foreground",
+        filled: "bg-primary text-on-primary hover:brightness-110 transition-all",
         outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-transparent dark:hover:bg-input/30",
-        tertiary: "bg-tertiary text-tertiary-foreground hover:bg-tertiary/80",
+          "border-outline-variant bg-transparent text-on-surface-variant hover:bg-surface-variant hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+        tertiary: "bg-tertiary text-tertiary-foreground hover:brightness-110 transition-all",
         secondary:
           "bg-secondary text-secondary-foreground aria-expanded:bg-secondary aria-expanded:text-secondary-foreground hover:bg-secondary/80",
         ghost:
@@ -30,18 +31,24 @@ const buttonVariants = cva(
         "icon-sm": "size-8",
         "icon-lg": "size-10",
       },
+      shape: {
+        round: "rounded-full",
+        square: "rounded-md",
+      },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "elevated",
       size: "default",
+      shape: "square",
     },
   }
 )
 
 function Button({
   className,
-  variant = "default",
+  variant = "elevated",
   size = "default",
+  shape = "square",
   nativeButton,
   render,
   ...props
@@ -50,8 +57,9 @@ function Button({
     <ButtonPrimitive
       data-slot="button"
       data-variant={variant}
+      data-shape={shape}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, shape, className }))}
       nativeButton={nativeButton ?? rendersNativeButton(render)}
       render={render}
       {...props}

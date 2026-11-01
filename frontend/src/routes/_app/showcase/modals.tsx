@@ -93,7 +93,7 @@ function ModalsPage() {
             <Dialog>
               <DialogTrigger
                 render={
-                  <Button variant="outline">
+                  <Button variant="elevated">
                     <Pencil className="size-4 mr-2" />
                     顧客情報を編集
                   </Button>
@@ -192,7 +192,7 @@ function ModalsPage() {
             <Sheet>
               <SheetTrigger
                 render={
-                  <Button variant="outline">
+                  <Button variant="filled">
                     <Info className="size-4 mr-2" />
                     詳細パネルを開く
                   </Button>
