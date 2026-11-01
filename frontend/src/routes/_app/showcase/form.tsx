@@ -127,7 +127,7 @@ function FormPage() {
 
   if (submitted) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+      <div className="container mx-auto p-6 flex items-center justify-center min-h-[60vh]">
         <Card className="max-w-md w-full text-center">
           <CardContent className="py-12">
             <CheckCircle2 className="size-16 text-success mx-auto mb-4" />
@@ -144,7 +144,7 @@ function FormPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
+    <div className="container mx-auto p-6 max-w-2xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">新規案件登録</h1>

@@ -140,7 +140,7 @@ function DetailPage() {
 
   if (viewState === "loading") {
     return (
-      <div className="p-6 space-y-6">
+      <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-64" />
           <div className="flex gap-1 border rounded-md p-0.5">
@@ -190,7 +190,7 @@ function DetailPage() {
 
   if (viewState === "error") {
     return (
-      <div className="p-6 space-y-6">
+      <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">案件詳細</h1>
           <div className="flex gap-1 border rounded-md p-0.5">
@@ -234,7 +234,7 @@ function DetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">

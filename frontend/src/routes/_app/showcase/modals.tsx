@@ -72,7 +72,7 @@ function ModalsPage() {
   const [drawerStatus, setDrawerStatus] = useState("in_progress");
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
           モーダル・ドロワー・ダイアログ

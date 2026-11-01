@@ -226,7 +226,7 @@ function TablePage() {
   };
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="container mx-auto p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">顧客一覧</h1>

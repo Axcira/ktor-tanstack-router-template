@@ -110,7 +110,7 @@ function UsersPage() {
 
   if (isErrorUsers) {
     return (
-      <div className="p-6 max-w-7xl mx-auto flex items-center justify-center h-[50vh]">
+      <div className="container mx-auto flex h-[50vh] items-center justify-center p-6">
         <div className="text-center space-y-4">
           <ShieldAlert className="h-10 w-10 text-destructive mx-auto" />
           <p className="text-muted-foreground">
@@ -122,7 +122,7 @@ function UsersPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="container mx-auto space-y-6 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="text-2xl font-bold font-heading tracking-tight flex items-center gap-2">
