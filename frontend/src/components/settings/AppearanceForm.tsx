@@ -22,7 +22,7 @@ export default function AppearanceForm() {
             setTheme(v);
           }
         }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4"
       >
         <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-checked])]:border-primary">
           <RadioGroupItem value="light" className="sr-only" />
