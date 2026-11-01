@@ -249,12 +249,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Drawer>
-              <DrawerTrigger asChild>
-                <Button variant="outline">
-                  <AlertTriangle className="size-4 mr-2" />
-                  ステータス変更
-                </Button>
-              </DrawerTrigger>
+              <DrawerTrigger
+                render={
+                  <Button variant="outline">
+                    <AlertTriangle className="size-4 mr-2" />
+                    ステータス変更
+                  </Button>
+                }
+              />
               <DrawerContent>
                 <DrawerHeader className="text-left">
                   <DrawerTitle>ステータスの変更</DrawerTitle>
