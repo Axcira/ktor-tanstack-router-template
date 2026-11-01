@@ -48,6 +48,7 @@ export default function AppHeader() {
 
       <DropdownMenu>
         <DropdownMenuTrigger
+          nativeButton={false}
           render={
             <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all select-none">
               <AvatarImage src="" alt={userEmail} />

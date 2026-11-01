@@ -41,6 +41,8 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  nativeButton,
+  render,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
@@ -49,9 +51,18 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
+      nativeButton={nativeButton ?? rendersNativeButton(render)}
+      render={render}
       {...props}
     />
   )
+}
+
+function rendersNativeButton(render: ButtonPrimitive.Props["render"]) {
+  if (render == null || typeof render === "function") {
+    return true
+  }
+  return render.type === "button"
 }
 
 export { Button, buttonVariants }
