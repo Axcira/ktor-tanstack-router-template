@@ -38,7 +38,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "elevated",
+      variant: "filled",
       size: "default",
       shape: "square",
     },
@@ -47,7 +47,7 @@ const buttonVariants = cva(
 
 function Button({
   className,
-  variant = "elevated",
+  variant = "filled",
   size = "default",
   shape = "square",
   nativeButton,
