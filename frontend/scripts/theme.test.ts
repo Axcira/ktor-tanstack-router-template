@@ -126,7 +126,7 @@ describe("theme generator output", () => {
     expect(css).toContain("--primary-foreground: #ffffff;");
     expect(css).toContain("--outline: #757680;");
     expect(css).toContain("--outline-variant: #c5c6d0;");
-    expect(css).toContain("--input: #c5c6d0;");
+    expect(css).toContain("--input: #e3e2e9;");
   });
 
   it("writes custom radii into the stylesheet and the header", () => {
@@ -147,6 +147,40 @@ describe("theme generator output", () => {
       "radius-sm: 2px  radius-md: 0.25rem  radius-lg: 0.375rem  radius-xl: 0.5rem",
     );
     expect(css).toContain("--primary: #4a5d92;");
+  });
+
+  it("publishes MD3 roles without replacing shadcn aliases", () => {
+    const css = generateThemeCss(DEFAULT_THEME);
+    expect(css).toContain("--secondary: #dde2f9;");
+    expect(css).toContain("--md-secondary: #585e71;");
+    expect(css).toContain("--tertiary: #ffd6f9;");
+    expect(css).toContain("--md-tertiary: #735471;");
+    expect(css).toContain("--on-primary: #ffffff;");
+    expect(css).toContain("--md-primary: #4a5d92;");
+    expect(css).toContain("--surface-container-low:");
+    expect(css).toContain("--surface-container-lowest:");
+    expect(css).toContain("--surface-dim:");
+    expect(css).toContain("--surface-bright:");
+    expect(css).toContain("--surface-variant:");
+    expect(css).toContain("--surface-tint:");
+    expect(css).toContain("--inverse-surface:");
+    expect(css).toContain("--inverse-primary:");
+    expect(css).toContain("--shadow: #000000;");
+    expect(css).toContain("--scrim: #000000;");
+    expect(css).toContain("--error:");
+    expect(css).toContain("--on-error:");
+    expect(css).toContain("--primary-fixed:");
+    expect(css).toContain("--primary-dim:");
+    expect(css).toContain("--color-md-secondary: var(--md-secondary);");
+    expect(css).toContain("--color-on-primary: var(--md-on-primary);");
+    expect(css).toContain("--color-md-on-primary: var(--md-on-primary);");
+    expect(css).toContain(
+      "--color-surface-container-low: var(--md-surface-container-low);",
+    );
+    expect(css).not.toContain("--color-secondary: var(--md-secondary);");
+    expect(css).not.toContain("--color-tertiary: var(--md-tertiary);");
+    expect(css).not.toContain("--color-background: var(--md-background);");
+    expect(css).not.toContain("--color-primary: var(--md-primary);");
   });
 
   it("passes contrastLevel through to primary, on-primary, and outline", () => {

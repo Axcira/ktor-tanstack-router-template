@@ -68,10 +68,21 @@ Tailwind `dark:` utilities are scoped in `frontend/src/styles.css` so they follo
 | `--tertiary` (+ foreground, container pair) | tertiary container roles |
 | `--accent` (+ foreground) | same tertiary container roles |
 | `--destructive` (+ container pair) | error roles |
-| `--border`, `--input`, `--outline*` | outline / outline-variant. Light `--input` and `--border` are `outline-variant`. Dark `--input` is `rgba(255, 255, 255, 0.16)`. |
+| `--border`, `--outline*` | `outline` / `outline-variant`. `--border` is `outline-variant`. |
+| `--input` | `surface-container-highest` |
 | `--success` / `--info` / `--warning` (+ containers) | custom-color groups from their seeds |
 | Sidebar `*` tokens | same roles on `surface-container-low` |
 | `--chart-1` … `--chart-5` | primary, secondary, tertiary, containers |
+
+`theme.generated.css` also publishes every scheme role from `MaterialDynamicColors.allColors`, plus `shadow`, `scrim`, `surface-tint`, and `surface-variant`. Palette key colors are not included. Each role is a Tailwind color prefixed with `md-` (`bg-md-primary`, `text-md-on-primary`, `bg-md-surface-container-low`). When `styles.css` does not already claim that name, the same role is available without the prefix (`bg-on-primary`, `bg-error`, `bg-surface-container-low`).
+
+These short names stay shadcn aliases, so they are not the scheme role:
+
+| Utility | Means | Scheme role |
+| --- | --- | --- |
+| `bg-secondary`, `text-secondary-foreground` | secondary container pair | `bg-md-secondary`, `text-on-secondary` |
+| `bg-tertiary`, `text-tertiary-foreground` | tertiary container pair | `bg-md-tertiary`, `text-on-tertiary` |
+| `bg-background` | `surface` | `bg-md-background` |
 
 ## Shape scale (corner radius)
 
@@ -158,10 +169,10 @@ px でも同じです。`--radius-sm=2px --radius-md=4px --radius-lg=6px --radiu
 
 入力コンポーネント（`frontend/src/components/ui/input.tsx`）は `bg-input/50` です。色トークンは `--input`（Tailwind の `--color-input`）で、50% の不透明度で下地に載ります。
 
-- ライト: `--input` は MD3 の `outline-variant`（既定では `#c5c6d0`）。`--outline-variant` およびライトの `--border` と同じ値です。50% で `#faf8ff` の上に置くと、グレーの塗りが目立ちます
-- ダーク: `--input` は `rgba(255, 255, 255, 0.16)` 固定です
+- ライト: `--input` は MD3 の `surface-container-highest`（既定では `#e3e2e9`）。`--border` と `--outline-variant` は `#c5c6d0` です。50% で `#faf8ff` の上に置くと、グレーの塗りが目立ちます
+- ダーク: `--input` は同じロールです（既定では `#33343a`）
 
-contrast を上げると outline-variant が濃くなり、このグレーはより目立ちます。薄くしたいときは contrast を上げず、`neutral` / `monochrome` で色相を抜くか、Input の `bg-input/50` を `bg-transparent` やより低い透明度に変えます。後者はフラグではなくコンポーネントのクラスです。
+contrast を上げると `surface-container-highest` が濃くなり、このグレーはより目立ちます。薄くしたいときは contrast を上げず、`neutral` / `monochrome` で色相を抜くか、Input の `bg-input/50` を `bg-transparent` やより低い透明度に変えます。後者はフラグではなくコンポーネントのクラスです。
 
 ## UI coding rules
 

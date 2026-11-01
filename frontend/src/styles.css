@@ -30,6 +30,13 @@ body {
     --radius-pill: 9999px;
 }
 
+/*
+ * MD3 scheme roles are published from theme.generated.css.
+ * `bg-md-secondary` is the secondary role. `bg-secondary` below stays the
+ * shadcn alias (the secondary container). The same split applies to tertiary
+ * and background. Unclaimed roles also have a short name, such as
+ * `bg-on-primary` and `bg-surface-container-low`.
+ */
 @theme inline {
     /* Fonts */
     --font-sans: 'Inter Variable', sans-serif;

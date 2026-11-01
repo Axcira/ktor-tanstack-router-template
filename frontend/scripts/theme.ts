@@ -18,6 +18,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as materialColor from "@material/material-color-utilities";
 import {
+  type DynamicColor,
   type DynamicScheme,
   Hct,
   Variant,
@@ -275,6 +276,35 @@ function pick(scheme: DynamicScheme, role: Md3Role): string {
   return argbToCss(resolveRole(scheme, role));
 }
 
+/**
+ * Roles present on the scheme but omitted from `MaterialDynamicColors.allColors`.
+ * Palette key colors stay out: they seed palettes and are not UI roles.
+ */
+const EXTRA_MD3_ROLES = [
+  "shadow",
+  "scrim",
+  "surfaceTint",
+  "surfaceVariant",
+] as const;
+
+function md3SchemeColors(scheme: DynamicScheme): DynamicColor[] {
+  const colors = scheme.colors;
+  const roles = [...colors.allColors];
+  const seen = new Set(roles.map((color) => color.name));
+  for (const role of EXTRA_MD3_ROLES) {
+    const color = colors[role]();
+    if (!seen.has(color.name)) {
+      roles.push(color);
+      seen.add(color.name);
+    }
+  }
+  return roles;
+}
+
+function md3RoleName(color: DynamicColor): string {
+  return color.name.replaceAll("_", "-");
+}
+
 function semanticPalette(
   sourceArgb: number,
   seedHex: string,
@@ -308,7 +338,7 @@ function buildSchemeBlock(
   isDark: boolean,
   sourceArgb: number,
   seeds: Pick<ThemeConfig, "success" | "info" | "warning">,
-): string {
+): { css: string; claimed: ReadonlySet<string> } {
   const success = semanticPalette(sourceArgb, seeds.success, "success", isDark);
   const info = semanticPalette(sourceArgb, seeds.info, "info", isDark);
   const warning = semanticPalette(sourceArgb, seeds.warning, "warning", isDark);
@@ -378,9 +408,41 @@ function buildSchemeBlock(
     "sidebar-ring": pick(scheme, "primary"),
   };
 
-  return Object.entries(lines)
-    .map(([key, value]) => `    --${key}: ${value};`)
-    .join("\n");
+  const claimed = new Set(Object.keys(lines));
+  for (const color of md3SchemeColors(scheme)) {
+    const name = md3RoleName(color);
+    const value = argbToCss(color.getArgb(scheme));
+    lines[`md-${name}`] = value;
+    if (!claimed.has(name)) {
+      lines[name] = value;
+    }
+  }
+
+  return {
+    css: Object.entries(lines)
+      .map(([key, value]) => `    --${key}: ${value};`)
+      .join("\n"),
+    claimed,
+  };
+}
+
+function md3ThemeAliases(
+  scheme: DynamicScheme,
+  claimed: ReadonlySet<string>,
+): string {
+  const lines: string[] = [
+    "/* MD3 scheme roles. md-* is the role. A short name is added when the shadcn alias does not already use it. */",
+    "@theme inline {",
+  ];
+  for (const color of md3SchemeColors(scheme)) {
+    const name = md3RoleName(color);
+    lines.push(`    --color-md-${name}: var(--md-${name});`);
+    if (!claimed.has(name)) {
+      lines.push(`    --color-${name}: var(--md-${name});`);
+    }
+  }
+  lines.push("}");
+  return lines.join("\n");
 }
 
 function radiusDeclarations(radius: RadiusScale): string {
@@ -574,26 +636,28 @@ export function generateThemeCss(config: ThemeConfig): string {
 :root {
 ${radiusDeclarations(radius)}
 
-${lightBlock}
+${lightBlock.css}
 }
 
 .dark {
-${darkBlock}
+${darkBlock.css}
 }
 
 .theme-preview-light {
     color-scheme: light;
     background-color: var(--background);
     color: var(--foreground);
-${lightBlock}
+${lightBlock.css}
 }
 
 .theme-preview-dark {
     color-scheme: dark;
     background-color: var(--background);
     color: var(--foreground);
-${darkBlock}
+${darkBlock.css}
 }
+
+${md3ThemeAliases(lightScheme, lightBlock.claimed)}
 `;
 }
 
