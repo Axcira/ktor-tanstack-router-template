@@ -28,7 +28,8 @@ import {
 export default function AppSidebarFooter() {
   const router = useRouter();
   const navigate = useNavigate();
-  const { state } = useSidebar();
+  const { isMobile, state } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
 
   const logoutMutation = useLogoutV1({
     mutation: {
@@ -78,7 +79,7 @@ export default function AppSidebarFooter() {
     </AlertDialogPortal>
   );
 
-  if (state === "collapsed") {
+  if (isCollapsed) {
     return (
       <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[state=collapsed]:flex group-data-[state=collapsed]:justify-center">
         <AlertDialog>

@@ -21,8 +21,10 @@ import {
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 
 export default function AppSidebarItem({ item }: { item: MenuItem }) {
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const { isMobile, state } = useSidebar();
+  // Desktop icon-collapse is a separate preference. The mobile sheet is always
+  // the full menu, so a collapsed desktop state must not drop labels there.
+  const isCollapsed = state === "collapsed" && !isMobile;
   const { isAllowed } = useAuthorize(item.requiredPermission);
 
   if (!isAllowed) {

@@ -199,7 +199,12 @@ function Sidebar({
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <div
+            className="group flex h-full w-full flex-col"
+            data-state="expanded"
+          >
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     )
