@@ -24,29 +24,29 @@ export function formErrorBannerClass(className?: string): string {
   );
 }
 
-/**
- * Sonner reads these on `[data-sonner-toaster]`. Inline styles beat Sonner's
- * built-in light/dark hex palette, and the values follow the app theme
- * because they reference our semantic custom properties.
- */
-export const sonnerToastCssVars = {
-  "--normal-bg": "var(--surface-container)",
-  "--normal-text": "var(--foreground)",
-  "--normal-border": "var(--border)",
-  "--success-bg": "var(--success-container)",
-  "--success-text": "var(--success-container-foreground)",
-  "--success-border": "var(--success)",
-  "--info-bg": "var(--info-container)",
-  "--info-text": "var(--info-container-foreground)",
-  "--info-border": "var(--info)",
-  "--warning-bg": "var(--warning-container)",
-  "--warning-text": "var(--warning-container-foreground)",
-  "--warning-border": "var(--warning)",
-  "--error-bg": "var(--destructive-container)",
-  "--error-text": "var(--destructive-container-foreground)",
-  "--error-border": "var(--destructive)",
-  "--border-radius": "var(--radius-lg)",
+const toastSurfaces = {
+  default: "border-border bg-surface-container text-foreground",
+  success:
+    "border-success bg-success-container text-success-container-foreground",
+  info: "border-info bg-info-container text-info-container-foreground",
+  warning:
+    "border-warning bg-warning-container text-warning-container-foreground",
+  error:
+    "border-destructive bg-destructive-container text-destructive-container-foreground",
 } as const;
+
+/** Surface classes for a toast. Unknown types, including loading, use the default surface. */
+export function toastSurfaceClass(type?: string): string {
+  switch (type) {
+    case "success":
+    case "info":
+    case "warning":
+    case "error":
+      return toastSurfaces[type];
+    default:
+      return toastSurfaces.default;
+  }
+}
 
 /** Return semantic container styles for an inline notification. */
 export function notificationToastClass(

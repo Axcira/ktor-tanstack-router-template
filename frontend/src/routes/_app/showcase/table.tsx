@@ -15,7 +15,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +46,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/table")({
   component: TablePage,
@@ -208,7 +208,9 @@ function TablePage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast.success("顧客情報を保存しました", {
+      toast.add({
+        type: "success",
+        title: "顧客情報を保存しました",
         description: `${editName} の情報を更新しました`,
       });
       setDialogOpen(false);
@@ -216,7 +218,9 @@ function TablePage() {
   };
 
   const handleDelete = (customer: Customer) => {
-    toast.success(`${customer.name} を削除しました`, {
+    toast.add({
+      type: "success",
+      title: `${customer.name} を削除しました`,
       description: `ID: ${customer.id}`,
     });
   };
@@ -314,7 +318,10 @@ function TablePage() {
                   setViewState("loading");
                   setTimeout(() => {
                     setViewState("loaded");
-                    toast.success("データを再読み込みしました");
+                    toast.add({
+                      type: "success",
+                      title: "データを再読み込みしました",
+                    });
                   }, 1000);
                 }}
               >

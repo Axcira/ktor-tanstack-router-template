@@ -8,7 +8,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/detail")({
   component: DetailPage,
@@ -117,7 +117,7 @@ function DetailPage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast.success("案件情報を保存しました");
+      toast.add({ type: "success", title: "案件情報を保存しました" });
     }, 1000);
   };
 

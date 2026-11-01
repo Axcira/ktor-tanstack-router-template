@@ -23,7 +23,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +39,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/toast";
 import { notificationToastClass } from "@/lib/theme-tokens";
 
 export const Route = createFileRoute("/_app/showcase/")({
@@ -128,7 +128,7 @@ function DashboardPage() {
     setViewState("loading");
     setTimeout(() => {
       setViewState("loaded");
-      toast.success("データを更新しました");
+      toast.add({ type: "success", title: "データを更新しました" });
     }, 1500);
   };
 
@@ -206,35 +206,46 @@ function DashboardPage() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast("通常の通知です")}
+              onClick={() => toast.add({ title: "通常の通知です" })}
             >
               Default toast
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.success("処理が完了しました")}
+              onClick={() =>
+                toast.add({ type: "success", title: "処理が完了しました" })
+              }
             >
               Success toast
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.info("新しいお知らせがあります")}
+              onClick={() =>
+                toast.add({ type: "info", title: "新しいお知らせがあります" })
+              }
             >
               Info toast
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.warning("在庫がしきい値を下回りました")}
+              onClick={() =>
+                toast.add({
+                  type: "warning",
+                  title: "在庫がしきい値を下回りました",
+                })
+              }
             >
               Warning toast
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.error("保存に失敗しました")}
+              onClick={() =>
+                toast.add({ type: "error", title: "保存に失敗しました" })
+              }
             >
               Error toast
             </Button>

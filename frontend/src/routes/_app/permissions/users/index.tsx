@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, Search, ShieldAlert, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import {
   useDeleteUserV1,
   useGetRolesV1,
@@ -11,6 +10,7 @@ import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import { DeleteUserDialog } from "./-components/DeleteUserDialog";
 import { UsersTable } from "./-components/UsersTable";
 
@@ -87,10 +87,13 @@ function UsersPage() {
       await deleteUserMutation.mutateAsync({ id: String(userId) });
       setUserToDelete(null);
       await refetch();
-      toast.success(`ユーザー「${email}」を削除しました。`);
+      toast.add({
+        type: "success",
+        title: `ユーザー「${email}」を削除しました。`,
+      });
     } catch (error) {
       console.error("Failed to delete user:", error);
-      toast.error("ユーザーの削除に失敗しました。");
+      toast.add({ type: "error", title: "ユーザーの削除に失敗しました。" });
     } finally {
       setDeletingId(null);
     }

@@ -196,16 +196,16 @@ Enforcement: `frontend/scripts/select-check.ts` (part of `bun run frontend:check
 | `permissions/roles/index.tsx` | Copy-role notification banner via `notificationToastClass` |
 | Showcase upload | Upload stats (`text-success`, `text-info`) and completed-row icon |
 | Showcase form | Success state hero icon (`text-success`) |
-| Showcase dashboard | Reference badges, status banners, and Sonner buttons (default / success / info / warning / error) |
+| Showcase dashboard | Reference badges, status banners, and toast buttons (default / success / info / warning / error) |
 
-Sonner (`frontend/src/components/ui/sonner.tsx`) follows the app theme from `themeAtom` and sets toaster CSS variables from `sonnerToastCssVars` in `theme-tokens.ts`:
+Toast (`frontend/src/components/ui/toast.tsx`) paints each toast with `toastSurfaceClass` from `theme-tokens.ts`. The classes follow the app theme because they use semantic tokens. Description text is `text-current`, so it stays on the container foreground. A type other than the four below, including `loading`, uses the default surface. The corner radius is `rounded-lg`.
 
-| Sonner variable | App token |
+| Type | Classes |
 | --- | --- |
-| `--normal-bg` / `--normal-text` / `--normal-border` | `--surface-container`, `--foreground`, `--border` |
-| `--success-*` | `--success-container`, `--success-container-foreground`, `--success` |
-| `--info-*` | `--info-container`, `--info-container-foreground`, `--info` |
-| `--warning-*` | `--warning-container`, `--warning-container-foreground`, `--warning` |
-| `--error-*` | `--destructive-container`, `--destructive-container-foreground`, `--destructive` |
+| default | `border-border bg-surface-container text-foreground` |
+| `success` | `border-success bg-success-container text-success-container-foreground` |
+| `info` | `border-info bg-info-container text-info-container-foreground` |
+| `warning` | `border-warning bg-warning-container text-warning-container-foreground` |
+| `error` | `border-destructive bg-destructive-container text-destructive-container-foreground` |
 
-`richColors` stays on so those variables paint typed toasts. Description text uses `!text-current` so Sonner’s hardcoded description color does not override the token.
+The viewport is bottom-centered below the `sm` breakpoint and bottom-right from `sm`. It uses `z-[100]` so a toast opened from a dialog or sheet stays above that layer (`z-50`).

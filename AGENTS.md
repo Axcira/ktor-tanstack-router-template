@@ -68,7 +68,7 @@ Authenticated pages live under `src/routes/_app/`. That layout loads the session
 
 Server data goes through the generated client (`@/api/generated/`). Theme state is Jotai in `src/store/theme.ts`. Gate UI with `useAuthorize` (`src/hooks/useAuthorize.ts`).
 
-Confirmations and errors use Dialog, AlertDialog, or Sonner. Do not call `window.alert` or `window.confirm`.
+Confirmations and errors use Dialog, AlertDialog, or Toast (`@/components/ui/toast`). Do not call `window.alert` or `window.confirm`.
 
 `src/routes/_app/showcase/` is the reference UI. Match its density and components. If showcase code fails lint, fix the code. Do not relax Biome or CI for it.
 

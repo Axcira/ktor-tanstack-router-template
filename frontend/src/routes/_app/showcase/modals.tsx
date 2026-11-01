@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, Info, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import {
   AlertDialog,
@@ -52,6 +51,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/modals")({
   component: ModalsPage,
@@ -128,7 +128,9 @@ function ModalsPage() {
                 <DialogFooter>
                   <Button
                     onClick={() => {
-                      toast.success("顧客情報を更新しました", {
+                      toast.add({
+                        type: "success",
+                        title: "顧客情報を更新しました",
                         description: `${editName} (${editEmail})`,
                       });
                     }}
@@ -169,7 +171,9 @@ function ModalsPage() {
                   <AlertDialogCancel>キャンセル</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      toast.success("案件を削除しました", {
+                      toast.add({
+                        type: "success",
+                        title: "案件を削除しました",
                         description: "PRJ-2026-042",
                       })
                     }
@@ -230,7 +234,10 @@ function ModalsPage() {
                 <SheetFooter>
                   <Button
                     onClick={() => {
-                      toast.success("メモを保存しました");
+                      toast.add({
+                        type: "success",
+                        title: "メモを保存しました",
+                      });
                     }}
                   >
                     保存
@@ -289,7 +296,9 @@ function ModalsPage() {
                         completed: "完了",
                         cancelled: "キャンセル",
                       };
-                      toast.success("ステータスを変更しました", {
+                      toast.add({
+                        type: "success",
+                        title: "ステータスを変更しました",
                         description: `新しいステータス: ${labels[drawerStatus]}`,
                       });
                     }}
@@ -373,7 +382,9 @@ function ModalsPage() {
                   <AlertDialogCancel>キャンセル</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      toast.success("エクスポートを開始しました", {
+                      toast.add({
+                        type: "success",
+                        title: "エクスポートを開始しました",
                         description: "完了後に通知します",
                       })
                     }

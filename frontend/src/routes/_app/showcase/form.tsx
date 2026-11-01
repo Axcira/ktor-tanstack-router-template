@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/form")({
   component: FormPage,
@@ -91,7 +91,9 @@ function FormPage() {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
-      toast.error("入力内容に誤りがあります", {
+      toast.add({
+        type: "error",
+        title: "入力内容に誤りがあります",
         description: `${Object.keys(validationErrors).length} 件のエラーを修正してください`,
       });
       return;
@@ -101,7 +103,9 @@ function FormPage() {
     setTimeout(() => {
       setSubmitting(false);
       setSubmitted(true);
-      toast.success("登録が完了しました", {
+      toast.add({
+        type: "success",
+        title: "登録が完了しました",
         description: `${companyName} の案件を登録しました`,
       });
     }, 1500);
@@ -118,7 +122,7 @@ function FormPage() {
     setAgree(false);
     setErrors({});
     setSubmitted(false);
-    toast.info("フォームをリセットしました");
+    toast.add({ type: "info", title: "フォームをリセットしました" });
   };
 
   if (submitted) {

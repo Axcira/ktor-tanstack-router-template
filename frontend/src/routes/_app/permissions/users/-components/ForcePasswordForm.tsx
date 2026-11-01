@@ -1,10 +1,10 @@
 import { type SubmitEventHandler, useState } from "react";
-import { toast } from "sonner";
 import { useForceChangePasswordV1 } from "@/api/generated/default/default";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
 import { formErrorBannerClass } from "@/lib/theme-tokens";
 
 const MIN_LENGTH = 8;
@@ -41,7 +41,7 @@ export default function ForcePasswordForm({ userId }: { userId: number }) {
           if (response.status === 204) {
             setNewPassword("");
             setConfirmPassword("");
-            toast.success("パスワードを変更しました");
+            toast.add({ type: "success", title: "パスワードを変更しました" });
             return;
           }
           setErrorMessage(
