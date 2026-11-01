@@ -49,7 +49,7 @@ export default function AppSidebarFooter() {
 
   const _sidebarMenuButton = (
     <SidebarMenuButton
-      className="w-full justify-start text-destructive hover:bg-sidebar-accent hover:text-destructive group-data-[state=collapsed]:w-10 group-data-[state=collapsed]:h-10 group-data-[state=collapsed]:p-0"
+      className="w-full justify-start text-destructive hover:bg-on-error-container/20 active:bg-on-error-container/30 hover:text-destructive active:text-destructive group-data-[state=collapsed]:w-10 group-data-[state=collapsed]:h-10 group-data-[state=collapsed]:p-0"
       disabled={logoutMutation.isPending}
     >
       <LogOut className="h-4 w-4 mr-2 shrink-0 group-data-[state=collapsed]:mr-0" />
