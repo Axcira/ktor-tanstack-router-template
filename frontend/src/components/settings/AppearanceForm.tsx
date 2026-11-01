@@ -24,7 +24,7 @@ export default function AppearanceForm() {
         }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4"
       >
-        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-checked])]:border-primary">
           <RadioGroupItem value="light" className="sr-only" />
 
           <div className="theme-preview-light h-[140px] rounded-t-lg border-b border-border bg-background p-4 overflow-hidden text-foreground">
@@ -48,8 +48,8 @@ export default function AppearanceForm() {
 
           <div className="flex flex-1 flex-col p-4">
             <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-state=checked])]:border-primary transition-colors">
-                <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-state=checked])]:opacity-100" />
+              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-checked])]:border-primary transition-colors">
+                <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-checked])]:opacity-100" />
               </div>
               <span className="font-semibold text-sm text-card-foreground">
                 ライト
@@ -61,7 +61,7 @@ export default function AppearanceForm() {
           </div>
         </Label>
 
-        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-checked])]:border-primary">
           <RadioGroupItem value="dark" className="sr-only" />
 
           <div className="theme-preview-dark h-[140px] rounded-t-lg bg-background border-b border-border p-4 overflow-hidden text-foreground">
@@ -85,8 +85,8 @@ export default function AppearanceForm() {
 
           <div className="flex flex-1 flex-col p-4">
             <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-state=checked])]:border-primary transition-colors">
-                <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-state=checked])]:opacity-100" />
+              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-checked])]:border-primary transition-colors">
+                <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-checked])]:opacity-100" />
               </div>
               <span className="font-semibold text-sm text-card-foreground">
                 ダーク
@@ -98,7 +98,7 @@ export default function AppearanceForm() {
           </div>
         </Label>
 
-        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-state=checked])]:border-primary">
+        <Label className="cursor-pointer group relative flex flex-col rounded-lg border-2 border-border bg-card transition-all hover:border-primary/50 [&:has([data-checked])]:border-primary">
           <RadioGroupItem value="system" className="sr-only" />
 
           <div className="flex h-[140px] rounded-t-lg border-b border-border overflow-hidden">
@@ -131,8 +131,8 @@ export default function AppearanceForm() {
 
           <div className="flex flex-1 flex-col p-4">
             <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-state=checked])]:border-primary transition-colors">
-                <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-state=checked])]:opacity-100" />
+              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border group-[&:has([data-checked])]:border-primary transition-colors">
+                <div className="h-2 w-2 rounded-full bg-primary opacity-0 transition-opacity group-[&:has([data-checked])]:opacity-100" />
               </div>
               <span className="font-semibold text-sm text-card-foreground">
                 システム同期
