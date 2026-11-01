@@ -13,7 +13,7 @@ function requireForm(submitLabel: string) {
 }
 
 function requireSwitch(root: Element | null) {
-  const sw = root?.querySelector('button[role="switch"]');
+  const sw = root?.querySelector('[role="switch"]');
   expect(sw).toBeTruthy();
   return sw as HTMLElement;
 }

@@ -216,7 +216,6 @@ export default function RoleForm({
                       handleTogglePermission(type, checked)
                     }
                     disabled={isSubmitting}
-                    type="button"
                   />
                 </div>
 
@@ -244,7 +243,6 @@ export default function RoleForm({
                               handlePropChange(type, propKey, checked)
                             }
                             disabled={isSubmitting}
-                            type="button"
                           />
                         )}
                       </div>

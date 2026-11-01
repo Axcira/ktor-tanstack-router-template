@@ -47,14 +47,16 @@ export default function AppHeader() {
       </div>
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all select-none">
-            <AvatarImage src="" alt={userEmail} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-              {fallbackChar}
-            </AvatarFallback>
-          </Avatar>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all select-none">
+              <AvatarImage src="" alt={userEmail} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                {fallbackChar}
+              </AvatarFallback>
+            </Avatar>
+          }
+        />
         <DropdownMenuContent
           align="end"
           className="w-80 p-3 rounded-lg bg-card border shadow-xl"

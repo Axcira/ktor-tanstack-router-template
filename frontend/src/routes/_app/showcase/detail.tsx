@@ -424,7 +424,9 @@ function DetailPage() {
               <ResponsiveSelect
                 aria-label="ステータス"
                 value={status}
-                onValueChange={setStatus}
+                onValueChange={(value) => {
+                  if (value != null) setStatus(value);
+                }}
                 options={projectStatusOptions}
               />
             </CardContent>

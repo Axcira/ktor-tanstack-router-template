@@ -18,8 +18,6 @@ export type ResponsiveSelectOption = {
 const nativeSelectClassName =
   "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:bg-background";
 
-type SelectRootProps = ComponentProps<typeof Select>;
-
 /** DOM props applied to both the native control and the shadcn trigger. */
 type SharedControlProps = {
   id?: string;
@@ -33,22 +31,34 @@ type SharedControlProps = {
     [key: `data-${string}`]: string | number | undefined;
   };
 
-export type ResponsiveSelectProps = Omit<SelectRootProps, "children"> &
-  SharedControlProps & {
-    options: ResponsiveSelectOption[];
-    placeholder?: string;
-    /** Overrides for the shadcn trigger (fine pointer). */
-    triggerProps?: Omit<ComponentProps<typeof SelectTrigger>, "children">;
-    /** Overrides for the shadcn menu (fine pointer). */
-    contentProps?: Omit<ComponentProps<typeof SelectContent>, "children">;
-    /** Overrides for the native select (coarse pointer). */
-    nativeProps?: Omit<ComponentProps<"select">, "children">;
-  };
+export type ResponsiveSelectProps = SharedControlProps & {
+  options: ResponsiveSelectOption[];
+  placeholder?: string;
+  value?: string | null;
+  defaultValue?: string | null;
+  /** Base UI may clear the value with `null`. */
+  onValueChange?: (value: string | null) => void;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  name?: string;
+  autoComplete?: string;
+  disabled?: boolean;
+  required?: boolean;
+  readOnly?: boolean;
+  form?: string;
+  /** Overrides for the shadcn trigger (fine pointer). */
+  triggerProps?: Omit<ComponentProps<typeof SelectTrigger>, "children">;
+  /** Overrides for the shadcn menu (fine pointer). */
+  contentProps?: Omit<ComponentProps<typeof SelectContent>, "children">;
+  /** Overrides for the native select (coarse pointer). */
+  nativeProps?: Omit<ComponentProps<"select">, "children">;
+};
 
 /**
  * Render a native select for a coarse primary pointer and a shadcn select otherwise.
  * Shared DOM props go to the native control or trigger; nativeProps and triggerProps
- * can override them. Radix-only root props are ignored by the native control.
+ * can override them. Popup props (`open`, `onOpenChange`) are ignored by the native control.
  * A native placeholder is a disabled, hidden option with an empty value.
  */
 export function ResponsiveSelect({
@@ -63,7 +73,6 @@ export function ResponsiveSelect({
   open,
   defaultOpen,
   onOpenChange,
-  dir,
   name,
   autoComplete,
   disabled,
@@ -96,9 +105,9 @@ export function ResponsiveSelect({
     const { className: nativeClassName, ...restNative } = nativeProps ?? {};
     const valueProps =
       value !== undefined
-        ? { value }
+        ? { value: value ?? "" }
         : defaultValue !== undefined
-          ? { defaultValue }
+          ? { defaultValue: defaultValue ?? "" }
           : {};
     return (
       <select
@@ -135,13 +144,13 @@ export function ResponsiveSelect({
 
   return (
     <Select
+      items={options}
       value={value}
       defaultValue={defaultValue}
       onValueChange={onValueChange}
       open={open}
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange}
-      dir={dir}
       name={name}
       autoComplete={autoComplete}
       disabled={disabled}

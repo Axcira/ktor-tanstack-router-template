@@ -37,12 +37,10 @@ function AuthButtons() {
     <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
       {data?.status !== 200 ? (
         <Button
-          asChild
           size="lg"
           className="h-12 px-8 text-base bg-primary text-primary-foreground rounded-md hover:opacity-90 shadow-md transition-all"
-        >
-          <Link to="/login">ログイン</Link>
-        </Button>
+          render={<Link to="/login">ログイン</Link>}
+        />
       ) : (
         <div className="mt-8">
           <p className="mb-4 text-lg text-muted-foreground">

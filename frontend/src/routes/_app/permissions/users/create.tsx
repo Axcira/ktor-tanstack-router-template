@@ -55,9 +55,10 @@ function UserCreatePage() {
           <Button variant="outline" onClick={() => refetchRoles()}>
             再試行
           </Button>
-          <Button asChild variant="ghost">
-            <Link to="/permissions/users">ユーザー一覧に戻る</Link>
-          </Button>
+          <Button
+            variant="ghost"
+            render={<Link to="/permissions/users">ユーザー一覧に戻る</Link>}
+          />
         </div>
       </div>
     );
@@ -66,16 +67,16 @@ function UserCreatePage() {
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
       <Button
-        asChild
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
-      >
-        <Link to="/permissions/users">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          ユーザー一覧に戻る
-        </Link>
-      </Button>
+        render={
+          <Link to="/permissions/users">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            ユーザー一覧に戻る
+          </Link>
+        }
+      />
 
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Users className="h-8 w-8 text-primary" />

@@ -231,7 +231,9 @@ function FormPage() {
                 <ResponsiveSelect
                   id="industry"
                   value={industry}
-                  onValueChange={setIndustry}
+                  onValueChange={(value) => {
+                    if (value != null) setIndustry(value);
+                  }}
                   options={industryOptions}
                   placeholder="選択してください"
                   aria-invalid={!!errors.industry}
@@ -247,7 +249,9 @@ function FormPage() {
                 <ResponsiveSelect
                   id="budget"
                   value={budget}
-                  onValueChange={setBudget}
+                  onValueChange={(value) => {
+                    if (value != null) setBudget(value);
+                  }}
                   options={budgetOptions}
                   placeholder="選択してください"
                   aria-invalid={!!errors.budget}

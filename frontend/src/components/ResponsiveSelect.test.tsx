@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 
@@ -89,7 +90,7 @@ describe("ResponsiveSelect", () => {
     expect(trigger).toHaveAttribute("aria-required", "true");
   });
 
-  it("ignores Radix-only props on the native select and still reports value changes", () => {
+  it("ignores popup props on the native select and still reports value changes", () => {
     mockCoarsePointer(true);
     const onValueChange = vi.fn();
     const onOpenChange = vi.fn();
@@ -101,13 +102,11 @@ describe("ResponsiveSelect", () => {
         aria-label="Filter"
         open
         onOpenChange={onOpenChange}
-        dir="rtl"
         name="role"
       />,
     );
     const select = screen.getByRole("combobox");
     expect(select.tagName).toBe("SELECT");
-    expect(select).not.toHaveAttribute("dir");
     expect(select).not.toHaveAttribute("open");
     expect(select).toHaveAttribute("name", "role");
     fireEvent.change(select, { target: { value: "1" } });
@@ -155,9 +154,10 @@ describe("ResponsiveSelect", () => {
     expect(trigger.className).toContain("w-32");
   });
 
-  it("calls onValueChange from the shadcn select", () => {
+  it("calls onValueChange from the shadcn select", async () => {
     mockCoarsePointer(false);
     const onValueChange = vi.fn();
+    const user = userEvent.setup();
     render(
       <form>
         <ResponsiveSelect
@@ -169,9 +169,9 @@ describe("ResponsiveSelect", () => {
       </form>,
     );
     expect(screen.getByRole("combobox")).toHaveTextContent("All");
-    const bubble = document.querySelector("select");
-    expect(bubble).toBeTruthy();
-    fireEvent.change(bubble as HTMLSelectElement, { target: { value: "1" } });
-    expect(onValueChange).toHaveBeenCalledWith("1");
+    await user.click(screen.getByRole("combobox"));
+    await user.click(await screen.findByRole("option", { name: "Admin" }));
+    expect(onValueChange).toHaveBeenCalled();
+    expect(onValueChange.mock.calls[0]?.[0]).toBe("1");
   });
 });

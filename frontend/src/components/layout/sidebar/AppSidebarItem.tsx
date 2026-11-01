@@ -34,13 +34,15 @@ export default function AppSidebarItem({ item }: { item: MenuItem }) {
       return (
         <SidebarMenuItem>
           <Popover>
-            <PopoverTrigger asChild>
-              <SidebarMenuButton tooltip={item.text}>
-                {item.icon && (
-                  <span className="h-4 w-4 shrink-0">{item.icon}</span>
-                )}
-              </SidebarMenuButton>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={
+                <SidebarMenuButton tooltip={item.text}>
+                  {item.icon && (
+                    <span className="h-4 w-4 shrink-0">{item.icon}</span>
+                  )}
+                </SidebarMenuButton>
+              }
+            />
             <PopoverContent
               side="right"
               align="start"
@@ -59,15 +61,17 @@ export default function AppSidebarItem({ item }: { item: MenuItem }) {
     return (
       <Collapsible defaultOpen className="group/collapsible">
         <SidebarMenuItem>
-          <CollapsibleTrigger asChild>
-            <SidebarMenuButton tooltip={item.text}>
-              {item.icon && (
-                <span className="h-4 w-4 mr-2 shrink-0">{item.icon}</span>
-              )}
-              <span>{item.text}</span>
-              <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
-            </SidebarMenuButton>
-          </CollapsibleTrigger>
+          <CollapsibleTrigger
+            render={
+              <SidebarMenuButton tooltip={item.text}>
+                {item.icon && (
+                  <span className="h-4 w-4 mr-2 shrink-0">{item.icon}</span>
+                )}
+                <span>{item.text}</span>
+                <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-open/collapsible:rotate-90" />
+              </SidebarMenuButton>
+            }
+          />
           <CollapsibleContent>
             <CollapsibleMenuItems items={item.children} />
           </CollapsibleContent>
@@ -78,30 +82,16 @@ export default function AppSidebarItem({ item }: { item: MenuItem }) {
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton tooltip={item.text} asChild={!!item.to}>
-        {item.to ? (
-          <Link to={item.to}>
-            {item.icon && (
-              <span className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0">
-                {item.icon}
-              </span>
-            )}
-            <span className="group-data-[state=collapsed]:hidden">
-              {item.text}
-            </span>
-          </Link>
-        ) : (
-          <>
-            {item.icon && (
-              <span className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0">
-                {item.icon}
-              </span>
-            )}
-            <span className="group-data-[state=collapsed]:hidden">
-              {item.text}
-            </span>
-          </>
+      <SidebarMenuButton
+        tooltip={item.text}
+        render={item.to ? <Link to={item.to} /> : undefined}
+      >
+        {item.icon && (
+          <span className="h-4 w-4 group-data-[state=collapsed]:mr-0 mr-2 shrink-0">
+            {item.icon}
+          </span>
         )}
+        <span className="group-data-[state=collapsed]:hidden">{item.text}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

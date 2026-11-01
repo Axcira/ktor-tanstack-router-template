@@ -160,6 +160,7 @@ function UsersPage() {
             aria-label="ロールでフィルター"
             value={roleFilter}
             onValueChange={(value) => {
+              if (value == null) return;
               setRoleFilter(value);
               setPage(1);
             }}

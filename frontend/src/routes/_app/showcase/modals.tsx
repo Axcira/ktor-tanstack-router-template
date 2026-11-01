@@ -91,12 +91,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Pencil className="size-4 mr-2" />
-                  顧客情報を編集
-                </Button>
-              </DialogTrigger>
+              <DialogTrigger
+                render={
+                  <Button variant="outline">
+                    <Pencil className="size-4 mr-2" />
+                    顧客情報を編集
+                  </Button>
+                }
+              />
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>顧客情報の編集</DialogTitle>
@@ -147,12 +149,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="size-4 mr-2" />
-                  案件を削除
-                </Button>
-              </AlertDialogTrigger>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="destructive">
+                    <Trash2 className="size-4 mr-2" />
+                    案件を削除
+                  </Button>
+                }
+              />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>案件を削除しますか？</AlertDialogTitle>
@@ -186,12 +190,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline">
-                  <Info className="size-4 mr-2" />
-                  詳細パネルを開く
-                </Button>
-              </SheetTrigger>
+              <SheetTrigger
+                render={
+                  <Button variant="outline">
+                    <Info className="size-4 mr-2" />
+                    詳細パネルを開く
+                  </Button>
+                }
+              />
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>案件メモ</SheetTitle>
@@ -263,7 +269,9 @@ function ModalsPage() {
                       <ResponsiveSelect
                         id="drawer-status"
                         value={drawerStatus}
-                        onValueChange={setDrawerStatus}
+                        onValueChange={(value) => {
+                          if (value != null) setDrawerStatus(value);
+                        }}
                         options={projectStatusOptions}
                       />
                     </div>
@@ -300,12 +308,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="secondary">
-                  <Info className="size-4 mr-2" />
-                  システム情報
-                </Button>
-              </DialogTrigger>
+              <DialogTrigger
+                render={
+                  <Button variant="secondary">
+                    <Info className="size-4 mr-2" />
+                    システム情報
+                  </Button>
+                }
+              />
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>システム情報</DialogTitle>
@@ -340,12 +350,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline">
-                  <AlertTriangle className="size-4 mr-2" />
-                  データをエクスポート
-                </Button>
-              </AlertDialogTrigger>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="outline">
+                    <AlertTriangle className="size-4 mr-2" />
+                    データをエクスポート
+                  </Button>
+                }
+              />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>

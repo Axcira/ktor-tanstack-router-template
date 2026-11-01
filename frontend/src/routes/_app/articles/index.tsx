@@ -77,12 +77,15 @@ export function ArticlesListView({
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">記事一覧</h1>
         {isAllowedCreation && (
-          <Button asChild disabled={!isAllowedCreation}>
-            <Link to="/articles/create">
-              <Plus className="mr-2 h-4 w-4" />
-              記事を書く
-            </Link>
-          </Button>
+          <Button
+            disabled={!isAllowedCreation}
+            render={
+              <Link to="/articles/create">
+                <Plus className="mr-2 h-4 w-4" />
+                記事を書く
+              </Link>
+            }
+          />
         )}
       </div>
 

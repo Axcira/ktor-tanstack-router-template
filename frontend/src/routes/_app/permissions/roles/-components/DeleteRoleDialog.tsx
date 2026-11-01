@@ -56,7 +56,9 @@ export function DeleteRoleDialog({
             <ResponsiveSelect
               id="fallback-role"
               value={selectedFallbackId}
-              onValueChange={setSelectedFallbackId}
+              onValueChange={(value) => {
+                if (value != null) setSelectedFallbackId(value);
+              }}
               placeholder="ロールを選択"
               className="w-full"
               options={roles

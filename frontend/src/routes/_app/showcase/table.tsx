@@ -270,8 +270,9 @@ function TablePage() {
         <ResponsiveSelect
           aria-label="ステータス"
           value={statusFilter}
-          onValueChange={(v) => {
-            setStatusFilter(v);
+          onValueChange={(value) => {
+            if (value == null) return;
+            setStatusFilter(value);
             setPage(1);
           }}
           options={statusFilterOptions}
@@ -368,15 +369,17 @@ function TablePage() {
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="size-4" />
+                            </Button>
+                          }
+                        />
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={(e) => {

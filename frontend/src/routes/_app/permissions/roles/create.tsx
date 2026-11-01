@@ -31,16 +31,16 @@ function RoleCreatePage() {
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
       <Button
-        asChild
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
-      >
-        <Link to="/permissions/roles">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          ロール一覧に戻る
-        </Link>
-      </Button>
+        render={
+          <Link to="/permissions/roles">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            ロール一覧に戻る
+          </Link>
+        }
+      />
 
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Shield className="h-8 w-8 text-primary" />

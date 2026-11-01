@@ -58,7 +58,7 @@ export default function AppSidebarFooter() {
   const _alertDialogPortal = (
     <AlertDialogPortal>
       <AlertDialogOverlay className="fixed inset-0 z-50 bg-black/5 backdrop-blur-sm" />
-      <AlertDialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg duration-100 data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:zoom-out-95">
+      <AlertDialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg duration-100 data-open:animate-in data-open:zoom-in-95 data-closed:animate-out data-closed:zoom-out-95">
         <AlertDialogHeader>
           <AlertDialogTitle>ログアウトしますか？</AlertDialogTitle>
           <AlertDialogDescription>
@@ -83,11 +83,9 @@ export default function AppSidebarFooter() {
       <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[state=collapsed]:flex group-data-[state=collapsed]:justify-center">
         <AlertDialog>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <AlertDialogTrigger asChild>
-                {_sidebarMenuButton}
-              </AlertDialogTrigger>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={<AlertDialogTrigger render={_sidebarMenuButton} />}
+            />
 
             <TooltipContent side="right">{logOutLabel}</TooltipContent>
           </Tooltip>
@@ -99,7 +97,7 @@ export default function AppSidebarFooter() {
     return (
       <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[state=collapsed]:flex group-data-[state=collapsed]:justify-center">
         <AlertDialog>
-          <AlertDialogTrigger asChild>{_sidebarMenuButton}</AlertDialogTrigger>
+          <AlertDialogTrigger render={_sidebarMenuButton} />
           {_alertDialogPortal}
         </AlertDialog>
       </SidebarFooter>
