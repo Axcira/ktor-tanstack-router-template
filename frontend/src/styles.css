@@ -138,6 +138,31 @@ body {
     --radius-pill: var(--radius-pill);
 }
 
+/*
+ * The built-in container caps at the viewport breakpoint, which is wider than
+ * the main column beside the sidebar. These container queries measure that
+ * column (main is @container) and override the viewport caps. max-w-* still
+ * wins when a page sets a tighter ceiling.
+ */
+@utility container {
+    margin-inline: auto;
+    @container (width >= theme(--breakpoint-sm)) {
+        max-width: theme(--breakpoint-sm);
+    }
+    @container (width >= theme(--breakpoint-md)) {
+        max-width: theme(--breakpoint-md);
+    }
+    @container (width >= theme(--breakpoint-lg)) {
+        max-width: theme(--breakpoint-lg);
+    }
+    @container (width >= theme(--breakpoint-xl)) {
+        max-width: theme(--breakpoint-xl);
+    }
+    @container (width >= theme(--breakpoint-2xl)) {
+        max-width: theme(--breakpoint-2xl);
+    }
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
