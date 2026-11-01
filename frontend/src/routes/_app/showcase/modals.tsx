@@ -354,7 +354,7 @@ function ModalsPage() {
             <AlertDialog>
               <AlertDialogTrigger
                 render={
-                  <Button variant="outline">
+                  <Button variant="tertiary">
                     <AlertTriangle className="size-4 mr-2" />
                     データをエクスポート
                   </Button>

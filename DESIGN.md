@@ -64,7 +64,9 @@ Tailwind `dark:` utilities are scoped in `frontend/src/styles.css` so they follo
 | `--card`, `--popover`, `--muted` | surface container steps |
 | `--primary`, `--primary-foreground` | `primary`, `on-primary` |
 | `--primary-container`, `--on-primary-container` | primary container roles |
-| `--secondary`, `--accent` | secondary / tertiary containers |
+| `--secondary` (+ foreground, container pair) | secondary container roles |
+| `--tertiary` (+ foreground, container pair) | tertiary container roles |
+| `--accent` (+ foreground) | same tertiary container roles |
 | `--destructive` (+ container pair) | error roles |
 | `--border`, `--input`, `--outline*` | outline / outline-variant. Light `--input` and `--border` are `outline-variant`. Dark `--input` is `rgba(255, 255, 255, 0.16)`. |
 | `--success` / `--info` / `--warning` (+ containers) | custom-color groups from their seeds |

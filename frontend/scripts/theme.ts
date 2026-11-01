@@ -324,6 +324,8 @@ function buildSchemeBlock(
     "primary-foreground": pick(scheme, "onPrimary"),
     secondary: pick(scheme, "secondaryContainer"),
     "secondary-foreground": pick(scheme, "onSecondaryContainer"),
+    tertiary: pick(scheme, "tertiaryContainer"),
+    "tertiary-foreground": pick(scheme, "onTertiaryContainer"),
     muted: pick(scheme, "surfaceContainerHighest"),
     "muted-foreground": pick(scheme, "onSurfaceVariant"),
     accent: pick(scheme, "tertiaryContainer"),
