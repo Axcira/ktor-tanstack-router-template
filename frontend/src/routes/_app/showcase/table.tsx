@@ -621,7 +621,9 @@ function TablePage() {
                       <ResponsiveSelect
                         id="edit-status"
                         value={editStatus}
-                        onValueChange={(v) => setEditStatus(v as Status)}
+                        onValueChange={(v) => {
+                          if (v !== null) setEditStatus(v as Status);
+                        }}
                         options={customerStatusOptions}
                       />
                     </div>

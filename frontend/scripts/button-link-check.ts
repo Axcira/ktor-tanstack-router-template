@@ -1,7 +1,8 @@
 #!/usr/bin/env bun
 /**
  * Navigation must stay a link. Base UI Button sets role="button" when it
- * renders a non-button, so <Button render={<Link>}> / <a> is rejected.
+ * renders a non-button, so a Button whose render prop or children are a
+ * <Link> or <a> is rejected.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
@@ -28,37 +29,100 @@ function walk(dir: string, out: string[] = []): string[] {
 
 export type ButtonLinkIssue = { line: number; message: string };
 
-/** Opening `<Button>` tags whose render prop is a `<Link>` or `<a>`. */
+const ANCHOR_ELEMENT = /<Link(?:[\s>/]|$)|<a(?:[\s>/]|$)/;
+
+/** `<Button>` whose render prop or element body contains a `<Link>` or `<a>`. */
 export function buttonLinkIssuesInSource(text: string): ButtonLinkIssue[] {
   const issues: ButtonLinkIssue[] = [];
   let i = 0;
   while (i < text.length) {
-    const idx = text.indexOf("<Button", i);
+    const idx = indexOfButtonTag(text, i);
     if (idx === -1) break;
-    const next = text[idx + "<Button".length];
-    if (next && /[A-Za-z0-9_$]/.test(next)) {
-      i = idx + "<Button".length;
-      continue;
+    const openEnd = endOfOpeningTag(text, idx);
+    const opening = text.slice(idx, openEnd);
+    const selfClosing = opening.trimEnd().endsWith("/>");
+    let bodyHasAnchor = false;
+    let nextIndex = openEnd;
+    if (!selfClosing) {
+      const close = findMatchingClose(text, openEnd);
+      bodyHasAnchor = ANCHOR_ELEMENT.test(text.slice(openEnd, close.start));
+      nextIndex = close.end;
     }
-    const end = endOfOpeningTag(text, idx);
-    const tag = text.slice(idx, end);
-    if (renderPointsAtAnchor(tag)) {
+    if (renderPointsAtAnchor(opening) || bodyHasAnchor) {
       issues.push({
         line: text.slice(0, idx).split("\n").length,
         message:
-          "<Button render={<Link>}> or <a> is announced as a button. Use ButtonLink.",
+          "<Button> must not render a <Link> or <a>, including as a child. Use ButtonLink.",
       });
     }
-    i = Math.max(end, idx + "<Button".length);
+    i = Math.max(nextIndex, idx + "<Button".length);
   }
   return issues;
+}
+
+function indexOfButtonTag(text: string, from: number): number {
+  let i = from;
+  while (i < text.length) {
+    const idx = text.indexOf("<Button", i);
+    if (idx === -1) return -1;
+    const next = text[idx + "<Button".length];
+    if (!next || !/[A-Za-z0-9_$]/.test(next)) return idx;
+    i = idx + "<Button".length;
+  }
+  return -1;
 }
 
 function renderPointsAtAnchor(openingTag: string): boolean {
   const renderAt = openingTag.search(/\brender\s*=/);
   if (renderAt === -1) return false;
-  const expr = openingTag.slice(renderAt);
-  return /<Link(?:[\s>/]|$)/.test(expr) || /<a(?:[\s>/]|$)/.test(expr);
+  return ANCHOR_ELEMENT.test(openingTag.slice(renderAt));
+}
+
+function findMatchingClose(
+  source: string,
+  from: number,
+): { start: number; end: number } {
+  let depth = 1;
+  let i = from;
+  let quote: string | null = null;
+  while (i < source.length) {
+    const ch = source[i];
+    if (quote) {
+      if (ch === "\\") {
+        i += 2;
+        continue;
+      }
+      if (ch === quote) quote = null;
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      quote = ch;
+      i++;
+      continue;
+    }
+    if (source.startsWith("</Button", i) && isTagBoundary(source, i + "</Button".length)) {
+      depth--;
+      const gt = source.indexOf(">", i);
+      const end = gt === -1 ? source.length : gt + 1;
+      if (depth === 0) return { start: i, end };
+      i = end;
+      continue;
+    }
+    if (source.startsWith("<Button", i) && isTagBoundary(source, i + "<Button".length)) {
+      const openEnd = endOfOpeningTag(source, i);
+      if (!source.slice(i, openEnd).trimEnd().endsWith("/>")) depth++;
+      i = openEnd;
+      continue;
+    }
+    i++;
+  }
+  return { start: source.length, end: source.length };
+}
+
+function isTagBoundary(source: string, index: number): boolean {
+  const next = source[index];
+  return !next || !/[A-Za-z0-9_$]/.test(next);
 }
 
 function endOfOpeningTag(source: string, start: number): number {

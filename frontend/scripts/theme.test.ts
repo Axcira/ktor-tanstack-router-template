@@ -43,6 +43,9 @@ describe("theme generator arguments", () => {
     expect(() => parseThemeArgs(["--variant=nope"])).toThrow(
       `Unknown variant "nope". Expected one of: ${VARIANT_NAMES.join(", ")}.`,
     );
+    expect(() => parseThemeArgs(["--variant=constructor"])).toThrow(
+      `Unknown variant "constructor". Expected one of: ${VARIANT_NAMES.join(", ")}.`,
+    );
   });
 
   it("validates contrastLevel in -1..1 and defaults to 0", () => {

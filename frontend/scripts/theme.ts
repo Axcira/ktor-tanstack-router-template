@@ -537,7 +537,7 @@ export function parseThemeArgs(argv: string[]): ParsedThemeArgs {
     }
     if (arg.startsWith("--variant=")) {
       const name = arg.slice("--variant=".length);
-      if (!(name in VARIANTS)) {
+      if (!Object.hasOwn(VARIANTS, name)) {
         throw unknownVariantError(name);
       }
       variant = name;
@@ -617,6 +617,9 @@ export function generateThemeCss(config: ThemeConfig): string {
   const warning = normalizeHex(config.warning);
   const contrast = assertContrast(config.contrast);
   const radius = normalizeRadius(config.radius);
+  if (!Object.hasOwn(VARIANTS, config.variant)) {
+    throw unknownVariantError(config.variant);
+  }
   const SchemeCtor = VARIANTS[config.variant];
   if (!SchemeCtor) {
     throw unknownVariantError(config.variant);

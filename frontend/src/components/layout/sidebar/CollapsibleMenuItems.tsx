@@ -31,6 +31,7 @@ function CollapsibleMenuItem({
     <Collapsible className="group/collapsible">
       <SidebarMenuSubItem>
         <CollapsibleTrigger
+          nativeButton={false}
           render={
             <SidebarMenuSubButton>
               {item.icon && (

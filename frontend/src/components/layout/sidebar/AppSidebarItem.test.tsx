@@ -18,7 +18,7 @@ function mockViewport(initialWidth: number) {
     writable: true,
     value: width,
   });
-  window.matchMedia = (query: string) => ({
+  window.matchMedia = ((query: string) => ({
     matches: query.includes("max-width") ? width < 768 : false,
     media: query,
     onchange: null,
@@ -31,7 +31,7 @@ function mockViewport(initialWidth: number) {
       listeners.delete(listener);
     },
     dispatchEvent: () => false,
-  });
+  })) as unknown as typeof window.matchMedia;
 
   return {
     resize(next: number) {
