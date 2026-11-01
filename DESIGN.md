@@ -1,6 +1,6 @@
 # Design system (frontend)
 
-Material Design 3–inspired **tokens only** — no MD3 components. The stack stays shadcn, Radix, and Tailwind.
+Material Design 3–inspired **tokens only** — no MD3 components. The stack stays shadcn, Base UI, and Tailwind.
 
 ## Generated artifacts
 
@@ -169,7 +169,7 @@ contrast を上げると outline-variant が濃くなり、このグレーはよ
 - `frontend/src/components/ui/` is shadcn code owned by this project. Edit it directly so components follow these rules (semantic tokens, the shape scale). It is not generated output to leave untouched. Biome ignores that directory.
 - Do **not** use raw Tailwind palette utilities (`bg-gray-100`, `text-red-500`, …) or hard-coded hex in app code.
 - Prefer `frontend/src/lib/theme-tokens.ts` for repeated patterns (form errors, toasts, role badges).
-- Use `ResponsiveSelect` (`frontend/src/components/ResponsiveSelect.tsx`) for every dropdown in app routes and feature components — not raw `<select>` and not direct imports from `@/components/ui/select`. Native `<select>` on coarse pointers, shadcn Select on fine pointers. Pass Radix Select root props (`value`, `defaultValue`, `onValueChange`, `name`, `required`, `disabled`, `form`, `autoComplete`, and the open/dir props). `id`, `className`, `aria-*`, and `data-*` are forwarded to both the native control and the shadcn trigger. Radix-only props (`open`, `defaultOpen`, `onOpenChange`, `dir`, …) apply on fine pointers and are ignored on the native control. Branch overrides are `triggerProps`, `contentProps`, and `nativeProps`.
+- Use `ResponsiveSelect` (`frontend/src/components/ResponsiveSelect.tsx`) for every dropdown in app routes and feature components — not raw `<select>` and not direct imports from `@/components/ui/select`. Native `<select>` on coarse pointers, shadcn Select on fine pointers. Pass Base UI Select root props (`value`, `defaultValue`, `onValueChange`, `name`, `required`, `disabled`, `form`, `autoComplete`, and the open props). `value` and `onValueChange` use `string | null` because Base UI clears the value with `null`. `id`, `className`, `aria-*`, and `data-*` are forwarded to both the native control and the shadcn trigger. Popup-only props (`open`, `defaultOpen`, `onOpenChange`) apply on fine pointers and are ignored on the native control. Branch overrides are `triggerProps`, `contentProps`, and `nativeProps`.
 
 Enforcement: `frontend/scripts/select-check.ts` (part of `bun run frontend:check`).
 

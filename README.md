@@ -40,7 +40,7 @@
 |---|---|
 |フレームワーク|TanStack Router (React)|
 |ツールチェイン|Vite|
-|UI|shadcn/ui, Radix UI|
+|UI|shadcn/ui, Base UI|
 |データフェッチ|TanStack Query|
 
 # Why this template
