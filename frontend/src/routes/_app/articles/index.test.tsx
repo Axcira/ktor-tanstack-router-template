@@ -20,10 +20,12 @@ describe("ArticlesListView authorization", () => {
 
     await renderApp("/articles");
 
+    // Button render={<Link>} sets nativeButton false, so Base UI adds role="button"
+    // on the anchor. The control still navigates.
     await waitFor(() => {
       expect(
-        screen.getByRole("link", { name: /記事を書く/ }),
-      ).toBeInTheDocument();
+        screen.getByRole("button", { name: /記事を書く/ }),
+      ).toHaveAttribute("href", "/articles/create");
     });
     expect(screen.getByText("記事がありません。")).toBeInTheDocument();
   });
@@ -39,8 +41,8 @@ describe("ArticlesListView authorization", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("link", { name: /記事を書く/ }),
-      ).toBeInTheDocument();
+        screen.getByRole("button", { name: /記事を書く/ }),
+      ).toHaveAttribute("href", "/articles/create");
     });
   });
 
@@ -57,7 +59,7 @@ describe("ArticlesListView authorization", () => {
       expect(screen.getByText("記事一覧")).toBeInTheDocument();
     });
     expect(
-      screen.queryByRole("link", { name: /記事を書く/ }),
+      screen.queryByRole("button", { name: /記事を書く/ }),
     ).not.toBeInTheDocument();
   });
 
