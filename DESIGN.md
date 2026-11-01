@@ -184,6 +184,8 @@ contrast を上げると `surface-container-highest` が濃くなり、このグ
 
 Enforcement: `frontend/scripts/select-check.ts` (part of `bun run frontend:check`).
 
+- A control that navigates is `ButtonLink` (`frontend/src/components/ui/button.tsx`), not `<Button render={<Link>}>` or `<Button render={<a>}>`. Base UI's button sets `role="button"` when `nativeButton` is false, so a link rendered that way is announced as a button. `ButtonLink` is the router `Link` with `buttonVariants`, and it stays an anchor. Enforcement: `frontend/scripts/button-link-check.ts` (part of `bun run frontend:check`).
+
 ### Semantic status colors (`success`, `info`, `warning`)
 
 | Location | Usage |

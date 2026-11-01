@@ -1,4 +1,5 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import { Link, type LinkComponentProps } from "@tanstack/react-router"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
@@ -74,4 +75,26 @@ function rendersNativeButton(render: ButtonPrimitive.Props["render"]) {
   return render.type === "button"
 }
 
-export { Button, buttonVariants }
+type ButtonLinkProps = LinkComponentProps<"a"> &
+  VariantProps<typeof buttonVariants>
+
+function ButtonLink({
+  className,
+  variant = "elevated",
+  size = "default",
+  shape = "square",
+  ...props
+}: ButtonLinkProps) {
+  return (
+    <Link
+      data-slot="button"
+      data-variant={variant}
+      data-shape={shape}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, shape, className }))}
+      {...props}
+    />
+  )
+}
+
+export { Button, ButtonLink, buttonVariants }

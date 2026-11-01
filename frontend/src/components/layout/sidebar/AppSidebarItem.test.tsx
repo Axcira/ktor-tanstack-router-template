@@ -18,6 +18,10 @@ describe("AppSidebar authorization", () => {
     await waitFor(() => {
       expect(screen.getByText("Dashboard")).toBeInTheDocument();
     });
+    expect(screen.getByRole("link", { name: "Dashboard" })).toHaveAttribute(
+      "href",
+      "/",
+    );
     expect(screen.queryByText("Administration")).not.toBeInTheDocument();
   });
 

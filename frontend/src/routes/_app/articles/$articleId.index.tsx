@@ -1,9 +1,9 @@
-import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { ArrowLeft, Edit, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useGetArticleV1 } from "@/api/generated/default/default.ts";
 import type { ArticleDTO } from "@/api/generated/schemas";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 import DeleteArticleDialog from "./-components/DeleteArticleDialog";
 
@@ -27,17 +27,15 @@ function ArticleDetail({ article }: { article: ArticleDTO }) {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl space-y-8">
-      <Button
+      <ButtonLink
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
-        render={
-          <Link to="/articles">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            一覧に戻る
-          </Link>
-        }
-      />
+        to="/articles"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        一覧に戻る
+      </ButtonLink>
 
       <article className="space-y-6">
         <header className="space-y-4 border-b pb-6">
@@ -59,19 +57,15 @@ function ArticleDetail({ article }: { article: ArticleDTO }) {
 
         <div className="flex gap-2">
           {isEditAllowed && (
-            <Button
+            <ButtonLink
               variant="outline"
               size="sm"
-              render={
-                <Link
-                  to="/articles/$articleId/edit"
-                  params={{ articleId: article.id.toString() }}
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  編集する
-                </Link>
-              }
-            />
+              to="/articles/$articleId/edit"
+              params={{ articleId: article.id.toString() }}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              編集する
+            </ButtonLink>
           )}
           {isDeleteAllowed && (
             <Button
@@ -117,10 +111,9 @@ function ArticleDetailPage() {
     return (
       <div className="p-6 text-center space-y-4">
         <p className="text-destructive">記事が見つかりませんでした。</p>
-        <Button
-          variant="outline"
-          render={<Link to="/articles">一覧に戻る</Link>}
-        />
+        <ButtonLink variant="outline" to="/articles">
+          一覧に戻る
+        </ButtonLink>
       </div>
     );
   }

@@ -1,11 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Shield } from "lucide-react";
 import {
   useGetRoleByIdV1,
   useUpdateRoleV1,
 } from "@/api/generated/default/default.ts";
 import type { Permission } from "@/api/generated/schemas/permission";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import RoleForm from "./-components/RoleForm";
 
 export const Route = createFileRoute("/_app/permissions/roles/$roleId/edit")({
@@ -50,10 +50,9 @@ function RoleEditPage() {
     return (
       <div className="p-6 text-center space-y-4">
         <p className="text-destructive">ロールの読み込みに失敗しました。</p>
-        <Button
-          variant="outline"
-          render={<Link to="/permissions/roles">ロール一覧に戻る</Link>}
-        />
+        <ButtonLink variant="outline" to="/permissions/roles">
+          ロール一覧に戻る
+        </ButtonLink>
       </div>
     );
   }
@@ -66,17 +65,15 @@ function RoleEditPage() {
 
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
-      <Button
+      <ButtonLink
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
-        render={
-          <Link to="/permissions/roles">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            ロール一覧に戻る
-          </Link>
-        }
-      />
+        to="/permissions/roles"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        ロール一覧に戻る
+      </ButtonLink>
 
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Shield className="h-8 w-8 text-primary" />

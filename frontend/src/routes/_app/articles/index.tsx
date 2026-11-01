@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
 import { useListArticlesV1 } from "@/api/generated/default/default.ts";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 
 const defaultArticlesSearch = {
@@ -77,15 +77,10 @@ export function ArticlesListView({
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">記事一覧</h1>
         {isAllowedCreation && (
-          <Button
-            disabled={!isAllowedCreation}
-            render={
-              <Link to="/articles/create">
-                <Plus className="mr-2 h-4 w-4" />
-                記事を書く
-              </Link>
-            }
-          />
+          <ButtonLink to="/articles/create">
+            <Plus className="mr-2 h-4 w-4" />
+            記事を書く
+          </ButtonLink>
         )}
       </div>
 

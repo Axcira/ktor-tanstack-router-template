@@ -1,11 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Users } from "lucide-react";
 import {
   useGetRolesV1,
   useGetUsersV1,
   useUpdateUserV1,
 } from "@/api/generated/default/default.ts";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import ForcePasswordForm from "./-components/ForcePasswordForm";
 import UserForm from "./-components/UserForm";
 
@@ -75,10 +75,9 @@ function UserEditPage() {
           >
             再試行
           </Button>
-          <Button
-            variant="ghost"
-            render={<Link to="/permissions/users">ユーザー一覧に戻る</Link>}
-          />
+          <ButtonLink variant="ghost" to="/permissions/users">
+            ユーザー一覧に戻る
+          </ButtonLink>
         </div>
       </div>
     );
@@ -88,27 +87,24 @@ function UserEditPage() {
     return (
       <div className="p-6 text-center space-y-4">
         <p className="text-destructive">指定されたユーザーが見つかりません。</p>
-        <Button
-          variant="outline"
-          render={<Link to="/permissions/users">ユーザー一覧に戻る</Link>}
-        />
+        <ButtonLink variant="outline" to="/permissions/users">
+          ユーザー一覧に戻る
+        </ButtonLink>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
-      <Button
+      <ButtonLink
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
-        render={
-          <Link to="/permissions/users">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            ユーザー一覧に戻る
-          </Link>
-        }
-      />
+        to="/permissions/users"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        ユーザー一覧に戻る
+      </ButtonLink>
 
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Users className="h-8 w-8 text-primary" />

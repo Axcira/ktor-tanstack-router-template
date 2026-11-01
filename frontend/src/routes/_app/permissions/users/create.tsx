@@ -1,10 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Users } from "lucide-react";
 import {
   useCreateUserV1,
   useGetRolesV1,
 } from "@/api/generated/default/default.ts";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import UserForm from "./-components/UserForm";
 
 export const Route = createFileRoute("/_app/permissions/users/create")({
@@ -55,10 +55,9 @@ function UserCreatePage() {
           <Button variant="outline" onClick={() => refetchRoles()}>
             再試行
           </Button>
-          <Button
-            variant="ghost"
-            render={<Link to="/permissions/users">ユーザー一覧に戻る</Link>}
-          />
+          <ButtonLink variant="ghost" to="/permissions/users">
+            ユーザー一覧に戻る
+          </ButtonLink>
         </div>
       </div>
     );
@@ -66,17 +65,15 @@ function UserCreatePage() {
 
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
-      <Button
+      <ButtonLink
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
-        render={
-          <Link to="/permissions/users">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            ユーザー一覧に戻る
-          </Link>
-        }
-      />
+        to="/permissions/users"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        ユーザー一覧に戻る
+      </ButtonLink>
 
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Users className="h-8 w-8 text-primary" />
