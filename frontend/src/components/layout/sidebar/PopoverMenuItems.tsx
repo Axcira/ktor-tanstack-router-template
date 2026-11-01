@@ -45,7 +45,7 @@ function PopoverMenuItem({ item }: { item: MenuItem }) {
     </Popover>
   ) : (
     <SidebarMenuSubButton
-      className={"px-2"}
+      className={"px-2 rounded-sm"}
       render={
         <Link
           to={item.to ?? "#"}

@@ -49,6 +49,7 @@ function CollapsibleMenuItem({
   ) : (
     <SidebarMenuSubItem>
       <SidebarMenuSubButton
+        className="rounded-md"
         render={
           <Link to={item.to ?? "#"}>
             {item.icon && (
