@@ -5,14 +5,27 @@
  * OpenAPI spec version: 1.0
  */
 import { HttpResponse, http } from "msw";
-import type { RequestHandlerOptions } from "msw";
+import type {
+  HttpResponseResolver,
+  PathParams,
+  RequestHandlerOptions,
+} from "msw";
 
 import type {
   ArticleDTO,
+  ChangePasswordRequest,
+  CreateArticleInput,
+  CreateRoleInput,
+  CreateUserInput,
+  ForceChangePasswordRequest,
   GetApiJsonKotlinxSerialization200,
   HealthResponse,
+  LoginRequest,
   Permission,
   RoleDTO,
+  UpdateArticleInput,
+  UpdateRoleInput,
+  UpdateUserInput,
   UserDTO,
   UserSession,
 } from "../schemas";
@@ -57,13 +70,13 @@ export const getGetApiMockHandler = (
   overrideResponse?:
     | unknown
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     "*/api/",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -78,7 +91,7 @@ export const getGetApiJsonKotlinxSerializationMockHandler = (
   overrideResponse?:
     | GetApiJsonKotlinxSerialization200
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) =>
         | Promise<GetApiJsonKotlinxSerialization200>
         | GetApiJsonKotlinxSerialization200),
@@ -86,7 +99,7 @@ export const getGetApiJsonKotlinxSerializationMockHandler = (
 ) => {
   return http.get(
     "*/api/json/kotlinx-serialization",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -104,13 +117,15 @@ export const getLoginV1MockHandler = (
   overrideResponse?:
     | UserSession
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<HttpResponseResolver<PathParams, LoginRequest>>[0],
       ) => Promise<UserSession> | UserSession),
   options?: RequestHandlerOptions,
 ) => {
-  return http.post(
+  return http.post<PathParams, LoginRequest>(
     "*/api/v1/auth/login",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (
+      info: Parameters<HttpResponseResolver<PathParams, LoginRequest>>[0],
+    ) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -127,14 +142,12 @@ export const getLoginV1MockHandler = (
 export const getLogoutV1MockHandler = (
   overrideResponse?:
     | void
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<void> | void),
+    | ((info: Parameters<HttpResponseResolver>[0]) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     "*/api/v1/auth/logout",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -149,13 +162,19 @@ export const getChangePasswordV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<
+          HttpResponseResolver<PathParams, ChangePasswordRequest>
+        >[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.post(
+  return http.post<PathParams, ChangePasswordRequest>(
     "*/api/v1/auth/password",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (
+      info: Parameters<
+        HttpResponseResolver<PathParams, ChangePasswordRequest>
+      >[0],
+    ) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -170,13 +189,13 @@ export const getGetUsersV1MockHandler = (
   overrideResponse?:
     | UserDTO[]
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) => Promise<UserDTO[]> | UserDTO[]),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     "*/api/v1/users",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -194,13 +213,15 @@ export const getCreateUserV1MockHandler = (
   overrideResponse?:
     | UserDTO
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<HttpResponseResolver<PathParams, CreateUserInput>>[0],
       ) => Promise<UserDTO> | UserDTO),
   options?: RequestHandlerOptions,
 ) => {
-  return http.post(
+  return http.post<PathParams, CreateUserInput>(
     "*/api/v1/users/create",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (
+      info: Parameters<HttpResponseResolver<PathParams, CreateUserInput>>[0],
+    ) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -218,13 +239,19 @@ export const getUpdateUserV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, UpdateUserInput>
+        >[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.patch(
+  return http.patch<{ id: string }, UpdateUserInput>(
     "*/api/v1/users/update/:id",
-    async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, UpdateUserInput>
+      >[0],
+    ) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -239,13 +266,13 @@ export const getDeleteUserV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.delete(
+  return http.delete<{ id: string }>(
     "*/api/v1/users/delete/:id",
-    async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -260,13 +287,19 @@ export const getForceChangePasswordV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, ForceChangePasswordRequest>
+        >[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.post(
+  return http.post<{ id: string }, ForceChangePasswordRequest>(
     "*/api/v1/users/:id/password",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, ForceChangePasswordRequest>
+      >[0],
+    ) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -281,13 +314,15 @@ export const getUpdateMeV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.put>[1]>[0],
+        info: Parameters<HttpResponseResolver<PathParams, UpdateUserInput>>[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.put(
+  return http.put<PathParams, UpdateUserInput>(
     "*/api/v1/users/me",
-    async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+    async (
+      info: Parameters<HttpResponseResolver<PathParams, UpdateUserInput>>[0],
+    ) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -301,14 +336,12 @@ export const getUpdateMeV1MockHandler = (
 export const getDeleteMeV1MockHandler = (
   overrideResponse?:
     | void
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) => Promise<void> | void),
+    | ((info: Parameters<HttpResponseResolver>[0]) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
   return http.delete(
     "*/api/v1/users/me",
-    async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -323,13 +356,13 @@ export const getGetSelfV1MockHandler = (
   overrideResponse?:
     | UserSession
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) => Promise<UserSession> | UserSession),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     "*/api/v1/users/me",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -347,13 +380,17 @@ export const getCreateArticleV1MockHandler = (
   overrideResponse?:
     | ArticleDTO
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<
+          HttpResponseResolver<PathParams, CreateArticleInput>
+        >[0],
       ) => Promise<ArticleDTO> | ArticleDTO),
   options?: RequestHandlerOptions,
 ) => {
-  return http.post(
+  return http.post<PathParams, CreateArticleInput>(
     "*/api/v1/articles",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (
+      info: Parameters<HttpResponseResolver<PathParams, CreateArticleInput>>[0],
+    ) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -371,13 +408,13 @@ export const getListArticlesV1MockHandler = (
   overrideResponse?:
     | ArticleDTO[]
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) => Promise<ArticleDTO[]> | ArticleDTO[]),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     "*/api/v1/articles",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -395,13 +432,13 @@ export const getDeleteArticleV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.delete(
+  return http.delete<{ id: string }>(
     "*/api/v1/articles/:id",
-    async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -416,13 +453,13 @@ export const getGetArticleV1MockHandler = (
   overrideResponse?:
     | ArticleDTO
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
       ) => Promise<ArticleDTO> | ArticleDTO),
   options?: RequestHandlerOptions,
 ) => {
-  return http.get(
+  return http.get<{ id: string }>(
     "*/api/v1/articles/:id",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -441,13 +478,19 @@ export const getUpdateArticleV1MockHandler = (
     | ArticleDTO
     | void
     | ((
-        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, UpdateArticleInput>
+        >[0],
       ) => Promise<ArticleDTO | void> | ArticleDTO | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.patch(
+  return http.patch<{ id: string }, UpdateArticleInput>(
     "*/api/v1/articles/:id",
-    async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, UpdateArticleInput>
+      >[0],
+    ) => {
       const resolvedBody =
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -466,13 +509,13 @@ export const getGetUserPermissionsV1MockHandler = (
   overrideResponse?:
     | Permission[]
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) => Promise<Permission[]> | Permission[]),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     "*/api/v1/permissions",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -490,13 +533,15 @@ export const getCanIV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<HttpResponseResolver<PathParams, Permission>>[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.post(
+  return http.post<PathParams, Permission>(
     "*/api/v1/permissions/can-i",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (
+      info: Parameters<HttpResponseResolver<PathParams, Permission>>[0],
+    ) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -511,13 +556,15 @@ export const getCreateRoleV1MockHandler = (
   overrideResponse?:
     | RoleDTO
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<HttpResponseResolver<PathParams, CreateRoleInput>>[0],
       ) => Promise<RoleDTO> | RoleDTO),
   options?: RequestHandlerOptions,
 ) => {
-  return http.post(
+  return http.post<PathParams, CreateRoleInput>(
     "*/api/v1/roles",
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+    async (
+      info: Parameters<HttpResponseResolver<PathParams, CreateRoleInput>>[0],
+    ) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -535,13 +582,13 @@ export const getGetRolesV1MockHandler = (
   overrideResponse?:
     | RoleDTO[]
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) => Promise<RoleDTO[]> | RoleDTO[]),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     "*/api/v1/roles",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -559,13 +606,13 @@ export const getGetRoleByIdV1MockHandler = (
   overrideResponse?:
     | RoleDTO
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver<{ roleId: string }>>[0],
       ) => Promise<RoleDTO> | RoleDTO),
   options?: RequestHandlerOptions,
 ) => {
-  return http.get(
+  return http.get<{ roleId: string }>(
     "*/api/v1/roles/:roleId",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver<{ roleId: string }>>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -583,13 +630,13 @@ export const getDeleteRoleV1MockHandler = (
   overrideResponse?:
     | void
     | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
       ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.delete(
+  return http.delete<{ id: string }>(
     "*/api/v1/roles/:id",
-    async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -605,13 +652,19 @@ export const getUpdateRoleV1MockHandler = (
     | RoleDTO
     | void
     | ((
-        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, UpdateRoleInput>
+        >[0],
       ) => Promise<RoleDTO | void> | RoleDTO | void),
   options?: RequestHandlerOptions,
 ) => {
-  return http.patch(
+  return http.patch<{ id: string }, UpdateRoleInput>(
     "*/api/v1/roles/:id",
-    async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, UpdateRoleInput>
+      >[0],
+    ) => {
       const resolvedBody =
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
@@ -630,13 +683,13 @@ export const getHealthV1MockHandler = (
   overrideResponse?:
     | HealthResponse
     | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
+        info: Parameters<HttpResponseResolver>[0],
       ) => Promise<HealthResponse> | HealthResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     "*/api/v1/health",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+    async (info: Parameters<HttpResponseResolver>[0]) => {
       return HttpResponse.json(
         overrideResponse !== undefined
           ? typeof overrideResponse === "function"
