@@ -30,15 +30,18 @@ function CollapsibleMenuItem({
   return item.children && item.children.length > 0 ? (
     <Collapsible className="group/collapsible">
       <SidebarMenuSubItem>
-        <CollapsibleTrigger asChild>
-          <SidebarMenuSubButton>
-            {item.icon && (
-              <span className="h-4 w-4 mr-2 shrink-0">{item.icon}</span>
-            )}
-            <span>{item.text}</span>
-            <ChevronRight className="ml-auto h-3.5 w-3.5 transition-transform group-data-[state=open]/collapsible:rotate-90" />
-          </SidebarMenuSubButton>
-        </CollapsibleTrigger>
+        <CollapsibleTrigger
+          nativeButton={false}
+          render={
+            <SidebarMenuSubButton>
+              {item.icon && (
+                <span className="h-4 w-4 mr-2 shrink-0">{item.icon}</span>
+              )}
+              <span>{item.text}</span>
+              <ChevronRight className="ml-auto h-3.5 w-3.5 transition-transform group-data-open/collapsible:rotate-90" />
+            </SidebarMenuSubButton>
+          }
+        />
         <CollapsibleContent>
           <CollapsibleMenuItems items={item.children} depth={depth + 1} />
         </CollapsibleContent>
@@ -46,14 +49,17 @@ function CollapsibleMenuItem({
     </Collapsible>
   ) : (
     <SidebarMenuSubItem>
-      <SidebarMenuSubButton asChild>
-        <Link to={item.to ?? "#"}>
-          {item.icon && (
-            <span className="h-4 w-4 mr-2 shrink-0">{item.icon}</span>
-          )}
-          {item.text}
-        </Link>
-      </SidebarMenuSubButton>
+      <SidebarMenuSubButton
+        className="rounded-md"
+        render={
+          <Link to={item.to ?? "#"}>
+            {item.icon && (
+              <span className="h-4 w-4 mr-2 shrink-0">{item.icon}</span>
+            )}
+            {item.text}
+          </Link>
+        }
+      />
     </SidebarMenuSubItem>
   );
 }

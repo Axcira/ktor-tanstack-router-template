@@ -1,9 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useCreateArticleV1 } from "@/api/generated/default/default.ts";
 import LoadingSpinner from "@/components/LoadingSpinner.tsx";
 import NoPermission from "@/components/NoPermission.tsx";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 import ArticleForm, { type ArticleFormValues } from "./-components/ArticleForm";
 
@@ -52,17 +52,15 @@ function ArticleCreatePage() {
 
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
-      <Button
-        asChild
+      <ButtonLink
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
+        to="/articles"
       >
-        <Link to="/articles">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          一覧に戻る
-        </Link>
-      </Button>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        一覧に戻る
+      </ButtonLink>
 
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">記事の作成</h1>

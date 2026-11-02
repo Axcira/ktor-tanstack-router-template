@@ -36,7 +36,7 @@ function AppLayout() {
       <AppSidebar />
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto">
+        <main className="@container flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>

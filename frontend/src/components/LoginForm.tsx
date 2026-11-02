@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type SubmitEventHandler, useState } from "react";
-import { toast } from "sonner";
 import { useLoginV1 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
+import { formErrorBannerClass } from "@/lib/theme-tokens";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -24,7 +25,7 @@ export function LoginForm() {
             setErrorMessage("メールアドレスまたはパスワードが間違っています");
             return;
           }
-          toast.success("ログインに成功しました");
+          toast.add({ type: "success", title: "ログインに成功しました" });
           navigate({ to: "/" }).then();
         },
         onError: () => {
@@ -36,14 +37,11 @@ export function LoginForm() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-      <div className="w-full max-w-md p-8 bg-card text-card-foreground border border-border rounded-xl shadow-sm">
+      <div className="w-full max-w-md p-8 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
         <h1 className="text-2xl font-bold mb-6 text-center">ログイン</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
-            <div
-              role="alert"
-              className="p-3 text-sm rounded-lg bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400"
-            >
+            <div role="alert" className={formErrorBannerClass("p-3")}>
               {errorMessage}
             </div>
           )}

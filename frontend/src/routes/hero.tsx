@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useGetSelfV1 } from "@/api/generated/default/default.ts";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 
 export const Route = createFileRoute("/hero")({ component: Home });
 
@@ -21,7 +21,7 @@ function WelcomeMessage() {
       </h1>
       <p className="mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
         Edit{" "}
-        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm font-semibold">
+        <code className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-sm font-semibold">
           src/routes/index.tsx
         </code>{" "}
         to get started.
@@ -36,13 +36,13 @@ function AuthButtons() {
   return (
     <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
       {data?.status !== 200 ? (
-        <Button
-          asChild
+        <ButtonLink
           size="lg"
-          className="h-12 px-8 text-base bg-primary text-primary-foreground rounded hover:opacity-90 shadow-md transition-all"
+          className="h-12 px-8 text-base bg-primary text-primary-foreground rounded-md hover:opacity-90 shadow-md transition-all"
+          to="/login"
         >
-          <Link to="/login">ログイン</Link>
-        </Button>
+          ログイン
+        </ButtonLink>
       ) : (
         <div className="mt-8">
           <p className="mb-4 text-lg text-muted-foreground">

@@ -8,7 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,13 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -37,10 +30,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/detail")({
   component: DetailPage,
 });
+
+const projectStatusOptions = [
+  { value: "draft", label: "下書き" },
+  { value: "in_progress", label: "進行中" },
+  { value: "review", label: "レビュー中" },
+  { value: "completed", label: "完了" },
+  { value: "cancelled", label: "キャンセル" },
+];
 
 interface LineItem {
   id: number;
@@ -115,7 +117,7 @@ function DetailPage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast.success("案件情報を保存しました");
+      toast.add({ type: "success", title: "案件情報を保存しました" });
     }, 1000);
   };
 
@@ -138,7 +140,7 @@ function DetailPage() {
 
   if (viewState === "loading") {
     return (
-      <div className="p-6 space-y-6">
+      <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-64" />
           <div className="flex gap-1 border rounded-md p-0.5">
@@ -188,7 +190,7 @@ function DetailPage() {
 
   if (viewState === "error") {
     return (
-      <div className="p-6 space-y-6">
+      <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">案件詳細</h1>
           <div className="flex gap-1 border rounded-md p-0.5">
@@ -232,7 +234,7 @@ function DetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -419,18 +421,14 @@ function DetailPage() {
               <CardTitle className="text-sm">ステータス</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">下書き</SelectItem>
-                  <SelectItem value="in_progress">進行中</SelectItem>
-                  <SelectItem value="review">レビュー中</SelectItem>
-                  <SelectItem value="completed">完了</SelectItem>
-                  <SelectItem value="cancelled">キャンセル</SelectItem>
-                </SelectContent>
-              </Select>
+              <ResponsiveSelect
+                aria-label="ステータス"
+                value={status}
+                onValueChange={(value) => {
+                  if (value != null) setStatus(value);
+                }}
+                options={projectStatusOptions}
+              />
             </CardContent>
           </Card>
 

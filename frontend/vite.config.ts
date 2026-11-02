@@ -27,6 +27,13 @@ const config = defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     globals: false,
+    server: {
+      deps: {
+        // The package's ESM imports omit file extensions. Node cannot load
+        // that, so Vitest must bundle it instead of externalizing it.
+        inline: ["@material/material-color-utilities"],
+      },
+    },
   },
 });
 

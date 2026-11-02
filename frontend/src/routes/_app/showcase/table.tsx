@@ -15,7 +15,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,13 +35,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -53,12 +46,26 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/table")({
   component: TablePage,
 });
 
 type Status = "active" | "inactive" | "pending";
+
+const statusFilterOptions = [
+  { value: "all", label: "すべて" },
+  { value: "active", label: "有効" },
+  { value: "inactive", label: "無効" },
+  { value: "pending", label: "保留" },
+];
+
+const customerStatusOptions = [
+  { value: "active", label: "有効" },
+  { value: "inactive", label: "無効" },
+  { value: "pending", label: "保留" },
+];
 
 interface Customer {
   id: string;
@@ -201,7 +208,9 @@ function TablePage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast.success("顧客情報を保存しました", {
+      toast.add({
+        type: "success",
+        title: "顧客情報を保存しました",
         description: `${editName} の情報を更新しました`,
       });
       setDialogOpen(false);
@@ -209,13 +218,15 @@ function TablePage() {
   };
 
   const handleDelete = (customer: Customer) => {
-    toast.success(`${customer.name} を削除しました`, {
+    toast.add({
+      type: "success",
+      title: `${customer.name} を削除しました`,
       description: `ID: ${customer.id}`,
     });
   };
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="container mx-auto p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">顧客一覧</h1>
@@ -260,23 +271,18 @@ function TablePage() {
             className="pl-8"
           />
         </div>
-        <Select
+        <ResponsiveSelect
+          aria-label="ステータス"
           value={statusFilter}
-          onValueChange={(v) => {
-            setStatusFilter(v);
+          onValueChange={(value) => {
+            if (value == null) return;
+            setStatusFilter(value);
             setPage(1);
           }}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="ステータス" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">すべて</SelectItem>
-            <SelectItem value="active">有効</SelectItem>
-            <SelectItem value="inactive">無効</SelectItem>
-            <SelectItem value="pending">保留</SelectItem>
-          </SelectContent>
-        </Select>
+          options={statusFilterOptions}
+          placeholder="ステータス"
+          className="w-32"
+        />
       </div>
 
       {/* Table */}
@@ -312,7 +318,10 @@ function TablePage() {
                   setViewState("loading");
                   setTimeout(() => {
                     setViewState("loaded");
-                    toast.success("データを再読み込みしました");
+                    toast.add({
+                      type: "success",
+                      title: "データを再読み込みしました",
+                    });
                   }, 1000);
                 }}
               >
@@ -367,15 +376,17 @@ function TablePage() {
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="size-4" />
+                            </Button>
+                          }
+                        />
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={(e) => {
@@ -606,20 +617,15 @@ function TablePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>ステータス</Label>
-                      <Select
+                      <Label htmlFor="edit-status">ステータス</Label>
+                      <ResponsiveSelect
+                        id="edit-status"
                         value={editStatus}
-                        onValueChange={(v) => setEditStatus(v as Status)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">有効</SelectItem>
-                          <SelectItem value="inactive">無効</SelectItem>
-                          <SelectItem value="pending">保留</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        onValueChange={(v) => {
+                          if (v !== null) setEditStatus(v as Status);
+                        }}
+                        options={customerStatusOptions}
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">

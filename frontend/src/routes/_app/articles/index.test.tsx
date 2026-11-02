@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getGetSelfV1MockHandler,
   getListArticlesV1MockHandler,
@@ -11,7 +11,12 @@ import { server } from "@/test/msw";
 import { makeSession } from "@/test/session";
 
 describe("ArticlesListView authorization", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("shows create CTA when session has CreateArticle (local shortcut)", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       getGetSelfV1MockHandler(makeSession([{ type: "CreateArticle" }])),
       getListArticlesV1MockHandler([]),
@@ -20,12 +25,17 @@ describe("ArticlesListView authorization", () => {
 
     await renderApp("/articles");
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("link", { name: /記事を書く/ }),
-      ).toBeInTheDocument();
-    });
+    const createLink = await screen.findByRole("link", { name: /記事を書く/ });
+    expect(createLink).toHaveAttribute("href", "/articles/create");
+    expect(createLink).not.toHaveAttribute("role", "button");
     expect(screen.getByText("記事がありません。")).toBeInTheDocument();
+    expect(
+      error.mock.calls
+        .map((call) => String(call[0]))
+        .filter((message) =>
+          /Base UI|nativeButton|forwardRef|validateDOMNesting/i.test(message),
+        ),
+    ).toEqual([]);
   });
 
   it("shows create CTA when can-i allows CreateArticle via ManageArticles", async () => {
@@ -38,9 +48,10 @@ describe("ArticlesListView authorization", () => {
     await renderApp("/articles");
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("link", { name: /記事を書く/ }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /記事を書く/ })).toHaveAttribute(
+        "href",
+        "/articles/create",
+      );
     });
   });
 

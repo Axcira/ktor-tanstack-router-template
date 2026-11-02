@@ -10,7 +10,6 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/upload")({
   component: UploadPage,
@@ -63,7 +63,10 @@ function UploadPage() {
       progress: 0,
     }));
     setFiles((prev) => [...prev, ...newFiles]);
-    toast.info(`${newFiles.length} 件のファイルを追加しました`);
+    toast.add({
+      type: "info",
+      title: `${newFiles.length} 件のファイルを追加しました`,
+    });
   }, []);
 
   const simulateUpload = (fileId: string) => {
@@ -90,13 +93,18 @@ function UploadPage() {
           ),
         );
         if (shouldFail) {
-          toast.error("アップロードに失敗しました", {
+          toast.add({
+            type: "error",
+            title: "アップロードに失敗しました",
             description:
               "ネットワークエラーが発生しました。再試行してください。",
           });
         } else {
           const file = files.find((f) => f.id === fileId);
-          toast.success(`${file?.name ?? "ファイル"} をアップロードしました`);
+          toast.add({
+            type: "success",
+            title: `${file?.name ?? "ファイル"} をアップロードしました`,
+          });
         }
       } else {
         setFiles((prev) =>
@@ -113,7 +121,10 @@ function UploadPage() {
       (f) => f.status === "pending" || f.status === "error",
     );
     if (pending.length === 0) {
-      toast.warning("アップロードするファイルがありません");
+      toast.add({
+        type: "warning",
+        title: "アップロードするファイルがありません",
+      });
       return;
     }
     for (const f of pending) {
@@ -123,12 +134,12 @@ function UploadPage() {
 
   const removeFile = (fileId: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== fileId));
-    toast.info("ファイルを削除しました");
+    toast.add({ type: "info", title: "ファイルを削除しました" });
   };
 
   const clearAll = () => {
     setFiles([]);
-    toast.info("すべてのファイルをクリアしました");
+    toast.add({ type: "info", title: "すべてのファイルをクリアしました" });
   };
 
   const handleDrop = useCallback(
@@ -146,7 +157,7 @@ function UploadPage() {
   const errorCount = files.filter((f) => f.status === "error").length;
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl mx-auto">
+    <div className="container mx-auto p-6 max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
           ファイルアップロード
@@ -202,14 +213,14 @@ function UploadPage() {
                 {doneCount > 0 && (
                   <>
                     {" "}
-                    · <span className="text-green-600">{doneCount} 完了</span>
+                    · <span className="text-success">{doneCount} 完了</span>
                   </>
                 )}
                 {uploadingCount > 0 && (
                   <>
                     {" "}
                     ·{" "}
-                    <span className="text-blue-600">
+                    <span className="text-info">
                       {uploadingCount} アップロード中
                     </span>
                   </>
@@ -256,7 +267,7 @@ function UploadPage() {
                         {file.name}
                       </p>
                       {file.status === "done" && (
-                        <CheckCircle2 className="size-4 text-green-500 shrink-0" />
+                        <CheckCircle2 className="size-4 text-success shrink-0" />
                       )}
                       {file.status === "error" && (
                         <AlertCircle className="size-4 text-destructive shrink-0" />

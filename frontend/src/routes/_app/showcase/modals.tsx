@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, Info, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,13 +42,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -58,10 +51,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 export const Route = createFileRoute("/_app/showcase/modals")({
   component: ModalsPage,
 });
+
+const projectStatusOptions = [
+  { value: "draft", label: "下書き" },
+  { value: "in_progress", label: "進行中" },
+  { value: "review", label: "レビュー中" },
+  { value: "completed", label: "完了" },
+  { value: "cancelled", label: "キャンセル" },
+];
 
 function ModalsPage() {
   const [editName, setEditName] = useState("田中太郎");
@@ -70,7 +72,7 @@ function ModalsPage() {
   const [drawerStatus, setDrawerStatus] = useState("in_progress");
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
           モーダル・ドロワー・ダイアログ
@@ -89,12 +91,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Pencil className="size-4 mr-2" />
-                  顧客情報を編集
-                </Button>
-              </DialogTrigger>
+              <DialogTrigger
+                render={
+                  <Button variant="elevated">
+                    <Pencil className="size-4 mr-2" />
+                    顧客情報を編集
+                  </Button>
+                }
+              />
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>顧客情報の編集</DialogTitle>
@@ -124,7 +128,9 @@ function ModalsPage() {
                 <DialogFooter>
                   <Button
                     onClick={() => {
-                      toast.success("顧客情報を更新しました", {
+                      toast.add({
+                        type: "success",
+                        title: "顧客情報を更新しました",
                         description: `${editName} (${editEmail})`,
                       });
                     }}
@@ -145,12 +151,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="size-4 mr-2" />
-                  案件を削除
-                </Button>
-              </AlertDialogTrigger>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="destructive">
+                    <Trash2 className="size-4 mr-2" />
+                    案件を削除
+                  </Button>
+                }
+              />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>案件を削除しますか？</AlertDialogTitle>
@@ -163,7 +171,9 @@ function ModalsPage() {
                   <AlertDialogCancel>キャンセル</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      toast.success("案件を削除しました", {
+                      toast.add({
+                        type: "success",
+                        title: "案件を削除しました",
                         description: "PRJ-2026-042",
                       })
                     }
@@ -184,12 +194,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline">
-                  <Info className="size-4 mr-2" />
-                  詳細パネルを開く
-                </Button>
-              </SheetTrigger>
+              <SheetTrigger
+                render={
+                  <Button variant="filled">
+                    <Info className="size-4 mr-2" />
+                    詳細パネルを開く
+                  </Button>
+                }
+              />
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>案件メモ</SheetTitle>
@@ -222,7 +234,10 @@ function ModalsPage() {
                 <SheetFooter>
                   <Button
                     onClick={() => {
-                      toast.success("メモを保存しました");
+                      toast.add({
+                        type: "success",
+                        title: "メモを保存しました",
+                      });
                     }}
                   >
                     保存
@@ -241,12 +256,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Drawer>
-              <DrawerTrigger asChild>
-                <Button variant="outline">
-                  <AlertTriangle className="size-4 mr-2" />
-                  ステータス変更
-                </Button>
-              </DrawerTrigger>
+              <DrawerTrigger
+                render={
+                  <Button variant="outline">
+                    <AlertTriangle className="size-4 mr-2" />
+                    ステータス変更
+                  </Button>
+                }
+              />
               <DrawerContent>
                 <DrawerHeader className="text-left">
                   <DrawerTitle>ステータスの変更</DrawerTitle>
@@ -257,22 +274,15 @@ function ModalsPage() {
                 <div className="px-4 pb-4">
                   <div className="space-y-4 max-w-sm mx-auto">
                     <div className="space-y-2">
-                      <Label>現在のステータス</Label>
-                      <Select
+                      <Label htmlFor="drawer-status">現在のステータス</Label>
+                      <ResponsiveSelect
+                        id="drawer-status"
                         value={drawerStatus}
-                        onValueChange={setDrawerStatus}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">下書き</SelectItem>
-                          <SelectItem value="in_progress">進行中</SelectItem>
-                          <SelectItem value="review">レビュー中</SelectItem>
-                          <SelectItem value="completed">完了</SelectItem>
-                          <SelectItem value="cancelled">キャンセル</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        onValueChange={(value) => {
+                          if (value != null) setDrawerStatus(value);
+                        }}
+                        options={projectStatusOptions}
+                      />
                     </div>
                   </div>
                 </div>
@@ -286,7 +296,9 @@ function ModalsPage() {
                         completed: "完了",
                         cancelled: "キャンセル",
                       };
-                      toast.success("ステータスを変更しました", {
+                      toast.add({
+                        type: "success",
+                        title: "ステータスを変更しました",
                         description: `新しいステータス: ${labels[drawerStatus]}`,
                       });
                     }}
@@ -307,12 +319,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="secondary">
-                  <Info className="size-4 mr-2" />
-                  システム情報
-                </Button>
-              </DialogTrigger>
+              <DialogTrigger
+                render={
+                  <Button variant="secondary">
+                    <Info className="size-4 mr-2" />
+                    システム情報
+                  </Button>
+                }
+              />
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>システム情報</DialogTitle>
@@ -347,12 +361,14 @@ function ModalsPage() {
           </CardHeader>
           <CardContent>
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline">
-                  <AlertTriangle className="size-4 mr-2" />
-                  データをエクスポート
-                </Button>
-              </AlertDialogTrigger>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="tertiary">
+                    <AlertTriangle className="size-4 mr-2" />
+                    データをエクスポート
+                  </Button>
+                }
+              />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>
@@ -366,7 +382,9 @@ function ModalsPage() {
                   <AlertDialogCancel>キャンセル</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
-                      toast.success("エクスポートを開始しました", {
+                      toast.add({
+                        type: "success",
+                        title: "エクスポートを開始しました",
                         description: "完了後に通知します",
                       })
                     }

@@ -1,8 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Shield } from "lucide-react";
 import { useCreateRoleV1 } from "@/api/generated/default/default.ts";
 import type { Permission } from "@/api/generated/schemas/permission";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import RoleForm from "./-components/RoleForm";
 
 export const Route = createFileRoute("/_app/permissions/roles/create")({
@@ -30,17 +30,15 @@ function RoleCreatePage() {
 
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
-      <Button
-        asChild
+      <ButtonLink
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
+        to="/permissions/roles"
       >
-        <Link to="/permissions/roles">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          ロール一覧に戻る
-        </Link>
-      </Button>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        ロール一覧に戻る
+      </ButtonLink>
 
       <div className="flex items-center gap-3 border-b border-border pb-5">
         <Shield className="h-8 w-8 text-primary" />
@@ -52,7 +50,7 @@ function RoleCreatePage() {
         </div>
       </div>
 
-      <div className="border rounded-xl p-6 bg-card shadow-sm">
+      <div className="border rounded-lg p-6 bg-card shadow-sm">
         <RoleForm
           onSubmit={handleSubmit}
           onCancel={() => navigate({ to: "/permissions/roles" })}

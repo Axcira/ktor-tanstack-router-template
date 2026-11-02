@@ -141,7 +141,7 @@ function ChatPage() {
   const displayMessages = viewState === "empty" ? [] : messages;
 
   return (
-    <div className="p-6 h-[calc(100vh-2rem)] flex flex-col gap-4">
+    <div className="container mx-auto flex h-[calc(100vh-2rem)] flex-col gap-4 p-6">
       <div className="flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">チャット</h1>

@@ -1,15 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, Search, ShieldAlert, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import {
   useDeleteUserV1,
   useGetRolesV1,
   useGetUsersV1,
 } from "@/api/generated/default/default.ts";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
+import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import { DeleteUserDialog } from "./-components/DeleteUserDialog";
 import { UsersTable } from "./-components/UsersTable";
 
@@ -86,10 +87,13 @@ function UsersPage() {
       await deleteUserMutation.mutateAsync({ id: String(userId) });
       setUserToDelete(null);
       await refetch();
-      toast.success(`ユーザー「${email}」を削除しました。`);
+      toast.add({
+        type: "success",
+        title: `ユーザー「${email}」を削除しました。`,
+      });
     } catch (error) {
       console.error("Failed to delete user:", error);
-      toast.error("ユーザーの削除に失敗しました。");
+      toast.add({ type: "error", title: "ユーザーの削除に失敗しました。" });
     } finally {
       setDeletingId(null);
     }
@@ -106,7 +110,7 @@ function UsersPage() {
 
   if (isErrorUsers) {
     return (
-      <div className="p-6 max-w-7xl mx-auto flex items-center justify-center h-[50vh]">
+      <div className="container mx-auto flex h-[50vh] items-center justify-center p-6">
         <div className="text-center space-y-4">
           <ShieldAlert className="h-10 w-10 text-destructive mx-auto" />
           <p className="text-muted-foreground">
@@ -118,7 +122,7 @@ function UsersPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="container mx-auto space-y-6 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="text-2xl font-bold font-heading tracking-tight flex items-center gap-2">
@@ -139,7 +143,7 @@ function UsersPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card p-4 rounded-xl border">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card p-4 rounded-lg border">
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -155,22 +159,24 @@ function UsersPage() {
               disabled={isLoading}
             />
           </div>
-          <select
+          <ResponsiveSelect
+            aria-label="ロールでフィルター"
             value={roleFilter}
-            onChange={(e) => {
-              setRoleFilter(e.target.value);
+            onValueChange={(value) => {
+              if (value == null) return;
+              setRoleFilter(value);
               setPage(1);
             }}
             disabled={isLoading || availableRoles.length === 0}
-            className="flex h-9 w-full sm:w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-muted-foreground dark:bg-background"
-          >
-            <option value="all">すべてのロール</option>
-            {availableRoles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.name}
-              </option>
-            ))}
-          </select>
+            className="sm:w-48"
+            options={[
+              { value: "all", label: "すべてのロール" },
+              ...availableRoles.map((role) => ({
+                value: String(role.id),
+                label: role.name,
+              })),
+            ]}
+          />
         </div>
         <div className="text-sm text-muted-foreground self-end sm:self-center shrink-0">
           該当ユーザー数:{" "}

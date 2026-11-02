@@ -1,6 +1,5 @@
 import {
   createFileRoute,
-  Link,
   useNavigate,
   useRouteContext,
 } from "@tanstack/react-router";
@@ -12,7 +11,7 @@ import {
 import type { ArticleDTO } from "@/api/generated/schemas";
 import LoadingSpinner from "@/components/LoadingSpinner.tsx";
 import NoPermission from "@/components/NoPermission.tsx";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { useAuthorize } from "@/hooks/useAuthorize.ts";
 import ArticleForm, { type ArticleFormValues } from "./-components/ArticleForm";
 
@@ -34,9 +33,9 @@ function ArticleEditPage() {
     return (
       <div className="p-6 text-center space-y-4">
         <p className="text-destructive">記事の読み込みに失敗しました。</p>
-        <Button asChild variant="outline">
-          <Link to="/articles">一覧に戻る</Link>
-        </Button>
+        <ButtonLink variant="outline" to="/articles">
+          一覧に戻る
+        </ButtonLink>
       </div>
     );
   }
@@ -111,17 +110,16 @@ function ArticleEditForm({ article }: { article: ArticleDTO }) {
 
   return (
     <div className="container mx-auto p-6 max-w-2xl space-y-6">
-      <Button
-        asChild
+      <ButtonLink
         variant="ghost"
         size="sm"
         className="-ml-2 text-muted-foreground hover:text-foreground"
+        to="/articles/$articleId"
+        params={{ articleId }}
       >
-        <Link to="/articles/$articleId" params={{ articleId }}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          詳細に戻る
-        </Link>
-      </Button>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        詳細に戻る
+      </ButtonLink>
 
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">記事の編集</h1>

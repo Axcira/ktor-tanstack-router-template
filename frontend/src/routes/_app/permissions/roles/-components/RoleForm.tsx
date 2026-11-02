@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
+import { formErrorBannerClass } from "@/lib/theme-tokens";
 
 const permissionEntries = Object.entries(PERMISSION_UI_DEFS) as [
   keyof typeof PERMISSION_UI_DEFS,
@@ -143,7 +144,7 @@ export default function RoleForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {validationError && (
-        <div className="p-3 text-sm rounded-lg bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400 animate-in fade-in">
+        <div className={formErrorBannerClass("animate-in fade-in")}>
           {validationError}
         </div>
       )}
@@ -215,7 +216,6 @@ export default function RoleForm({
                       handleTogglePermission(type, checked)
                     }
                     disabled={isSubmitting}
-                    type="button"
                   />
                 </div>
 
@@ -243,7 +243,6 @@ export default function RoleForm({
                               handlePropChange(type, propKey, checked)
                             }
                             disabled={isSubmitting}
-                            type="button"
                           />
                         )}
                       </div>

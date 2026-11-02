@@ -10,10 +10,8 @@ export const Route = createFileRoute("/_app/settings")({
 
 function SettingsPage() {
   return (
-    <div className="relative flex flex-col items-center bg-linear-to-b from-background to-muted/40 px-4 py-16 text-center">
-      <h1 className="max-w-4xl text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">
-        Settings
-      </h1>
+    <div className="container mx-auto space-y-8 p-6">
+      <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
       <AppearanceForm />
       <PasswordSection />
     </div>
@@ -25,7 +23,7 @@ function PasswordSection() {
 
   if (isLoading) {
     return (
-      <div className="mt-16 flex w-full max-w-md justify-center">
+      <div className="flex w-full max-w-md justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
@@ -33,7 +31,7 @@ function PasswordSection() {
 
   if (!isAllowed) {
     return (
-      <div className="mx-auto mt-16 w-full max-w-md space-y-2 rounded-xl border bg-card p-6 text-left shadow-sm">
+      <div className="w-full max-w-md space-y-2 rounded-lg border bg-card p-6 text-left shadow-sm">
         <h2 className="text-xl font-semibold">パスワード</h2>
         <p className="text-sm text-muted-foreground">
           自分のパスワードを変更するには「パスワードの変更」権限が必要です。
@@ -43,7 +41,7 @@ function PasswordSection() {
   }
 
   return (
-    <div className="mt-16 w-full">
+    <div className="w-full">
       <PasswordForm />
     </div>
   );

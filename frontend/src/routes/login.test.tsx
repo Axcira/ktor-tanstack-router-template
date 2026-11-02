@@ -17,12 +17,11 @@ import { server } from "@/test/msw";
 import { createTestQueryClient } from "@/test/render";
 import { makeSession } from "@/test/session";
 
-const toastSuccess = vi.fn();
+const toastAdd = vi.fn();
 
-vi.mock("sonner", () => ({
+vi.mock("@/components/ui/toast", () => ({
   toast: {
-    success: (...args: unknown[]) => toastSuccess(...args),
-    error: vi.fn(),
+    add: (...args: unknown[]) => toastAdd(...args),
   },
 }));
 
@@ -69,7 +68,7 @@ async function renderLogin() {
 
 describe("LoginForm", () => {
   beforeEach(() => {
-    toastSuccess.mockClear();
+    toastAdd.mockClear();
   });
 
   it("shows inline error on 401", async () => {
@@ -105,7 +104,10 @@ describe("LoginForm", () => {
     await user.click(screen.getByRole("button", { name: "ログイン" }));
 
     await waitFor(() => {
-      expect(toastSuccess).toHaveBeenCalledWith("ログインに成功しました");
+      expect(toastAdd).toHaveBeenCalledWith({
+        type: "success",
+        title: "ログインに成功しました",
+      });
       expect(router.state.location.pathname).toBe("/");
     });
   });

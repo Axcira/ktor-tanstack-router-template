@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { getGetSelfV1MockHandler } from "@/api/generated/default/default.msw";
 import { renderApp } from "@/test/app";
 import { denyCanI } from "@/test/handlers";
@@ -8,7 +8,12 @@ import { server } from "@/test/msw";
 import { makeSession } from "@/test/session";
 
 describe("auth and permission gates", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("redirects unauthenticated users from /_app routes to /hero", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get(
         "*/api/v1/users/me",
@@ -21,6 +26,16 @@ describe("auth and permission gates", () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/hero");
     });
+    const login = await screen.findByRole("link", { name: "ログイン" });
+    expect(login).toHaveAttribute("href", "/login");
+    expect(login).not.toHaveAttribute("role", "button");
+    expect(
+      error.mock.calls
+        .map((call) => String(call[0]))
+        .filter((message) =>
+          /Base UI|nativeButton|forwardRef|validateDOMNesting/i.test(message),
+        ),
+    ).toEqual([]);
   });
 
   it("redirects users without ManageUsers away from /permissions/users", async () => {
