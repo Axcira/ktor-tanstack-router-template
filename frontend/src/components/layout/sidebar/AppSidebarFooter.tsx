@@ -1,6 +1,7 @@
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useLogoutV1 } from "@/api/generated/default/default.ts";
+import { VersionStamp } from "@/components/layout/VersionStamp.tsx";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,7 +100,10 @@ export default function AppSidebarFooter() {
     );
   } else {
     return (
-      <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[state=collapsed]:flex group-data-[state=collapsed]:justify-center">
+      <SidebarFooter className="border-t border-sidebar-border p-2 space-y-2">
+        <div className="px-2">
+          <VersionStamp />
+        </div>
         <AlertDialog>
           <AlertDialogTrigger render={_sidebarMenuButton} />
           {_alertDialogPortal}

@@ -28,6 +28,7 @@ import type {
   UpdateUserInput,
   UserDTO,
   UserSession,
+  VersionResponse,
 } from "../schemas";
 
 import {
@@ -46,6 +47,7 @@ import {
   getLoginV1ResponseMock,
   getUpdateArticleV1ResponseMock,
   getUpdateRoleV1ResponseMock,
+  getVersionV1ResponseMock,
 } from "./default.faker.ts";
 
 export {
@@ -64,6 +66,7 @@ export {
   getGetRoleByIdV1ResponseMock,
   getUpdateRoleV1ResponseMock,
   getHealthV1ResponseMock,
+  getVersionV1ResponseMock,
 } from "./default.faker.ts";
 
 export const getGetApiMockHandler = (
@@ -702,6 +705,30 @@ export const getHealthV1MockHandler = (
     options,
   );
 };
+
+export const getVersionV1MockHandler = (
+  overrideResponse?:
+    | VersionResponse
+    | ((
+        info: Parameters<HttpResponseResolver>[0],
+      ) => Promise<VersionResponse> | VersionResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/version",
+    async (info: Parameters<HttpResponseResolver>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getVersionV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
 export const getDefaultMock = () => [
   getGetApiMockHandler(),
   getGetApiJsonKotlinxSerializationMockHandler(),
@@ -729,4 +756,5 @@ export const getDefaultMock = () => [
   getDeleteRoleV1MockHandler(),
   getUpdateRoleV1MockHandler(),
   getHealthV1MockHandler(),
+  getVersionV1MockHandler(),
 ];
