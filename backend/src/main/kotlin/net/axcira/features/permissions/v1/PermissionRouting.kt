@@ -10,14 +10,18 @@ import io.ktor.server.routing.*
 import net.axcira.*
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.CreateRoleInput
+import net.axcira.features.permissions.DeleteRoleResult
 import net.axcira.features.permissions.Permission
 import net.axcira.features.permissions.PermissionService
 import net.axcira.features.permissions.UpdateRoleInput
+import net.axcira.features.permissions.UpdateRoleResult
 import net.axcira.features.permissions.satisfies
 import net.axcira.features.permissions.satisfiesAll
 import net.axcira.features.permissions.withPermission
-import net.axcira.plugins.Optional
 
+/**
+ * Registers permission and role management routes under `/api/v1/permissions` and `/api/v1/roles`.
+ */
 fun Application.permissions() {
     val permissionService: PermissionService by dependencies
 
@@ -109,20 +113,12 @@ fun Application.permissions() {
                         val callerPermissions =
                             call.principal<UserSession>()?.permissions ?: throw IllegalArgumentException("User not authenticated")
                         val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
-                        val existing = permissionService.getRoleById(id) ?: return@patch call.respond(HttpStatusCode.NotFound)
-                        if (!callerPermissions.satisfiesAll(existing.permissions)) {
-                            call.respond(HttpStatusCode.Forbidden)
-                            return@patch
-                        }
                         val scheme = call.receive<UpdateRoleInput>()
-                        if (scheme.permissions is Optional.Present && !callerPermissions.satisfiesAll(scheme.permissions.value)) {
-                            call.respond(HttpStatusCode.Forbidden)
-                            return@patch
-                        }
-                        when (val role = permissionService.update(id, scheme)) {
-                            is UpdateResult.Success -> call.respond(HttpStatusCode.OK, role.value)
-                            is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound)
-                            is UpdateResult.NotModified -> call.respond(HttpStatusCode.NoContent)
+                        when (val role = permissionService.update(id, scheme, callerPermissions)) {
+                            is UpdateRoleResult.Success -> call.respond(HttpStatusCode.OK, role.value)
+                            is UpdateRoleResult.NotFound -> call.respond(HttpStatusCode.NotFound)
+                            is UpdateRoleResult.NotModified -> call.respond(HttpStatusCode.NoContent)
+                            is UpdateRoleResult.Forbidden -> call.respond(HttpStatusCode.Forbidden)
                         }
                     }
 
@@ -144,22 +140,23 @@ fun Application.permissions() {
                             return@delete
                         }
 
-                        val fallbackRole = permissionService.getRoleById(fallbackRoleId)
-                        if (fallbackRole == null) {
-                            call.respond(HttpStatusCode.BadRequest, "fallbackRoleId does not exist")
-                            return@delete
-                        }
+                        when (permissionService.delete(id, fallbackRoleId, callerPermissions)) {
+                            DeleteRoleResult.FallbackNotFound -> {
+                                call.respond(HttpStatusCode.BadRequest, "fallbackRoleId does not exist")
+                            }
 
-                        val targetRole = permissionService.getRoleById(id) ?: return@delete call.respond(HttpStatusCode.NotFound)
-                        if (!callerPermissions.satisfiesAll(targetRole.permissions) ||
-                            !callerPermissions.satisfiesAll(fallbackRole.permissions)
-                        ) {
-                            call.respond(HttpStatusCode.Forbidden)
-                            return@delete
-                        }
+                            DeleteRoleResult.NotFound -> {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
 
-                        permissionService.delete(id, fallbackRoleId)
-                        call.respond(HttpStatusCode.NoContent)
+                            DeleteRoleResult.Forbidden -> {
+                                call.respond(HttpStatusCode.Forbidden)
+                            }
+
+                            DeleteRoleResult.Success -> {
+                                call.respond(HttpStatusCode.NoContent)
+                            }
+                        }
                     }
                 }
             }

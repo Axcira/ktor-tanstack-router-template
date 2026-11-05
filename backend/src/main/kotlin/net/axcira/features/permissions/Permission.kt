@@ -21,6 +21,10 @@ sealed interface Permission {
     @SerialName("ManageUsers")
     data object ManageUsers : Permission
 
+    /**
+     * Grants access to read role details, query user permissions, and create, update, or delete roles
+     * whose permissions the caller satisfies.
+     */
     @Serializable
     @SerialName("ManageRoles")
     data object ManageRoles : Permission

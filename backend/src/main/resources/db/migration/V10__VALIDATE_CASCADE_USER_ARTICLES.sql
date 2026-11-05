@@ -1,0 +1,3 @@
+ALTER TABLE articles VALIDATE CONSTRAINT fk_articles_user_id__id;
+ALTER TABLE articletags VALIDATE CONSTRAINT fk_articletags_article_id__id;
+ALTER TABLE articletags VALIDATE CONSTRAINT fk_articletags_tag_id__id;

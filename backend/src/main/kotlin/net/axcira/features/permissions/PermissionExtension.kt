@@ -20,8 +20,14 @@ class NoPermissionException(
     val permission: Permission,
 ) : Exception("User does not have permission: $permission")
 
+/**
+ * Returns `true` when at least one permission in this collection satisfies [permission].
+ */
 fun Iterable<Permission>.satisfies(permission: Permission) = any { it.satisfies(permission) }
 
+/**
+ * Returns `true` when every permission in [required] is satisfied by at least one permission in this collection.
+ */
 fun Iterable<Permission>.satisfiesAll(required: Iterable<Permission>) = required.all { satisfies(it) }
 
 inline fun <reified T : Permission> permissionPlugin(permission: T) =

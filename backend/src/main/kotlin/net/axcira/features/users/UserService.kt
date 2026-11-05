@@ -79,6 +79,9 @@ class UserService(
         }
     }
 
+    /**
+     * Deletes the user with [id] along with all of their active sessions.
+     */
     suspend fun delete(id: UInt) {
         database.dbQuery {
             SessionsTable.deleteWhere { SessionsTable.userId eq id }

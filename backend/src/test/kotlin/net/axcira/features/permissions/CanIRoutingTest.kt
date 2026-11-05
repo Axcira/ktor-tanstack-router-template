@@ -129,7 +129,7 @@ class CanIRoutingTest {
                     "role-manager@example.com",
                     listOf(Permission.ManageRoles, Permission.CreateArticle),
                 )
-                login(admin, "role-admin@example.com", listOf(Permission.Administrator))
+                val adminUser = login(admin, "role-admin@example.com", listOf(Permission.Administrator))
 
                 // Any authenticated user can list roles
                 assertEquals(HttpStatusCode.OK, reader.get("/api/v1/roles").status)
@@ -169,19 +169,109 @@ class CanIRoutingTest {
                 assertEquals(
                     HttpStatusCode.Forbidden,
                     roleManager
+                        .post("/api/v1/roles") {
+                            contentType(ContentType.Application.Json)
+                            setBody(CreateRoleInput("mixed-a", "Mixed", listOf(Permission.CreateArticle, Permission.Administrator)))
+                        }.status,
+                )
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    roleManager
+                        .post("/api/v1/roles") {
+                            contentType(ContentType.Application.Json)
+                            setBody(CreateRoleInput("mixed-b", "Mixed", listOf(Permission.Administrator, Permission.CreateArticle)))
+                        }.status,
+                )
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    roleManager
                         .patch("/api/v1/roles/${created.id}") {
                             contentType(ContentType.Application.Json)
                             setBody("""{"permissions":[{"type":"Administrator"}]}""")
                         }.status,
                 )
 
-                // Administrator can create and delete roles with any permission
+                // ManageRoles cannot modify or delete an existing higher-privilege role or fallback to it
+                val adminRoleBefore = admin.get("/api/v1/roles/${adminUser.roleId}").body<RoleDTO>()
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    roleManager
+                        .patch("/api/v1/roles/${adminUser.roleId}") {
+                            contentType(ContentType.Application.Json)
+                            setBody("""{"description":"Hijacked description"}""")
+                        }.status,
+                )
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    roleManager.delete("/api/v1/roles/${adminUser.roleId}?fallbackRoleId=${readerUser.roleId}").status,
+                )
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    roleManager.delete("/api/v1/roles/${created.id}?fallbackRoleId=${adminUser.roleId}").status,
+                )
+                assertEquals(adminRoleBefore, admin.get("/api/v1/roles/${adminUser.roleId}").body<RoleDTO>())
+                assertEquals(HttpStatusCode.OK, roleManager.get("/api/v1/roles/${created.id}").status)
+
+                // Administrator can delete roles with any permission
                 assertEquals(
                     HttpStatusCode.NoContent,
-                    roleManager.delete("/api/v1/roles/${created.id}?fallbackRoleId=${readerUser.roleId}").status,
+                    admin.delete("/api/v1/roles/${created.id}?fallbackRoleId=${readerUser.roleId}").status,
                 )
             } finally {
                 roleManager.close()
+                admin.close()
+            }
+        }
+
+    @Test
+    fun `user creation and update enforce role permission hierarchy`() =
+        test { reader ->
+            val userManager = extraClient()
+            val admin = extraClient()
+            try {
+                val readerUser = login(reader, "hierarchy-reader@example.com", emptyList())
+                login(userManager, "hierarchy-manager@example.com", listOf(Permission.ManageUsers))
+                val adminUser = login(admin, "hierarchy-admin@example.com", listOf(Permission.Administrator))
+
+                // ManageUsers cannot create a user with an Administrator role
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    userManager
+                        .post("/api/v1/users/create") {
+                            contentType(ContentType.Application.Json)
+                            setBody(CreateUserInput("escalated@example.com", "password", adminUser.roleId!!))
+                        }.status,
+                )
+
+                // ManageUsers can create a user with an unprivileged role
+                assertEquals(
+                    HttpStatusCode.Created,
+                    userManager
+                        .post("/api/v1/users/create") {
+                            contentType(ContentType.Application.Json)
+                            setBody(CreateUserInput("allowed@example.com", "password", readerUser.roleId!!))
+                        }.status,
+                )
+
+                // ManageUsers cannot update an existing Administrator user or assign Administrator roleId
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    userManager
+                        .patch("/api/v1/users/update/${adminUser.id}") {
+                            contentType(ContentType.Application.Json)
+                            setBody("""{"email":"hijacked-admin@example.com"}""")
+                        }.status,
+                )
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    userManager
+                        .patch("/api/v1/users/update/${readerUser.id}") {
+                            contentType(ContentType.Application.Json)
+                            setBody("""{"roleId":${adminUser.roleId}}""")
+                        }.status,
+                )
+            } finally {
+                userManager.close()
                 admin.close()
             }
         }

@@ -912,7 +912,23 @@ export type createUserV1Response201 = {
   status: 201;
 };
 
+export type createUserV1Response400 = {
+  data: string;
+  status: 400;
+};
+
+export type createUserV1Response403 = {
+  data: void;
+  status: 403;
+};
+
 export type createUserV1ResponseSuccess = createUserV1Response201 & {
+  headers: Headers;
+};
+export type createUserV1ResponseError = (
+  | createUserV1Response400
+  | createUserV1Response403
+) & {
   headers: Headers;
 };
 
@@ -962,7 +978,7 @@ export const createUserV1 = async (
 export const getCreateUserV1MutationKey = () => ["createUserV1"] as const;
 
 export const getCreateUserV1MutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<string | void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1003,14 +1019,14 @@ export type CreateUserV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof createUserV1>>
 >;
 export type CreateUserV1MutationBody = CreateUserInput | undefined;
-export type CreateUserV1MutationError = ErrorType<unknown>;
+export type CreateUserV1MutationError = ErrorType<string | void>;
 export type CreateUserV1MutationVariables = { data?: CreateUserInput };
 
 /**
  * @summary Create a new user
  */
 export const useCreateUserV1 = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<string | void>,
   TContext = unknown,
 >(
   options?: {
@@ -1036,6 +1052,16 @@ export type updateUserV1Response204 = {
   status: 204;
 };
 
+export type updateUserV1Response400 = {
+  data: string;
+  status: 400;
+};
+
+export type updateUserV1Response403 = {
+  data: void;
+  status: 403;
+};
+
 export type updateUserV1Response404 = {
   data: string;
   status: 404;
@@ -1044,7 +1070,11 @@ export type updateUserV1Response404 = {
 export type updateUserV1ResponseSuccess = updateUserV1Response204 & {
   headers: Headers;
 };
-export type updateUserV1ResponseError = updateUserV1Response404 & {
+export type updateUserV1ResponseError = (
+  | updateUserV1Response400
+  | updateUserV1Response403
+  | updateUserV1Response404
+) & {
   headers: Headers;
 };
 
@@ -1095,7 +1125,7 @@ export const updateUserV1 = async (
 export const getUpdateUserV1MutationKey = () => ["updateUserV1"] as const;
 
 export const getUpdateUserV1MutationOptions = <
-  TError = ErrorType<string>,
+  TError = ErrorType<string | void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1136,7 +1166,7 @@ export type UpdateUserV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof updateUserV1>>
 >;
 export type UpdateUserV1MutationBody = UpdateUserInput | undefined;
-export type UpdateUserV1MutationError = ErrorType<string>;
+export type UpdateUserV1MutationError = ErrorType<string | void>;
 export type UpdateUserV1MutationVariables = {
   id: string;
   data?: UpdateUserInput;
@@ -1145,7 +1175,10 @@ export type UpdateUserV1MutationVariables = {
 /**
  * @summary Update a user by ID
  */
-export const useUpdateUserV1 = <TError = ErrorType<string>, TContext = unknown>(
+export const useUpdateUserV1 = <
+  TError = ErrorType<string | void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateUserV1>>,

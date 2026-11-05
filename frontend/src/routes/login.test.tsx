@@ -13,6 +13,8 @@ import { HttpResponse, http } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getLoginV1MockHandler } from "@/api/generated/default/default.msw";
 import { LoginForm } from "@/components/LoginForm";
+import { selfQueryOptions } from "@/lib/self";
+import { queryClient as rootQueryClient } from "@/routes/__root";
 import { server } from "@/test/msw";
 import { createTestQueryClient } from "@/test/render";
 import { makeSession } from "@/test/session";
@@ -66,6 +68,7 @@ async function renderLogin() {
 
   return {
     router,
+    queryClient,
     user: userEvent.setup(),
     ...view,
   };
@@ -150,5 +153,45 @@ describe("LoginForm", () => {
     );
     expect(toastAdd).not.toHaveBeenCalled();
     expect(router.state.location.pathname).toBe("/login");
+  });
+
+  it("clears stale cached queries and sets the new session on both query clients", async () => {
+    const previousSession = makeSession([{ type: "Administrator" }], {
+      id: 1,
+      email: "prev@b.com",
+    });
+    const nextSession = makeSession([{ type: "ManageUsers" }], {
+      id: 2,
+      email: "next@b.com",
+    });
+    const stalePermissionKey = ["authorize", { type: "Administrator" }];
+
+    server.use(getLoginV1MockHandler(nextSession));
+
+    const { user, queryClient: hookQueryClient } = await renderLogin();
+    hookQueryClient.setDefaultOptions({
+      queries: { retry: false, gcTime: Number.POSITIVE_INFINITY },
+      mutations: { retry: false },
+    });
+
+    rootQueryClient.setQueryData(selfQueryOptions.queryKey, previousSession);
+    rootQueryClient.setQueryData(stalePermissionKey, true);
+    hookQueryClient.setQueryData(selfQueryOptions.queryKey, previousSession);
+    hookQueryClient.setQueryData(stalePermissionKey, true);
+
+    await user.type(screen.getByLabelText("メールアドレス"), "next@b.com");
+    await user.type(screen.getByLabelText("パスワード"), "password");
+    await user.click(screen.getByRole("button", { name: "ログイン" }));
+
+    await waitFor(() => {
+      expect(rootQueryClient.getQueryData(selfQueryOptions.queryKey)).toEqual(
+        nextSession,
+      );
+      expect(hookQueryClient.getQueryData(selfQueryOptions.queryKey)).toEqual(
+        nextSession,
+      );
+    });
+    expect(rootQueryClient.getQueryData(stalePermissionKey)).toBeUndefined();
+    expect(hookQueryClient.getQueryData(stalePermissionKey)).toBeUndefined();
   });
 });

@@ -308,6 +308,13 @@ class AuthRoutingTest {
                 assertEquals(HttpStatusCode.NoContent, adminClient.delete("/api/v1/users/delete/${author.id}").status)
                 assertEquals(HttpStatusCode.NotFound, adminClient.get("/api/v1/articles/${createdArticle.id}").status)
                 assertEquals(HttpStatusCode.Unauthorized, authorClient.get("/api/v1/users/me").status)
+                val database: Database by application.dependencies
+                database.dbQuery {
+                    assertEquals(
+                        0L,
+                        SessionsTable.selectAll().where { SessionsTable.userId eq author.id }.count(),
+                    )
+                }
             } finally {
                 adminClient.close()
             }
