@@ -25,6 +25,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip.tsx";
+import { selfQueryOptions } from "@/lib/self";
+import { queryClient } from "@/routes/__root.tsx";
 
 export default function AppSidebarFooter() {
   const router = useRouter();
@@ -36,8 +38,9 @@ export default function AppSidebarFooter() {
     mutation: {
       onSuccess: async () => {
         console.log("サーバー側のログアウトに成功しました");
+        queryClient.removeQueries({ queryKey: selfQueryOptions.queryKey });
         await router.invalidate();
-        await navigate({ to: "/hero" });
+        await navigate({ to: "/" });
       },
       onError: (error) => {
         console.error("ログアウト処理でエラーが発生しました:", error);
@@ -82,8 +85,7 @@ export default function AppSidebarFooter() {
 
   if (isCollapsed) {
     return (
-      <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[state=collapsed]:flex group-data-[state=collapsed]:flex-col group-data-[state=collapsed]:items-center group-data-[state=collapsed]:gap-2">
-        <VersionStamp className="font-mono text-[10px] text-muted-foreground" />
+      <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[state=collapsed]:flex group-data-[state=collapsed]:justify-center">
         <AlertDialog>
           <Tooltip>
             <TooltipTrigger

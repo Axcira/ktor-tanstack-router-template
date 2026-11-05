@@ -62,14 +62,14 @@ describe("AppSidebar authorization", () => {
       denyCanI(),
     );
 
-    await renderApp("/");
+    await renderApp("/dashboard");
 
     await waitFor(() => {
       expect(screen.getByText("Dashboard")).toBeInTheDocument();
     });
     expect(screen.getByRole("link", { name: "Dashboard" })).toHaveAttribute(
       "href",
-      "/",
+      "/dashboard",
     );
     expect(screen.queryByText("Administration")).not.toBeInTheDocument();
   });
@@ -81,7 +81,7 @@ describe("AppSidebar authorization", () => {
       denyCanI(),
     );
 
-    await renderApp("/");
+    await renderApp("/dashboard");
 
     await waitFor(() => {
       expect(screen.getByText("Articles")).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe("AppSidebar authorization", () => {
       denyCanI(),
     );
 
-    await renderApp("/");
+    await renderApp("/dashboard");
 
     await waitFor(() => {
       expect(screen.getByText("Administration")).toBeInTheDocument();

@@ -19,8 +19,12 @@ else
   commit_short="$commit"
 fi
 
-if git -C "$root" status --porcelain 2>/dev/null | grep -q .; then
-  dirty=true
+if porcelain="$(git -C "$root" status --porcelain 2>/dev/null)"; then
+  if [[ -n "$porcelain" ]]; then
+    dirty=true
+  else
+    dirty=false
+  fi
 else
   dirty=false
 fi

@@ -27,6 +27,7 @@ COPY backend/build.gradle.kts build.gradle.kts
 COPY backend/settings.gradle.kts settings.gradle.kts
 COPY backend/gradle.properties gradle.properties
 COPY backend/src/ src/
+COPY backend/scripts/ scripts/
 ENV GIT_COMMIT=${GIT_COMMIT}
 RUN --mount=type=cache,id=application-gradle,target=/root/.gradle \
     ./gradlew prepareDockerImageContext --no-daemon

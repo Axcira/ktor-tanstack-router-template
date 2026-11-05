@@ -20,7 +20,7 @@ const menuItems: MenuItem[] = [
   {
     text: "Dashboard",
     icon: <LayoutDashboard />,
-    to: "/",
+    to: "/dashboard",
   },
   {
     text: "Articles",

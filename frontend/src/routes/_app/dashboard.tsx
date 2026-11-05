@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_app/")({
+export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
@@ -14,7 +14,7 @@ function DashboardPage() {
         <p className="text-muted-foreground">
           Edit{" "}
           <code className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-sm font-semibold">
-            src/routes/index.tsx
+            src/routes/_app/dashboard.tsx
           </code>{" "}
           to get started.
         </p>

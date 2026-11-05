@@ -44,8 +44,13 @@ async function renderLogin() {
     path: "/",
     component: () => <div>Home</div>,
   });
+  const dashboardRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/dashboard",
+    component: () => <div>Dashboard</div>,
+  });
   const router = createRouter({
-    routeTree: rootRoute.addChildren([loginRoute, homeRoute]),
+    routeTree: rootRoute.addChildren([loginRoute, homeRoute, dashboardRoute]),
     history: createMemoryHistory({ initialEntries: ["/login"] }),
   });
 
@@ -90,7 +95,7 @@ describe("LoginForm", () => {
     );
   });
 
-  it("toasts and navigates home on success", async () => {
+  it("toasts and navigates to the dashboard on success", async () => {
     server.use(
       getLoginV1MockHandler(
         makeSession([{ type: "ManageUsers" }], { email: "a@b.com" }),
@@ -108,7 +113,7 @@ describe("LoginForm", () => {
         type: "success",
         title: "ログインに成功しました",
       });
-      expect(router.state.location.pathname).toBe("/");
+      expect(router.state.location.pathname).toBe("/dashboard");
     });
   });
 

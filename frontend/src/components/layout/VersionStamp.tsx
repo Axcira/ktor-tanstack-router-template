@@ -6,33 +6,45 @@ import {
 } from "@/components/ui/tooltip.tsx";
 
 const bundled = __APP_VERSION__;
+const VERSION_STALE_MS = 5 * 60 * 1000;
 
 type VersionStampProps = {
   className?: string;
 };
 
 export function VersionStamp({ className }: VersionStampProps) {
-  const { data: versionResponse } = useVersionV1({
+  const {
+    data: versionResponse,
+    isError,
+    isFetched,
+  } = useVersionV1({
     query: {
       enabled: !import.meta.env.VITEST,
-      staleTime: Number.POSITIVE_INFINITY,
+      staleTime: VERSION_STALE_MS,
       retry: false,
     },
   });
 
   const apiVersion =
     versionResponse?.status === 200 ? versionResponse.data : null;
-  const backendShort = apiVersion?.commitShort ?? "…";
+  const backendUnavailable =
+    isError || (isFetched && versionResponse?.status !== 200);
+  const backendShort =
+    apiVersion?.commitShort ?? (backendUnavailable ? "—" : "…");
   const frontendMismatch =
     apiVersion?.frontend != null &&
     apiVersion.frontend.commit !== bundled.commit;
 
+  const backendTooltipLine = apiVersion
+    ? `Backend: ${apiVersion.commit}${apiVersion.dirty ? " (dirty)" : ""}`
+    : backendUnavailable
+      ? "Backend: unavailable"
+      : "Backend: loading…";
+
   const tooltipLines = [
     `Frontend (bundle): ${bundled.commit}${bundled.dirty ? " (dirty)" : ""}`,
     `Frontend built: ${bundled.builtAt}`,
-    apiVersion
-      ? `Backend: ${apiVersion.commit}${apiVersion.dirty ? " (dirty)" : ""}`
-      : "Backend: loading…",
+    backendTooltipLine,
     apiVersion ? `Backend built: ${apiVersion.builtAt}` : null,
     apiVersion?.frontend
       ? `Static on server: ${apiVersion.frontend.commit}`

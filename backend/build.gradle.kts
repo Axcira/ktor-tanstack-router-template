@@ -159,6 +159,7 @@ tasks.register<Exec>("generateBuildInfo") {
     inputs.property("gitCommitEnv", providers.environmentVariable("GIT_COMMIT").orElse(""))
     inputs.file(script).withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.dir(buildInfoOutputDir)
+    outputs.upToDateWhen { false }
 
     workingDir = layout.projectDirectory.asFile
     commandLine("bash", script.asFile.absolutePath)
