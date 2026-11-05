@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/permissions/users")({
       !(await checkPermission(context.session, { type: "ManageUsers" }))
     ) {
       throw redirect({
-        to: "/",
+        to: "/dashboard",
       });
     }
   },

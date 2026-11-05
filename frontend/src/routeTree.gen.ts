@@ -9,11 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as HeroRouteImport } from './routes/hero'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppArticlesIndexRouteImport } from './routes/_app/articles/index'
@@ -40,13 +40,13 @@ import { Route as AppPermissionsUsersCreateRouteImport } from './routes/_app/per
 import { Route as AppPermissionsRolesRoleIdEditRouteImport } from './routes/_app/permissions/roles/$roleId.edit'
 import { Route as AppPermissionsUsersUserIdEditRouteImport } from './routes/_app/permissions/users/$userId.edit'
 
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HeroRoute = HeroRouteImport.update({
-  id: '/hero',
-  path: '/hero',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -54,14 +54,14 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppArticlesRoute = AppArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDocumentationRoute = AppDocumentationRouteImport.update({
@@ -199,10 +199,10 @@ const AppPermissionsUsersUserIdEditRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
-  '/hero': typeof HeroRoute
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/articles': typeof AppArticlesRouteWithChildren
+  '/dashboard': typeof AppDashboardRoute
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
   '/articles/create': typeof AppArticlesCreateRoute
@@ -230,11 +230,11 @@ export interface FileRoutesByFullPath {
   '/permissions/users/$userId/edit': typeof AppPermissionsUsersUserIdEditRoute
 }
 export interface FileRoutesByTo {
-  '/hero': typeof HeroRoute
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/dashboard': typeof AppDashboardRoute
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
-  '/': typeof AppIndexRoute
   '/articles/create': typeof AppArticlesCreateRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
@@ -259,13 +259,13 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
-  '/hero': typeof HeroRoute
   '/login': typeof LoginRoute
   '/_app/articles': typeof AppArticlesRouteWithChildren
+  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/documentation': typeof AppDocumentationRoute
   '/_app/settings': typeof AppSettingsRoute
-  '/_app/': typeof AppIndexRoute
   '/_app/articles/create': typeof AppArticlesCreateRoute
   '/_app/permissions/roles': typeof AppPermissionsRolesRouteWithChildren
   '/_app/permissions/users': typeof AppPermissionsUsersRouteWithChildren
@@ -294,9 +294,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/hero'
     | '/login'
     | '/articles'
+    | '/dashboard'
     | '/documentation'
     | '/settings'
     | '/articles/create'
@@ -324,11 +324,11 @@ export interface FileRouteTypes {
     | '/permissions/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/hero'
+    | '/'
     | '/login'
+    | '/dashboard'
     | '/documentation'
     | '/settings'
-    | '/'
     | '/articles/create'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
@@ -352,13 +352,13 @@ export interface FileRouteTypes {
     | '/permissions/users/$userId/edit'
   id:
     | '__root__'
+    | '/'
     | '/_app'
-    | '/hero'
     | '/login'
     | '/_app/articles'
+    | '/_app/dashboard'
     | '/_app/documentation'
     | '/_app/settings'
-    | '/_app/'
     | '/_app/articles/create'
     | '/_app/permissions/roles'
     | '/_app/permissions/users'
@@ -385,25 +385,25 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  HeroRoute: typeof HeroRoute
   LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hero': {
-      id: '/hero'
-      path: '/hero'
-      fullPath: '/hero'
-      preLoaderRoute: typeof HeroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -413,18 +413,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/articles': {
       id: '/_app/articles'
       path: '/articles'
       fullPath: '/articles'
       preLoaderRoute: typeof AppArticlesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/documentation': {
@@ -655,9 +655,9 @@ const AppPermissionsUsersRouteWithChildren =
 
 interface AppRouteChildren {
   AppArticlesRoute: typeof AppArticlesRouteWithChildren
+  AppDashboardRoute: typeof AppDashboardRoute
   AppDocumentationRoute: typeof AppDocumentationRoute
   AppSettingsRoute: typeof AppSettingsRoute
-  AppIndexRoute: typeof AppIndexRoute
   AppPermissionsRolesRoute: typeof AppPermissionsRolesRouteWithChildren
   AppPermissionsUsersRoute: typeof AppPermissionsUsersRouteWithChildren
   AppPlaygroundNav11Route: typeof AppPlaygroundNav11Route
@@ -675,9 +675,9 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppArticlesRoute: AppArticlesRouteWithChildren,
+  AppDashboardRoute: AppDashboardRoute,
   AppDocumentationRoute: AppDocumentationRoute,
   AppSettingsRoute: AppSettingsRoute,
-  AppIndexRoute: AppIndexRoute,
   AppPermissionsRolesRoute: AppPermissionsRolesRouteWithChildren,
   AppPermissionsUsersRoute: AppPermissionsUsersRouteWithChildren,
   AppPlaygroundNav11Route: AppPlaygroundNav11Route,
@@ -696,8 +696,8 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  HeroRoute: HeroRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport

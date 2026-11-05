@@ -26,7 +26,7 @@ export function LoginForm() {
             return;
           }
           toast.add({ type: "success", title: "ログインに成功しました" });
-          navigate({ to: "/" }).then();
+          navigate({ to: "/dashboard" }).then();
         },
         onError: () => {
           setErrorMessage("ログインに失敗しました");
