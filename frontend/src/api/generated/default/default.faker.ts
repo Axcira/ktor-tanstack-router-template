@@ -16,6 +16,7 @@ import type {
   PermissionCreateArticle,
   PermissionDeleteArticle,
   PermissionManageArticles,
+  PermissionManageRoles,
   PermissionManageUsers,
   PermissionUpdateArticle,
   RoleDTO,
@@ -69,6 +70,13 @@ export const getLoginV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getLoginV1ResponsePermissionManageRolesMock = (
+  overrideResponse: Partial<PermissionManageRoles> = {},
+): PermissionManageRoles => ({
+  ...{ type: faker.helpers.arrayElement(["ManageRoles"] as const) },
+  ...overrideResponse,
+});
+
 export const getLoginV1ResponsePermissionManageUsersMock = (
   overrideResponse: Partial<PermissionManageUsers> = {},
 ): PermissionManageUsers => ({
@@ -104,6 +112,7 @@ export const getLoginV1ResponseMock = (
       { ...getLoginV1ResponsePermissionCreateArticleMock() },
       { ...getLoginV1ResponsePermissionDeleteArticleMock() },
       { ...getLoginV1ResponsePermissionManageArticlesMock() },
+      { ...getLoginV1ResponsePermissionManageRolesMock() },
       { ...getLoginV1ResponsePermissionManageUsersMock() },
       { ...getLoginV1ResponsePermissionUpdateArticleMock() },
     ]),
@@ -168,6 +177,13 @@ export const getGetSelfV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetSelfV1ResponsePermissionManageRolesMock = (
+  overrideResponse: Partial<PermissionManageRoles> = {},
+): PermissionManageRoles => ({
+  ...{ type: faker.helpers.arrayElement(["ManageRoles"] as const) },
+  ...overrideResponse,
+});
+
 export const getGetSelfV1ResponsePermissionManageUsersMock = (
   overrideResponse: Partial<PermissionManageUsers> = {},
 ): PermissionManageUsers => ({
@@ -203,6 +219,7 @@ export const getGetSelfV1ResponseMock = (
       { ...getGetSelfV1ResponsePermissionCreateArticleMock() },
       { ...getGetSelfV1ResponsePermissionDeleteArticleMock() },
       { ...getGetSelfV1ResponsePermissionManageArticlesMock() },
+      { ...getGetSelfV1ResponsePermissionManageRolesMock() },
       { ...getGetSelfV1ResponsePermissionManageUsersMock() },
       { ...getGetSelfV1ResponsePermissionUpdateArticleMock() },
     ]),
@@ -321,6 +338,13 @@ export const getGetUserPermissionsV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetUserPermissionsV1ResponsePermissionManageRolesMock = (
+  overrideResponse: Partial<PermissionManageRoles> = {},
+): PermissionManageRoles => ({
+  ...{ type: faker.helpers.arrayElement(["ManageRoles"] as const) },
+  ...overrideResponse,
+});
+
 export const getGetUserPermissionsV1ResponsePermissionManageUsersMock = (
   overrideResponse: Partial<PermissionManageUsers> = {},
 ): PermissionManageUsers => ({
@@ -349,6 +373,7 @@ export const getGetUserPermissionsV1ResponseMock = (): Permission[] =>
       { ...getGetUserPermissionsV1ResponsePermissionCreateArticleMock() },
       { ...getGetUserPermissionsV1ResponsePermissionDeleteArticleMock() },
       { ...getGetUserPermissionsV1ResponsePermissionManageArticlesMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionManageRolesMock() },
       { ...getGetUserPermissionsV1ResponsePermissionManageUsersMock() },
       { ...getGetUserPermissionsV1ResponsePermissionUpdateArticleMock() },
     ]),
@@ -392,6 +417,13 @@ export const getCreateRoleV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getCreateRoleV1ResponsePermissionManageRolesMock = (
+  overrideResponse: Partial<PermissionManageRoles> = {},
+): PermissionManageRoles => ({
+  ...{ type: faker.helpers.arrayElement(["ManageRoles"] as const) },
+  ...overrideResponse,
+});
+
 export const getCreateRoleV1ResponsePermissionManageUsersMock = (
   overrideResponse: Partial<PermissionManageUsers> = {},
 ): PermissionManageUsers => ({
@@ -425,6 +457,7 @@ export const getCreateRoleV1ResponseMock = (
       { ...getCreateRoleV1ResponsePermissionCreateArticleMock() },
       { ...getCreateRoleV1ResponsePermissionDeleteArticleMock() },
       { ...getCreateRoleV1ResponsePermissionManageArticlesMock() },
+      { ...getCreateRoleV1ResponsePermissionManageRolesMock() },
       { ...getCreateRoleV1ResponsePermissionManageUsersMock() },
       { ...getCreateRoleV1ResponsePermissionUpdateArticleMock() },
     ]),
@@ -470,6 +503,13 @@ export const getGetRolesV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetRolesV1ResponsePermissionManageRolesMock = (
+  overrideResponse: Partial<PermissionManageRoles> = {},
+): PermissionManageRoles => ({
+  ...{ type: faker.helpers.arrayElement(["ManageRoles"] as const) },
+  ...overrideResponse,
+});
+
 export const getGetRolesV1ResponsePermissionManageUsersMock = (
   overrideResponse: Partial<PermissionManageUsers> = {},
 ): PermissionManageUsers => ({
@@ -505,6 +545,7 @@ export const getGetRolesV1ResponseMock = (): RoleDTO[] =>
         { ...getGetRolesV1ResponsePermissionCreateArticleMock() },
         { ...getGetRolesV1ResponsePermissionDeleteArticleMock() },
         { ...getGetRolesV1ResponsePermissionManageArticlesMock() },
+        { ...getGetRolesV1ResponsePermissionManageRolesMock() },
         { ...getGetRolesV1ResponsePermissionManageUsersMock() },
         { ...getGetRolesV1ResponsePermissionUpdateArticleMock() },
       ]),
@@ -549,6 +590,13 @@ export const getGetRoleByIdV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetRoleByIdV1ResponsePermissionManageRolesMock = (
+  overrideResponse: Partial<PermissionManageRoles> = {},
+): PermissionManageRoles => ({
+  ...{ type: faker.helpers.arrayElement(["ManageRoles"] as const) },
+  ...overrideResponse,
+});
+
 export const getGetRoleByIdV1ResponsePermissionManageUsersMock = (
   overrideResponse: Partial<PermissionManageUsers> = {},
 ): PermissionManageUsers => ({
@@ -582,6 +630,7 @@ export const getGetRoleByIdV1ResponseMock = (
       { ...getGetRoleByIdV1ResponsePermissionCreateArticleMock() },
       { ...getGetRoleByIdV1ResponsePermissionDeleteArticleMock() },
       { ...getGetRoleByIdV1ResponsePermissionManageArticlesMock() },
+      { ...getGetRoleByIdV1ResponsePermissionManageRolesMock() },
       { ...getGetRoleByIdV1ResponsePermissionManageUsersMock() },
       { ...getGetRoleByIdV1ResponsePermissionUpdateArticleMock() },
     ]),
@@ -627,6 +676,13 @@ export const getUpdateRoleV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getUpdateRoleV1ResponsePermissionManageRolesMock = (
+  overrideResponse: Partial<PermissionManageRoles> = {},
+): PermissionManageRoles => ({
+  ...{ type: faker.helpers.arrayElement(["ManageRoles"] as const) },
+  ...overrideResponse,
+});
+
 export const getUpdateRoleV1ResponsePermissionManageUsersMock = (
   overrideResponse: Partial<PermissionManageUsers> = {},
 ): PermissionManageUsers => ({
@@ -660,6 +716,7 @@ export const getUpdateRoleV1ResponseMock = (
       { ...getUpdateRoleV1ResponsePermissionCreateArticleMock() },
       { ...getUpdateRoleV1ResponsePermissionDeleteArticleMock() },
       { ...getUpdateRoleV1ResponsePermissionManageArticlesMock() },
+      { ...getUpdateRoleV1ResponsePermissionManageRolesMock() },
       { ...getUpdateRoleV1ResponsePermissionManageUsersMock() },
       { ...getUpdateRoleV1ResponsePermissionUpdateArticleMock() },
     ]),

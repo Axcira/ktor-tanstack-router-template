@@ -130,4 +130,25 @@ describe("LoginForm", () => {
       "ログインに失敗しました",
     );
   });
+
+  it("does not treat 500 server error as login success", async () => {
+    server.use(
+      http.post(
+        "*/api/v1/auth/login",
+        () => new HttpResponse(JSON.stringify({}), { status: 500 }),
+      ),
+    );
+
+    const { user, router } = await renderLogin();
+
+    await user.type(screen.getByLabelText("メールアドレス"), "a@b.com");
+    await user.type(screen.getByLabelText("パスワード"), "password");
+    await user.click(screen.getByRole("button", { name: "ログイン" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "ログインに失敗しました",
+    );
+    expect(toastAdd).not.toHaveBeenCalled();
+    expect(router.state.location.pathname).toBe("/login");
+  });
 });

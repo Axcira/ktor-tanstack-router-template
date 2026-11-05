@@ -9,6 +9,7 @@ class PermissionSatisfiesTest {
     fun `administrator satisfies any permission`() {
         assertTrue(Permission.Administrator.satisfies(Permission.CreateArticle))
         assertTrue(Permission.Administrator.satisfies(Permission.ManageUsers))
+        assertTrue(Permission.Administrator.satisfies(Permission.ManageRoles))
         assertTrue(Permission.Administrator.satisfies(Permission.ChangePassword))
         assertTrue(Permission.Administrator.satisfies(Permission.UpdateArticle(true)))
         assertTrue(Permission.Administrator.satisfies(Permission.DeleteArticle(false)))
@@ -18,6 +19,8 @@ class PermissionSatisfiesTest {
     fun `change password is not implied by manage users`() {
         assertTrue(Permission.ChangePassword.satisfies(Permission.ChangePassword))
         assertFalse(Permission.ManageUsers.satisfies(Permission.ChangePassword))
+        assertFalse(Permission.ManageUsers.satisfies(Permission.ManageRoles))
+        assertFalse(Permission.ManageRoles.satisfies(Permission.ManageUsers))
         assertFalse(Permission.ChangePassword.satisfies(Permission.ManageUsers))
         assertFalse(Permission.ManageArticles.satisfies(Permission.ChangePassword))
     }

@@ -9,6 +9,7 @@ import type { PermissionChangePassword } from "./permissionChangePassword.ts";
 import type { PermissionCreateArticle } from "./permissionCreateArticle.ts";
 import type { PermissionDeleteArticle } from "./permissionDeleteArticle.ts";
 import type { PermissionManageArticles } from "./permissionManageArticles.ts";
+import type { PermissionManageRoles } from "./permissionManageRoles.ts";
 import type { PermissionManageUsers } from "./permissionManageUsers.ts";
 import type { PermissionUpdateArticle } from "./permissionUpdateArticle.ts";
 
@@ -18,5 +19,6 @@ export type Permission =
   | PermissionCreateArticle
   | PermissionDeleteArticle
   | PermissionManageArticles
+  | PermissionManageRoles
   | PermissionManageUsers
   | PermissionUpdateArticle;

@@ -3,6 +3,7 @@ package net.axcira.features.users
 import kotlinx.serialization.Serializable
 import net.axcira.Pagination
 import net.axcira.UpdateResult
+import net.axcira.db.SessionsTable
 import net.axcira.db.Users
 import net.axcira.features.auth.PasswordHasher
 import net.axcira.paginate
@@ -79,7 +80,10 @@ class UserService(
     }
 
     suspend fun delete(id: UInt) {
-        database.dbQuery { Users.deleteWhere { Users.id eq id } }
+        database.dbQuery {
+            SessionsTable.deleteWhere { SessionsTable.userId eq id }
+            Users.deleteWhere { Users.id eq id }
+        }
         log.info("User deleted: id=$id")
     }
 

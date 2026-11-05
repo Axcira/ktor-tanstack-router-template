@@ -46,6 +46,11 @@ import type {
   VersionResponse,
 } from "../schemas";
 
+import { customFetch } from "../../client.ts";
+import type { ErrorType } from "../../client.ts";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 const withQueryKey = <T extends object, K>(
   query: T,
   queryKey: K,
@@ -79,17 +84,12 @@ export const getGetApiUrl = () => {
 };
 
 export const getApi = async (
-  options?: RequestInit,
+  options?: Parameters<typeof customFetch>[1],
 ): Promise<getApiResponse> => {
-  const res = await fetch(getGetApiUrl(), {
+  return customFetch<getApiResponse>(getGetApiUrl(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getApiResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as getApiResponse;
 };
 
 export const getGetApiQueryKey = () => {
@@ -98,20 +98,20 @@ export const getGetApiQueryKey = () => {
 
 export const getGetApiQueryOptions = <
   TData = Awaited<ReturnType<typeof getApi>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getApi>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetApiQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getApi>>> = ({
     signal,
-  }) => getApi({ signal, ...fetchOptions });
+  }) => getApi({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApi>>,
@@ -121,11 +121,11 @@ export const getGetApiQueryOptions = <
 };
 
 export type GetApiQueryResult = NonNullable<Awaited<ReturnType<typeof getApi>>>;
-export type GetApiQueryError = unknown;
+export type GetApiQueryError = ErrorType<unknown>;
 
 export function useGetApi<
   TData = Awaited<ReturnType<typeof getApi>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options: {
     query: Partial<
@@ -139,7 +139,7 @@ export function useGetApi<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -147,7 +147,7 @@ export function useGetApi<
 };
 export function useGetApi<
   TData = Awaited<ReturnType<typeof getApi>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -161,7 +161,7 @@ export function useGetApi<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -169,13 +169,13 @@ export function useGetApi<
 };
 export function useGetApi<
   TData = Awaited<ReturnType<typeof getApi>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getApi>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -184,13 +184,13 @@ export function useGetApi<
 
 export function useGetApi<
   TData = Awaited<ReturnType<typeof getApi>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getApi>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -216,31 +216,20 @@ export type getApiJsonKotlinxSerializationResponseSuccess =
     headers: Headers;
   };
 
-export type getApiJsonKotlinxSerializationResponse =
-  getApiJsonKotlinxSerializationResponseSuccess;
-
 export const getGetApiJsonKotlinxSerializationUrl = () => {
   return `/api/json/kotlinx-serialization`;
 };
 
 export const getApiJsonKotlinxSerialization = async (
-  options?: RequestInit,
-): Promise<getApiJsonKotlinxSerializationResponse> => {
-  const res = await fetch(getGetApiJsonKotlinxSerializationUrl(), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getApiJsonKotlinxSerializationResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getApiJsonKotlinxSerializationResponse;
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getApiJsonKotlinxSerializationResponseSuccess> => {
+  return customFetch<getApiJsonKotlinxSerializationResponseSuccess>(
+    getGetApiJsonKotlinxSerializationUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getGetApiJsonKotlinxSerializationQueryKey = () => {
@@ -249,7 +238,7 @@ export const getGetApiJsonKotlinxSerializationQueryKey = () => {
 
 export const getGetApiJsonKotlinxSerializationQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -258,9 +247,9 @@ export const getGetApiJsonKotlinxSerializationQueryOptions = <
       TData
     >
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
     queryOptions?.queryKey ?? getGetApiJsonKotlinxSerializationQueryKey();
@@ -268,7 +257,7 @@ export const getGetApiJsonKotlinxSerializationQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>
   > = ({ signal }) =>
-    getApiJsonKotlinxSerialization({ signal, ...fetchOptions });
+    getApiJsonKotlinxSerialization({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>,
@@ -280,11 +269,11 @@ export const getGetApiJsonKotlinxSerializationQueryOptions = <
 export type GetApiJsonKotlinxSerializationQueryResult = NonNullable<
   Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>
 >;
-export type GetApiJsonKotlinxSerializationQueryError = unknown;
+export type GetApiJsonKotlinxSerializationQueryError = ErrorType<unknown>;
 
 export function useGetApiJsonKotlinxSerialization<
   TData = Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options: {
     query: Partial<
@@ -302,7 +291,7 @@ export function useGetApiJsonKotlinxSerialization<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -310,7 +299,7 @@ export function useGetApiJsonKotlinxSerialization<
 };
 export function useGetApiJsonKotlinxSerialization<
   TData = Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -328,7 +317,7 @@ export function useGetApiJsonKotlinxSerialization<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -336,7 +325,7 @@ export function useGetApiJsonKotlinxSerialization<
 };
 export function useGetApiJsonKotlinxSerialization<
   TData = Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -346,7 +335,7 @@ export function useGetApiJsonKotlinxSerialization<
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -355,7 +344,7 @@ export function useGetApiJsonKotlinxSerialization<
 
 export function useGetApiJsonKotlinxSerialization<
   TData = Awaited<ReturnType<typeof getApiJsonKotlinxSerialization>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -365,7 +354,7 @@ export function useGetApiJsonKotlinxSerialization<
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -398,8 +387,6 @@ export type loginV1ResponseError = loginV1Response401 & {
   headers: Headers;
 };
 
-export type loginV1Response = loginV1ResponseSuccess | loginV1ResponseError;
-
 export const getLoginV1Url = () => {
   return `/api/v1/auth/login`;
 };
@@ -409,8 +396,8 @@ export const getLoginV1Url = () => {
  */
 export const loginV1 = async (
   loginRequest?: LoginRequest,
-  options?: RequestInit,
-): Promise<loginV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<loginV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -432,7 +419,7 @@ export const loginV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getLoginV1Url(), {
+  return customFetch<loginV1ResponseSuccess>(getLoginV1Url(), {
     ...options,
     method: "POST",
     headers: {
@@ -441,17 +428,12 @@ export const loginV1 = async (
     },
     body: JSON.stringify(loginRequest),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: loginV1Response["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as loginV1Response;
 };
 
 export const getLoginV1MutationKey = () => ["loginV1"] as const;
 
 export const getLoginV1MutationOptions = <
-  TError = void,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -460,7 +442,7 @@ export const getLoginV1MutationOptions = <
     LoginV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof loginV1>>,
   TError,
@@ -468,13 +450,13 @@ export const getLoginV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getLoginV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof loginV1>>,
@@ -482,7 +464,7 @@ export const getLoginV1MutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return loginV1(data, fetchOptions);
+    return loginV1(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -492,13 +474,13 @@ export type LoginV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof loginV1>>
 >;
 export type LoginV1MutationBody = LoginRequest | undefined;
-export type LoginV1MutationError = void;
+export type LoginV1MutationError = ErrorType<void>;
 export type LoginV1MutationVariables = { data?: LoginRequest };
 
 /**
  * @summary Authenticate (Login)
  */
-export const useLoginV1 = <TError = void, TContext = unknown>(
+export const useLoginV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof loginV1>>,
@@ -506,7 +488,7 @@ export const useLoginV1 = <TError = void, TContext = unknown>(
       LoginV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -526,8 +508,6 @@ export type logoutV1ResponseSuccess = logoutV1Response204 & {
   headers: Headers;
 };
 
-export type logoutV1Response = logoutV1ResponseSuccess;
-
 export const getLogoutV1Url = () => {
   return `/api/v1/auth/logout`;
 };
@@ -536,23 +516,18 @@ export const getLogoutV1Url = () => {
  * @summary Logout
  */
 export const logoutV1 = async (
-  options?: RequestInit,
-): Promise<logoutV1Response> => {
-  const res = await fetch(getLogoutV1Url(), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<logoutV1ResponseSuccess> => {
+  return customFetch<logoutV1ResponseSuccess>(getLogoutV1Url(), {
     ...options,
     method: "POST",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: logoutV1Response["data"] = body ? JSON.parse(body) : undefined;
-  return { data, status: res.status, headers: res.headers } as logoutV1Response;
 };
 
 export const getLogoutV1MutationKey = () => ["logoutV1"] as const;
 
 export const getLogoutV1MutationOptions = <
-  TError = unknown,
+  TError = ErrorType<unknown>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -561,7 +536,7 @@ export const getLogoutV1MutationOptions = <
     void,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof logoutV1>>,
   TError,
@@ -569,19 +544,19 @@ export const getLogoutV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getLogoutV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof logoutV1>>,
     void
   > = () => {
-    return logoutV1(fetchOptions);
+    return logoutV1(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -591,12 +566,12 @@ export type LogoutV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof logoutV1>>
 >;
 
-export type LogoutV1MutationError = unknown;
+export type LogoutV1MutationError = ErrorType<unknown>;
 
 /**
  * @summary Logout
  */
-export const useLogoutV1 = <TError = unknown, TContext = unknown>(
+export const useLogoutV1 = <TError = ErrorType<unknown>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof logoutV1>>,
@@ -604,7 +579,7 @@ export const useLogoutV1 = <TError = unknown, TContext = unknown>(
       void,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -640,10 +615,6 @@ export type changePasswordV1ResponseError = (
   headers: Headers;
 };
 
-export type changePasswordV1Response =
-  | changePasswordV1ResponseSuccess
-  | changePasswordV1ResponseError;
-
 export const getChangePasswordV1Url = () => {
   return `/api/v1/auth/password`;
 };
@@ -656,8 +627,8 @@ The current session stays. Omitted or false leaves other sessions in place.
  */
 export const changePasswordV1 = async (
   changePasswordRequest?: ChangePasswordRequest,
-  options?: RequestInit,
-): Promise<changePasswordV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<changePasswordV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -679,33 +650,25 @@ export const changePasswordV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getChangePasswordV1Url(), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getHeaders(options?.headers),
+  return customFetch<changePasswordV1ResponseSuccess>(
+    getChangePasswordV1Url(),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(changePasswordRequest),
     },
-    body: JSON.stringify(changePasswordRequest),
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: changePasswordV1Response["data"] = body
-    ? JSON.parse(body)
-    : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as changePasswordV1Response;
+  );
 };
 
 export const getChangePasswordV1MutationKey = () =>
   ["changePasswordV1"] as const;
 
 export const getChangePasswordV1MutationOptions = <
-  TError = ValidationErrorBody | void,
+  TError = ErrorType<ValidationErrorBody | void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -714,7 +677,7 @@ export const getChangePasswordV1MutationOptions = <
     ChangePasswordV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof changePasswordV1>>,
   TError,
@@ -722,13 +685,13 @@ export const getChangePasswordV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getChangePasswordV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof changePasswordV1>>,
@@ -736,7 +699,7 @@ export const getChangePasswordV1MutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return changePasswordV1(data, fetchOptions);
+    return changePasswordV1(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -746,7 +709,8 @@ export type ChangePasswordV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof changePasswordV1>>
 >;
 export type ChangePasswordV1MutationBody = ChangePasswordRequest | undefined;
-export type ChangePasswordV1MutationError = ValidationErrorBody | void;
+export type ChangePasswordV1MutationError =
+  ErrorType<ValidationErrorBody | void>;
 export type ChangePasswordV1MutationVariables = {
   data?: ChangePasswordRequest;
 };
@@ -758,7 +722,7 @@ When logoutOtherSessions is true, other cookie sessions for this user are delete
 The current session stays. Omitted or false leaves other sessions in place.
  */
 export const useChangePasswordV1 = <
-  TError = ValidationErrorBody | void,
+  TError = ErrorType<ValidationErrorBody | void>,
   TContext = unknown,
 >(
   options?: {
@@ -768,7 +732,7 @@ export const useChangePasswordV1 = <
       ChangePasswordV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -787,8 +751,6 @@ export type getUsersV1Response200 = {
 export type getUsersV1ResponseSuccess = getUsersV1Response200 & {
   headers: Headers;
 };
-
-export type getUsersV1Response = getUsersV1ResponseSuccess;
 
 export const getGetUsersV1Url = (params?: GetUsersV1Params) => {
   const normalizedParams = new URLSearchParams();
@@ -811,21 +773,12 @@ export const getGetUsersV1Url = (params?: GetUsersV1Params) => {
  */
 export const getUsersV1 = async (
   params?: GetUsersV1Params,
-  options?: RequestInit,
-): Promise<getUsersV1Response> => {
-  const res = await fetch(getGetUsersV1Url(params), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUsersV1ResponseSuccess> => {
+  return customFetch<getUsersV1ResponseSuccess>(getGetUsersV1Url(params), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getUsersV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getUsersV1Response;
 };
 
 export const getGetUsersV1QueryKey = (params?: GetUsersV1Params) => {
@@ -834,23 +787,23 @@ export const getGetUsersV1QueryKey = (params?: GetUsersV1Params) => {
 
 export const getGetUsersV1QueryOptions = <
   TData = Awaited<ReturnType<typeof getUsersV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetUsersV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getUsersV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetUsersV1QueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersV1>>> = ({
     signal,
-  }) => getUsersV1(params, { signal, ...fetchOptions });
+  }) => getUsersV1(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getUsersV1>>,
@@ -862,11 +815,11 @@ export const getGetUsersV1QueryOptions = <
 export type GetUsersV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof getUsersV1>>
 >;
-export type GetUsersV1QueryError = unknown;
+export type GetUsersV1QueryError = ErrorType<unknown>;
 
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params: undefined | GetUsersV1Params,
   options: {
@@ -881,7 +834,7 @@ export function useGetUsersV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -889,7 +842,7 @@ export function useGetUsersV1<
 };
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetUsersV1Params,
   options?: {
@@ -904,7 +857,7 @@ export function useGetUsersV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -912,14 +865,14 @@ export function useGetUsersV1<
 };
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetUsersV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getUsersV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -931,14 +884,14 @@ export function useGetUsersV1<
 
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetUsersV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getUsersV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -963,8 +916,6 @@ export type createUserV1ResponseSuccess = createUserV1Response201 & {
   headers: Headers;
 };
 
-export type createUserV1Response = createUserV1ResponseSuccess;
-
 export const getCreateUserV1Url = () => {
   return `/api/v1/users/create`;
 };
@@ -974,8 +925,8 @@ export const getCreateUserV1Url = () => {
  */
 export const createUserV1 = async (
   createUserInput?: CreateUserInput,
-  options?: RequestInit,
-): Promise<createUserV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<createUserV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -997,7 +948,7 @@ export const createUserV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getCreateUserV1Url(), {
+  return customFetch<createUserV1ResponseSuccess>(getCreateUserV1Url(), {
     ...options,
     method: "POST",
     headers: {
@@ -1006,21 +957,12 @@ export const createUserV1 = async (
     },
     body: JSON.stringify(createUserInput),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createUserV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as createUserV1Response;
 };
 
 export const getCreateUserV1MutationKey = () => ["createUserV1"] as const;
 
 export const getCreateUserV1MutationOptions = <
-  TError = unknown,
+  TError = ErrorType<unknown>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1029,7 +971,7 @@ export const getCreateUserV1MutationOptions = <
     CreateUserV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createUserV1>>,
   TError,
@@ -1037,13 +979,13 @@ export const getCreateUserV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getCreateUserV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createUserV1>>,
@@ -1051,7 +993,7 @@ export const getCreateUserV1MutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return createUserV1(data, fetchOptions);
+    return createUserV1(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1061,13 +1003,16 @@ export type CreateUserV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof createUserV1>>
 >;
 export type CreateUserV1MutationBody = CreateUserInput | undefined;
-export type CreateUserV1MutationError = unknown;
+export type CreateUserV1MutationError = ErrorType<unknown>;
 export type CreateUserV1MutationVariables = { data?: CreateUserInput };
 
 /**
  * @summary Create a new user
  */
-export const useCreateUserV1 = <TError = unknown, TContext = unknown>(
+export const useCreateUserV1 = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof createUserV1>>,
@@ -1075,7 +1020,7 @@ export const useCreateUserV1 = <TError = unknown, TContext = unknown>(
       CreateUserV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -1103,10 +1048,6 @@ export type updateUserV1ResponseError = updateUserV1Response404 & {
   headers: Headers;
 };
 
-export type updateUserV1Response =
-  | updateUserV1ResponseSuccess
-  | updateUserV1ResponseError;
-
 export const getUpdateUserV1Url = (id: string) => {
   return `/api/v1/users/update/${id}`;
 };
@@ -1117,8 +1058,8 @@ export const getUpdateUserV1Url = (id: string) => {
 export const updateUserV1 = async (
   id: string,
   updateUserInput?: UpdateUserInput,
-  options?: RequestInit,
-): Promise<updateUserV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateUserV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -1140,7 +1081,7 @@ export const updateUserV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getUpdateUserV1Url(id), {
+  return customFetch<updateUserV1ResponseSuccess>(getUpdateUserV1Url(id), {
     ...options,
     method: "PATCH",
     headers: {
@@ -1149,23 +1090,12 @@ export const updateUserV1 = async (
     },
     body: JSON.stringify(updateUserInput),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateUserV1Response["data"] = body
-    ? JSON.parse(body)
-    : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as updateUserV1Response;
 };
 
 export const getUpdateUserV1MutationKey = () => ["updateUserV1"] as const;
 
 export const getUpdateUserV1MutationOptions = <
-  TError = string,
+  TError = ErrorType<string>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1174,7 +1104,7 @@ export const getUpdateUserV1MutationOptions = <
     UpdateUserV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateUserV1>>,
   TError,
@@ -1182,13 +1112,13 @@ export const getUpdateUserV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getUpdateUserV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateUserV1>>,
@@ -1196,7 +1126,7 @@ export const getUpdateUserV1MutationOptions = <
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return updateUserV1(id, data, fetchOptions);
+    return updateUserV1(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1206,7 +1136,7 @@ export type UpdateUserV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof updateUserV1>>
 >;
 export type UpdateUserV1MutationBody = UpdateUserInput | undefined;
-export type UpdateUserV1MutationError = string;
+export type UpdateUserV1MutationError = ErrorType<string>;
 export type UpdateUserV1MutationVariables = {
   id: string;
   data?: UpdateUserInput;
@@ -1215,7 +1145,7 @@ export type UpdateUserV1MutationVariables = {
 /**
  * @summary Update a user by ID
  */
-export const useUpdateUserV1 = <TError = string, TContext = unknown>(
+export const useUpdateUserV1 = <TError = ErrorType<string>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateUserV1>>,
@@ -1223,7 +1153,7 @@ export const useUpdateUserV1 = <TError = string, TContext = unknown>(
       UpdateUserV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -1243,8 +1173,6 @@ export type deleteUserV1ResponseSuccess = deleteUserV1Response204 & {
   headers: Headers;
 };
 
-export type deleteUserV1Response = deleteUserV1ResponseSuccess;
-
 export const getDeleteUserV1Url = (id: string) => {
   return `/api/v1/users/delete/${id}`;
 };
@@ -1254,29 +1182,18 @@ export const getDeleteUserV1Url = (id: string) => {
  */
 export const deleteUserV1 = async (
   id: string,
-  options?: RequestInit,
-): Promise<deleteUserV1Response> => {
-  const res = await fetch(getDeleteUserV1Url(id), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteUserV1ResponseSuccess> => {
+  return customFetch<deleteUserV1ResponseSuccess>(getDeleteUserV1Url(id), {
     ...options,
     method: "DELETE",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteUserV1Response["data"] = body
-    ? JSON.parse(body)
-    : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as deleteUserV1Response;
 };
 
 export const getDeleteUserV1MutationKey = () => ["deleteUserV1"] as const;
 
 export const getDeleteUserV1MutationOptions = <
-  TError = unknown,
+  TError = ErrorType<unknown>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1285,7 +1202,7 @@ export const getDeleteUserV1MutationOptions = <
     DeleteUserV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteUserV1>>,
   TError,
@@ -1293,13 +1210,13 @@ export const getDeleteUserV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getDeleteUserV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteUserV1>>,
@@ -1307,7 +1224,7 @@ export const getDeleteUserV1MutationOptions = <
   > = (props) => {
     const { id } = props ?? {};
 
-    return deleteUserV1(id, fetchOptions);
+    return deleteUserV1(id, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1317,13 +1234,16 @@ export type DeleteUserV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteUserV1>>
 >;
 
-export type DeleteUserV1MutationError = unknown;
+export type DeleteUserV1MutationError = ErrorType<unknown>;
 export type DeleteUserV1MutationVariables = { id: string };
 
 /**
  * @summary Delete a user by ID
  */
-export const useDeleteUserV1 = <TError = unknown, TContext = unknown>(
+export const useDeleteUserV1 = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteUserV1>>,
@@ -1331,7 +1251,7 @@ export const useDeleteUserV1 = <TError = unknown, TContext = unknown>(
       DeleteUserV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -1361,10 +1281,6 @@ export type forceChangePasswordV1ResponseError =
     headers: Headers;
   };
 
-export type forceChangePasswordV1Response =
-  | forceChangePasswordV1ResponseSuccess
-  | forceChangePasswordV1ResponseError;
-
 export const getForceChangePasswordV1Url = (id: string) => {
   return `/api/v1/users/${id}/password`;
 };
@@ -1377,8 +1293,8 @@ Omitted or false leaves their sessions in place.
 export const forceChangePasswordV1 = async (
   id: string,
   forceChangePasswordRequest?: ForceChangePasswordRequest,
-  options?: RequestInit,
-): Promise<forceChangePasswordV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<forceChangePasswordV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -1400,33 +1316,25 @@ export const forceChangePasswordV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getForceChangePasswordV1Url(id), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getHeaders(options?.headers),
+  return customFetch<forceChangePasswordV1ResponseSuccess>(
+    getForceChangePasswordV1Url(id),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(forceChangePasswordRequest),
     },
-    body: JSON.stringify(forceChangePasswordRequest),
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: forceChangePasswordV1Response["data"] = body
-    ? JSON.parse(body)
-    : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as forceChangePasswordV1Response;
+  );
 };
 
 export const getForceChangePasswordV1MutationKey = () =>
   ["forceChangePasswordV1"] as const;
 
 export const getForceChangePasswordV1MutationOptions = <
-  TError = string,
+  TError = ErrorType<string>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1435,7 +1343,7 @@ export const getForceChangePasswordV1MutationOptions = <
     ForceChangePasswordV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof forceChangePasswordV1>>,
   TError,
@@ -1443,13 +1351,13 @@ export const getForceChangePasswordV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getForceChangePasswordV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof forceChangePasswordV1>>,
@@ -1457,7 +1365,7 @@ export const getForceChangePasswordV1MutationOptions = <
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return forceChangePasswordV1(id, data, fetchOptions);
+    return forceChangePasswordV1(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1469,7 +1377,7 @@ export type ForceChangePasswordV1MutationResult = NonNullable<
 export type ForceChangePasswordV1MutationBody =
   | ForceChangePasswordRequest
   | undefined;
-export type ForceChangePasswordV1MutationError = string;
+export type ForceChangePasswordV1MutationError = ErrorType<string>;
 export type ForceChangePasswordV1MutationVariables = {
   id: string;
   data?: ForceChangePasswordRequest;
@@ -1480,7 +1388,10 @@ export type ForceChangePasswordV1MutationVariables = {
 Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
 Omitted or false leaves their sessions in place.
  */
-export const useForceChangePasswordV1 = <TError = string, TContext = unknown>(
+export const useForceChangePasswordV1 = <
+  TError = ErrorType<string>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof forceChangePasswordV1>>,
@@ -1488,7 +1399,7 @@ export const useForceChangePasswordV1 = <TError = string, TContext = unknown>(
       ForceChangePasswordV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -1519,10 +1430,6 @@ export type updateMeV1ResponseError = updateMeV1Response400 & {
   headers: Headers;
 };
 
-export type updateMeV1Response =
-  | updateMeV1ResponseSuccess
-  | updateMeV1ResponseError;
-
 export const getUpdateMeV1Url = () => {
   return `/api/v1/users/me`;
 };
@@ -1532,8 +1439,8 @@ export const getUpdateMeV1Url = () => {
  */
 export const updateMeV1 = async (
   updateUserInput?: UpdateUserInput,
-  options?: RequestInit,
-): Promise<updateMeV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateMeV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -1555,7 +1462,7 @@ export const updateMeV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getUpdateMeV1Url(), {
+  return customFetch<updateMeV1ResponseSuccess>(getUpdateMeV1Url(), {
     ...options,
     method: "PUT",
     headers: {
@@ -1564,21 +1471,12 @@ export const updateMeV1 = async (
     },
     body: JSON.stringify(updateUserInput),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateMeV1Response["data"] = body ? JSON.parse(body) : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as updateMeV1Response;
 };
 
 export const getUpdateMeV1MutationKey = () => ["updateMeV1"] as const;
 
 export const getUpdateMeV1MutationOptions = <
-  TError = ValidationErrorBody,
+  TError = ErrorType<ValidationErrorBody>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1587,7 +1485,7 @@ export const getUpdateMeV1MutationOptions = <
     UpdateMeV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateMeV1>>,
   TError,
@@ -1595,13 +1493,13 @@ export const getUpdateMeV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getUpdateMeV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateMeV1>>,
@@ -1609,7 +1507,7 @@ export const getUpdateMeV1MutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return updateMeV1(data, fetchOptions);
+    return updateMeV1(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1619,13 +1517,16 @@ export type UpdateMeV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof updateMeV1>>
 >;
 export type UpdateMeV1MutationBody = UpdateUserInput | undefined;
-export type UpdateMeV1MutationError = ValidationErrorBody;
+export type UpdateMeV1MutationError = ErrorType<ValidationErrorBody>;
 export type UpdateMeV1MutationVariables = { data?: UpdateUserInput };
 
 /**
  * @summary Update the current user
  */
-export const useUpdateMeV1 = <TError = ValidationErrorBody, TContext = unknown>(
+export const useUpdateMeV1 = <
+  TError = ErrorType<ValidationErrorBody>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateMeV1>>,
@@ -1633,7 +1534,7 @@ export const useUpdateMeV1 = <TError = ValidationErrorBody, TContext = unknown>(
       UpdateMeV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -1653,8 +1554,6 @@ export type deleteMeV1ResponseSuccess = deleteMeV1Response204 & {
   headers: Headers;
 };
 
-export type deleteMeV1Response = deleteMeV1ResponseSuccess;
-
 export const getDeleteMeV1Url = () => {
   return `/api/v1/users/me`;
 };
@@ -1663,27 +1562,18 @@ export const getDeleteMeV1Url = () => {
  * @summary Delete the current user
  */
 export const deleteMeV1 = async (
-  options?: RequestInit,
-): Promise<deleteMeV1Response> => {
-  const res = await fetch(getDeleteMeV1Url(), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteMeV1ResponseSuccess> => {
+  return customFetch<deleteMeV1ResponseSuccess>(getDeleteMeV1Url(), {
     ...options,
     method: "DELETE",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteMeV1Response["data"] = body ? JSON.parse(body) : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as deleteMeV1Response;
 };
 
 export const getDeleteMeV1MutationKey = () => ["deleteMeV1"] as const;
 
 export const getDeleteMeV1MutationOptions = <
-  TError = unknown,
+  TError = ErrorType<unknown>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1692,7 +1582,7 @@ export const getDeleteMeV1MutationOptions = <
     void,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteMeV1>>,
   TError,
@@ -1700,19 +1590,19 @@ export const getDeleteMeV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getDeleteMeV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteMeV1>>,
     void
   > = () => {
-    return deleteMeV1(fetchOptions);
+    return deleteMeV1(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1722,12 +1612,12 @@ export type DeleteMeV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteMeV1>>
 >;
 
-export type DeleteMeV1MutationError = unknown;
+export type DeleteMeV1MutationError = ErrorType<unknown>;
 
 /**
  * @summary Delete the current user
  */
-export const useDeleteMeV1 = <TError = unknown, TContext = unknown>(
+export const useDeleteMeV1 = <TError = ErrorType<unknown>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteMeV1>>,
@@ -1735,7 +1625,7 @@ export const useDeleteMeV1 = <TError = unknown, TContext = unknown>(
       void,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -1755,8 +1645,6 @@ export type getSelfV1ResponseSuccess = getSelfV1Response200 & {
   headers: Headers;
 };
 
-export type getSelfV1Response = getSelfV1ResponseSuccess;
-
 export const getGetSelfV1Url = () => {
   return `/api/v1/users/me`;
 };
@@ -1765,21 +1653,12 @@ export const getGetSelfV1Url = () => {
  * @summary Get current user
  */
 export const getSelfV1 = async (
-  options?: RequestInit,
-): Promise<getSelfV1Response> => {
-  const res = await fetch(getGetSelfV1Url(), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getSelfV1ResponseSuccess> => {
+  return customFetch<getSelfV1ResponseSuccess>(getGetSelfV1Url(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getSelfV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getSelfV1Response;
 };
 
 export const getGetSelfV1QueryKey = () => {
@@ -1788,20 +1667,20 @@ export const getGetSelfV1QueryKey = () => {
 
 export const getGetSelfV1QueryOptions = <
   TData = Awaited<ReturnType<typeof getSelfV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getSelfV1>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetSelfV1QueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getSelfV1>>> = ({
     signal,
-  }) => getSelfV1({ signal, ...fetchOptions });
+  }) => getSelfV1({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getSelfV1>>,
@@ -1813,11 +1692,11 @@ export const getGetSelfV1QueryOptions = <
 export type GetSelfV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof getSelfV1>>
 >;
-export type GetSelfV1QueryError = unknown;
+export type GetSelfV1QueryError = ErrorType<unknown>;
 
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options: {
     query: Partial<
@@ -1831,7 +1710,7 @@ export function useGetSelfV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -1839,7 +1718,7 @@ export function useGetSelfV1<
 };
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -1853,7 +1732,7 @@ export function useGetSelfV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -1861,13 +1740,13 @@ export function useGetSelfV1<
 };
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getSelfV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -1879,13 +1758,13 @@ export function useGetSelfV1<
 
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getSelfV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -1910,8 +1789,6 @@ export type createArticleV1ResponseSuccess = createArticleV1Response201 & {
   headers: Headers;
 };
 
-export type createArticleV1Response = createArticleV1ResponseSuccess;
-
 export const getCreateArticleV1Url = () => {
   return `/api/v1/articles`;
 };
@@ -1921,8 +1798,8 @@ export const getCreateArticleV1Url = () => {
  */
 export const createArticleV1 = async (
   createArticleInput?: CreateArticleInput,
-  options?: RequestInit,
-): Promise<createArticleV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<createArticleV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -1944,7 +1821,7 @@ export const createArticleV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getCreateArticleV1Url(), {
+  return customFetch<createArticleV1ResponseSuccess>(getCreateArticleV1Url(), {
     ...options,
     method: "POST",
     headers: {
@@ -1953,21 +1830,12 @@ export const createArticleV1 = async (
     },
     body: JSON.stringify(createArticleInput),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createArticleV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as createArticleV1Response;
 };
 
 export const getCreateArticleV1MutationKey = () => ["createArticleV1"] as const;
 
 export const getCreateArticleV1MutationOptions = <
-  TError = unknown,
+  TError = ErrorType<unknown>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1976,7 +1844,7 @@ export const getCreateArticleV1MutationOptions = <
     CreateArticleV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createArticleV1>>,
   TError,
@@ -1984,13 +1852,13 @@ export const getCreateArticleV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getCreateArticleV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createArticleV1>>,
@@ -1998,7 +1866,7 @@ export const getCreateArticleV1MutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return createArticleV1(data, fetchOptions);
+    return createArticleV1(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -2008,13 +1876,16 @@ export type CreateArticleV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof createArticleV1>>
 >;
 export type CreateArticleV1MutationBody = CreateArticleInput | undefined;
-export type CreateArticleV1MutationError = unknown;
+export type CreateArticleV1MutationError = ErrorType<unknown>;
 export type CreateArticleV1MutationVariables = { data?: CreateArticleInput };
 
 /**
  * @summary Create an article
  */
-export const useCreateArticleV1 = <TError = unknown, TContext = unknown>(
+export const useCreateArticleV1 = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof createArticleV1>>,
@@ -2022,7 +1893,7 @@ export const useCreateArticleV1 = <TError = unknown, TContext = unknown>(
       CreateArticleV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -2041,8 +1912,6 @@ export type listArticlesV1Response200 = {
 export type listArticlesV1ResponseSuccess = listArticlesV1Response200 & {
   headers: Headers;
 };
-
-export type listArticlesV1Response = listArticlesV1ResponseSuccess;
 
 export const getListArticlesV1Url = (params?: ListArticlesV1Params) => {
   const normalizedParams = new URLSearchParams();
@@ -2065,21 +1934,15 @@ export const getListArticlesV1Url = (params?: ListArticlesV1Params) => {
  */
 export const listArticlesV1 = async (
   params?: ListArticlesV1Params,
-  options?: RequestInit,
-): Promise<listArticlesV1Response> => {
-  const res = await fetch(getListArticlesV1Url(params), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: listArticlesV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as listArticlesV1Response;
+  options?: Parameters<typeof customFetch>[1],
+): Promise<listArticlesV1ResponseSuccess> => {
+  return customFetch<listArticlesV1ResponseSuccess>(
+    getListArticlesV1Url(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getListArticlesV1QueryKey = (params?: ListArticlesV1Params) => {
@@ -2088,23 +1951,23 @@ export const getListArticlesV1QueryKey = (params?: ListArticlesV1Params) => {
 
 export const getListArticlesV1QueryOptions = <
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: ListArticlesV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof listArticlesV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getListArticlesV1QueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof listArticlesV1>>> = ({
     signal,
-  }) => listArticlesV1(params, { signal, ...fetchOptions });
+  }) => listArticlesV1(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof listArticlesV1>>,
@@ -2116,11 +1979,11 @@ export const getListArticlesV1QueryOptions = <
 export type ListArticlesV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof listArticlesV1>>
 >;
-export type ListArticlesV1QueryError = unknown;
+export type ListArticlesV1QueryError = ErrorType<unknown>;
 
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params: undefined | ListArticlesV1Params,
   options: {
@@ -2135,7 +1998,7 @@ export function useListArticlesV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -2143,7 +2006,7 @@ export function useListArticlesV1<
 };
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: ListArticlesV1Params,
   options?: {
@@ -2158,7 +2021,7 @@ export function useListArticlesV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2166,14 +2029,14 @@ export function useListArticlesV1<
 };
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: ListArticlesV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof listArticlesV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2185,14 +2048,14 @@ export function useListArticlesV1<
 
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: ListArticlesV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof listArticlesV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2225,10 +2088,6 @@ export type deleteArticleV1ResponseError = deleteArticleV1Response404 & {
   headers: Headers;
 };
 
-export type deleteArticleV1Response =
-  | deleteArticleV1ResponseSuccess
-  | deleteArticleV1ResponseError;
-
 export const getDeleteArticleV1Url = (id: string) => {
   return `/api/v1/articles/${id}`;
 };
@@ -2238,29 +2097,21 @@ export const getDeleteArticleV1Url = (id: string) => {
  */
 export const deleteArticleV1 = async (
   id: string,
-  options?: RequestInit,
-): Promise<deleteArticleV1Response> => {
-  const res = await fetch(getDeleteArticleV1Url(id), {
-    ...options,
-    method: "DELETE",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteArticleV1Response["data"] = body
-    ? JSON.parse(body)
-    : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as deleteArticleV1Response;
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteArticleV1ResponseSuccess> => {
+  return customFetch<deleteArticleV1ResponseSuccess>(
+    getDeleteArticleV1Url(id),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
 };
 
 export const getDeleteArticleV1MutationKey = () => ["deleteArticleV1"] as const;
 
 export const getDeleteArticleV1MutationOptions = <
-  TError = void,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2269,7 +2120,7 @@ export const getDeleteArticleV1MutationOptions = <
     DeleteArticleV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteArticleV1>>,
   TError,
@@ -2277,13 +2128,13 @@ export const getDeleteArticleV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getDeleteArticleV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteArticleV1>>,
@@ -2291,7 +2142,7 @@ export const getDeleteArticleV1MutationOptions = <
   > = (props) => {
     const { id } = props ?? {};
 
-    return deleteArticleV1(id, fetchOptions);
+    return deleteArticleV1(id, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -2301,13 +2152,16 @@ export type DeleteArticleV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteArticleV1>>
 >;
 
-export type DeleteArticleV1MutationError = void;
+export type DeleteArticleV1MutationError = ErrorType<void>;
 export type DeleteArticleV1MutationVariables = { id: string };
 
 /**
  * @summary Delete an article
  */
-export const useDeleteArticleV1 = <TError = void, TContext = unknown>(
+export const useDeleteArticleV1 = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteArticleV1>>,
@@ -2315,7 +2169,7 @@ export const useDeleteArticleV1 = <TError = void, TContext = unknown>(
       DeleteArticleV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -2343,10 +2197,6 @@ export type getArticleV1ResponseError = getArticleV1Response404 & {
   headers: Headers;
 };
 
-export type getArticleV1Response =
-  | getArticleV1ResponseSuccess
-  | getArticleV1ResponseError;
-
 export const getGetArticleV1Url = (id: string) => {
   return `/api/v1/articles/${id}`;
 };
@@ -2356,21 +2206,12 @@ export const getGetArticleV1Url = (id: string) => {
  */
 export const getArticleV1 = async (
   id: string,
-  options?: RequestInit,
-): Promise<getArticleV1Response> => {
-  const res = await fetch(getGetArticleV1Url(id), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getArticleV1ResponseSuccess> => {
+  return customFetch<getArticleV1ResponseSuccess>(getGetArticleV1Url(id), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getArticleV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getArticleV1Response;
 };
 
 export const getGetArticleV1QueryKey = (id: string) => {
@@ -2379,23 +2220,23 @@ export const getGetArticleV1QueryKey = (id: string) => {
 
 export const getGetArticleV1QueryOptions = <
   TData = Awaited<ReturnType<typeof getArticleV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   id: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getArticleV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetArticleV1QueryKey(id);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getArticleV1>>> = ({
     signal,
-  }) => getArticleV1(id, { signal, ...fetchOptions });
+  }) => getArticleV1(id, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -2412,11 +2253,11 @@ export const getGetArticleV1QueryOptions = <
 export type GetArticleV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof getArticleV1>>
 >;
-export type GetArticleV1QueryError = void;
+export type GetArticleV1QueryError = ErrorType<void>;
 
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   id: string,
   options: {
@@ -2431,7 +2272,7 @@ export function useGetArticleV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -2439,7 +2280,7 @@ export function useGetArticleV1<
 };
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   id: string,
   options?: {
@@ -2454,7 +2295,7 @@ export function useGetArticleV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2462,14 +2303,14 @@ export function useGetArticleV1<
 };
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   id: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getArticleV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2481,14 +2322,14 @@ export function useGetArticleV1<
 
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   id: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getArticleV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2529,10 +2370,6 @@ export type updateArticleV1ResponseError = updateArticleV1Response404 & {
   headers: Headers;
 };
 
-export type updateArticleV1Response =
-  | updateArticleV1ResponseSuccess
-  | updateArticleV1ResponseError;
-
 export const getUpdateArticleV1Url = (id: string) => {
   return `/api/v1/articles/${id}`;
 };
@@ -2543,8 +2380,8 @@ export const getUpdateArticleV1Url = (id: string) => {
 export const updateArticleV1 = async (
   id: string,
   updateArticleInput?: UpdateArticleInput,
-  options?: RequestInit,
-): Promise<updateArticleV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateArticleV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -2566,30 +2403,24 @@ export const updateArticleV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getUpdateArticleV1Url(id), {
-    ...options,
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getHeaders(options?.headers),
+  return customFetch<updateArticleV1ResponseSuccess>(
+    getUpdateArticleV1Url(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(updateArticleInput),
     },
-    body: JSON.stringify(updateArticleInput),
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateArticleV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as updateArticleV1Response;
+  );
 };
 
 export const getUpdateArticleV1MutationKey = () => ["updateArticleV1"] as const;
 
 export const getUpdateArticleV1MutationOptions = <
-  TError = void,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2598,7 +2429,7 @@ export const getUpdateArticleV1MutationOptions = <
     UpdateArticleV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateArticleV1>>,
   TError,
@@ -2606,13 +2437,13 @@ export const getUpdateArticleV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getUpdateArticleV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateArticleV1>>,
@@ -2620,7 +2451,7 @@ export const getUpdateArticleV1MutationOptions = <
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return updateArticleV1(id, data, fetchOptions);
+    return updateArticleV1(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -2630,7 +2461,7 @@ export type UpdateArticleV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof updateArticleV1>>
 >;
 export type UpdateArticleV1MutationBody = UpdateArticleInput | undefined;
-export type UpdateArticleV1MutationError = void;
+export type UpdateArticleV1MutationError = ErrorType<void>;
 export type UpdateArticleV1MutationVariables = {
   id: string;
   data?: UpdateArticleInput;
@@ -2639,7 +2470,10 @@ export type UpdateArticleV1MutationVariables = {
 /**
  * @summary Update an article
  */
-export const useUpdateArticleV1 = <TError = void, TContext = unknown>(
+export const useUpdateArticleV1 = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateArticleV1>>,
@@ -2647,7 +2481,7 @@ export const useUpdateArticleV1 = <TError = void, TContext = unknown>(
       UpdateArticleV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -2677,10 +2511,6 @@ export type getUserPermissionsV1ResponseError =
     headers: Headers;
   };
 
-export type getUserPermissionsV1Response =
-  | getUserPermissionsV1ResponseSuccess
-  | getUserPermissionsV1ResponseError;
-
 export const getGetUserPermissionsV1Url = (
   params?: GetUserPermissionsV1Params,
 ) => {
@@ -2704,23 +2534,15 @@ export const getGetUserPermissionsV1Url = (
  */
 export const getUserPermissionsV1 = async (
   params?: GetUserPermissionsV1Params,
-  options?: RequestInit,
-): Promise<getUserPermissionsV1Response> => {
-  const res = await fetch(getGetUserPermissionsV1Url(params), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getUserPermissionsV1Response["data"] = body
-    ? JSON.parse(body)
-    : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getUserPermissionsV1Response;
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUserPermissionsV1ResponseSuccess> => {
+  return customFetch<getUserPermissionsV1ResponseSuccess>(
+    getGetUserPermissionsV1Url(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getGetUserPermissionsV1QueryKey = (
@@ -2731,7 +2553,7 @@ export const getGetUserPermissionsV1QueryKey = (
 
 export const getGetUserPermissionsV1QueryOptions = <
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   params?: GetUserPermissionsV1Params,
   options?: {
@@ -2742,17 +2564,18 @@ export const getGetUserPermissionsV1QueryOptions = <
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
     queryOptions?.queryKey ?? getGetUserPermissionsV1QueryKey(params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getUserPermissionsV1>>
-  > = ({ signal }) => getUserPermissionsV1(params, { signal, ...fetchOptions });
+  > = ({ signal }) =>
+    getUserPermissionsV1(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getUserPermissionsV1>>,
@@ -2764,11 +2587,11 @@ export const getGetUserPermissionsV1QueryOptions = <
 export type GetUserPermissionsV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof getUserPermissionsV1>>
 >;
-export type GetUserPermissionsV1QueryError = void;
+export type GetUserPermissionsV1QueryError = ErrorType<void>;
 
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   params: undefined | GetUserPermissionsV1Params,
   options: {
@@ -2787,7 +2610,7 @@ export function useGetUserPermissionsV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -2795,7 +2618,7 @@ export function useGetUserPermissionsV1<
 };
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   params?: GetUserPermissionsV1Params,
   options?: {
@@ -2814,7 +2637,7 @@ export function useGetUserPermissionsV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2822,7 +2645,7 @@ export function useGetUserPermissionsV1<
 };
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   params?: GetUserPermissionsV1Params,
   options?: {
@@ -2833,7 +2656,7 @@ export function useGetUserPermissionsV1<
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2845,7 +2668,7 @@ export function useGetUserPermissionsV1<
 
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   params?: GetUserPermissionsV1Params,
   options?: {
@@ -2856,7 +2679,7 @@ export function useGetUserPermissionsV1<
         TData
       >
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -2889,8 +2712,6 @@ export type canIV1ResponseError = canIV1Response403 & {
   headers: Headers;
 };
 
-export type canIV1Response = canIV1ResponseSuccess | canIV1ResponseError;
-
 export const getCanIV1Url = () => {
   return `/api/v1/permissions/can-i`;
 };
@@ -2900,8 +2721,8 @@ export const getCanIV1Url = () => {
  */
 export const canIV1 = async (
   permission?: Permission,
-  options?: RequestInit,
-): Promise<canIV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<canIV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -2923,7 +2744,7 @@ export const canIV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getCanIV1Url(), {
+  return customFetch<canIV1ResponseSuccess>(getCanIV1Url(), {
     ...options,
     method: "POST",
     headers: {
@@ -2932,17 +2753,12 @@ export const canIV1 = async (
     },
     body: JSON.stringify(permission),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: canIV1Response["data"] = body ? JSON.parse(body) : undefined;
-  return { data, status: res.status, headers: res.headers } as canIV1Response;
 };
 
 export const getCanIV1MutationKey = () => ["canIV1"] as const;
 
 export const getCanIV1MutationOptions = <
-  TError = void,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2951,7 +2767,7 @@ export const getCanIV1MutationOptions = <
     CanIV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof canIV1>>,
   TError,
@@ -2959,13 +2775,13 @@ export const getCanIV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getCanIV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof canIV1>>,
@@ -2973,7 +2789,7 @@ export const getCanIV1MutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return canIV1(data, fetchOptions);
+    return canIV1(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -2983,13 +2799,13 @@ export type CanIV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof canIV1>>
 >;
 export type CanIV1MutationBody = Permission | undefined;
-export type CanIV1MutationError = void;
+export type CanIV1MutationError = ErrorType<void>;
 export type CanIV1MutationVariables = { data?: Permission };
 
 /**
  * @summary Check permission for user
  */
-export const useCanIV1 = <TError = void, TContext = unknown>(
+export const useCanIV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof canIV1>>,
@@ -2997,7 +2813,7 @@ export const useCanIV1 = <TError = void, TContext = unknown>(
       CanIV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -3013,11 +2829,17 @@ export type createRoleV1Response201 = {
   status: 201;
 };
 
+export type createRoleV1Response403 = {
+  data: void;
+  status: 403;
+};
+
 export type createRoleV1ResponseSuccess = createRoleV1Response201 & {
   headers: Headers;
 };
-
-export type createRoleV1Response = createRoleV1ResponseSuccess;
+export type createRoleV1ResponseError = createRoleV1Response403 & {
+  headers: Headers;
+};
 
 export const getCreateRoleV1Url = () => {
   return `/api/v1/roles`;
@@ -3028,8 +2850,8 @@ export const getCreateRoleV1Url = () => {
  */
 export const createRoleV1 = async (
   createRoleInput?: CreateRoleInput,
-  options?: RequestInit,
-): Promise<createRoleV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<createRoleV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -3051,7 +2873,7 @@ export const createRoleV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getCreateRoleV1Url(), {
+  return customFetch<createRoleV1ResponseSuccess>(getCreateRoleV1Url(), {
     ...options,
     method: "POST",
     headers: {
@@ -3060,21 +2882,12 @@ export const createRoleV1 = async (
     },
     body: JSON.stringify(createRoleInput),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createRoleV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as createRoleV1Response;
 };
 
 export const getCreateRoleV1MutationKey = () => ["createRoleV1"] as const;
 
 export const getCreateRoleV1MutationOptions = <
-  TError = unknown,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3083,7 +2896,7 @@ export const getCreateRoleV1MutationOptions = <
     CreateRoleV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createRoleV1>>,
   TError,
@@ -3091,13 +2904,13 @@ export const getCreateRoleV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getCreateRoleV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createRoleV1>>,
@@ -3105,7 +2918,7 @@ export const getCreateRoleV1MutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return createRoleV1(data, fetchOptions);
+    return createRoleV1(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -3115,13 +2928,13 @@ export type CreateRoleV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof createRoleV1>>
 >;
 export type CreateRoleV1MutationBody = CreateRoleInput | undefined;
-export type CreateRoleV1MutationError = unknown;
+export type CreateRoleV1MutationError = ErrorType<void>;
 export type CreateRoleV1MutationVariables = { data?: CreateRoleInput };
 
 /**
  * @summary Create a new role
  */
-export const useCreateRoleV1 = <TError = unknown, TContext = unknown>(
+export const useCreateRoleV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof createRoleV1>>,
@@ -3129,7 +2942,7 @@ export const useCreateRoleV1 = <TError = unknown, TContext = unknown>(
       CreateRoleV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -3148,8 +2961,6 @@ export type getRolesV1Response200 = {
 export type getRolesV1ResponseSuccess = getRolesV1Response200 & {
   headers: Headers;
 };
-
-export type getRolesV1Response = getRolesV1ResponseSuccess;
 
 export const getGetRolesV1Url = (params?: GetRolesV1Params) => {
   const normalizedParams = new URLSearchParams();
@@ -3172,21 +2983,12 @@ export const getGetRolesV1Url = (params?: GetRolesV1Params) => {
  */
 export const getRolesV1 = async (
   params?: GetRolesV1Params,
-  options?: RequestInit,
-): Promise<getRolesV1Response> => {
-  const res = await fetch(getGetRolesV1Url(params), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getRolesV1ResponseSuccess> => {
+  return customFetch<getRolesV1ResponseSuccess>(getGetRolesV1Url(params), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getRolesV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getRolesV1Response;
 };
 
 export const getGetRolesV1QueryKey = (params?: GetRolesV1Params) => {
@@ -3195,23 +2997,23 @@ export const getGetRolesV1QueryKey = (params?: GetRolesV1Params) => {
 
 export const getGetRolesV1QueryOptions = <
   TData = Awaited<ReturnType<typeof getRolesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetRolesV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getRolesV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetRolesV1QueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getRolesV1>>> = ({
     signal,
-  }) => getRolesV1(params, { signal, ...fetchOptions });
+  }) => getRolesV1(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getRolesV1>>,
@@ -3223,11 +3025,11 @@ export const getGetRolesV1QueryOptions = <
 export type GetRolesV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof getRolesV1>>
 >;
-export type GetRolesV1QueryError = unknown;
+export type GetRolesV1QueryError = ErrorType<unknown>;
 
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params: undefined | GetRolesV1Params,
   options: {
@@ -3242,7 +3044,7 @@ export function useGetRolesV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -3250,7 +3052,7 @@ export function useGetRolesV1<
 };
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetRolesV1Params,
   options?: {
@@ -3265,7 +3067,7 @@ export function useGetRolesV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3273,14 +3075,14 @@ export function useGetRolesV1<
 };
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetRolesV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getRolesV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3292,14 +3094,14 @@ export function useGetRolesV1<
 
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   params?: GetRolesV1Params,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getRolesV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3332,10 +3134,6 @@ export type getRoleByIdV1ResponseError = getRoleByIdV1Response404 & {
   headers: Headers;
 };
 
-export type getRoleByIdV1Response =
-  | getRoleByIdV1ResponseSuccess
-  | getRoleByIdV1ResponseError;
-
 export const getGetRoleByIdV1Url = (roleId: string) => {
   return `/api/v1/roles/${roleId}`;
 };
@@ -3345,21 +3143,15 @@ export const getGetRoleByIdV1Url = (roleId: string) => {
  */
 export const getRoleByIdV1 = async (
   roleId: string,
-  options?: RequestInit,
-): Promise<getRoleByIdV1Response> => {
-  const res = await fetch(getGetRoleByIdV1Url(roleId), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getRoleByIdV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as getRoleByIdV1Response;
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getRoleByIdV1ResponseSuccess> => {
+  return customFetch<getRoleByIdV1ResponseSuccess>(
+    getGetRoleByIdV1Url(roleId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
 };
 
 export const getGetRoleByIdV1QueryKey = (roleId: string) => {
@@ -3368,23 +3160,23 @@ export const getGetRoleByIdV1QueryKey = (roleId: string) => {
 
 export const getGetRoleByIdV1QueryOptions = <
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   roleId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getRoleByIdV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
 ) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetRoleByIdV1QueryKey(roleId);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoleByIdV1>>> = ({
     signal,
-  }) => getRoleByIdV1(roleId, { signal, ...fetchOptions });
+  }) => getRoleByIdV1(roleId, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -3401,11 +3193,11 @@ export const getGetRoleByIdV1QueryOptions = <
 export type GetRoleByIdV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof getRoleByIdV1>>
 >;
-export type GetRoleByIdV1QueryError = void;
+export type GetRoleByIdV1QueryError = ErrorType<void>;
 
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   roleId: string,
   options: {
@@ -3420,7 +3212,7 @@ export function useGetRoleByIdV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -3428,7 +3220,7 @@ export function useGetRoleByIdV1<
 };
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   roleId: string,
   options?: {
@@ -3443,7 +3235,7 @@ export function useGetRoleByIdV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3451,14 +3243,14 @@ export function useGetRoleByIdV1<
 };
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   roleId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getRoleByIdV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3470,14 +3262,14 @@ export function useGetRoleByIdV1<
 
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
-  TError = void,
+  TError = ErrorType<void>,
 >(
   roleId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getRoleByIdV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3503,16 +3295,26 @@ export type deleteRoleV1Response400 = {
   status: 400;
 };
 
+export type deleteRoleV1Response403 = {
+  data: void;
+  status: 403;
+};
+
+export type deleteRoleV1Response404 = {
+  data: void;
+  status: 404;
+};
+
 export type deleteRoleV1ResponseSuccess = deleteRoleV1Response204 & {
   headers: Headers;
 };
-export type deleteRoleV1ResponseError = deleteRoleV1Response400 & {
+export type deleteRoleV1ResponseError = (
+  | deleteRoleV1Response400
+  | deleteRoleV1Response403
+  | deleteRoleV1Response404
+) & {
   headers: Headers;
 };
-
-export type deleteRoleV1Response =
-  | deleteRoleV1ResponseSuccess
-  | deleteRoleV1ResponseError;
 
 export const getDeleteRoleV1Url = (id: string, params?: DeleteRoleV1Params) => {
   const normalizedParams = new URLSearchParams();
@@ -3536,29 +3338,21 @@ export const getDeleteRoleV1Url = (id: string, params?: DeleteRoleV1Params) => {
 export const deleteRoleV1 = async (
   id: string,
   params?: DeleteRoleV1Params,
-  options?: RequestInit,
-): Promise<deleteRoleV1Response> => {
-  const res = await fetch(getDeleteRoleV1Url(id, params), {
-    ...options,
-    method: "DELETE",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteRoleV1Response["data"] = body
-    ? JSON.parse(body)
-    : undefined;
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as deleteRoleV1Response;
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteRoleV1ResponseSuccess> => {
+  return customFetch<deleteRoleV1ResponseSuccess>(
+    getDeleteRoleV1Url(id, params),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
 };
 
 export const getDeleteRoleV1MutationKey = () => ["deleteRoleV1"] as const;
 
 export const getDeleteRoleV1MutationOptions = <
-  TError = string,
+  TError = ErrorType<string | void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3567,7 +3361,7 @@ export const getDeleteRoleV1MutationOptions = <
     DeleteRoleV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteRoleV1>>,
   TError,
@@ -3575,13 +3369,13 @@ export const getDeleteRoleV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getDeleteRoleV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteRoleV1>>,
@@ -3589,7 +3383,7 @@ export const getDeleteRoleV1MutationOptions = <
   > = (props) => {
     const { id, params } = props ?? {};
 
-    return deleteRoleV1(id, params, fetchOptions);
+    return deleteRoleV1(id, params, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -3599,7 +3393,7 @@ export type DeleteRoleV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteRoleV1>>
 >;
 
-export type DeleteRoleV1MutationError = string;
+export type DeleteRoleV1MutationError = ErrorType<string | void>;
 export type DeleteRoleV1MutationVariables = {
   id: string;
   params?: DeleteRoleV1Params;
@@ -3608,7 +3402,10 @@ export type DeleteRoleV1MutationVariables = {
 /**
  * @summary Delete a role by ID with a fallback role
  */
-export const useDeleteRoleV1 = <TError = string, TContext = unknown>(
+export const useDeleteRoleV1 = <
+  TError = ErrorType<string | void>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteRoleV1>>,
@@ -3616,7 +3413,7 @@ export const useDeleteRoleV1 = <TError = string, TContext = unknown>(
       DeleteRoleV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -3637,6 +3434,11 @@ export type updateRoleV1Response204 = {
   status: 204;
 };
 
+export type updateRoleV1Response403 = {
+  data: void;
+  status: 403;
+};
+
 export type updateRoleV1Response404 = {
   data: void;
   status: 404;
@@ -3648,13 +3450,12 @@ export type updateRoleV1ResponseSuccess = (
 ) & {
   headers: Headers;
 };
-export type updateRoleV1ResponseError = updateRoleV1Response404 & {
+export type updateRoleV1ResponseError = (
+  | updateRoleV1Response403
+  | updateRoleV1Response404
+) & {
   headers: Headers;
 };
-
-export type updateRoleV1Response =
-  | updateRoleV1ResponseSuccess
-  | updateRoleV1ResponseError;
 
 export const getUpdateRoleV1Url = (id: string) => {
   return `/api/v1/roles/${id}`;
@@ -3666,8 +3467,8 @@ export const getUpdateRoleV1Url = (id: string) => {
 export const updateRoleV1 = async (
   id: string,
   updateRoleInput?: UpdateRoleInput,
-  options?: RequestInit,
-): Promise<updateRoleV1Response> => {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateRoleV1ResponseSuccess> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -3689,7 +3490,7 @@ export const updateRoleV1 = async (
     }
     return headers;
   };
-  const res = await fetch(getUpdateRoleV1Url(id), {
+  return customFetch<updateRoleV1ResponseSuccess>(getUpdateRoleV1Url(id), {
     ...options,
     method: "PATCH",
     headers: {
@@ -3698,21 +3499,12 @@ export const updateRoleV1 = async (
     },
     body: JSON.stringify(updateRoleInput),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateRoleV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as updateRoleV1Response;
 };
 
 export const getUpdateRoleV1MutationKey = () => ["updateRoleV1"] as const;
 
 export const getUpdateRoleV1MutationOptions = <
-  TError = void,
+  TError = ErrorType<void>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3721,7 +3513,7 @@ export const getUpdateRoleV1MutationOptions = <
     UpdateRoleV1MutationVariables,
     TContext
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateRoleV1>>,
   TError,
@@ -3729,13 +3521,13 @@ export const getUpdateRoleV1MutationOptions = <
   TContext
 > => {
   const mutationKey = getUpdateRoleV1MutationKey();
-  const { mutation: mutationOptions, fetch: fetchOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, fetch: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateRoleV1>>,
@@ -3743,7 +3535,7 @@ export const getUpdateRoleV1MutationOptions = <
   > = (props) => {
     const { id, data } = props ?? {};
 
-    return updateRoleV1(id, data, fetchOptions);
+    return updateRoleV1(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -3753,7 +3545,7 @@ export type UpdateRoleV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof updateRoleV1>>
 >;
 export type UpdateRoleV1MutationBody = UpdateRoleInput | undefined;
-export type UpdateRoleV1MutationError = void;
+export type UpdateRoleV1MutationError = ErrorType<void>;
 export type UpdateRoleV1MutationVariables = {
   id: string;
   data?: UpdateRoleInput;
@@ -3762,7 +3554,7 @@ export type UpdateRoleV1MutationVariables = {
 /**
  * @summary Update a role by ID
  */
-export const useUpdateRoleV1 = <TError = void, TContext = unknown>(
+export const useUpdateRoleV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateRoleV1>>,
@@ -3770,7 +3562,7 @@ export const useUpdateRoleV1 = <TError = void, TContext = unknown>(
       UpdateRoleV1MutationVariables,
       TContext
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -3798,8 +3590,6 @@ export type healthV1ResponseError = healthV1Response503 & {
   headers: Headers;
 };
 
-export type healthV1Response = healthV1ResponseSuccess | healthV1ResponseError;
-
 export const getHealthV1Url = () => {
   return `/api/v1/health`;
 };
@@ -3808,17 +3598,12 @@ export const getHealthV1Url = () => {
  * @summary Health check (DB connectivity)
  */
 export const healthV1 = async (
-  options?: RequestInit,
-): Promise<healthV1Response> => {
-  const res = await fetch(getHealthV1Url(), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<healthV1ResponseSuccess> => {
+  return customFetch<healthV1ResponseSuccess>(getHealthV1Url(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: healthV1Response["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as healthV1Response;
 };
 
 export const getHealthV1QueryKey = () => {
@@ -3827,20 +3612,20 @@ export const getHealthV1QueryKey = () => {
 
 export const getHealthV1QueryOptions = <
   TData = Awaited<ReturnType<typeof healthV1>>,
-  TError = HealthResponse,
+  TError = ErrorType<HealthResponse>,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getHealthV1QueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof healthV1>>> = ({
     signal,
-  }) => healthV1({ signal, ...fetchOptions });
+  }) => healthV1({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof healthV1>>,
@@ -3852,11 +3637,11 @@ export const getHealthV1QueryOptions = <
 export type HealthV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof healthV1>>
 >;
-export type HealthV1QueryError = HealthResponse;
+export type HealthV1QueryError = ErrorType<HealthResponse>;
 
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
-  TError = HealthResponse,
+  TError = ErrorType<HealthResponse>,
 >(
   options: {
     query: Partial<
@@ -3870,7 +3655,7 @@ export function useHealthV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -3878,7 +3663,7 @@ export function useHealthV1<
 };
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
-  TError = HealthResponse,
+  TError = ErrorType<HealthResponse>,
 >(
   options?: {
     query?: Partial<
@@ -3892,7 +3677,7 @@ export function useHealthV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3900,13 +3685,13 @@ export function useHealthV1<
 };
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
-  TError = HealthResponse,
+  TError = ErrorType<HealthResponse>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3918,13 +3703,13 @@ export function useHealthV1<
 
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
-  TError = HealthResponse,
+  TError = ErrorType<HealthResponse>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof healthV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -3949,8 +3734,6 @@ export type versionV1ResponseSuccess = versionV1Response200 & {
   headers: Headers;
 };
 
-export type versionV1Response = versionV1ResponseSuccess;
-
 export const getVersionV1Url = () => {
   return `/api/v1/version`;
 };
@@ -3959,21 +3742,12 @@ export const getVersionV1Url = () => {
  * @summary Deployed build identity (backend and bundled frontend when present)
  */
 export const versionV1 = async (
-  options?: RequestInit,
-): Promise<versionV1Response> => {
-  const res = await fetch(getVersionV1Url(), {
+  options?: Parameters<typeof customFetch>[1],
+): Promise<versionV1ResponseSuccess> => {
+  return customFetch<versionV1ResponseSuccess>(getVersionV1Url(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: versionV1Response["data"] = body ? JSON.parse(body) : {};
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as versionV1Response;
 };
 
 export const getVersionV1QueryKey = () => {
@@ -3982,20 +3756,20 @@ export const getVersionV1QueryKey = () => {
 
 export const getVersionV1QueryOptions = <
   TData = Awaited<ReturnType<typeof versionV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
   >;
-  fetch?: RequestInit;
+  request?: SecondParameter<typeof customFetch>;
 }) => {
-  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getVersionV1QueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof versionV1>>> = ({
     signal,
-  }) => versionV1({ signal, ...fetchOptions });
+  }) => versionV1({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof versionV1>>,
@@ -4007,11 +3781,11 @@ export const getVersionV1QueryOptions = <
 export type VersionV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof versionV1>>
 >;
-export type VersionV1QueryError = unknown;
+export type VersionV1QueryError = ErrorType<unknown>;
 
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options: {
     query: Partial<
@@ -4025,7 +3799,7 @@ export function useVersionV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -4033,7 +3807,7 @@ export function useVersionV1<
 };
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -4047,7 +3821,7 @@ export function useVersionV1<
         >,
         "initialData"
       >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -4055,13 +3829,13 @@ export function useVersionV1<
 };
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -4073,13 +3847,13 @@ export function useVersionV1<
 
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
-  TError = unknown,
+  TError = ErrorType<unknown>,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
     >;
-    fetch?: RequestInit;
+    request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {

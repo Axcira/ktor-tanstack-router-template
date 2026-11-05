@@ -1,4 +1,5 @@
 import { type SubmitEventHandler, useState } from "react";
+import { ApiError } from "@/api/client";
 import { useChangePasswordV1 } from "@/api/generated/default/default";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,25 +46,25 @@ export default function PasswordForm() {
         },
       },
       {
-        onSuccess: (response) => {
-          if (response.status === 204) {
-            setCurrentPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
-            toast.add({ type: "success", title: "パスワードを変更しました" });
-            return;
-          }
-          if (response.status === 401) {
-            setErrorMessage("現在のパスワードが違います");
-            return;
-          }
-          const reasons = (response.data as { reasons?: string[] } | undefined)
-            ?.reasons;
-          setErrorMessage(
-            reasons?.join("\n") || "パスワードの変更に失敗しました",
-          );
+        onSuccess: () => {
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+          toast.add({ type: "success", title: "パスワードを変更しました" });
         },
-        onError: () => {
+        onError: (error) => {
+          if (error instanceof ApiError) {
+            if (error.status === 401) {
+              setErrorMessage("現在のパスワードが違います");
+              return;
+            }
+            const reasons = (error.data as { reasons?: string[] } | undefined)
+              ?.reasons;
+            if (reasons?.length) {
+              setErrorMessage(reasons.join("\n"));
+              return;
+            }
+          }
           setErrorMessage("パスワードの変更に失敗しました");
         },
       },

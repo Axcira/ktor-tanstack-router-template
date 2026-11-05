@@ -7,6 +7,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import kotlinx.serialization.json.Json
 import net.axcira.*
 import net.axcira.features.auth.AuthService
@@ -131,6 +132,15 @@ fun Application.users() {
                     )
                     return@put
                 }
+                if (user.roleId.isPresent()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ValidationErrorBody(
+                            reasons = listOf("roleId cannot be changed with PUT /api/v1/users/me"),
+                        ),
+                    )
+                    return@put
+                }
                 userService.update(userId, user)
                 call.respond(HttpStatusCode.NoContent)
             }
@@ -144,6 +154,7 @@ fun Application.users() {
                 val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
                 val userId = principal.user.id
                 userService.delete(userId)
+                call.sessions.clear<UserSession>()
                 call.respond(HttpStatusCode.NoContent)
             }
         }

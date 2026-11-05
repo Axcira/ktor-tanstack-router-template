@@ -8,6 +8,15 @@ export default defineConfig({
       schemas: "src/api/generated/schemas",
       client: "react-query",
       mock: true,
+      override: {
+        mutator: {
+          path: "./src/api/client.ts",
+          name: "customFetch",
+        },
+        fetch: {
+          forceSuccessResponse: true,
+        },
+      },
     },
     input: {
       target: "../backend/generated/openapi.json",

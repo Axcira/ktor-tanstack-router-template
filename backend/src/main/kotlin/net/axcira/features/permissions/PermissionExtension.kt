@@ -22,6 +22,8 @@ class NoPermissionException(
 
 fun Iterable<Permission>.satisfies(permission: Permission) = any { it.satisfies(permission) }
 
+fun Iterable<Permission>.satisfiesAll(required: Iterable<Permission>) = required.all { satisfies(it) }
+
 inline fun <reified T : Permission> permissionPlugin(permission: T) =
     createRouteScopedPlugin(
         "RequirePermission_${T::class.java.simpleName}",

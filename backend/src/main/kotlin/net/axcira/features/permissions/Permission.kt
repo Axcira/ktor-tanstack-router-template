@@ -21,6 +21,10 @@ sealed interface Permission {
     @SerialName("ManageUsers")
     data object ManageUsers : Permission
 
+    @Serializable
+    @SerialName("ManageRoles")
+    data object ManageRoles : Permission
+
     /**
      * Change the signed-in user's own password after confirming the current one.
      * ManageUsers does not imply this permission. Administrators bypass it, as with every other check.
