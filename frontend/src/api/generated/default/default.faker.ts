@@ -21,6 +21,7 @@ import type {
   RoleDTO,
   UserDTO,
   UserSession,
+  VersionResponse,
 } from "../schemas";
 
 export const getGetApiJsonKotlinxSerializationResponseMock =
@@ -671,5 +672,24 @@ export const getHealthV1ResponseMock = (
 ): HealthResponse => ({
   status: faker.string.alpha({ length: { min: 10, max: 20 } }),
   database: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getVersionV1ResponseMock = (
+  overrideResponse: Partial<Extract<VersionResponse, object>> = {},
+): VersionResponse => ({
+  commit: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  commitShort: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  builtAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  dirty: faker.datatype.boolean(),
+  frontend: faker.helpers.arrayElement([
+    {
+      commit: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      commitShort: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      builtAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      dirty: faker.datatype.boolean(),
+    },
+    null,
+  ]),
   ...overrideResponse,
 });

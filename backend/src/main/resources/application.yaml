@@ -22,6 +22,7 @@ ktor:
       - net.axcira.features.articles.v1.ArticleRoutingKt.articles
       - net.axcira.features.permissions.v1.PermissionRoutingKt.permissions
       - net.axcira.features.health.v1.HealthRoutingKt.health
+      - net.axcira.features.version.v1.VersionRoutingKt.version
 
       # Production SPA (no-op when /app/static is absent — local keeps Scalar at /)
       - net.axcira.plugins.FrontendKt.configureFrontend

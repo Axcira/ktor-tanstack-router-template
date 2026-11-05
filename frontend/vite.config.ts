@@ -1,10 +1,32 @@
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import { defineConfig } from "vitest/config";
+import { defineConfig, type Plugin } from "vitest/config";
+import { resolveBuildVersion } from "./scripts/build-version";
+
+const appVersion = resolveBuildVersion();
+
+function versionJsonPlugin(): Plugin {
+  return {
+    name: "version-json",
+    apply: "build",
+    closeBundle() {
+      const outDir = join(process.cwd(), "dist");
+      writeFileSync(
+        join(outDir, "version.json"),
+        `${JSON.stringify(appVersion, null, 2)}\n`,
+      );
+    },
+  };
+}
 
 const config = defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   resolve: {
     tsconfigPaths: true,
     dedupe: ["react", "react-dom", "jotai"],
@@ -14,6 +36,7 @@ const config = defineConfig({
     tailwindcss(),
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
     viteReact(),
+    versionJsonPlugin(),
   ],
   server: {
     proxy: {

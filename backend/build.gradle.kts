@@ -144,6 +144,31 @@ tasks.named<ShadowJar>("shadowJar") {
     exclude("logback.xml")
 }
 
+val buildInfoOutputDir = layout.buildDirectory.dir("generated/build-info")
+
+sourceSets.main {
+    resources.srcDir(buildInfoOutputDir)
+}
+
+tasks.register<Exec>("generateBuildInfo") {
+    description = "Write build-info.properties (commit SHA and build time) into generated resources."
+    group = "build"
+    notCompatibleWithConfigurationCache("reads git state at execution time")
+
+    val script = layout.projectDirectory.file("scripts/write-build-info.sh")
+    inputs.property("gitCommitEnv", providers.environmentVariable("GIT_COMMIT").orElse(""))
+    inputs.file(script).withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir(buildInfoOutputDir)
+
+    workingDir = layout.projectDirectory.asFile
+    commandLine("bash", script.asFile.absolutePath)
+    isIgnoreExitValue = false
+}
+
+tasks.named("processResources") {
+    dependsOn("generateBuildInfo")
+}
+
 val dockerImageContext = layout.buildDirectory.dir("docker-image")
 
 tasks.register<Sync>("prepareDockerImageContext") {

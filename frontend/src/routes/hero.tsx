@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useGetSelfV1 } from "@/api/generated/default/default.ts";
+import { VersionStamp } from "@/components/layout/VersionStamp.tsx";
 import { ButtonLink } from "@/components/ui/button";
 
 export const Route = createFileRoute("/hero")({ component: Home });
@@ -9,6 +10,9 @@ function Home() {
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-background to-muted/40 px-4 py-24 text-center">
       <WelcomeMessage />
       <AuthButtons />
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+        <VersionStamp />
+      </div>
     </div>
   );
 }

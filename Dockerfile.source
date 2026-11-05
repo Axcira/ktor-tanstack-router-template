@@ -5,6 +5,7 @@
 # ---- frontend stage ----
 FROM docker.io/oven/bun:1.4 AS frontend
 WORKDIR /src
+ARG GIT_COMMIT
 
 COPY package.json bun.lock ./
 COPY frontend/package.json frontend/package.json
@@ -12,11 +13,13 @@ COPY frontend/package.json frontend/package.json
 RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY frontend/ frontend/
+ENV GIT_COMMIT=${GIT_COMMIT}
 RUN bun run --cwd frontend build
 
 # ---- backend builder ----
 FROM docker.io/eclipse-temurin:25-jdk AS builder
 WORKDIR /build
+ARG GIT_COMMIT
 
 COPY backend/gradle/ gradle/
 COPY backend/gradlew gradlew
@@ -24,6 +27,7 @@ COPY backend/build.gradle.kts build.gradle.kts
 COPY backend/settings.gradle.kts settings.gradle.kts
 COPY backend/gradle.properties gradle.properties
 COPY backend/src/ src/
+ENV GIT_COMMIT=${GIT_COMMIT}
 RUN --mount=type=cache,id=application-gradle,target=/root/.gradle \
     ./gradlew prepareDockerImageContext --no-daemon
 

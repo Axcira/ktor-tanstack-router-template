@@ -138,6 +138,7 @@ bun run orval:watch
 
 環境変数の一覧とデフォルトはルートの [`.env.example`](.env.example) を参照してください（アプリは `.env` を自動読込しません。シェルやオーケストレータ経由で注入してください）。
 ヘルスチェックは `GET /api/v1/health` です（DB 疎通確認。失敗時は `503`）。
+デプロイ識別子は `GET /api/v1/version` です（ビルド時に焼き込んだ git コミットと、同梱されているフロントエンドの `version.json`。DB 非依存、認証不要）。
 ## Customize project identity
 
 このテンプレートを元に新しいプロジェクトを作成したら、まずプロジェクトの名前やパッケージを変更してください。
@@ -258,7 +259,9 @@ podman build -f Dockerfile -t backend image-context
 イメージ内でソースからビルドする場合（CI は使いません）:
 
 ```bash
-podman build -f Dockerfile.source -t backend .
+podman build -f Dockerfile.source \
+  --build-arg GIT_COMMIT="$(git rev-parse HEAD)" \
+  -t backend .
 ```
 
 CI の `docker` ジョブは同じレイアウトでイメージを作り、Orval の drift チェック後に GHCR へ push します（`main` への push、`push-image` ラベル付き PR、`workflow_dispatch` の `push=true`）。詳細は AGENTS.md の Production image を参照してください。

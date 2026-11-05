@@ -42,3 +42,5 @@ export * from "./updateUserInput.ts";
 export * from "./userDTO.ts";
 export * from "./userSession.ts";
 export * from "./validationErrorBody.ts";
+export * from "./versionIdentity.ts";
+export * from "./versionResponse.ts";

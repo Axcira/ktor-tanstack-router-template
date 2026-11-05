@@ -43,6 +43,7 @@ import type {
   UserDTO,
   UserSession,
   ValidationErrorBody,
+  VersionResponse,
 } from "../schemas";
 
 const withQueryKey = <T extends object, K>(
@@ -3930,6 +3931,161 @@ export function useHealthV1<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getHealthV1QueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type versionV1Response200 = {
+  data: VersionResponse;
+  status: 200;
+};
+
+export type versionV1ResponseSuccess = versionV1Response200 & {
+  headers: Headers;
+};
+
+export type versionV1Response = versionV1ResponseSuccess;
+
+export const getVersionV1Url = () => {
+  return `/api/v1/version`;
+};
+
+/**
+ * @summary Deployed build identity (backend and bundled frontend when present)
+ */
+export const versionV1 = async (
+  options?: RequestInit,
+): Promise<versionV1Response> => {
+  const res = await fetch(getVersionV1Url(), {
+    ...options,
+    method: "GET",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: versionV1Response["data"] = body ? JSON.parse(body) : {};
+  return {
+    data,
+    status: res.status,
+    headers: res.headers,
+  } as versionV1Response;
+};
+
+export const getVersionV1QueryKey = () => {
+  return [`/api/v1/version`] as const;
+};
+
+export const getVersionV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof versionV1>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
+  >;
+  fetch?: RequestInit;
+}) => {
+  const { query: queryOptions, fetch: fetchOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getVersionV1QueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof versionV1>>> = ({
+    signal,
+  }) => versionV1({ signal, ...fetchOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof versionV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type VersionV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof versionV1>>
+>;
+export type VersionV1QueryError = unknown;
+
+export function useVersionV1<
+  TData = Awaited<ReturnType<typeof versionV1>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof versionV1>>,
+          TError,
+          Awaited<ReturnType<typeof versionV1>>
+        >,
+        "initialData"
+      >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useVersionV1<
+  TData = Awaited<ReturnType<typeof versionV1>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof versionV1>>,
+          TError,
+          Awaited<ReturnType<typeof versionV1>>
+        >,
+        "initialData"
+      >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useVersionV1<
+  TData = Awaited<ReturnType<typeof versionV1>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
+    >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Deployed build identity (backend and bundled frontend when present)
+ */
+
+export function useVersionV1<
+  TData = Awaited<ReturnType<typeof versionV1>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof versionV1>>, TError, TData>
+    >;
+    fetch?: RequestInit;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getVersionV1QueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

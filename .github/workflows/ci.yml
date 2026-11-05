@@ -65,6 +65,8 @@ jobs:
       - name: Build
         run: bun run build
         working-directory: frontend
+        env:
+          GIT_COMMIT: ${{ github.sha }}
 
       - name: Upload frontend dist
         uses: actions/upload-artifact@v7
@@ -112,6 +114,7 @@ jobs:
         working-directory: backend
         env:
           TESTCONTAINERS_RYUK_DISABLED: "true"
+          GIT_COMMIT: ${{ github.sha }}
         run: |
           docker pull --quiet "$POSTGRES_IMAGE" &
           pull_pid=$!

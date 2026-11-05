@@ -52,7 +52,7 @@ Sessions are cookie-based. There is no public registration API. Admins create us
 
 Permission checks belong in `Permission.satisfies` on the server. `Administrator` bypasses every check. `ManageArticles` implies the article permissions. `UpdateArticle` and `DeleteArticle` carry `allowOthers`. The client may treat a permission with only `type` as a local shortcut, then calls `can-i` for anything compound. Do not reimplement that algebra in TypeScript.
 
-Request-body validation is `plugins/RequestValidation.kt`. Failures are `400` with `{ message, reasons }`. Health is `GET /api/v1/health` (database ping; `503` when it fails).
+Request-body validation is `plugins/RequestValidation.kt`. Failures are `400` with `{ message, reasons }`. Health is `GET /api/v1/health` (database ping; `503` when it fails). Deploy identity is `GET /api/v1/version` (build-time git commit for backend and bundled frontend `version.json` when present; no DB; no auth).
 
 Tests use `test { }` from `BaseTest.kt`: one shared Ktor app, schema migrated once, `TRUNCATE ... RESTART IDENTITY CASCADE` between tests, a fresh HTTP client per test. Gradle sets fast Argon2 parameters for tests only.
 
@@ -154,7 +154,9 @@ podman build -f Dockerfile -t backend image-context
 To compile inside the image instead (local only; CI does not use this):
 
 ```bash
-podman build -f Dockerfile.source -t backend .
+podman build -f Dockerfile.source \
+  --build-arg GIT_COMMIT="$(git rev-parse HEAD)" \
+  -t backend .
 ```
 
 The runtime image is JRE 25 with static files at `/app/static`. The entrypoint passes `--enable-native-access=ALL-UNNAMED` for Argon2 JNI.
