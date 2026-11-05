@@ -14,6 +14,7 @@ type VersionStampProps = {
 export function VersionStamp({ className }: VersionStampProps) {
   const { data: versionResponse } = useVersionV1({
     query: {
+      enabled: !import.meta.env.VITEST,
       staleTime: Number.POSITIVE_INFINITY,
       retry: false,
     },

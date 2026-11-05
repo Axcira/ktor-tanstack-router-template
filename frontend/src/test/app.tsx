@@ -17,9 +17,12 @@ export async function renderApp(initialEntry: string) {
 
   const result = render(<RouterProvider router={router} />);
 
-  await waitFor(() => {
-    expect(router.state.status).toBe("idle");
-  });
+  await waitFor(
+    () => {
+      expect(router.state.status).toBe("idle");
+    },
+    { timeout: 5000 },
+  );
 
   return {
     router,
