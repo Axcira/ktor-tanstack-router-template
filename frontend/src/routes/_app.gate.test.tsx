@@ -12,7 +12,7 @@ describe("auth and permission gates", () => {
     vi.restoreAllMocks();
   });
 
-  it("redirects unauthenticated users from /_app routes to /hero", async () => {
+  it("shows the signed-out landing at /", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     server.use(
       http.get(
@@ -21,11 +21,9 @@ describe("auth and permission gates", () => {
       ),
     );
 
-    const { router } = await renderApp("/articles");
+    const { router } = await renderApp("/");
 
-    await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/hero");
-    });
+    expect(router.state.location.pathname).toBe("/");
     const login = await screen.findByRole("link", { name: "ログイン" });
     expect(login).toHaveAttribute("href", "/login");
     expect(login).not.toHaveAttribute("role", "button");
@@ -38,13 +36,46 @@ describe("auth and permission gates", () => {
     ).toEqual([]);
   });
 
+  it("redirects unauthenticated users from app routes to /", async () => {
+    server.use(
+      http.get(
+        "*/api/v1/users/me",
+        () => new HttpResponse(null, { status: 401 }),
+      ),
+    );
+
+    const { router } = await renderApp("/articles");
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/");
+    });
+    expect(
+      await screen.findByRole("link", { name: "ログイン" }),
+    ).toHaveAttribute("href", "/login");
+  });
+
+  it("sends an existing session from / and /login to /dashboard", async () => {
+    server.use(getGetSelfV1MockHandler(makeSession([])), denyCanI());
+
+    const home = await renderApp("/");
+    await waitFor(() => {
+      expect(home.router.state.location.pathname).toBe("/dashboard");
+    });
+    home.unmount();
+
+    const login = await renderApp("/login");
+    await waitFor(() => {
+      expect(login.router.state.location.pathname).toBe("/dashboard");
+    });
+  });
+
   it("redirects users without ManageUsers away from /permissions/users", async () => {
     server.use(getGetSelfV1MockHandler(makeSession([])), denyCanI());
 
     const { router } = await renderApp("/permissions/users");
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/");
+      expect(router.state.location.pathname).toBe("/dashboard");
     });
   });
 

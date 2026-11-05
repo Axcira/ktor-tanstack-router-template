@@ -64,7 +64,7 @@ Kotlin style is official (`kotlin.code.style=official`). ktlint allows star impo
 
 `@/*` maps to `./src/*`.
 
-Authenticated pages live under `src/routes/_app/`. That layout loads the session and redirects to `/hero` when it is missing. Put the page in the route file. Colocate pieces used by that route in a sibling `-components/` directory — TanStack Router ignores the `-` prefix, so those files are not routes. Add sidebar entries in `src/components/layout/sidebar/MenuItems.tsx`.
+Authenticated pages live under `src/routes/_app/`. That layout loads the session and redirects to `/` when it is missing. `/` is the signed-out landing and sends an existing session to `/dashboard`. Put the page in the route file. Colocate pieces used by that route in a sibling `-components/` directory — TanStack Router ignores the `-` prefix, so those files are not routes. Add sidebar entries in `src/components/layout/sidebar/MenuItems.tsx`.
 
 Server data goes through the generated client (`@/api/generated/`). Theme state is Jotai in `src/store/theme.ts`. Gate UI with `useAuthorize` (`src/hooks/useAuthorize.ts`).
 

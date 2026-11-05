@@ -24,6 +24,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip.tsx";
+import { selfQueryOptions } from "@/lib/self";
+import { queryClient } from "@/routes/__root.tsx";
 
 export default function AppSidebarFooter() {
   const router = useRouter();
@@ -35,8 +37,9 @@ export default function AppSidebarFooter() {
     mutation: {
       onSuccess: async () => {
         console.log("サーバー側のログアウトに成功しました");
+        queryClient.removeQueries({ queryKey: selfQueryOptions.queryKey });
         await router.invalidate();
-        await navigate({ to: "/hero" });
+        await navigate({ to: "/" });
       },
       onError: (error) => {
         console.error("ログアウト処理でエラーが発生しました:", error);
