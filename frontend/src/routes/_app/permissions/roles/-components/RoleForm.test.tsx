@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/render";
@@ -74,5 +74,46 @@ describe("RoleForm", () => {
         }),
       ],
     });
+  });
+
+  it("preserves user edits when parent re-renders with a new initialValues object reference", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const onCancel = vi.fn();
+    const user = userEvent.setup();
+
+    const { rerender } = render(
+      <RoleForm
+        initialValues={{
+          name: "InitialRole",
+          description: "InitialDesc",
+          permissions: [],
+        }}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        isSubmitting={false}
+        submitLabel="更新を保存する"
+      />,
+    );
+
+    const nameInput = screen.getByLabelText(/ロール名/);
+    await user.clear(nameInput);
+    await user.type(nameInput, "EditedRole");
+    expect(nameInput).toHaveValue("EditedRole");
+
+    rerender(
+      <RoleForm
+        initialValues={{
+          name: "InitialRole",
+          description: "InitialDesc",
+          permissions: [],
+        }}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        isSubmitting={true}
+        submitLabel="更新を保存する"
+      />,
+    );
+
+    expect(screen.getByLabelText(/ロール名/)).toHaveValue("EditedRole");
   });
 });

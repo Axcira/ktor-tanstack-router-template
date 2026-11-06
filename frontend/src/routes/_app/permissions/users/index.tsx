@@ -1,7 +1,15 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  useNavigate,
+  useRouteContext,
+  useRouter,
+} from "@tanstack/react-router";
 import { Plus, Search, ShieldAlert, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  getGetUserByIdV1QueryKey,
+  getGetUsersV1QueryKey,
   useDeleteUserV1,
   useGetRolesV1,
   useGetUsersV1,
@@ -11,6 +19,8 @@ import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
+import { selfQueryOptions } from "@/lib/self";
+import { queryClient as rootQueryClient } from "@/routes/__root";
 import { DeleteUserDialog } from "./-components/DeleteUserDialog";
 import { UsersTable } from "./-components/UsersTable";
 
@@ -19,7 +29,10 @@ export const Route = createFileRoute("/_app/permissions/users/")({
 });
 
 function UsersPage() {
+  const { session } = useRouteContext({ from: "/_app" });
+  const router = useRouter();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -29,7 +42,6 @@ function UsersPage() {
     data: usersResponse,
     isLoading: isLoadingUsers,
     isError: isErrorUsers,
-    refetch,
   } = useGetUsersV1({
     limit: String(limit),
     offset: String(offset),
@@ -86,7 +98,25 @@ function UsersPage() {
     try {
       await deleteUserMutation.mutateAsync({ id: String(userId) });
       setUserToDelete(null);
-      await refetch();
+      if (userId === session?.user.id) {
+        queryClient.removeQueries({ queryKey: selfQueryOptions.queryKey });
+        queryClient.removeQueries({ queryKey: ["authorize"] });
+        if (rootQueryClient !== queryClient) {
+          rootQueryClient.removeQueries({
+            queryKey: selfQueryOptions.queryKey,
+          });
+          rootQueryClient.removeQueries({ queryKey: ["authorize"] });
+        }
+        await router.invalidate();
+        await navigate({ to: "/" });
+        return;
+      }
+      queryClient.removeQueries({
+        queryKey: getGetUserByIdV1QueryKey(String(userId)),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: getGetUsersV1QueryKey(),
+      });
       toast.add({
         type: "success",
         title: `ユーザー「${email}」を削除しました。`,

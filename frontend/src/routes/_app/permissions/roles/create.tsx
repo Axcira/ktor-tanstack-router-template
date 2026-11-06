@@ -1,6 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Shield } from "lucide-react";
-import { useCreateRoleV1 } from "@/api/generated/default/default.ts";
+import {
+  getGetRolesV1QueryKey,
+  useCreateRoleV1,
+} from "@/api/generated/default/default.ts";
 import type { Permission } from "@/api/generated/schemas/permission";
 import { ButtonLink } from "@/components/ui/button";
 import RoleForm from "./-components/RoleForm";
@@ -11,6 +15,7 @@ export const Route = createFileRoute("/_app/permissions/roles/create")({
 
 function RoleCreatePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const createRole = useCreateRoleV1();
 
   const handleSubmit = async (values: {
@@ -24,6 +29,9 @@ function RoleCreatePage() {
         description: values.description,
         permissions: values.permissions,
       },
+    });
+    await queryClient.invalidateQueries({
+      queryKey: getGetRolesV1QueryKey(),
     });
     await navigate({ to: "/permissions/roles" });
   };

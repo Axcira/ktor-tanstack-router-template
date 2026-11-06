@@ -1,6 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useCreateArticleV1 } from "@/api/generated/default/default.ts";
+import {
+  getListArticlesV1QueryKey,
+  useCreateArticleV1,
+} from "@/api/generated/default/default.ts";
 import LoadingSpinner from "@/components/LoadingSpinner.tsx";
 import NoPermission from "@/components/NoPermission.tsx";
 import { ButtonLink } from "@/components/ui/button";
@@ -13,6 +17,7 @@ export const Route = createFileRoute("/_app/articles/create")({
 
 function ArticleCreatePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const createArticle = useCreateArticleV1();
   const { isAllowed, isLoading } = useAuthorize({ type: "CreateArticle" });
 
@@ -43,6 +48,9 @@ function ArticleCreatePage() {
       });
 
       if (response.status === 201 || response.status === 200) {
+        await queryClient.invalidateQueries({
+          queryKey: getListArticlesV1QueryKey(),
+        });
         await navigate({ to: "/articles" });
       }
     } catch (error) {

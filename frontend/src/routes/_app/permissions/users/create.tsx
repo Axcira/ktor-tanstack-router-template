@@ -1,6 +1,8 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Users } from "lucide-react";
 import {
+  getGetUsersV1QueryKey,
   useCreateUserV1,
   useGetRolesV1,
 } from "@/api/generated/default/default.ts";
@@ -13,6 +15,7 @@ export const Route = createFileRoute("/_app/permissions/users/create")({
 
 function UserCreatePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const createUser = useCreateUserV1();
 
   const {
@@ -35,6 +38,9 @@ function UserCreatePage() {
         password: values.password || "",
         roleId: values.roleId,
       },
+    });
+    await queryClient.invalidateQueries({
+      queryKey: getGetUsersV1QueryKey(),
     });
     await navigate({ to: "/permissions/users" });
   };

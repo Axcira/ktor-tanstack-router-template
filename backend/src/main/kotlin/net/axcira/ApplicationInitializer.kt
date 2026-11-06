@@ -3,11 +3,13 @@ package net.axcira
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.launch
+import net.axcira.features.auth.PasswordHasher
 import net.axcira.features.permissions.*
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserService
 
 fun Application.subscribe() {
+    PasswordHasher.ensureConfigured()
     monitor.subscribe(ApplicationStarted) {
         launch {
             initialize()
@@ -16,6 +18,8 @@ fun Application.subscribe() {
 }
 
 suspend fun Application.initialize() {
+    PasswordHasher.ensureConfigured()
+
     if (System.getenv("SKIP_BOOTSTRAP") == "true") {
         log.info("SKIP_BOOTSTRAP is set. Skipping admin user/role initialization.")
         return

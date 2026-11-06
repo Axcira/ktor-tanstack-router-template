@@ -4,14 +4,17 @@ import { Check, Info, Loader2, Plus, Search, Shield, X } from "lucide-react";
 import { useState } from "react";
 import {
   getGetRolesV1QueryKey,
+  getGetUsersV1QueryKey,
   useDeleteRoleV1,
   useGetRolesV1,
 } from "@/api/generated/default/default";
 import type { RoleDTO } from "@/api/generated/schemas/roleDTO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { selfQueryOptions } from "@/lib/self";
 import { notificationToastClass } from "@/lib/theme-tokens";
 import { cn } from "@/lib/utils";
+import { queryClient as rootQueryClient } from "@/routes/__root";
 import { Route as rolesLayoutRoute } from "../roles";
 import { DeleteRoleDialog } from "./-components/DeleteRoleDialog";
 import { RoleCard } from "./-components/RoleCard";
@@ -70,9 +73,30 @@ function RolesPage() {
         params: { fallbackRoleId },
       });
 
-      await queryClient.invalidateQueries({
-        queryKey: getGetRolesV1QueryKey(),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: getGetRolesV1QueryKey(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: getGetUsersV1QueryKey(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: selfQueryOptions.queryKey,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["authorize"],
+        }),
+        ...(rootQueryClient !== queryClient
+          ? [
+              rootQueryClient.invalidateQueries({
+                queryKey: selfQueryOptions.queryKey,
+              }),
+              rootQueryClient.invalidateQueries({
+                queryKey: ["authorize"],
+              }),
+            ]
+          : []),
+      ]);
       showNotification(
         `ロール「${roleToDelete.name}」を削除しました。`,
         "info",

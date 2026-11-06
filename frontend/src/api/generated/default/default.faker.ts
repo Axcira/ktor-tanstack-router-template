@@ -130,6 +130,15 @@ export const getGetUsersV1ResponseMock = (): UserDTO[] =>
     roleId: faker.helpers.arrayElement([faker.number.int(), null]),
   }));
 
+export const getGetUserByIdV1ResponseMock = (
+  overrideResponse: Partial<Extract<UserDTO, object>> = {},
+): UserDTO => ({
+  id: faker.number.int(),
+  email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  roleId: faker.helpers.arrayElement([faker.number.int(), null]),
+  ...overrideResponse,
+});
+
 export const getCreateUserV1ResponseMock = (
   overrideResponse: Partial<Extract<UserDTO, object>> = {},
 ): UserDTO => ({

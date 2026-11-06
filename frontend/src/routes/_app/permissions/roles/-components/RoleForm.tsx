@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import type * as React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Permission } from "@/api/generated/schemas/permission";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,14 +77,6 @@ export default function RoleForm({
     () => computeInitialPermissionStates(initialValues?.permissions),
   );
   const [validationError, setValidationError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setRoleName(initialValues?.name || "");
-    setRoleDescription(initialValues?.description || "");
-    setPermissionStates(
-      computeInitialPermissionStates(initialValues?.permissions),
-    );
-  }, [initialValues]);
 
   const handleTogglePermission = (type: string, checked: boolean) => {
     setPermissionStates((prev) => ({
