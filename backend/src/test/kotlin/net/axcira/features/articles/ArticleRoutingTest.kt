@@ -5,10 +5,12 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
 import net.axcira.db.Role
+import net.axcira.extraClient
 import net.axcira.features.auth.LoginRequest
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserService
+import net.axcira.login
 import net.axcira.plugins.dbQuery
 import net.axcira.test
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -122,5 +124,47 @@ class ArticleRoutingTest {
             assertEquals(HttpStatusCode.NoContent, client.delete("/api/v1/articles/${createdArticle.id}").status)
             assertEquals(HttpStatusCode.NotFound, client.get("/api/v1/articles/${createdArticle.id}").status)
             assertEquals(1, client.get("/api/v1/articles").body<List<ArticleDTO>>().size)
+        }
+
+    @Test
+    fun `article creation requires CreateArticle and UpdateArticle false rejects editing others articles`() =
+        test { authorClient ->
+            val readerClient = extraClient()
+            val staffClient = extraClient()
+            try {
+                login(authorClient, "article-owner@example.com", listOf(Permission.CreateArticle))
+                login(readerClient, "article-reader@example.com", emptyList())
+                login(staffClient, "article-staff@example.com", listOf(Permission.UpdateArticle(false)))
+
+                val input = CreateArticleInput("Owner Article", "Desc", "Body", emptyList())
+
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    readerClient
+                        .post("/api/v1/articles") {
+                            contentType(ContentType.Application.Json)
+                            setBody(input)
+                        }.status,
+                )
+
+                val created =
+                    authorClient
+                        .post("/api/v1/articles") {
+                            contentType(ContentType.Application.Json)
+                            setBody(input)
+                        }.body<ArticleDTO>()
+
+                assertEquals(
+                    HttpStatusCode.Forbidden,
+                    staffClient
+                        .patch("/api/v1/articles/${created.id}") {
+                            contentType(ContentType.Application.Json)
+                            setBody("""{"title":"Hijacked"}""")
+                        }.status,
+                )
+            } finally {
+                readerClient.close()
+                staffClient.close()
+            }
         }
 }
