@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   getGetRolesV1MockHandler,
   getGetSelfV1MockHandler,
-  getGetUsersV1MockHandler,
+  getGetUserByIdV1MockHandler,
 } from "@/api/generated/default/default.msw";
 import { renderApp } from "@/test/app";
 import { denyCanI } from "@/test/handlers";
@@ -18,9 +18,11 @@ describe("Force password change", () => {
     server.use(
       getGetSelfV1MockHandler(makeSession([{ type: "ManageUsers" }])),
       denyCanI(),
-      getGetUsersV1MockHandler([
-        { id: 7, email: "other@example.com", roleId: 2 },
-      ]),
+      getGetUserByIdV1MockHandler({
+        id: 7,
+        email: "other@example.com",
+        roleId: 2,
+      }),
       getGetRolesV1MockHandler([
         {
           id: 2,
@@ -100,9 +102,11 @@ describe("Force password change", () => {
     server.use(
       getGetSelfV1MockHandler(makeSession([{ type: "ManageUsers" }])),
       denyCanI(),
-      getGetUsersV1MockHandler([
-        { id: 7, email: "other@example.com", roleId: 2 },
-      ]),
+      getGetUserByIdV1MockHandler({
+        id: 7,
+        email: "other@example.com",
+        roleId: 2,
+      }),
       getGetRolesV1MockHandler([
         {
           id: 2,

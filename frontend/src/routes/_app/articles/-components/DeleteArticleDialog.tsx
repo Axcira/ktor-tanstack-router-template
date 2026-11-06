@@ -1,7 +1,12 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useDeleteArticleV1 } from "@/api/generated/default/default";
+import {
+  getGetArticleV1QueryKey,
+  getListArticlesV1QueryKey,
+  useDeleteArticleV1,
+} from "@/api/generated/default/default";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +30,7 @@ export default function DeleteArticleDialog({
   onOpenChange,
 }: DeleteArticleDialogProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteMutation = useDeleteArticleV1();
 
@@ -32,6 +38,12 @@ export default function DeleteArticleDialog({
     setIsDeleting(true);
     try {
       await deleteMutation.mutateAsync({ id: articleId.toString() });
+      await queryClient.invalidateQueries({
+        queryKey: getListArticlesV1QueryKey(),
+      });
+      queryClient.removeQueries({
+        queryKey: getGetArticleV1QueryKey(articleId.toString()),
+      });
       onOpenChange(false);
       await navigate({ to: "/articles", replace: true });
     } catch (error) {

@@ -6,6 +6,7 @@ import net.axcira.db.Role
 import net.axcira.db.SessionsTable
 import net.axcira.db.Users
 import net.axcira.features.users.UserDTO
+import net.axcira.isDevelopment
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -174,6 +175,15 @@ class AuthService(
         return changed
     }
 
+    /**
+     * Deletes a specific session row by [sessionId] when rotating sessions on login.
+     */
+    suspend fun deleteSessionById(sessionId: String) {
+        database.dbQuery {
+            SessionsTable.deleteWhere { SessionsTable.sessionId eq sessionId }
+        }
+    }
+
     private fun invalidateSessions(
         userId: UInt,
         keepSessionId: String?,
@@ -192,7 +202,7 @@ class AuthService(
 object PasswordHasher {
     private val log = LoggerFactory.getLogger(PasswordHasher::class.java)
     private val argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id)
-    private val pepper = System.getenv("SECRET") ?: "secret"
+    private val pepper: String by lazy { resolvePepper() }
 
     // Defaults are production-grade Argon2id. Override via env for tests/local DX.
     // argon2-jvm signature: hash(iterations, memoryKiB, parallelism, password)
@@ -209,6 +219,30 @@ object PasswordHasher {
                 parallelism,
             )
         }
+    }
+
+    /**
+     * Resolves the Argon2 pepper from [secretEnv].
+     * Outside development mode, a missing or blank `SECRET` fails fast with [IllegalStateException].
+     */
+    internal fun resolvePepper(
+        secretEnv: String? = System.getenv("SECRET"),
+        development: Boolean = isDevelopment,
+    ): String =
+        if (!secretEnv.isNullOrBlank()) {
+            secretEnv
+        } else if (development) {
+            log.warn("No SECRET environment variable set. Using 'secret' as default in development mode.")
+            "secret"
+        } else {
+            throw IllegalStateException("No SECRET environment variable set.")
+        }
+
+    /**
+     * Eagerly validates that the Argon2 pepper is configured.
+     */
+    fun ensureConfigured() {
+        pepper
     }
 
     suspend fun hashPassword(password: CharSequence): String =

@@ -907,6 +907,322 @@ export function useGetUsersV1<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export type getUserByIdV1Response200 = {
+  data: UserDTO;
+  status: 200;
+};
+
+export type getUserByIdV1Response404 = {
+  data: string;
+  status: 404;
+};
+
+export type getUserByIdV1ResponseSuccess = getUserByIdV1Response200 & {
+  headers: Headers;
+};
+export type getUserByIdV1ResponseError = getUserByIdV1Response404 & {
+  headers: Headers;
+};
+
+export const getGetUserByIdV1Url = (id: string) => {
+  return `/api/v1/users/${id}`;
+};
+
+/**
+ * @summary Get a user by ID
+ */
+export const getUserByIdV1 = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUserByIdV1ResponseSuccess> => {
+  return customFetch<getUserByIdV1ResponseSuccess>(getGetUserByIdV1Url(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetUserByIdV1QueryKey = (id: string) => {
+  return [`/api/v1/users/${id}`] as const;
+};
+
+export const getGetUserByIdV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof getUserByIdV1>>,
+  TError = ErrorType<string>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserByIdV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetUserByIdV1QueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserByIdV1>>> = ({
+    signal,
+  }) => getUserByIdV1(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUserByIdV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUserByIdV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUserByIdV1>>
+>;
+export type GetUserByIdV1QueryError = ErrorType<string>;
+
+export function useGetUserByIdV1<
+  TData = Awaited<ReturnType<typeof getUserByIdV1>>,
+  TError = ErrorType<string>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserByIdV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByIdV1>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByIdV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserByIdV1<
+  TData = Awaited<ReturnType<typeof getUserByIdV1>>,
+  TError = ErrorType<string>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserByIdV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUserByIdV1>>,
+          TError,
+          Awaited<ReturnType<typeof getUserByIdV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUserByIdV1<
+  TData = Awaited<ReturnType<typeof getUserByIdV1>>,
+  TError = ErrorType<string>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserByIdV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get a user by ID
+ */
+
+export function useGetUserByIdV1<
+  TData = Awaited<ReturnType<typeof getUserByIdV1>>,
+  TError = ErrorType<string>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getUserByIdV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUserByIdV1QueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type forceChangePasswordV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type forceChangePasswordV1Response404 = {
+  data: string;
+  status: 404;
+};
+
+export type forceChangePasswordV1ResponseSuccess =
+  forceChangePasswordV1Response204 & {
+    headers: Headers;
+  };
+export type forceChangePasswordV1ResponseError =
+  forceChangePasswordV1Response404 & {
+    headers: Headers;
+  };
+
+export const getForceChangePasswordV1Url = (id: string) => {
+  return `/api/v1/users/${id}/password`;
+};
+
+/**
+ * @summary Replace another user's password without the current one.
+Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+Omitted or false leaves their sessions in place.
+ */
+export const forceChangePasswordV1 = async (
+  id: string,
+  forceChangePasswordRequest?: ForceChangePasswordRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<forceChangePasswordV1ResponseSuccess> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<forceChangePasswordV1ResponseSuccess>(
+    getForceChangePasswordV1Url(id),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(forceChangePasswordRequest),
+    },
+  );
+};
+
+export const getForceChangePasswordV1MutationKey = () =>
+  ["forceChangePasswordV1"] as const;
+
+export const getForceChangePasswordV1MutationOptions = <
+  TError = ErrorType<string>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof forceChangePasswordV1>>,
+    TError,
+    ForceChangePasswordV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof forceChangePasswordV1>>,
+  TError,
+  ForceChangePasswordV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getForceChangePasswordV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof forceChangePasswordV1>>,
+    ForceChangePasswordV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return forceChangePasswordV1(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ForceChangePasswordV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof forceChangePasswordV1>>
+>;
+export type ForceChangePasswordV1MutationBody =
+  | ForceChangePasswordRequest
+  | undefined;
+export type ForceChangePasswordV1MutationError = ErrorType<string>;
+export type ForceChangePasswordV1MutationVariables = {
+  id: string;
+  data?: ForceChangePasswordRequest;
+};
+
+/**
+ * @summary Replace another user's password without the current one.
+Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+Omitted or false leaves their sessions in place.
+ */
+export const useForceChangePasswordV1 = <
+  TError = ErrorType<string>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof forceChangePasswordV1>>,
+      TError,
+      ForceChangePasswordV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof forceChangePasswordV1>>,
+  TError,
+  ForceChangePasswordV1MutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getForceChangePasswordV1MutationOptions(options),
+    queryClient,
+  );
+};
 export type createUserV1Response201 = {
   data: UserDTO;
   status: 201;
@@ -1294,157 +1610,6 @@ export const useDeleteUserV1 = <
   TContext
 > => {
   return useMutation(getDeleteUserV1MutationOptions(options), queryClient);
-};
-export type forceChangePasswordV1Response204 = {
-  data: void;
-  status: 204;
-};
-
-export type forceChangePasswordV1Response404 = {
-  data: string;
-  status: 404;
-};
-
-export type forceChangePasswordV1ResponseSuccess =
-  forceChangePasswordV1Response204 & {
-    headers: Headers;
-  };
-export type forceChangePasswordV1ResponseError =
-  forceChangePasswordV1Response404 & {
-    headers: Headers;
-  };
-
-export const getForceChangePasswordV1Url = (id: string) => {
-  return `/api/v1/users/${id}/password`;
-};
-
-/**
- * @summary Replace another user's password without the current one.
-Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
-Omitted or false leaves their sessions in place.
- */
-export const forceChangePasswordV1 = async (
-  id: string,
-  forceChangePasswordRequest?: ForceChangePasswordRequest,
-  options?: Parameters<typeof customFetch>[1],
-): Promise<forceChangePasswordV1ResponseSuccess> => {
-  const getHeaders = (
-    h?: NonNullable<RequestInit["headers"]>,
-  ): Record<string, string | readonly string[]> => {
-    if (!h) return {};
-    if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
-  };
-  return customFetch<forceChangePasswordV1ResponseSuccess>(
-    getForceChangePasswordV1Url(id),
-    {
-      ...options,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...getHeaders(options?.headers),
-      },
-      body: JSON.stringify(forceChangePasswordRequest),
-    },
-  );
-};
-
-export const getForceChangePasswordV1MutationKey = () =>
-  ["forceChangePasswordV1"] as const;
-
-export const getForceChangePasswordV1MutationOptions = <
-  TError = ErrorType<string>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof forceChangePasswordV1>>,
-    TError,
-    ForceChangePasswordV1MutationVariables,
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof forceChangePasswordV1>>,
-  TError,
-  ForceChangePasswordV1MutationVariables,
-  TContext
-> => {
-  const mutationKey = getForceChangePasswordV1MutationKey();
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof forceChangePasswordV1>>,
-    ForceChangePasswordV1MutationVariables
-  > = (props) => {
-    const { id, data } = props ?? {};
-
-    return forceChangePasswordV1(id, data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type ForceChangePasswordV1MutationResult = NonNullable<
-  Awaited<ReturnType<typeof forceChangePasswordV1>>
->;
-export type ForceChangePasswordV1MutationBody =
-  | ForceChangePasswordRequest
-  | undefined;
-export type ForceChangePasswordV1MutationError = ErrorType<string>;
-export type ForceChangePasswordV1MutationVariables = {
-  id: string;
-  data?: ForceChangePasswordRequest;
-};
-
-/**
- * @summary Replace another user's password without the current one.
-Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
-Omitted or false leaves their sessions in place.
- */
-export const useForceChangePasswordV1 = <
-  TError = ErrorType<string>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof forceChangePasswordV1>>,
-      TError,
-      ForceChangePasswordV1MutationVariables,
-      TContext
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof forceChangePasswordV1>>,
-  TError,
-  ForceChangePasswordV1MutationVariables,
-  TContext
-> => {
-  return useMutation(
-    getForceChangePasswordV1MutationOptions(options),
-    queryClient,
-  );
 };
 export type updateMeV1Response204 = {
   data: void;

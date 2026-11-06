@@ -13,6 +13,7 @@ import net.axcira.features.users.UserDTO
 import net.axcira.isDevelopment
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.jdbc.*
 
 @Serializable
@@ -40,8 +41,15 @@ data class ForceChangePasswordRequest(
     val logoutSessions: Boolean = false,
 )
 
+/**
+ * Default session lifetime (7 days in seconds) applied to both the session cookie and database storage.
+ */
+const val SESSION_MAX_AGE_SECONDS: Long = 7L * 24 * 60 * 60
+
 class DatabaseSessionStorage(
     private val database: Database,
+    private val maxAgeSeconds: Long = SESSION_MAX_AGE_SECONDS,
+    private val clockEpochSeconds: () -> Long = { System.currentTimeMillis() / 1000 },
 ) : SessionStorage {
     override suspend fun invalidate(id: String) {
         database.dbQuery {
@@ -49,30 +57,46 @@ class DatabaseSessionStorage(
         }
     }
 
-    override suspend fun read(id: String): String =
-        database.dbQuery {
-            SessionsTable
-                .select(SessionsTable.session)
-                .where { sessionId eq id }
-                .singleOrNull()
-                ?.get(SessionsTable.session)
-                ?: throw NoSuchElementException("Session $id not found")
-        }
+    override suspend fun read(id: String): String {
+        val payload =
+            database.dbQuery {
+                val row =
+                    SessionsTable
+                        .select(SessionsTable.session, SessionsTable.expiresAt)
+                        .where { sessionId eq id }
+                        .singleOrNull()
+                        ?: return@dbQuery null
+                val expiresAt = row[SessionsTable.expiresAt]
+                if (expiresAt != null && expiresAt <= clockEpochSeconds()) {
+                    SessionsTable.deleteWhere { sessionId eq id }
+                    return@dbQuery null
+                }
+                row[SessionsTable.session]
+            }
+        return payload ?: throw NoSuchElementException("Session $id not found")
+    }
 
     override suspend fun write(
         id: String,
         value: String,
     ) {
+        val now = clockEpochSeconds()
+        val expiresAtEpochSeconds = now + maxAgeSeconds
         database.dbQuery {
+            SessionsTable.deleteWhere { SessionsTable.expiresAt lessEq now }
             SessionsTable.upsert {
                 it[sessionId] = id
                 it[session] = value
                 it[SessionsTable.userId] = sessionUserId(value)
+                it[SessionsTable.expiresAt] = expiresAtEpochSeconds
             }
         }
     }
 }
 
+/**
+ * Configures cookie-based session storage and session authentication.
+ */
 fun Application.configureAuthentication() {
     val database: Database by dependencies
     install(Sessions) {
@@ -80,6 +104,8 @@ fun Application.configureAuthentication() {
             cookie.path = "/"
             cookie.httpOnly = true
             cookie.secure = !isDevelopment
+            cookie.maxAgeInSeconds = SESSION_MAX_AGE_SECONDS
+            cookie.extensions["SameSite"] = "Lax"
         }
     }
     install(Authentication) {

@@ -48,6 +48,17 @@ fun Application.users() {
                 }
 
                 /**
+                 * Get a user by ID
+                 *
+                 * OperationID: getUserByIdV1
+                 */
+                get("/{id}") {
+                    val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                    val user = userService.findById(id) ?: return@get call.respond(HttpStatusCode.NotFound, "User not found")
+                    call.respond(user)
+                }
+
+                /**
                  * Create a new user
                  *
                  * OperationID: createUserV1

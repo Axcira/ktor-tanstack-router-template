@@ -12,6 +12,7 @@ import net.axcira.features.articles.ArticleDTO
 import net.axcira.features.articles.CreateArticleInput
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
+import net.axcira.features.users.UserDTO
 import net.axcira.features.users.UserService
 import net.axcira.login
 import net.axcira.plugins.ValidationErrorBody
@@ -23,8 +24,12 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
+import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class AuthRoutingTest {
@@ -543,6 +548,130 @@ class AuthRoutingTest {
             } finally {
                 other.close()
                 bystander.close()
+            }
+        }
+
+    @Test
+    fun `session cookie sets SameSite Lax and Max-Age and rotates session id on re-login`() =
+        test { client ->
+            val database: Database by application.dependencies
+            val userService = UserService(database)
+            val roleId =
+                database.dbQuery {
+                    Role.insertAndGetId {
+                        it[name] = "session-rotation-role"
+                        it[description] = "Session rotation role"
+                        it[permissions] = emptyList()
+                    }
+                }
+            val firstUser = userService.createUser(CreateUserInput("first-session@example.com", "password", roleId.value))
+            val secondUser = userService.createUser(CreateUserInput("second-session@example.com", "password", roleId.value))
+
+            val firstResponse =
+                client.post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest("first-session@example.com", "password"))
+                }
+            assertEquals(HttpStatusCode.OK, firstResponse.status)
+            val setCookieHeaders = firstResponse.headers.getAll(HttpHeaders.SetCookie).orEmpty()
+            assertTrue(setCookieHeaders.any { it.contains("SameSite=Lax", ignoreCase = true) })
+            assertTrue(setCookieHeaders.any { it.contains("Max-Age=$SESSION_MAX_AGE_SECONDS", ignoreCase = true) })
+
+            val firstSessionId =
+                database.dbQuery {
+                    val row =
+                        SessionsTable
+                            .selectAll()
+                            .where { SessionsTable.userId eq firstUser.id }
+                            .single()
+                    val expiresAt = assertNotNull(row[SessionsTable.expiresAt])
+                    assertTrue(expiresAt > System.currentTimeMillis() / 1000)
+                    row[SessionsTable.sessionId]
+                }
+
+            // Re-login on the same client (sending the existing cookie) as a second user
+            val secondResponse =
+                client.post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest("second-session@example.com", "password"))
+                }
+            assertEquals(HttpStatusCode.OK, secondResponse.status)
+
+            database.dbQuery {
+                assertEquals(
+                    0L,
+                    SessionsTable.selectAll().where { SessionsTable.sessionId eq firstSessionId }.count(),
+                )
+                val secondSessionId =
+                    SessionsTable
+                        .selectAll()
+                        .where { SessionsTable.userId eq secondUser.id }
+                        .single()[SessionsTable.sessionId]
+                assertNotEquals(firstSessionId, secondSessionId)
+            }
+            assertEquals(
+                secondUser.id,
+                client
+                    .get("/api/v1/users/me")
+                    .body<UserSession>()
+                    .user.id,
+            )
+        }
+
+    @Test
+    fun `expired session in database is rejected and deleted on read`() =
+        test { client ->
+            val user = login(client, "expired-session@example.com", emptyList())
+            val database: Database by application.dependencies
+
+            database.dbQuery {
+                SessionsTable.update({ SessionsTable.userId eq user.id }) {
+                    it[expiresAt] = (System.currentTimeMillis() / 1000) - 60
+                }
+            }
+
+            assertEquals(HttpStatusCode.Unauthorized, client.get("/api/v1/users/me").status)
+            database.dbQuery {
+                assertEquals(
+                    0L,
+                    SessionsTable.selectAll().where { SessionsTable.userId eq user.id }.count(),
+                )
+            }
+        }
+
+    @Test
+    fun `PasswordHasher resolvePepper requires SECRET outside development mode`() {
+        assertFailsWith<IllegalStateException> {
+            PasswordHasher.resolvePepper(secretEnv = null, development = false)
+        }
+        assertFailsWith<IllegalStateException> {
+            PasswordHasher.resolvePepper(secretEnv = "   ", development = false)
+        }
+        assertEquals("secret", PasswordHasher.resolvePepper(secretEnv = null, development = true))
+        assertEquals("custom-secret", PasswordHasher.resolvePepper(secretEnv = "custom-secret", development = false))
+    }
+
+    @Test
+    fun `getUserById returns user for ManageUsers and 404 when missing`() =
+        test { manager ->
+            val reader = extraClient()
+            try {
+                login(manager, "get-user-manager@example.com", listOf(Permission.ManageUsers))
+                val readerUser = login(reader, "get-user-target@example.com", emptyList())
+
+                assertEquals(HttpStatusCode.Forbidden, reader.get("/api/v1/users/${readerUser.id}").status)
+
+                val fetched =
+                    manager.get("/api/v1/users/${readerUser.id}").let {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                        it.body<UserDTO>()
+                    }
+                assertEquals(readerUser.id, fetched.id)
+                assertEquals(readerUser.email, fetched.email)
+
+                assertEquals(HttpStatusCode.NotFound, manager.get("/api/v1/users/999999").status)
+            } finally {
+                reader.close()
             }
         }
 }

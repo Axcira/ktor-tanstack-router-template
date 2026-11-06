@@ -1,7 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, Search, ShieldAlert, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  getGetUserByIdV1QueryKey,
+  getGetUsersV1QueryKey,
   useDeleteUserV1,
   useGetRolesV1,
   useGetUsersV1,
@@ -20,6 +23,7 @@ export const Route = createFileRoute("/_app/permissions/users/")({
 
 function UsersPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -86,6 +90,12 @@ function UsersPage() {
     try {
       await deleteUserMutation.mutateAsync({ id: String(userId) });
       setUserToDelete(null);
+      queryClient.removeQueries({
+        queryKey: getGetUserByIdV1QueryKey(String(userId)),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: getGetUsersV1QueryKey(),
+      });
       await refetch();
       toast.add({
         type: "success",

@@ -3,6 +3,7 @@ package net.axcira
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.launch
+import net.axcira.features.auth.PasswordHasher
 import net.axcira.features.permissions.*
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserService
@@ -20,6 +21,8 @@ suspend fun Application.initialize() {
         log.info("SKIP_BOOTSTRAP is set. Skipping admin user/role initialization.")
         return
     }
+
+    PasswordHasher.ensureConfigured()
 
     val userService: UserService by dependencies
     val permissionService: PermissionService by dependencies

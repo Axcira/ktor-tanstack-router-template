@@ -33,6 +33,14 @@ fun Application.auth() {
         post("/login") {
             val request = call.receive<LoginRequest>()
             val session = authService.login(request.email, request.password) ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            call.request.cookies["user_session"]?.let { previousSessionId ->
+                authService.deleteSessionById(previousSessionId)
+            }
+            call.sessions.clear<UserSession>()
+            @Suppress("UNCHECKED_CAST")
+            call.attributes.allKeys
+                .filter { it.name == "SessionId" }
+                .forEach { key -> call.attributes.remove(key as io.ktor.util.AttributeKey<Any>) }
             call.sessions.set(session)
             call.respond(session)
         }

@@ -1,11 +1,17 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Users } from "lucide-react";
+import { ApiError } from "@/api/client";
 import {
+  getGetUserByIdV1QueryKey,
+  getGetUsersV1QueryKey,
   useGetRolesV1,
-  useGetUsersV1,
+  useGetUserByIdV1,
   useUpdateUserV1,
 } from "@/api/generated/default/default.ts";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { selfQueryOptions } from "@/lib/self";
+import { queryClient as rootQueryClient } from "@/routes/__root";
 import ForcePasswordForm from "./-components/ForcePasswordForm";
 import UserForm from "./-components/UserForm";
 
@@ -16,13 +22,15 @@ export const Route = createFileRoute("/_app/permissions/users/$userId/edit")({
 function UserEditPage() {
   const { userId } = Route.useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
-    data: usersResponse,
-    isLoading: isLoadingUsers,
-    isError: isErrorUsers,
-    refetch: refetchUsers,
-  } = useGetUsersV1();
+    data: userResponse,
+    isLoading: isLoadingUser,
+    isError: isErrorUser,
+    error: errorUser,
+    refetch: refetchUser,
+  } = useGetUserByIdV1(userId);
   const {
     data: rolesResponse,
     isLoading: isLoadingRoles,
@@ -33,7 +41,9 @@ function UserEditPage() {
   const updateUser = useUpdateUserV1();
 
   const availableRoles = rolesResponse?.data || [];
-  const user = usersResponse?.data?.find((u) => String(u.id) === userId);
+  const user = userResponse?.data;
+  const isUserNotFound =
+    errorUser instanceof ApiError && errorUser.status === 404;
 
   const handleSubmit = async (values: { email: string; roleId: number }) => {
     if (!user) return;
@@ -44,10 +54,30 @@ function UserEditPage() {
         roleId: values.roleId,
       },
     });
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: getGetUsersV1QueryKey(),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: getGetUserByIdV1QueryKey(String(user.id)),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: selfQueryOptions.queryKey,
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["authorize"],
+      }),
+      rootQueryClient.invalidateQueries({
+        queryKey: selfQueryOptions.queryKey,
+      }),
+      rootQueryClient.invalidateQueries({
+        queryKey: ["authorize"],
+      }),
+    ]);
     await navigate({ to: "/permissions/users" });
   };
 
-  const isLoading = isLoadingUsers || isLoadingRoles;
+  const isLoading = isLoadingUser || isLoadingRoles;
 
   if (isLoading) {
     return (
@@ -57,11 +87,22 @@ function UserEditPage() {
     );
   }
 
-  if (isErrorUsers || isErrorRoles) {
+  if (isUserNotFound) {
+    return (
+      <div className="p-6 text-center space-y-4">
+        <p className="text-destructive">指定されたユーザーが見つかりません。</p>
+        <ButtonLink variant="outline" to="/permissions/users">
+          ユーザー一覧に戻る
+        </ButtonLink>
+      </div>
+    );
+  }
+
+  if (isErrorUser || isErrorRoles) {
     return (
       <div className="space-y-4 p-6 text-center">
         <p className="text-destructive">
-          {isErrorUsers
+          {isErrorUser
             ? "ユーザー情報の取得に失敗しました。"
             : "ロール一覧の取得に失敗しました。"}
         </p>
@@ -69,7 +110,7 @@ function UserEditPage() {
           <Button
             variant="outline"
             onClick={() => {
-              if (isErrorUsers) refetchUsers().then();
+              if (isErrorUser) refetchUser().then();
               if (isErrorRoles) refetchRoles().then();
             }}
           >

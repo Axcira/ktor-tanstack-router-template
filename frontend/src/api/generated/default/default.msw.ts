@@ -40,6 +40,7 @@ import {
   getGetRoleByIdV1ResponseMock,
   getGetRolesV1ResponseMock,
   getGetSelfV1ResponseMock,
+  getGetUserByIdV1ResponseMock,
   getGetUserPermissionsV1ResponseMock,
   getGetUsersV1ResponseMock,
   getHealthV1ResponseMock,
@@ -54,6 +55,7 @@ export {
   getGetApiJsonKotlinxSerializationResponseMock,
   getLoginV1ResponseMock,
   getGetUsersV1ResponseMock,
+  getGetUserByIdV1ResponseMock,
   getCreateUserV1ResponseMock,
   getGetSelfV1ResponseMock,
   getCreateArticleV1ResponseMock,
@@ -212,6 +214,57 @@ export const getGetUsersV1MockHandler = (
   );
 };
 
+export const getGetUserByIdV1MockHandler = (
+  overrideResponse?:
+    | UserDTO
+    | ((
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
+      ) => Promise<UserDTO> | UserDTO),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get<{ id: string }>(
+    "*/api/v1/users/:id",
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetUserByIdV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getForceChangePasswordV1MockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, ForceChangePasswordRequest>
+        >[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post<{ id: string }, ForceChangePasswordRequest>(
+    "*/api/v1/users/:id/password",
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, ForceChangePasswordRequest>
+      >[0],
+    ) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
 export const getCreateUserV1MockHandler = (
   overrideResponse?:
     | UserDTO
@@ -276,33 +329,6 @@ export const getDeleteUserV1MockHandler = (
   return http.delete<{ id: string }>(
     "*/api/v1/users/delete/:id",
     async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
-      if (typeof overrideResponse === "function") {
-        await overrideResponse(info);
-      }
-
-      return new HttpResponse(null, { status: 204 });
-    },
-    options,
-  );
-};
-
-export const getForceChangePasswordV1MockHandler = (
-  overrideResponse?:
-    | void
-    | ((
-        info: Parameters<
-          HttpResponseResolver<{ id: string }, ForceChangePasswordRequest>
-        >[0],
-      ) => Promise<void> | void),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post<{ id: string }, ForceChangePasswordRequest>(
-    "*/api/v1/users/:id/password",
-    async (
-      info: Parameters<
-        HttpResponseResolver<{ id: string }, ForceChangePasswordRequest>
-      >[0],
-    ) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -736,10 +762,11 @@ export const getDefaultMock = () => [
   getLogoutV1MockHandler(),
   getChangePasswordV1MockHandler(),
   getGetUsersV1MockHandler(),
+  getGetUserByIdV1MockHandler(),
+  getForceChangePasswordV1MockHandler(),
   getCreateUserV1MockHandler(),
   getUpdateUserV1MockHandler(),
   getDeleteUserV1MockHandler(),
-  getForceChangePasswordV1MockHandler(),
   getUpdateMeV1MockHandler(),
   getDeleteMeV1MockHandler(),
   getGetSelfV1MockHandler(),

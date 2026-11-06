@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createFileRoute,
   useNavigate,
@@ -5,6 +6,8 @@ import {
 } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import {
+  getGetArticleV1QueryKey,
+  getListArticlesV1QueryKey,
   useGetArticleV1,
   useUpdateArticleV1,
 } from "@/api/generated/default/default.ts";
@@ -45,6 +48,7 @@ function ArticleEditPage() {
 
 function ArticleEditForm({ article }: { article: ArticleDTO }) {
   const { session } = useRouteContext({ from: "/_app" });
+  const queryClient = useQueryClient();
   const updateArticle = useUpdateArticleV1();
   const navigate = useNavigate();
   const articleId = article.id.toString();
@@ -78,6 +82,15 @@ function ArticleEditForm({ article }: { article: ArticleDTO }) {
           tagList,
         },
       });
+
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: getListArticlesV1QueryKey(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: getGetArticleV1QueryKey(articleId),
+        }),
+      ]);
 
       await navigate({
         to: "/articles/$articleId",
