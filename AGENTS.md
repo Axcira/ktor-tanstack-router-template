@@ -18,7 +18,7 @@ Commit generated files. CI runs `bun run orval:drift` and fails on drift.
 ## Backend
 
 Each feature is a vertical slice under `backend/src/main/kotlin/net/axcira/features/<name>/`:
-- `<Name>Service.kt` + request/response types
+- `<Name>Service.kt` + request/response types (intentionally a single concrete class combining service and repository logic for simplicity; only extract interfaces or separate repositories when external I/O, testability, or domain complexity genuinely warrants it)
 - `v1/<Name>Routing.kt` exposing `fun Application.<name>()`
 
 Wire new features in `Application.kt` (`provide<XService>()` in `dependencies`) and `src/main/resources/application.yaml` (`ktor.application.modules`).
