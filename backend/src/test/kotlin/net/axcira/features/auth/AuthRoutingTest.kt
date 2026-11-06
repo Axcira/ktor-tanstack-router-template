@@ -637,6 +637,26 @@ class AuthRoutingTest {
                     SessionsTable.selectAll().where { SessionsTable.userId eq user.id }.count(),
                 )
             }
+
+            // A session row with NULL expires_at is also rejected and deleted on read
+            val nullExpiryClient = extraClient()
+            try {
+                val nullExpiryUser = login(nullExpiryClient, "null-expiry-session@example.com", emptyList())
+                database.dbQuery {
+                    SessionsTable.update({ SessionsTable.userId eq nullExpiryUser.id }) {
+                        it[expiresAt] = null
+                    }
+                }
+                assertEquals(HttpStatusCode.Unauthorized, nullExpiryClient.get("/api/v1/users/me").status)
+                database.dbQuery {
+                    assertEquals(
+                        0L,
+                        SessionsTable.selectAll().where { SessionsTable.userId eq nullExpiryUser.id }.count(),
+                    )
+                }
+            } finally {
+                nullExpiryClient.close()
+            }
         }
 
     @Test
@@ -670,6 +690,7 @@ class AuthRoutingTest {
                 assertEquals(readerUser.email, fetched.email)
 
                 assertEquals(HttpStatusCode.NotFound, manager.get("/api/v1/users/999999").status)
+                assertEquals(HttpStatusCode.BadRequest, manager.get("/api/v1/users/not-a-number").status)
             } finally {
                 reader.close()
             }

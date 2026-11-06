@@ -24,8 +24,11 @@ export const Route = createFileRoute("/_app/articles/$articleId/edit")({
 
 function ArticleEditPage() {
   const { articleId } = Route.useParams();
+  const normalizedArticleId = /^\d+$/.test(articleId)
+    ? String(Number(articleId))
+    : articleId;
 
-  const { data, isLoading, isError } = useGetArticleV1(articleId);
+  const { data, isLoading, isError } = useGetArticleV1(normalizedArticleId);
   const article = data?.data;
 
   if (isLoading) {
@@ -83,7 +86,7 @@ function ArticleEditForm({ article }: { article: ArticleDTO }) {
         },
       });
 
-      await Promise.all([
+      void Promise.all([
         queryClient.invalidateQueries({
           queryKey: getListArticlesV1QueryKey(),
         }),

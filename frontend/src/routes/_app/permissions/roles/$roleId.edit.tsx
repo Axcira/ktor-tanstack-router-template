@@ -67,12 +67,16 @@ function RoleEditPage() {
       queryClient.invalidateQueries({
         queryKey: ["authorize"],
       }),
-      rootQueryClient.invalidateQueries({
-        queryKey: selfQueryOptions.queryKey,
-      }),
-      rootQueryClient.invalidateQueries({
-        queryKey: ["authorize"],
-      }),
+      ...(rootQueryClient !== queryClient
+        ? [
+            rootQueryClient.invalidateQueries({
+              queryKey: selfQueryOptions.queryKey,
+            }),
+            rootQueryClient.invalidateQueries({
+              queryKey: ["authorize"],
+            }),
+          ]
+        : []),
     ]);
     await navigate({ to: "/permissions/roles" });
   };

@@ -86,12 +86,16 @@ function RolesPage() {
         queryClient.invalidateQueries({
           queryKey: ["authorize"],
         }),
-        rootQueryClient.invalidateQueries({
-          queryKey: selfQueryOptions.queryKey,
-        }),
-        rootQueryClient.invalidateQueries({
-          queryKey: ["authorize"],
-        }),
+        ...(rootQueryClient !== queryClient
+          ? [
+              rootQueryClient.invalidateQueries({
+                queryKey: selfQueryOptions.queryKey,
+              }),
+              rootQueryClient.invalidateQueries({
+                queryKey: ["authorize"],
+              }),
+            ]
+          : []),
       ]);
       showNotification(
         `ロール「${roleToDelete.name}」を削除しました。`,

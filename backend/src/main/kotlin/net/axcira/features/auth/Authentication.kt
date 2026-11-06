@@ -13,7 +13,9 @@ import net.axcira.features.users.UserDTO
 import net.axcira.isDevelopment
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.lessEq
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.*
 
 @Serializable
@@ -67,7 +69,7 @@ class DatabaseSessionStorage(
                         .singleOrNull()
                         ?: return@dbQuery null
                 val expiresAt = row[SessionsTable.expiresAt]
-                if (expiresAt != null && expiresAt <= clockEpochSeconds()) {
+                if (expiresAt == null || expiresAt <= clockEpochSeconds()) {
                     SessionsTable.deleteWhere { sessionId eq id }
                     return@dbQuery null
                 }
@@ -83,7 +85,9 @@ class DatabaseSessionStorage(
         val now = clockEpochSeconds()
         val expiresAtEpochSeconds = now + maxAgeSeconds
         database.dbQuery {
-            SessionsTable.deleteWhere { SessionsTable.expiresAt lessEq now }
+            SessionsTable.deleteWhere {
+                SessionsTable.expiresAt.isNull() or (SessionsTable.expiresAt lessEq now)
+            }
             SessionsTable.upsert {
                 it[sessionId] = id
                 it[session] = value

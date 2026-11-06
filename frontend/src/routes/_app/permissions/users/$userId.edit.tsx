@@ -21,6 +21,9 @@ export const Route = createFileRoute("/_app/permissions/users/$userId/edit")({
 
 function UserEditPage() {
   const { userId } = Route.useParams();
+  const normalizedUserId = /^\d+$/.test(userId)
+    ? String(Number(userId))
+    : userId;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -30,7 +33,7 @@ function UserEditPage() {
     isError: isErrorUser,
     error: errorUser,
     refetch: refetchUser,
-  } = useGetUserByIdV1(userId);
+  } = useGetUserByIdV1(normalizedUserId);
   const {
     data: rolesResponse,
     isLoading: isLoadingRoles,
@@ -59,7 +62,7 @@ function UserEditPage() {
         queryKey: getGetUsersV1QueryKey(),
       }),
       queryClient.invalidateQueries({
-        queryKey: getGetUserByIdV1QueryKey(String(user.id)),
+        queryKey: getGetUserByIdV1QueryKey(normalizedUserId),
       }),
       queryClient.invalidateQueries({
         queryKey: selfQueryOptions.queryKey,
@@ -67,12 +70,16 @@ function UserEditPage() {
       queryClient.invalidateQueries({
         queryKey: ["authorize"],
       }),
-      rootQueryClient.invalidateQueries({
-        queryKey: selfQueryOptions.queryKey,
-      }),
-      rootQueryClient.invalidateQueries({
-        queryKey: ["authorize"],
-      }),
+      ...(rootQueryClient !== queryClient
+        ? [
+            rootQueryClient.invalidateQueries({
+              queryKey: selfQueryOptions.queryKey,
+            }),
+            rootQueryClient.invalidateQueries({
+              queryKey: ["authorize"],
+            }),
+          ]
+        : []),
     ]);
     await navigate({ to: "/permissions/users" });
   };

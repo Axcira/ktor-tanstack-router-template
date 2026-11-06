@@ -84,6 +84,7 @@ tasks.register<JavaExec>("generateOpenApiJson") {
     dependsOn(codegen.classesTaskName)
     classpath = codegen.runtimeClasspath
     mainClass.set("net.axcira.GenerateOpenApiKt")
+    systemProperty("io.ktor.development", "true")
     environment("SKIP_BOOTSTRAP", "true")
     environment("SKIP_DATABASE", "true")
 

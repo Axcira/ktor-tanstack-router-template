@@ -912,6 +912,11 @@ export type getUserByIdV1Response200 = {
   status: 200;
 };
 
+export type getUserByIdV1Response400 = {
+  data: void;
+  status: 400;
+};
+
 export type getUserByIdV1Response404 = {
   data: string;
   status: 404;
@@ -920,7 +925,10 @@ export type getUserByIdV1Response404 = {
 export type getUserByIdV1ResponseSuccess = getUserByIdV1Response200 & {
   headers: Headers;
 };
-export type getUserByIdV1ResponseError = getUserByIdV1Response404 & {
+export type getUserByIdV1ResponseError = (
+  | getUserByIdV1Response400
+  | getUserByIdV1Response404
+) & {
   headers: Headers;
 };
 
@@ -947,7 +955,7 @@ export const getGetUserByIdV1QueryKey = (id: string) => {
 
 export const getGetUserByIdV1QueryOptions = <
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
-  TError = ErrorType<string>,
+  TError = ErrorType<void | string>,
 >(
   id: string,
   options?: {
@@ -980,11 +988,11 @@ export const getGetUserByIdV1QueryOptions = <
 export type GetUserByIdV1QueryResult = NonNullable<
   Awaited<ReturnType<typeof getUserByIdV1>>
 >;
-export type GetUserByIdV1QueryError = ErrorType<string>;
+export type GetUserByIdV1QueryError = ErrorType<void | string>;
 
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
-  TError = ErrorType<string>,
+  TError = ErrorType<void | string>,
 >(
   id: string,
   options: {
@@ -1007,7 +1015,7 @@ export function useGetUserByIdV1<
 };
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
-  TError = ErrorType<string>,
+  TError = ErrorType<void | string>,
 >(
   id: string,
   options?: {
@@ -1030,7 +1038,7 @@ export function useGetUserByIdV1<
 };
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
-  TError = ErrorType<string>,
+  TError = ErrorType<void | string>,
 >(
   id: string,
   options?: {
@@ -1049,7 +1057,7 @@ export function useGetUserByIdV1<
 
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
-  TError = ErrorType<string>,
+  TError = ErrorType<void | string>,
 >(
   id: string,
   options?: {

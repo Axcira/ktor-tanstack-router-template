@@ -95,8 +95,11 @@ function ArticleDetail({ article }: { article: ArticleDTO }) {
 
 function ArticleDetailPage() {
   const { articleId } = Route.useParams();
+  const normalizedArticleId = /^\d+$/.test(articleId)
+    ? String(Number(articleId))
+    : articleId;
 
-  const { data, isLoading, isError } = useGetArticleV1(articleId);
+  const { data, isLoading, isError } = useGetArticleV1(normalizedArticleId);
   const article = data?.data;
 
   if (isLoading) {

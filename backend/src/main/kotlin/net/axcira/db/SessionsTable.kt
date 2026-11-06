@@ -12,5 +12,6 @@ object SessionsTable : Table() {
 
     init {
         index("sessions_user_id", false, userId)
+        index("sessions_expires_at", false, expiresAt)
     }
 }
