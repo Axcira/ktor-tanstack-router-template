@@ -139,27 +139,6 @@ bun run orval:watch
 環境変数の一覧とデフォルトはルートの [`.env.example`](.env.example) を参照してください（アプリは `.env` を自動読込しません。シェルやオーケストレータ経由で注入してください）。
 ヘルスチェックは `GET /api/v1/health` です（DB 疎通確認。失敗時は `503`）。
 デプロイ識別子は `GET /api/v1/version` です（ビルド時に焼き込んだ git コミットと、同梱されているフロントエンドの `version.json`。DB 非依存、認証不要）。
-## Customize project identity
-
-このテンプレートを元に新しいプロジェクトを作成したら、まずプロジェクトの名前やパッケージを変更してください。
-
-```bash
-# 変更内容をプレビュー（ファイルは変更されません）
-bun scripts/rename.ts --package com.example.myapp --slug my-app --name "My App"
-
-# 実際に変更を適用する
-bun scripts/rename.ts --package com.example.myapp --slug my-app --name "My App" --write
-```
-
-`--package` は Kotlin のパッケージ名（`net.axcira` の置き換え）で必須です。
-`--slug` は Cloudflare Workers の名前などに使われるプロジェクト識別子、
-`--name` は画面に表示されるプロジェクト名です。
-
-その他のオプションは `bun scripts/rename.ts --help` を参照してください。
-
-> [!WARNING]
-> 変更を適用するには Git の作業ツリーがクリーンである必要があります。
-> ダーティな状態で実行する場合は `--allow-dirty` フラグを追加してください。
 
 ### Root scripts (Bun workspace)
 
@@ -264,7 +243,7 @@ podman build -f Dockerfile.source \
   -t backend .
 ```
 
-CI の `docker` ジョブは同じレイアウトでイメージを作り、Orval の drift チェック後に GHCR へ push します（`main` への push、`push-image` ラベル付き PR、`workflow_dispatch` の `push=true`）。詳細は AGENTS.md の Production image を参照してください。
+CI の `docker` ジョブは同じレイアウトでイメージを作り、Orval の drift チェック後に GHCR へ push します（`main` への push、`push-image` ラベル付き PR、`workflow_dispatch` の `push=true`）。
 
 #### Build manually
 

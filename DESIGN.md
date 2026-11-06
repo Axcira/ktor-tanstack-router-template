@@ -9,7 +9,7 @@ Material Design 3–inspired **tokens only** — no MD3 components. The stack st
 | `frontend/src/theme.generated.css` | `bun run --cwd frontend theme` | No |
 | `frontend/src/styles.css` (pill radius, Tailwind `@theme` aliases) | Maintained in repo | Yes (aliases / pill only) |
 
-`bun run frontend:check` runs `theme:check`, `radius:check`, and `select:check`.
+`bun run frontend:check` runs Biome check and all custom UI/theme checks (`package.json`).
 
 ## Theme generator
 
