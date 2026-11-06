@@ -8,7 +8,6 @@ import { faker } from "@faker-js/faker";
 
 import type {
   ArticleDTO,
-  GetApiJsonKotlinxSerialization200,
   HealthResponse,
   Permission,
   PermissionAdministrator,
@@ -24,13 +23,6 @@ import type {
   UserSession,
   VersionResponse,
 } from "../schemas";
-
-export const getGetApiJsonKotlinxSerializationResponseMock =
-  (): GetApiJsonKotlinxSerialization200 => ({
-    [faker.string.alphanumeric(5)]: faker.string.alpha({
-      length: { min: 10, max: 20 },
-    }),
-  });
 
 export const getLoginV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},

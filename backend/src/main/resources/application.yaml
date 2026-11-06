@@ -13,7 +13,6 @@ ktor:
       - net.axcira.features.auth.AuthenticationKt.configureAuthentication
       - net.axcira.plugins.OpenApiKt.configureOpenApi
       - net.axcira.plugins.StatusPagePluginKt.statusPage
-      - net.axcira.plugins.RoutingKt.root
 
       # Features
       - net.axcira.ApplicationInitializerKt.subscribe

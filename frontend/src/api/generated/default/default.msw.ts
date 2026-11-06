@@ -18,7 +18,6 @@ import type {
   CreateRoleInput,
   CreateUserInput,
   ForceChangePasswordRequest,
-  GetApiJsonKotlinxSerialization200,
   HealthResponse,
   LoginRequest,
   Permission,
@@ -35,7 +34,6 @@ import {
   getCreateArticleV1ResponseMock,
   getCreateRoleV1ResponseMock,
   getCreateUserV1ResponseMock,
-  getGetApiJsonKotlinxSerializationResponseMock,
   getGetArticleV1ResponseMock,
   getGetRoleByIdV1ResponseMock,
   getGetRolesV1ResponseMock,
@@ -52,7 +50,6 @@ import {
 } from "./default.faker.ts";
 
 export {
-  getGetApiJsonKotlinxSerializationResponseMock,
   getLoginV1ResponseMock,
   getGetUsersV1ResponseMock,
   getGetUserByIdV1ResponseMock,
@@ -70,53 +67,6 @@ export {
   getHealthV1ResponseMock,
   getVersionV1ResponseMock,
 } from "./default.faker.ts";
-
-export const getGetApiMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((
-        info: Parameters<HttpResponseResolver>[0],
-      ) => Promise<unknown> | unknown),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/",
-    async (info: Parameters<HttpResponseResolver>[0]) => {
-      if (typeof overrideResponse === "function") {
-        await overrideResponse(info);
-      }
-
-      return new HttpResponse(null, { status: 200 });
-    },
-    options,
-  );
-};
-
-export const getGetApiJsonKotlinxSerializationMockHandler = (
-  overrideResponse?:
-    | GetApiJsonKotlinxSerialization200
-    | ((
-        info: Parameters<HttpResponseResolver>[0],
-      ) =>
-        | Promise<GetApiJsonKotlinxSerialization200>
-        | GetApiJsonKotlinxSerialization200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/json/kotlinx-serialization",
-    async (info: Parameters<HttpResponseResolver>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getGetApiJsonKotlinxSerializationResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
 
 export const getLoginV1MockHandler = (
   overrideResponse?:
@@ -756,8 +706,6 @@ export const getVersionV1MockHandler = (
   );
 };
 export const getDefaultMock = () => [
-  getGetApiMockHandler(),
-  getGetApiJsonKotlinxSerializationMockHandler(),
   getLoginV1MockHandler(),
   getLogoutV1MockHandler(),
   getChangePasswordV1MockHandler(),
