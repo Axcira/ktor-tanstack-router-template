@@ -1,11 +1,15 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type SubmitEventHandler, useState } from "react";
+import { ApiError } from "@/api/client";
 import { useLoginV1 } from "@/api/generated/default/default.ts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
+import { selfQueryOptions } from "@/lib/self";
 import { formErrorBannerClass } from "@/lib/theme-tokens";
+import { queryClient } from "@/routes/__root";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -13,6 +17,7 @@ export function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const loginMutation = useLoginV1();
   const navigate = useNavigate();
+  const hookQueryClient = useQueryClient();
 
   const handleSubmit: SubmitEventHandler = (e) => {
     e.preventDefault();
@@ -21,14 +26,18 @@ export function LoginForm() {
       { data: { email, password } },
       {
         onSuccess: (data) => {
-          if (data.status === 401) {
-            setErrorMessage("メールアドレスまたはパスワードが間違っています");
-            return;
-          }
+          queryClient.clear();
+          hookQueryClient.clear();
+          queryClient.setQueryData(selfQueryOptions.queryKey, data.data);
+          hookQueryClient.setQueryData(selfQueryOptions.queryKey, data.data);
           toast.add({ type: "success", title: "ログインに成功しました" });
           navigate({ to: "/dashboard" }).then();
         },
-        onError: () => {
+        onError: (error) => {
+          if (error instanceof ApiError && error.status === 401) {
+            setErrorMessage("メールアドレスまたはパスワードが間違っています");
+            return;
+          }
           setErrorMessage("ログインに失敗しました");
         },
       },

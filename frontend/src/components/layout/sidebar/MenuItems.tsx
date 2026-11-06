@@ -13,7 +13,7 @@ export interface MenuItem {
   icon?: React.ReactNode;
   children?: MenuItem[];
   to?: string;
-  requiredPermission?: Permission;
+  requiredPermission?: Permission | Permission[];
 }
 
 const menuItems: MenuItem[] = [
@@ -63,15 +63,17 @@ const menuItems: MenuItem[] = [
   {
     text: "Administration",
     icon: <Settings2 />,
-    requiredPermission: { type: "ManageUsers" },
+    requiredPermission: [{ type: "ManageUsers" }, { type: "ManageRoles" }],
     children: [
       {
         text: "Users",
         to: "/permissions/users",
+        requiredPermission: { type: "ManageUsers" },
       },
       {
         text: "Roles",
         to: "/permissions/roles",
+        requiredPermission: { type: "ManageRoles" },
       },
     ],
   },

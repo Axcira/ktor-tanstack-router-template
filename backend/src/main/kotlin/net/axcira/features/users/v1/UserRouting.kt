@@ -7,6 +7,7 @@ import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import kotlinx.serialization.json.Json
 import net.axcira.*
 import net.axcira.features.auth.AuthService
@@ -16,12 +17,17 @@ import net.axcira.features.permissions.*
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UpdateUserInput
 import net.axcira.features.users.UserService
+import net.axcira.plugins.Optional
 import net.axcira.plugins.ValidationErrorBody
 import net.axcira.plugins.isPresent
 
+/**
+ * Registers user management and self-profile routes under `/api/v1/users`.
+ */
 fun Application.users() {
     val userService: UserService by dependencies
     val authService: AuthService by dependencies
+    val permissionService: PermissionService by dependencies
 
     apiRouting("/users") {
         authenticate {
@@ -47,7 +53,16 @@ fun Application.users() {
                  * OperationID: createUserV1
                  */
                 post("/create") {
+                    val callerPermissions =
+                        call.principal<UserSession>()?.permissions ?: throw IllegalArgumentException("User not authenticated")
                     val user = call.receive<CreateUserInput>()
+                    val targetRole =
+                        permissionService.getRoleById(user.roleId)
+                            ?: return@post call.respond(HttpStatusCode.BadRequest, "Role not found")
+                    if (!callerPermissions.satisfiesAll(targetRole.permissions)) {
+                        call.respond(HttpStatusCode.Forbidden)
+                        return@post
+                    }
                     val createdUser = userService.createUser(user)
                     call.respond(HttpStatusCode.Created, createdUser)
                 }
@@ -58,8 +73,28 @@ fun Application.users() {
                  * OperationID: updateUserV1
                  */
                 patch("/update/{id}") {
+                    val callerPermissions =
+                        call.principal<UserSession>()?.permissions ?: throw IllegalArgumentException("User not authenticated")
                     val id = call.parameters["id"]?.toUIntOrNull() ?: throw IllegalArgumentException("No id found")
+                    val existingUser =
+                        userService.findById(id)
+                            ?: return@patch call.respond(HttpStatusCode.NotFound, "User not found")
+                    val currentRole =
+                        existingUser.roleId?.let { permissionService.getRoleById(it) }
+                    if (currentRole != null && !callerPermissions.satisfiesAll(currentRole.permissions)) {
+                        call.respond(HttpStatusCode.Forbidden)
+                        return@patch
+                    }
                     val user = call.receive<UpdateUserInput>()
+                    if (user.roleId is Optional.Present) {
+                        val targetRole =
+                            permissionService.getRoleById(user.roleId.value)
+                                ?: return@patch call.respond(HttpStatusCode.BadRequest, "Role not found")
+                        if (!callerPermissions.satisfiesAll(targetRole.permissions)) {
+                            call.respond(HttpStatusCode.Forbidden)
+                            return@patch
+                        }
+                    }
                     when (userService.update(id, user)) {
                         is UpdateResult.Success, is UpdateResult.NotModified -> call.respond(HttpStatusCode.NoContent)
                         is UpdateResult.NotFound -> call.respond(HttpStatusCode.NotFound, "User not found")
@@ -131,6 +166,15 @@ fun Application.users() {
                     )
                     return@put
                 }
+                if (user.roleId.isPresent()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ValidationErrorBody(
+                            reasons = listOf("roleId cannot be changed with PUT /api/v1/users/me"),
+                        ),
+                    )
+                    return@put
+                }
                 userService.update(userId, user)
                 call.respond(HttpStatusCode.NoContent)
             }
@@ -144,6 +188,7 @@ fun Application.users() {
                 val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
                 val userId = principal.user.id
                 userService.delete(userId)
+                call.sessions.clear<UserSession>()
                 call.respond(HttpStatusCode.NoContent)
             }
         }

@@ -1,4 +1,5 @@
 import { type SubmitEventHandler, useState } from "react";
+import { ApiError } from "@/api/client";
 import { useForceChangePasswordV1 } from "@/api/generated/default/default";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -37,20 +38,16 @@ export default function ForcePasswordForm({ userId }: { userId: number }) {
         },
       },
       {
-        onSuccess: (response) => {
-          if (response.status === 204) {
-            setNewPassword("");
-            setConfirmPassword("");
-            toast.add({ type: "success", title: "パスワードを変更しました" });
+        onSuccess: () => {
+          setNewPassword("");
+          setConfirmPassword("");
+          toast.add({ type: "success", title: "パスワードを変更しました" });
+        },
+        onError: (error) => {
+          if (error instanceof ApiError && error.status === 404) {
+            setErrorMessage("ユーザーが見つかりません");
             return;
           }
-          setErrorMessage(
-            response.status === 404
-              ? "ユーザーが見つかりません"
-              : "パスワードの変更に失敗しました",
-          );
-        },
-        onError: () => {
           setErrorMessage("パスワードの変更に失敗しました");
         },
       },

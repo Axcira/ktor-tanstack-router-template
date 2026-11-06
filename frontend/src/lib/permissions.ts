@@ -1,3 +1,4 @@
+import { ApiError } from "@/api/client";
 import { canIV1 } from "@/api/generated/default/default.ts";
 import type { Permission, UserSession } from "@/api/generated/schemas";
 
@@ -34,9 +35,32 @@ export async function checkPermission(
     const canIResponse = await canIV1(permission);
     return canIResponse.status === 200;
   } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      return false;
+    }
     console.error("Permission check failed", error);
     return false;
   }
+}
+
+export async function checkAnyPermission(
+  session: UserSession,
+  permissions: Permission[],
+): Promise<boolean> {
+  for (const permission of permissions) {
+    if (
+      isStaticPermission(permission) &&
+      session.permissions.some((p) => p.type === permission.type)
+    ) {
+      return true;
+    }
+  }
+  for (const permission of permissions) {
+    if (await checkPermission(session, permission)) {
+      return true;
+    }
+  }
+  return false;
 }
 export type TsToRuntimeType<T> = T extends boolean
   ? "boolean"
@@ -95,6 +119,11 @@ export const PERMISSION_UI_DEFS = {
   ManageUsers: {
     label: "ユーザーの管理",
     description: "ユーザーの作成、編集、削除などの管理権限を与えます。",
+    props: {},
+  },
+  ManageRoles: {
+    label: "ロールの管理",
+    description: "ロールの作成、編集、削除などの管理権限を与えます。",
     props: {},
   },
   ChangePassword: {

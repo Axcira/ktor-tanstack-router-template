@@ -30,6 +30,8 @@ export * from "./permissionDeleteArticle.ts";
 export * from "./permissionDeleteArticleType.ts";
 export * from "./permissionManageArticles.ts";
 export * from "./permissionManageArticlesType.ts";
+export * from "./permissionManageRoles.ts";
+export * from "./permissionManageRolesType.ts";
 export * from "./permissionManageUsers.ts";
 export * from "./permissionManageUsersType.ts";
 export * from "./permissionUpdateArticle.ts";

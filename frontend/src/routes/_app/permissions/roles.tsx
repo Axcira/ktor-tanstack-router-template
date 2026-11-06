@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_app/permissions/roles")({
   beforeLoad: async ({ context }) => {
     if (
       !context.session ||
-      !(await checkPermission(context.session, { type: "ManageUsers" }))
+      !(await checkPermission(context.session, { type: "ManageRoles" }))
     ) {
       throw redirect({
         to: "/dashboard",

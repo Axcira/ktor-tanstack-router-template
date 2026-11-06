@@ -94,4 +94,32 @@ describe("auth and permission gates", () => {
       expect(screen.getByText("ユーザー管理")).toBeInTheDocument();
     });
   });
+
+  it("redirects users without ManageRoles away from /permissions/roles", async () => {
+    server.use(
+      getGetSelfV1MockHandler(makeSession([{ type: "ManageUsers" }])),
+      denyCanI(),
+    );
+
+    const { router } = await renderApp("/permissions/roles");
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/dashboard");
+    });
+  });
+
+  it("allows ManageRoles sessions into /permissions/roles", async () => {
+    server.use(
+      getGetSelfV1MockHandler(makeSession([{ type: "ManageRoles" }])),
+      http.get("*/api/v1/roles", () => HttpResponse.json([])),
+      denyCanI(),
+    );
+
+    const { router } = await renderApp("/permissions/roles");
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/permissions/roles");
+      expect(screen.getByText("ロール管理")).toBeInTheDocument();
+    });
+  });
 });

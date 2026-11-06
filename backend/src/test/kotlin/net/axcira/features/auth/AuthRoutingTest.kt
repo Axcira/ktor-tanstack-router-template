@@ -8,6 +8,8 @@ import io.ktor.server.plugins.di.*
 import net.axcira.db.Role
 import net.axcira.db.SessionsTable
 import net.axcira.extraClient
+import net.axcira.features.articles.ArticleDTO
+import net.axcira.features.articles.CreateArticleInput
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserService
@@ -251,6 +253,71 @@ class AuthRoutingTest {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("pw-self@example.com", "password"))
                 }.let { assertEquals(HttpStatusCode.OK, it.status) }
+        }
+
+    @Test
+    fun `self update cannot change roleId`() =
+        test { client ->
+            val database: Database by application.dependencies
+            val adminRoleId =
+                database.dbQuery {
+                    Role.insertAndGetId {
+                        it[name] = "self-update-admin-target"
+                        it[description] = "Admin"
+                        it[permissions] = listOf(Permission.Administrator)
+                    }
+                }
+            val user = login(client, "role-self@example.com", emptyList())
+            val response =
+                client.put("/api/v1/users/me") {
+                    contentType(ContentType.Application.Json)
+                    setBody("""{"roleId":${adminRoleId.value}}""")
+                }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertTrue(response.bodyAsText().contains("roleId"))
+
+            val me = client.get("/api/v1/users/me").body<UserSession>()
+            assertEquals(user.roleId, me.user.roleId)
+        }
+
+    @Test
+    fun `deleting a user with authored articles cascades cleanly and removes sessions`() =
+        test { authorClient ->
+            val adminClient = extraClient()
+            try {
+                val author = login(authorClient, "cascade-author@example.com", listOf(Permission.CreateArticle))
+                login(adminClient, "cascade-admin@example.com", listOf(Permission.ManageUsers))
+
+                val createdArticle =
+                    authorClient
+                        .post("/api/v1/articles") {
+                            contentType(ContentType.Application.Json)
+                            setBody(
+                                CreateArticleInput(
+                                    title = "Author Article",
+                                    description = "Will be deleted with author",
+                                    body = "Body",
+                                    tagList = listOf("cascade", "test"),
+                                ),
+                            )
+                        }.let {
+                            assertEquals(HttpStatusCode.Created, it.status)
+                            it.body<ArticleDTO>()
+                        }
+
+                assertEquals(HttpStatusCode.NoContent, adminClient.delete("/api/v1/users/delete/${author.id}").status)
+                assertEquals(HttpStatusCode.NotFound, adminClient.get("/api/v1/articles/${createdArticle.id}").status)
+                assertEquals(HttpStatusCode.Unauthorized, authorClient.get("/api/v1/users/me").status)
+                val database: Database by application.dependencies
+                database.dbQuery {
+                    assertEquals(
+                        0L,
+                        SessionsTable.selectAll().where { SessionsTable.userId eq author.id }.count(),
+                    )
+                }
+            } finally {
+                adminClient.close()
+            }
         }
 
     @Test

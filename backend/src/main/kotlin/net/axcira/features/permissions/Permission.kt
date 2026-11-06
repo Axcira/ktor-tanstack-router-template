@@ -22,6 +22,14 @@ sealed interface Permission {
     data object ManageUsers : Permission
 
     /**
+     * Grants access to read role details, query user permissions, and create, update, or delete roles
+     * whose permissions the caller satisfies.
+     */
+    @Serializable
+    @SerialName("ManageRoles")
+    data object ManageRoles : Permission
+
+    /**
      * Change the signed-in user's own password after confirming the current one.
      * ManageUsers does not imply this permission. Administrators bypass it, as with every other check.
      */

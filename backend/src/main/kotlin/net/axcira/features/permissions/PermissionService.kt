@@ -7,6 +7,7 @@ import net.axcira.db.Users
 import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.*
 import org.slf4j.LoggerFactory
 
@@ -31,6 +32,34 @@ data class UpdateRoleInput(
     val description: Optional<String> = Optional.None,
     val permissions: Optional<List<Permission>> = Optional.None,
 )
+
+/**
+ * Outcome of updating a role after locking the target row and checking the caller's permission hierarchy.
+ */
+sealed interface UpdateRoleResult {
+    data class Success(
+        val value: RoleDTO,
+    ) : UpdateRoleResult
+
+    data object NotFound : UpdateRoleResult
+
+    data object NotModified : UpdateRoleResult
+
+    data object Forbidden : UpdateRoleResult
+}
+
+/**
+ * Outcome of deleting a role and reassigning its users to a fallback role inside a single transaction.
+ */
+sealed interface DeleteRoleResult {
+    data object Success : DeleteRoleResult
+
+    data object NotFound : DeleteRoleResult
+
+    data object FallbackNotFound : DeleteRoleResult
+
+    data object Forbidden : DeleteRoleResult
+}
 
 class PermissionService(
     val database: Database,
@@ -78,45 +107,94 @@ class PermissionService(
             dto
         }
 
+    /**
+     * Locks the role with [id], verifies that [callerPermissions] satisfies both the current role's
+     * permissions and any replacement permissions in [updateRoleInput], and applies the update atomically.
+     */
     suspend fun update(
         id: UInt,
         updateRoleInput: UpdateRoleInput,
-    ): UpdateResult<RoleDTO> =
+        callerPermissions: List<Permission>,
+    ): UpdateRoleResult =
         database.dbQuery {
+            val existing =
+                Role
+                    .selectAll()
+                    .where { Role.id eq id }
+                    .forUpdate()
+                    .singleOrNull()
+                    ?: return@dbQuery UpdateRoleResult.NotFound
+
+            if (!callerPermissions.satisfiesAll(existing[Role.permissions])) {
+                return@dbQuery UpdateRoleResult.Forbidden
+            }
+
+            if (updateRoleInput.permissions is Optional.Present &&
+                !callerPermissions.satisfiesAll(updateRoleInput.permissions.value)
+            ) {
+                return@dbQuery UpdateRoleResult.Forbidden
+            }
+
             if (arrayOf(
                     updateRoleInput.name,
                     updateRoleInput.description,
                     updateRoleInput.permissions,
                 ).all { it == Optional.None }
             ) {
-                return@dbQuery UpdateResult.NotModified
+                return@dbQuery UpdateRoleResult.NotModified
             }
 
             val (name, description, permissions) = updateRoleInput
-            return@dbQuery Role
+            Role
                 .updateReturning(where = { Role.id eq id }) {
                     if (name is Optional.Present) it[Role.name] = name.value
                     if (description is Optional.Present) it[Role.description] = description.value
                     if (permissions is Optional.Present) it[Role.permissions] = permissions.value
                 }.singleOrNull()
                 ?.let {
-                    UpdateResult.Success(
+                    UpdateRoleResult.Success(
                         RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]),
                     )
-                } ?: UpdateResult.NotFound
+                } ?: UpdateRoleResult.NotFound
         }
 
+    /**
+     * Locks both [id] and [fallbackRoleId] in ascending ID order, verifies that [callerPermissions]
+     * satisfies both roles' permissions, reassigns users from [id] to [fallbackRoleId], and deletes [id]
+     * within a single transaction.
+     */
     suspend fun delete(
         id: UInt,
         fallbackRoleId: UInt,
-    ): Int {
+        callerPermissions: List<Permission>,
+    ): DeleteRoleResult {
         require(id != fallbackRoleId) { "Cannot fallback to the same role being deleted (id: $id)" }
         return database
             .dbQuery {
+                val lockedRoles =
+                    Role
+                        .selectAll()
+                        .where { Role.id inList listOf(id, fallbackRoleId) }
+                        .orderBy(Role.id)
+                        .forUpdate()
+                        .associateBy { it[Role.id].value }
+
+                val fallbackRole = lockedRoles[fallbackRoleId] ?: return@dbQuery DeleteRoleResult.FallbackNotFound
+                val targetRole = lockedRoles[id] ?: return@dbQuery DeleteRoleResult.NotFound
+
+                if (!callerPermissions.satisfiesAll(targetRole[Role.permissions]) ||
+                    !callerPermissions.satisfiesAll(fallbackRole[Role.permissions])
+                ) {
+                    return@dbQuery DeleteRoleResult.Forbidden
+                }
+
                 Users.update({ Users.roleId eq id }) { it[roleId] = fallbackRoleId }
                 Role.deleteWhere { Role.id eq id }
-            }.also {
-                log.info("Role deleted: id=$id, fallbackRoleId=$fallbackRoleId")
+                DeleteRoleResult.Success
+            }.also { result ->
+                if (result is DeleteRoleResult.Success) {
+                    log.info("Role deleted: id=$id, fallbackRoleId=$fallbackRoleId")
+                }
             }
     }
 
