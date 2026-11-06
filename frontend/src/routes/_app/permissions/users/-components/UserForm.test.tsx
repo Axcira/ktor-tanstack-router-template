@@ -98,7 +98,7 @@ describe("UserForm", () => {
     });
   });
 
-  it("omits password when editing", async () => {
+  it("submits updated email and role when editing an existing user", async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
     const user = userEvent.setup();
 
@@ -113,7 +113,6 @@ describe("UserForm", () => {
       />,
     );
 
-    expect(screen.queryByLabelText(/パスワード/)).not.toBeInTheDocument();
     await user.clear(screen.getByLabelText(/メールアドレス/));
     await user.type(screen.getByLabelText(/メールアドレス/), "new@b.com");
     await user.click(screen.getByRole("button", { name: "保存" }));

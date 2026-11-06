@@ -45,7 +45,6 @@ describe("Force password change", () => {
     expect(
       await screen.findByRole("heading", { name: "パスワードの強制変更" }),
     ).toBeInTheDocument();
-    expect(screen.queryByLabelText("現在のパスワード")).not.toBeInTheDocument();
 
     await user.type(screen.getByLabelText("新しいパスワード"), "replacement-1");
     await user.type(

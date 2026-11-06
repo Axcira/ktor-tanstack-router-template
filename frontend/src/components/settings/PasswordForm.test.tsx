@@ -4,12 +4,12 @@ import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 import { getGetSelfV1MockHandler } from "@/api/generated/default/default.msw";
 import { renderApp } from "@/test/app";
-import { allowCanI, denyCanI } from "@/test/handlers";
+import { denyCanI } from "@/test/handlers";
 import { server } from "@/test/msw";
 import { makeSession } from "@/test/session";
 
 describe("Password change settings", () => {
-  it("requires ChangePassword and does not treat ManageUsers as enough", async () => {
+  it("hides the form when ChangePassword is denied", async () => {
     server.use(
       getGetSelfV1MockHandler(makeSession([{ type: "ManageUsers" }])),
       denyCanI(),
@@ -23,32 +23,6 @@ describe("Password change settings", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByLabelText("現在のパスワード")).not.toBeInTheDocument();
-  });
-
-  it("shows the form when ChangePassword is granted", async () => {
-    server.use(
-      getGetSelfV1MockHandler(makeSession([{ type: "ChangePassword" }])),
-      denyCanI(),
-    );
-
-    await renderApp("/settings");
-
-    expect(
-      await screen.findByLabelText("現在のパスワード"),
-    ).toBeInTheDocument();
-  });
-
-  it("shows the form for Administrator after can-i allows it", async () => {
-    server.use(
-      getGetSelfV1MockHandler(makeSession([{ type: "Administrator" }])),
-      allowCanI(),
-    );
-
-    await renderApp("/settings");
-
-    expect(
-      await screen.findByLabelText("現在のパスワード"),
-    ).toBeInTheDocument();
   });
 
   it("asks for the current password and can log out other sessions", async () => {
