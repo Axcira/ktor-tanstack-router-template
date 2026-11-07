@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
 val skipDatabase = System.getenv("SKIP_DATABASE") == "true"
@@ -14,36 +15,70 @@ val port = System.getenv("DB_PORT")?.toInt() ?: 5432
 val dbName = System.getenv("DB_NAME") ?: "postgres"
 val user = System.getenv("DB_USER") ?: "postgres"
 val pass = System.getenv("DB_PASSWORD") ?: "password"
+val maxPoolSize = System.getenv("DB_MAX_POOL_SIZE")?.toIntOrNull()?.takeIf { it > 0 } ?: 10
 val url = "jdbc:postgresql://$host:$port/$dbName"
 
-val hikariConfig =
+val hikariConfig by lazy {
     HikariConfig().apply {
         this.driverClassName = "org.postgresql.Driver"
         this.jdbcUrl = url
         this.username = user
         this.password = pass
 
-        maximumPoolSize = 3
+        maximumPoolSize = maxPoolSize
         isAutoCommit = false
-        initializationFailTimeout = if (skipDatabase) 0 else 1
+        initializationFailTimeout = if (skipDatabase) -1 else 1
         validate()
     }
-
-val dataSource = HikariDataSource(hikariConfig)
-
-val database by lazy {
-    if (!skipDatabase) {
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .locations("classpath:db/migration")
-            .load()
-            .migrate()
-    }
-    Database.connect(dataSource)
 }
 
+private val lazyDataSource =
+    lazy {
+        HikariDataSource(hikariConfig).also { ds ->
+            Runtime.getRuntime().addShutdownHook(
+                Thread {
+                    runCatching { ds.close() }
+                },
+            )
+        }
+    }
+
+val dataSource: HikariDataSource by lazyDataSource
+
+private val lazyDatabase =
+    lazy {
+        if (!skipDatabase) {
+            Flyway
+                .configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                .load()
+                .migrate()
+        }
+        Database.connect(dataSource).also { db ->
+            Runtime.getRuntime().addShutdownHook(
+                Thread {
+                    runCatching { TransactionManager.closeAndUnregister(db) }
+                },
+            )
+        }
+    }
+
+val database: Database by lazyDatabase
+
 fun database() = database
+
+/**
+ * Closes the lazily initialized [database] and [dataSource] if they were created.
+ */
+fun closeDatabase() {
+    if (lazyDatabase.isInitialized()) {
+        runCatching { TransactionManager.closeAndUnregister(database) }
+    }
+    if (lazyDataSource.isInitialized()) {
+        runCatching { dataSource.close() }
+    }
+}
 
 /**
  * Truncates all application tables in the public schema while keeping the schema and
