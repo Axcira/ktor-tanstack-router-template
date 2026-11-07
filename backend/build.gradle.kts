@@ -145,6 +145,12 @@ tasks.named<ShadowJar>("shadowJar") {
     exclude("logback.xml")
 }
 
+normalization {
+    runtimeClasspath {
+        ignore("build-info.properties")
+    }
+}
+
 val buildInfoOutputDir = layout.buildDirectory.dir("generated/build-info")
 
 sourceSets.main {
@@ -154,10 +160,8 @@ sourceSets.main {
 tasks.register<Exec>("generateBuildInfo") {
     description = "Write build-info.properties (commit SHA and build time) into generated resources."
     group = "build"
-    notCompatibleWithConfigurationCache("reads git state at execution time")
 
     val script = layout.projectDirectory.file("scripts/write-build-info.sh")
-    inputs.property("gitCommitEnv", providers.environmentVariable("GIT_COMMIT").orElse(""))
     inputs.file(script).withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.dir(buildInfoOutputDir)
     outputs.upToDateWhen { false }
