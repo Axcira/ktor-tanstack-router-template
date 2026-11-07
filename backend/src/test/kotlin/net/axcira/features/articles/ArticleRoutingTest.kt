@@ -61,17 +61,15 @@ class ArticleRoutingTest {
                                 tagList = listOf("test", "article", "kotlin"),
                             ),
                         )
-                    }.let {
-                        it.assertStatus(HttpStatusCode.Created)
-                        val article = it.body<ArticleDTO>()
+                    }.assertStatus(HttpStatusCode.Created)
+                    .body<ArticleDTO>()
+                    .also { article ->
                         assert(article.id > 0u)
                         assertEquals(user.id, article.userId)
                         assertEquals("Test Article", article.title)
                         assertEquals("This is a test article", article.description)
                         assertContains(article.body, "automatic testing")
                         assertTrue(article.tagList.map { tag -> tag.name }.containsAll(listOf("test", "article", "kotlin")))
-
-                        article
                     }
 
             // Get created article
@@ -108,14 +106,16 @@ class ArticleRoutingTest {
                     )
                 }.assertStatus(HttpStatusCode.OK)
 
-            client.get("/api/v1/articles/${createdArticle.id}").let {
-                it.assertStatus(HttpStatusCode.OK)
-                val article = it.body<ArticleDTO>()
-                assertContains(article.title, "Updated")
-                assertContains(article.description, "updated")
-                assertContains(article.body, "automatic testing")
-                assertTrue(article.tagList.map { tag -> tag.name }.containsAll(listOf("updated", "test", "article", "kotlin")))
-            }
+            client
+                .get("/api/v1/articles/${createdArticle.id}")
+                .assertStatus(HttpStatusCode.OK)
+                .body<ArticleDTO>()
+                .also { article ->
+                    assertContains(article.title, "Updated")
+                    assertContains(article.description, "updated")
+                    assertContains(article.body, "automatic testing")
+                    assertTrue(article.tagList.map { tag -> tag.name }.containsAll(listOf("updated", "test", "article", "kotlin")))
+                }
 
             // Delete article
             client.delete("/api/v1/articles/${createdArticle.id}").assertStatus(HttpStatusCode.NoContent)

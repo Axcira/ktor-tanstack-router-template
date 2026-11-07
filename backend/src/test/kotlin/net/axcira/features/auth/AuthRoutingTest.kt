@@ -56,11 +56,9 @@ class AuthRoutingTest {
                 .post("/api/v1/auth/login") {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("api-auth@example.com", "password"))
-                }.let {
-                    it.assertStatus(HttpStatusCode.OK)
-                    val session = it.body<UserSession>()
-                    assert(session.user.id > 0u)
-                }
+                }.assertStatus(HttpStatusCode.OK)
+                .body<UserSession>()
+                .also { assert(it.user.id > 0u) }
 
             // Access to protected resources
             client.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
@@ -243,10 +241,8 @@ class AuthRoutingTest {
                                     tagList = listOf("cascade", "test"),
                                 ),
                             )
-                        }.let {
-                            it.assertStatus(HttpStatusCode.Created)
-                            it.body<ArticleDTO>()
-                        }
+                        }.assertStatus(HttpStatusCode.Created)
+                        .body<ArticleDTO>()
 
                 adminClient.delete("/api/v1/users/delete/${author.id}").assertStatus(HttpStatusCode.NoContent)
                 adminClient.get("/api/v1/articles/${createdArticle.id}").assertStatus(HttpStatusCode.NotFound)
@@ -347,10 +343,8 @@ class AuthRoutingTest {
                     .post("/api/v1/users/999999/password") {
                         contentType(ContentType.Application.Json)
                         setBody(ForceChangePasswordRequest(newPassword = "replacement-4"))
-                    }.let {
-                        it.assertStatus(HttpStatusCode.NotFound)
-                        assertEquals("\"User not found\"", it.bodyAsText())
-                    }
+                    }.assertStatus(HttpStatusCode.NotFound)
+                    .also { assertEquals("\"User not found\"", it.bodyAsText()) }
             } finally {
                 target.close()
                 targetOther.close()
@@ -498,10 +492,10 @@ class AuthRoutingTest {
                 reader.get("/api/v1/users/${readerUser.id}").assertStatus(HttpStatusCode.Forbidden)
 
                 val fetched =
-                    manager.get("/api/v1/users/${readerUser.id}").let {
-                        it.assertStatus(HttpStatusCode.OK)
-                        it.body<UserDTO>()
-                    }
+                    manager
+                        .get("/api/v1/users/${readerUser.id}")
+                        .assertStatus(HttpStatusCode.OK)
+                        .body<UserDTO>()
                 assertEquals(readerUser.id, fetched.id)
                 assertEquals(readerUser.email, fetched.email)
 

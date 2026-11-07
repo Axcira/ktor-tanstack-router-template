@@ -12,11 +12,12 @@ class HealthRoutingTest {
     @Test
     fun `health reports ok when database is up`() =
         test { client ->
-            client.get("/api/v1/health").let { response ->
-                response.assertStatus(HttpStatusCode.OK)
-                val body = response.body<HealthResponse>()
-                assertEquals("ok", body.status)
-                assertEquals("up", body.database)
-            }
+            val body =
+                client
+                    .get("/api/v1/health")
+                    .assertStatus(HttpStatusCode.OK)
+                    .body<HealthResponse>()
+            assertEquals("ok", body.status)
+            assertEquals("up", body.database)
         }
 }

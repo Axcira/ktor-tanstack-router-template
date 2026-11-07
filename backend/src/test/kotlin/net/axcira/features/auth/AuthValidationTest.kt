@@ -13,28 +13,26 @@ class AuthValidationTest {
     @Test
     fun `login rejects blank email`() =
         test { client ->
-            client
-                .post("/api/v1/auth/login") {
-                    contentType(ContentType.Application.Json)
-                    setBody(LoginRequest("", "password"))
-                }.let { response ->
-                    response.assertStatus(HttpStatusCode.BadRequest)
-                    val body = response.bodyAsText()
-                    assertTrue(body.contains("email"), "expected email validation reason in: $body")
-                }
+            val body =
+                client
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest("", "password"))
+                    }.assertStatus(HttpStatusCode.BadRequest)
+                    .bodyAsText()
+            assertTrue(body.contains("email"), "expected email validation reason in: $body")
         }
 
     @Test
     fun `login rejects short password`() =
         test { client ->
-            client
-                .post("/api/v1/auth/login") {
-                    contentType(ContentType.Application.Json)
-                    setBody(LoginRequest("user@example.com", "short"))
-                }.let { response ->
-                    response.assertStatus(HttpStatusCode.BadRequest)
-                    val body = response.bodyAsText()
-                    assertTrue(body.contains("password"), "expected password validation reason in: $body")
-                }
+            val body =
+                client
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest("user@example.com", "short"))
+                    }.assertStatus(HttpStatusCode.BadRequest)
+                    .bodyAsText()
+            assertTrue(body.contains("password"), "expected password validation reason in: $body")
         }
 }

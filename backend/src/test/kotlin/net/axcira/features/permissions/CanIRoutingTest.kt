@@ -150,10 +150,8 @@ class CanIRoutingTest {
                         .post("/api/v1/roles") {
                             contentType(ContentType.Application.Json)
                             setBody(CreateRoleInput("writer", "Writer role", listOf(Permission.CreateArticle)))
-                        }.let {
-                            it.assertStatus(HttpStatusCode.Created)
-                            it.body<RoleDTO>()
-                        }
+                        }.assertStatus(HttpStatusCode.Created)
+                        .body<RoleDTO>()
 
                 // ManageRoles cannot grant Administrator (which they do not hold) on create or update
                 roleManager

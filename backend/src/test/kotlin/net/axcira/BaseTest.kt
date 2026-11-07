@@ -238,6 +238,7 @@ private fun resetDatabase() {
 /**
  * A small utility function to assert the status code of an HttpResponse.
  */
-fun HttpResponse.assertStatus(status: HttpStatusCode) {
+fun HttpResponse.assertStatus(status: HttpStatusCode): HttpResponse {
     assertEquals(status, this.status)
+    return this
 }

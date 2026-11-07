@@ -15,15 +15,13 @@ class VersionRoutingTest {
     @Test
     fun `version is public and returns backend identity`() =
         test { client ->
-            client.get("/api/v1/version").let { response ->
-                response.assertStatus(HttpStatusCode.OK)
-                assertEquals("no-store", response.headers[HttpHeaders.CacheControl])
-                val body = response.body<VersionResponse>()
-                assertNotEquals("", body.commit)
-                assertNotEquals("", body.commitShort)
-                assertNotEquals("", body.builtAt)
-                assertTrue(body.commitShort.length <= 7 || body.commit == "unknown")
-                assertNull(body.frontend)
-            }
+            val response = client.get("/api/v1/version").assertStatus(HttpStatusCode.OK)
+            assertEquals("no-store", response.headers[HttpHeaders.CacheControl])
+            val body = response.body<VersionResponse>()
+            assertNotEquals("", body.commit)
+            assertNotEquals("", body.commitShort)
+            assertNotEquals("", body.builtAt)
+            assertTrue(body.commitShort.length <= 7 || body.commit == "unknown")
+            assertNull(body.frontend)
         }
 }
