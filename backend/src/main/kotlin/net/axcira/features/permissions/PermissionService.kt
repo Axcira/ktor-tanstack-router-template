@@ -2,7 +2,7 @@ package net.axcira.features.permissions
 
 import kotlinx.serialization.Serializable
 import net.axcira.*
-import net.axcira.db.Role
+import net.axcira.db.Roles
 import net.axcira.db.Users
 import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
@@ -68,41 +68,46 @@ class PermissionService(
 
     suspend fun getAllRoles(pagination: Pagination): List<RoleDTO> =
         database.dbQuery {
-            Role.selectAll().paginate(pagination).map {
-                RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions])
+            Roles.selectAll().paginate(pagination).map {
+                RoleDTO(it[Roles.id].value, it[Roles.name], it[Roles.description], it[Roles.permissions])
             }
         }
 
     suspend fun getRoleByName(name: String): RoleDTO? =
         database.dbQuery {
-            Role.selectAll().where { Role.name eq name }.firstOrNull()?.let {
-                RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions])
+            Roles.selectAll().where { Roles.name eq name }.firstOrNull()?.let {
+                RoleDTO(it[Roles.id].value, it[Roles.name], it[Roles.description], it[Roles.permissions])
             }
         }
 
     suspend fun getRoleById(id: UInt): RoleDTO? =
         database.dbQuery {
-            val role = Role.selectAll().where { Role.id eq id }.singleOrNull() ?: return@dbQuery null
-            RoleDTO(role[Role.id].value, role[Role.name], role[Role.description], role[Role.permissions])
+            val role = Roles.selectAll().where { Roles.id eq id }.singleOrNull() ?: return@dbQuery null
+            RoleDTO(role[Roles.id].value, role[Roles.name], role[Roles.description], role[Roles.permissions])
         }
 
     suspend fun getPermissionsForUser(userId: UInt): List<Permission>? =
         database.dbQuery {
-            val user = (Users innerJoin Role).selectAll().where { Users.id eq userId }.singleOrNull() ?: return@dbQuery null
-            user[Role.permissions]
+            val user = (Users innerJoin Roles).selectAll().where { Users.id eq userId }.singleOrNull() ?: return@dbQuery null
+            user[Roles.permissions]
         }
 
     suspend fun create(role: CreateRoleInput): RoleDTO =
         database.dbQuery {
             val createdRole =
-                Role
+                Roles
                     .insertReturning {
                         it[name] = role.name
                         it[description] = role.description
                         it[permissions] = role.permissions
                     }.single()
             val dto =
-                RoleDTO(createdRole[Role.id].value, createdRole[Role.name], createdRole[Role.description], createdRole[Role.permissions])
+                RoleDTO(
+                    createdRole[Roles.id].value,
+                    createdRole[Roles.name],
+                    createdRole[Roles.description],
+                    createdRole[Roles.permissions],
+                )
             log.info("Role created: id=${dto.id}, name=\"${dto.name}\"")
             dto
         }
@@ -118,14 +123,14 @@ class PermissionService(
     ): UpdateRoleResult =
         database.dbQuery {
             val existing =
-                Role
+                Roles
                     .selectAll()
-                    .where { Role.id eq id }
+                    .where { Roles.id eq id }
                     .forUpdate()
                     .singleOrNull()
                     ?: return@dbQuery UpdateRoleResult.NotFound
 
-            if (!callerPermissions.satisfiesAll(existing[Role.permissions])) {
+            if (!callerPermissions.satisfiesAll(existing[Roles.permissions])) {
                 return@dbQuery UpdateRoleResult.Forbidden
             }
 
@@ -145,15 +150,15 @@ class PermissionService(
             }
 
             val (name, description, permissions) = updateRoleInput
-            Role
-                .updateReturning(where = { Role.id eq id }) {
-                    if (name is Optional.Present) it[Role.name] = name.value
-                    if (description is Optional.Present) it[Role.description] = description.value
-                    if (permissions is Optional.Present) it[Role.permissions] = permissions.value
+            Roles
+                .updateReturning(where = { Roles.id eq id }) {
+                    if (name is Optional.Present) it[Roles.name] = name.value
+                    if (description is Optional.Present) it[Roles.description] = description.value
+                    if (permissions is Optional.Present) it[Roles.permissions] = permissions.value
                 }.singleOrNull()
                 ?.let {
                     UpdateRoleResult.Success(
-                        RoleDTO(it[Role.id].value, it[Role.name], it[Role.description], it[Role.permissions]),
+                        RoleDTO(it[Roles.id].value, it[Roles.name], it[Roles.description], it[Roles.permissions]),
                     )
                 } ?: UpdateRoleResult.NotFound
         }
@@ -172,24 +177,24 @@ class PermissionService(
         return database
             .dbQuery {
                 val lockedRoles =
-                    Role
+                    Roles
                         .selectAll()
-                        .where { Role.id inList listOf(id, fallbackRoleId) }
-                        .orderBy(Role.id)
+                        .where { Roles.id inList listOf(id, fallbackRoleId) }
+                        .orderBy(Roles.id)
                         .forUpdate()
-                        .associateBy { it[Role.id].value }
+                        .associateBy { it[Roles.id].value }
 
                 val fallbackRole = lockedRoles[fallbackRoleId] ?: return@dbQuery DeleteRoleResult.FallbackNotFound
                 val targetRole = lockedRoles[id] ?: return@dbQuery DeleteRoleResult.NotFound
 
-                if (!callerPermissions.satisfiesAll(targetRole[Role.permissions]) ||
-                    !callerPermissions.satisfiesAll(fallbackRole[Role.permissions])
+                if (!callerPermissions.satisfiesAll(targetRole[Roles.permissions]) ||
+                    !callerPermissions.satisfiesAll(fallbackRole[Roles.permissions])
                 ) {
                     return@dbQuery DeleteRoleResult.Forbidden
                 }
 
                 Users.update({ Users.roleId eq id }) { it[roleId] = fallbackRoleId }
-                Role.deleteWhere { Role.id eq id }
+                Roles.deleteWhere { Roles.id eq id }
                 DeleteRoleResult.Success
             }.also { result ->
                 if (result is DeleteRoleResult.Success) {
@@ -200,9 +205,9 @@ class PermissionService(
 
     suspend fun exists(roleId: UInt): Boolean =
         database.dbQuery {
-            Role
+            Roles
                 .selectAll()
-                .where { Role.id eq roleId }
+                .where { Roles.id eq roleId }
                 .limit(1)
                 .count() > 0
         }

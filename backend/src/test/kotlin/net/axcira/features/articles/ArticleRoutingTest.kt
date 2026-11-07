@@ -5,7 +5,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
 import net.axcira.assertStatus
-import net.axcira.db.Role
+import net.axcira.db.Roles
 import net.axcira.extraClient
 import net.axcira.features.auth.LoginRequest
 import net.axcira.features.permissions.Permission
@@ -31,7 +31,7 @@ class ArticleRoutingTest {
             // Create test role
             val role =
                 database.dbQuery {
-                    Role.insertAndGetId {
+                    Roles.insertAndGetId {
                         it[name] = "admin"
                         it[description] = "Administrator"
                         it[permissions] = listOf(Permission.Administrator)

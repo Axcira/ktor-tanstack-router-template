@@ -2,8 +2,8 @@ package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
 import kotlinx.coroutines.*
-import net.axcira.db.Role
-import net.axcira.db.SessionsTable
+import net.axcira.db.Roles
+import net.axcira.db.Sessions
 import net.axcira.db.Users
 import net.axcira.features.users.UserDTO
 import net.axcira.isDevelopment
@@ -78,7 +78,7 @@ class AuthService(
             val credential =
                 database.dbQuery {
                     val row =
-                        (Users innerJoin Role)
+                        (Users innerJoin Roles)
                             .selectAll()
                             .where { Users.email eq email }
                             .singleOrNull()
@@ -87,9 +87,9 @@ class AuthService(
                     AuthUserCredential(
                         id = row[Users.id].value,
                         email = row[Users.email],
-                        roleId = row[Role.id].value,
+                        roleId = row[Roles.id].value,
                         passwordHash = row[Users.passwordHash],
-                    ) to row[Role.permissions]
+                    ) to row[Roles.permissions]
                 } ?: return@minWait null
 
             val isValid = PasswordHasher.verifyPassword(password, credential.first.passwordHash)
@@ -180,7 +180,7 @@ class AuthService(
      */
     suspend fun deleteSessionById(sessionId: String) {
         database.dbQuery {
-            SessionsTable.deleteWhere { SessionsTable.sessionId eq sessionId }
+            Sessions.deleteWhere { Sessions.sessionId eq sessionId }
         }
     }
 
@@ -188,12 +188,12 @@ class AuthService(
         userId: UInt,
         keepSessionId: String?,
     ) {
-        SessionsTable.deleteWhere {
-            val owned = SessionsTable.userId eq userId
+        Sessions.deleteWhere {
+            val owned = Sessions.userId eq userId
             if (keepSessionId == null) {
                 owned
             } else {
-                owned and (SessionsTable.sessionId neq keepSessionId)
+                owned and (Sessions.sessionId neq keepSessionId)
             }
         }
     }

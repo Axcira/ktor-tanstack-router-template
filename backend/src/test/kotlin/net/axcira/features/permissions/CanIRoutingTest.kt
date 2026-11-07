@@ -5,7 +5,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
 import net.axcira.assertStatus
-import net.axcira.db.Role
+import net.axcira.db.Roles
 import net.axcira.extraClient
 import net.axcira.features.auth.LoginRequest
 import net.axcira.features.users.CreateUserInput
@@ -27,7 +27,7 @@ class CanIRoutingTest {
 
             val roleId =
                 database.dbQuery {
-                    Role.insertAndGetId {
+                    Roles.insertAndGetId {
                         it[name] = "can-i-manage-articles"
                         it[description] = "Manage articles role"
                         it[permissions] = listOf(Permission.ManageArticles)
@@ -60,7 +60,7 @@ class CanIRoutingTest {
 
             val roleId =
                 database.dbQuery {
-                    Role.insertAndGetId {
+                    Roles.insertAndGetId {
                         it[name] = "can-i-empty"
                         it[description] = "No permissions"
                         it[permissions] = emptyList()
@@ -93,7 +93,7 @@ class CanIRoutingTest {
 
             val roleId =
                 database.dbQuery {
-                    Role.insertAndGetId {
+                    Roles.insertAndGetId {
                         it[name] = "can-i-admin"
                         it[description] = "Administrator"
                         it[permissions] = listOf(Permission.Administrator)

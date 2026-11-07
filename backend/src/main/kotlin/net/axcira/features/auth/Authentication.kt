@@ -3,11 +3,12 @@ package net.axcira.features.auth
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.di.*
-import io.ktor.server.sessions.*
+import io.ktor.server.sessions.SessionStorage
+import io.ktor.server.sessions.cookie
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.axcira.db.*
-import net.axcira.db.SessionsTable.sessionId
+import net.axcira.db.Sessions.sessionId
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.UserDTO
 import net.axcira.isDevelopment
@@ -17,6 +18,7 @@ import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.*
+import io.ktor.server.sessions.Sessions as KtorSessions
 
 @Serializable
 data class UserSession(
@@ -55,7 +57,7 @@ class DatabaseSessionStorage(
 ) : SessionStorage {
     override suspend fun invalidate(id: String) {
         database.dbQuery {
-            SessionsTable.deleteWhere { sessionId eq id }
+            Sessions.deleteWhere { sessionId eq id }
         }
     }
 
@@ -63,17 +65,17 @@ class DatabaseSessionStorage(
         val payload =
             database.dbQuery {
                 val row =
-                    SessionsTable
-                        .select(SessionsTable.session, SessionsTable.expiresAt)
+                    Sessions
+                        .select(Sessions.session, Sessions.expiresAt)
                         .where { sessionId eq id }
                         .singleOrNull()
                         ?: return@dbQuery null
-                val expiresAt = row[SessionsTable.expiresAt]
+                val expiresAt = row[Sessions.expiresAt]
                 if (expiresAt == null || expiresAt <= clockEpochSeconds()) {
-                    SessionsTable.deleteWhere { sessionId eq id }
+                    Sessions.deleteWhere { sessionId eq id }
                     return@dbQuery null
                 }
-                row[SessionsTable.session]
+                row[Sessions.session]
             }
         return payload ?: throw NoSuchElementException("Session $id not found")
     }
@@ -85,14 +87,14 @@ class DatabaseSessionStorage(
         val now = clockEpochSeconds()
         val expiresAtEpochSeconds = now + maxAgeSeconds
         database.dbQuery {
-            SessionsTable.deleteWhere {
-                SessionsTable.expiresAt.isNull() or (SessionsTable.expiresAt lessEq now)
+            Sessions.deleteWhere {
+                Sessions.expiresAt.isNull() or (Sessions.expiresAt lessEq now)
             }
-            SessionsTable.upsert {
+            Sessions.upsert {
                 it[sessionId] = id
                 it[session] = value
-                it[SessionsTable.userId] = sessionUserId(value)
-                it[SessionsTable.expiresAt] = expiresAtEpochSeconds
+                it[Sessions.userId] = sessionUserId(value)
+                it[Sessions.expiresAt] = expiresAtEpochSeconds
             }
         }
     }
@@ -103,7 +105,7 @@ class DatabaseSessionStorage(
  */
 fun Application.configureAuthentication() {
     val database: Database by dependencies
-    install(Sessions) {
+    install(KtorSessions) {
         cookie<UserSession>("user_session", DatabaseSessionStorage(database)) {
             cookie.path = "/"
             cookie.httpOnly = true
@@ -116,12 +118,12 @@ fun Application.configureAuthentication() {
         session<UserSession> {
             validate { session ->
                 database.dbQuery {
-                    (Users innerJoin Role).selectAll().where { Users.id eq session.user.id }.singleOrNull()?.let {
+                    (Users innerJoin Roles).selectAll().where { Users.id eq session.user.id }.singleOrNull()?.let {
                         UserSession(
                             UserDTO(
                                 it[Users.id].value, it[Users.email], it[Users.roleId].value,
                             ),
-                            it[Role.permissions],
+                            it[Roles.permissions],
                         )
                     }
                 }

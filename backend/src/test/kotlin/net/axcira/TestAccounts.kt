@@ -4,7 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
-import net.axcira.db.Role
+import net.axcira.db.Roles
 import net.axcira.features.auth.LoginRequest
 import net.axcira.features.permissions.Permission
 import net.axcira.features.users.CreateUserInput
@@ -23,10 +23,10 @@ suspend fun SharedTestContext.login(
     val userService = UserService(database)
     val roleId =
         database.dbQuery {
-            Role.insertAndGetId {
+            Roles.insertAndGetId {
                 it[name] = email
                 it[description] = email
-                it[Role.permissions] = permissions
+                it[Roles.permissions] = permissions
             }
         }
     val user = userService.createUser(CreateUserInput(email, "password", roleId.value))

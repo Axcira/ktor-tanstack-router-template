@@ -1,0 +1,5 @@
+ALTER TABLE "Role" RENAME TO roles;
+ALTER TABLE roles RENAME CONSTRAINT chk_Role_unsigned_integer_id TO chk_roles_unsigned_integer_id;
+ALTER SEQUENCE "Role_id_seq" RENAME TO roles_id_seq;
+DROP SEQUENCE IF EXISTS role_id_seq;
+CREATE SEQUENCE IF NOT EXISTS Roles_id_seq START WITH 1 MINVALUE 1 MAXVALUE 9223372036854775807;

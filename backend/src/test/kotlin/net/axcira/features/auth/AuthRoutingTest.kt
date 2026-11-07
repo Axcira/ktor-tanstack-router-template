@@ -6,8 +6,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
 import net.axcira.assertStatus
-import net.axcira.db.Role
-import net.axcira.db.SessionsTable
+import net.axcira.db.Roles
+import net.axcira.db.Sessions
 import net.axcira.extraClient
 import net.axcira.features.articles.ArticleDTO
 import net.axcira.features.articles.CreateArticleInput
@@ -41,7 +41,7 @@ class AuthRoutingTest {
             // Create test role
             val roleId =
                 database.dbQuery {
-                    Role.insertAndGetId {
+                    Roles.insertAndGetId {
                         it[name] = "auth-test-role"
                         it[description] = "Auth test role"
                         it[permissions] = listOf(Permission.ManageUsers)
@@ -251,7 +251,7 @@ class AuthRoutingTest {
                 database.dbQuery {
                     assertEquals(
                         0L,
-                        SessionsTable.selectAll().where { SessionsTable.userId eq author.id }.count(),
+                        Sessions.selectAll().where { Sessions.userId eq author.id }.count(),
                     )
                 }
             }
@@ -370,7 +370,7 @@ class AuthRoutingTest {
             val userService = UserService(database)
             val roleId =
                 database.dbQuery {
-                    Role.insertAndGetId {
+                    Roles.insertAndGetId {
                         it[name] = "session-rotation-role"
                         it[description] = "Session rotation role"
                         it[permissions] = emptyList()
@@ -394,13 +394,13 @@ class AuthRoutingTest {
             val firstSessionId =
                 database.dbQuery {
                     val row =
-                        SessionsTable
+                        Sessions
                             .selectAll()
-                            .where { SessionsTable.userId eq firstUser.id }
+                            .where { Sessions.userId eq firstUser.id }
                             .single()
-                    val expiresAt = assertNotNull(row[SessionsTable.expiresAt])
+                    val expiresAt = assertNotNull(row[Sessions.expiresAt])
                     assertTrue(expiresAt > System.currentTimeMillis() / 1000)
-                    row[SessionsTable.sessionId]
+                    row[Sessions.sessionId]
                 }
 
             // Re-login on the same client (sending the existing cookie) as a second user
@@ -414,13 +414,13 @@ class AuthRoutingTest {
             database.dbQuery {
                 assertEquals(
                     0L,
-                    SessionsTable.selectAll().where { SessionsTable.sessionId eq firstSessionId }.count(),
+                    Sessions.selectAll().where { Sessions.sessionId eq firstSessionId }.count(),
                 )
                 val secondSessionId =
-                    SessionsTable
+                    Sessions
                         .selectAll()
-                        .where { SessionsTable.userId eq secondUser.id }
-                        .single()[SessionsTable.sessionId]
+                        .where { Sessions.userId eq secondUser.id }
+                        .single()[Sessions.sessionId]
                 assertNotEquals(firstSessionId, secondSessionId)
             }
             assertEquals(
@@ -439,7 +439,7 @@ class AuthRoutingTest {
             val database: Database by application.dependencies
 
             database.dbQuery {
-                SessionsTable.update({ SessionsTable.userId eq user.id }) {
+                Sessions.update({ Sessions.userId eq user.id }) {
                     it[expiresAt] = (System.currentTimeMillis() / 1000) - 60
                 }
             }
@@ -448,7 +448,7 @@ class AuthRoutingTest {
             database.dbQuery {
                 assertEquals(
                     0L,
-                    SessionsTable.selectAll().where { SessionsTable.userId eq user.id }.count(),
+                    Sessions.selectAll().where { Sessions.userId eq user.id }.count(),
                 )
             }
 
@@ -456,7 +456,7 @@ class AuthRoutingTest {
             extraClient().use { nullExpiryClient ->
                 val nullExpiryUser = login(nullExpiryClient, "null-expiry-session@example.com", emptyList())
                 database.dbQuery {
-                    SessionsTable.update({ SessionsTable.userId eq nullExpiryUser.id }) {
+                    Sessions.update({ Sessions.userId eq nullExpiryUser.id }) {
                         it[expiresAt] = null
                     }
                 }
@@ -464,7 +464,7 @@ class AuthRoutingTest {
                 database.dbQuery {
                     assertEquals(
                         0L,
-                        SessionsTable.selectAll().where { SessionsTable.userId eq nullExpiryUser.id }.count(),
+                        Sessions.selectAll().where { Sessions.userId eq nullExpiryUser.id }.count(),
                     )
                 }
             }
