@@ -67,8 +67,8 @@ class ArticleRoutingTest {
                         val article = it.body<ArticleDTO>()
                         assert(article.id > 0u)
                         assertEquals(user.id, article.userId)
-                        assertEquals(article.title, "Test Article")
-                        assertEquals(article.description, "This is a test article")
+                        assertEquals("Test Article", article.title)
+                        assertEquals("This is a test article", article.description)
                         assertContains(article.body, "automatic testing")
                         assertTrue(article.tagList.map { tag -> tag.name }.containsAll(listOf("test", "article", "kotlin")))
 
@@ -159,7 +159,7 @@ class ArticleRoutingTest {
                     staffClient
                         .patch("/api/v1/articles/${created.id}") {
                             contentType(ContentType.Application.Json)
-                            setBody("""{"title":"Hijacked"}""")
+                            setBody("{\"title\":\"Hijacked\"}")
                         }.status,
                 )
             } finally {

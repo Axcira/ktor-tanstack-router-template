@@ -8,6 +8,8 @@ import io.ktor.client.plugins.cookies.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.testing.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
 import net.axcira.plugins.truncateAllTables
 import org.flywaydb.core.Flyway
@@ -22,10 +24,8 @@ import java.time.Duration
  */
 class SharedTestContext internal constructor(
     val application: Application,
-    client: HttpClient,
-) {
-    val client: HttpClient = client
-}
+    val client: HttpClient,
+)
 
 /**
  * JDBC settings for the suite-scoped Postgres.
@@ -181,10 +181,8 @@ fun test(block: suspend SharedTestContext.(HttpClient) -> Unit) {
                 }
 
             val context = SharedTestContext(application, client)
-            try {
+            client.use { client ->
                 context.block(client)
-            } finally {
-                client.close()
             }
         }
     }
@@ -203,7 +201,11 @@ private val sharedTestApplication: TestApplication by lazy {
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 runBlocking {
-                    runCatching { app.stop() }
+                    runCatching { app.stop() }.onFailure {
+                        if (it is CancellationException) {
+                            ensureActive()
+                        }
+                    }
                 }
             },
         )
@@ -211,7 +213,7 @@ private val sharedTestApplication: TestApplication by lazy {
 }
 
 /** A second cookie jar against the shared test app, for multi-session checks. */
-fun SharedTestContext.extraClient(): HttpClient =
+fun extraClient(): HttpClient =
     sharedTestApplication.createClient {
         install(ContentNegotiation) {
             json()

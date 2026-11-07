@@ -187,7 +187,7 @@ class CanIRoutingTest {
                     roleManager
                         .patch("/api/v1/roles/${created.id}") {
                             contentType(ContentType.Application.Json)
-                            setBody("""{"permissions":[{"type":"Administrator"}]}""")
+                            setBody("{\"permissions\":[{\"type\":\"Administrator\"}]}")
                         }.status,
                 )
 
@@ -198,7 +198,7 @@ class CanIRoutingTest {
                     roleManager
                         .patch("/api/v1/roles/${adminUser.roleId}") {
                             contentType(ContentType.Application.Json)
-                            setBody("""{"description":"Hijacked description"}""")
+                            setBody("{\"description\":\"Hijacked description\"}")
                         }.status,
                 )
                 assertEquals(
@@ -259,7 +259,7 @@ class CanIRoutingTest {
                     userManager
                         .patch("/api/v1/users/update/${adminUser.id}") {
                             contentType(ContentType.Application.Json)
-                            setBody("""{"email":"hijacked-admin@example.com"}""")
+                            setBody("{\"email\":\"hijacked-admin@example.com\"}")
                         }.status,
                 )
                 assertEquals(
@@ -267,7 +267,7 @@ class CanIRoutingTest {
                     userManager
                         .patch("/api/v1/users/update/${readerUser.id}") {
                             contentType(ContentType.Application.Json)
-                            setBody("""{"roleId":${adminUser.roleId}}""")
+                            setBody("{\"roleId\":${adminUser.roleId}}")
                         }.status,
                 )
             } finally {

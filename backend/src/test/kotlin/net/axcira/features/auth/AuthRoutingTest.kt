@@ -168,7 +168,7 @@ class AuthRoutingTest {
                 client
                     .post("/api/v1/auth/password") {
                         contentType(ContentType.Application.Json)
-                        setBody("""{"currentPassword":"password","newPassword":"replacement-1"}""")
+                        setBody("{\"currentPassword\":\"password\",\"newPassword\":\"replacement-1\"}")
                     }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
                 assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
                 assertEquals(HttpStatusCode.OK, other.get("/api/v1/users/me").status)
@@ -236,8 +236,7 @@ class AuthRoutingTest {
     @Test
     fun `deleting a user with authored articles cascades cleanly and removes sessions`() =
         test { authorClient ->
-            val adminClient = extraClient()
-            try {
+            extraClient().use { adminClient ->
                 val author = login(authorClient, "cascade-author@example.com", listOf(Permission.CreateArticle))
                 login(adminClient, "cascade-admin@example.com", listOf(Permission.ManageUsers))
 
@@ -268,8 +267,6 @@ class AuthRoutingTest {
                         SessionsTable.selectAll().where { SessionsTable.userId eq author.id }.count(),
                     )
                 }
-            } finally {
-                adminClient.close()
             }
         }
 
@@ -311,7 +308,7 @@ class AuthRoutingTest {
                 admin
                     .post("/api/v1/users/$targetId/password") {
                         contentType(ContentType.Application.Json)
-                        setBody("""{"newPassword":"replacement-1"}""")
+                        setBody("{\"newPassword\":\"replacement-1\"}")
                     }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
                 assertEquals(HttpStatusCode.OK, target.get("/api/v1/users/me").status)
                 assertEquals(HttpStatusCode.OK, targetOther.get("/api/v1/users/me").status)
@@ -361,7 +358,7 @@ class AuthRoutingTest {
                         setBody(ForceChangePasswordRequest(newPassword = "replacement-4"))
                     }.let {
                         assertEquals(HttpStatusCode.NotFound, it.status)
-                        assertEquals(""""User not found"""", it.bodyAsText())
+                        assertEquals("\"User not found\"", it.bodyAsText())
                     }
             } finally {
                 target.close()
@@ -394,8 +391,10 @@ class AuthRoutingTest {
                         it[permissions] = emptyList()
                     }
                 }
-            val firstUser = userService.createUser(CreateUserInput("first-session@example.com", "password", roleId.value))
-            val secondUser = userService.createUser(CreateUserInput("second-session@example.com", "password", roleId.value))
+            val firstUser =
+                userService.createUser(CreateUserInput("first-session@example.com", "password", roleId.value))
+            val secondUser =
+                userService.createUser(CreateUserInput("second-session@example.com", "password", roleId.value))
 
             val firstResponse =
                 client.post("/api/v1/auth/login") {
@@ -469,8 +468,7 @@ class AuthRoutingTest {
             }
 
             // A session row with NULL expires_at is also rejected and deleted on read
-            val nullExpiryClient = extraClient()
-            try {
+            extraClient().use { nullExpiryClient ->
                 val nullExpiryUser = login(nullExpiryClient, "null-expiry-session@example.com", emptyList())
                 database.dbQuery {
                     SessionsTable.update({ SessionsTable.userId eq nullExpiryUser.id }) {
@@ -484,8 +482,6 @@ class AuthRoutingTest {
                         SessionsTable.selectAll().where { SessionsTable.userId eq nullExpiryUser.id }.count(),
                     )
                 }
-            } finally {
-                nullExpiryClient.close()
             }
         }
 
@@ -504,8 +500,7 @@ class AuthRoutingTest {
     @Test
     fun `getUserById returns user for ManageUsers and 404 when missing`() =
         test { manager ->
-            val reader = extraClient()
-            try {
+            extraClient().use { reader ->
                 login(manager, "get-user-manager@example.com", listOf(Permission.ManageUsers))
                 val readerUser = login(reader, "get-user-target@example.com", emptyList())
 
@@ -521,8 +516,6 @@ class AuthRoutingTest {
 
                 assertEquals(HttpStatusCode.NotFound, manager.get("/api/v1/users/999999").status)
                 assertEquals(HttpStatusCode.BadRequest, manager.get("/api/v1/users/not-a-number").status)
-            } finally {
-                reader.close()
             }
         }
 }

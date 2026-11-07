@@ -26,7 +26,7 @@ private var currentDataSource: HikariDataSource? = null
 @Volatile
 private var currentDatabase: Database? = null
 
-private val shutdownHookRegistered =
+private val shutdownHookRegistered by
     lazy {
         Runtime.getRuntime().addShutdownHook(
             Thread {
@@ -54,7 +54,7 @@ val dataSource: HikariDataSource
     get() =
         currentDataSource ?: synchronized(databaseLock) {
             currentDataSource ?: HikariDataSource(createHikariConfig()).also { ds ->
-                shutdownHookRegistered.value
+                shutdownHookRegistered
                 currentDataSource = ds
             }
         }
