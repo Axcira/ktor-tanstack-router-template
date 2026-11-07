@@ -5,9 +5,9 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
-import { useListArticlesV1 } from "@/api/generated/default/default.ts";
+import { useListArticlesV1 } from "@/api/generated/default/default";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { useAuthorize } from "@/hooks/useAuthorize.ts";
+import { useAuthorize } from "@/hooks/useAuthorize";
 
 const defaultArticlesSearch = {
   page: 1,

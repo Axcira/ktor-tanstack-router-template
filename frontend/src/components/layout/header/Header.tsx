@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSidebar } from "@/components/ui/sidebar.tsx";
+import { useSidebar } from "@/components/ui/sidebar";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
 import { Route } from "@/routes/_app";
 

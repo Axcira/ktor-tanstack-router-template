@@ -1,10 +1,10 @@
-import AppSidebarItem from "@/components/layout/sidebar/AppSidebarItem.tsx";
+import AppSidebarItem from "@/components/layout/sidebar/AppSidebarItem";
 import menuItems from "@/components/layout/sidebar/MenuItems";
 import {
   SidebarContent,
   SidebarGroup,
   SidebarMenu,
-} from "@/components/ui/sidebar.tsx";
+} from "@/components/ui/sidebar";
 
 export default function AppSidebarContent() {
   return (

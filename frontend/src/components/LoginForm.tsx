@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type SubmitEventHandler, useState } from "react";
 import { ApiError } from "@/api/client";
-import { useLoginV1 } from "@/api/generated/default/default.ts";
+import { useLoginV1 } from "@/api/generated/default/default";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

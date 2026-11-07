@@ -4,8 +4,8 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { Permission } from "./permission.ts";
-import type { UserDTO } from "./userDTO.ts";
+import type { Permission } from "./permission";
+import type { UserDTO } from "./userDTO";
 
 export interface UserSession {
   user: UserDTO;

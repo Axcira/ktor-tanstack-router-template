@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { PermissionManageRolesType } from "./permissionManageRolesType.ts";
+import type { PermissionManageRolesType } from "./permissionManageRolesType";
 
 export interface PermissionManageRoles {
   type: PermissionManageRolesType;

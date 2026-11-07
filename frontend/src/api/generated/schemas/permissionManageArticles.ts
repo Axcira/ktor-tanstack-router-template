@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { PermissionManageArticlesType } from "./permissionManageArticlesType.ts";
+import type { PermissionManageArticlesType } from "./permissionManageArticlesType";
 
 export interface PermissionManageArticles {
   type: PermissionManageArticlesType;

@@ -4,7 +4,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 import {
   getGetRolesV1QueryKey,
   useCreateRoleV1,
-} from "@/api/generated/default/default.ts";
+} from "@/api/generated/default/default";
 import type { Permission } from "@/api/generated/schemas/permission";
 import { ButtonLink } from "@/components/ui/button";
 import RoleForm from "./-components/RoleForm";

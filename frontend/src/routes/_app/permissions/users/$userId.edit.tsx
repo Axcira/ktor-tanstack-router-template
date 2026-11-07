@@ -8,7 +8,7 @@ import {
   useGetRolesV1,
   useGetUserByIdV1,
   useUpdateUserV1,
-} from "@/api/generated/default/default.ts";
+} from "@/api/generated/default/default";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { selfQueryOptions } from "@/lib/self";
 import { queryClient as rootQueryClient } from "@/routes/__root";

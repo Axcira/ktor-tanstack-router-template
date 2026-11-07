@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { Permission } from "./permission.ts";
+import type { Permission } from "./permission";
 
 export interface CreateRoleInput {
   name: string;

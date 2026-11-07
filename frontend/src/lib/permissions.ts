@@ -1,5 +1,5 @@
 import { ApiError } from "@/api/client";
-import { canIV1 } from "@/api/generated/default/default.ts";
+import { canIV1 } from "@/api/generated/default/default";
 import type { Permission, UserSession } from "@/api/generated/schemas";
 
 type StaticPermission = {

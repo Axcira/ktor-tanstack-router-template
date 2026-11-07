@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getSelfV1 } from "@/api/generated/default/default.ts";
-import { queryClient } from "@/routes/__root.tsx";
+import { getSelfV1 } from "@/api/generated/default/default";
+import { queryClient } from "@/routes/__root";
 
 export const selfQueryOptions = queryOptions({
   queryKey: ["self"],

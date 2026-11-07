@@ -10,12 +10,12 @@ import {
   getListArticlesV1QueryKey,
   useGetArticleV1,
   useUpdateArticleV1,
-} from "@/api/generated/default/default.ts";
+} from "@/api/generated/default/default";
 import type { ArticleDTO } from "@/api/generated/schemas";
-import LoadingSpinner from "@/components/LoadingSpinner.tsx";
-import NoPermission from "@/components/NoPermission.tsx";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import NoPermission from "@/components/NoPermission";
 import { ButtonLink } from "@/components/ui/button";
-import { useAuthorize } from "@/hooks/useAuthorize.ts";
+import { useAuthorize } from "@/hooks/useAuthorize";
 import ArticleForm, { type ArticleFormValues } from "./-components/ArticleForm";
 
 export const Route = createFileRoute("/_app/articles/$articleId/edit")({

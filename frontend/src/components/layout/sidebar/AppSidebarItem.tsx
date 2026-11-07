@@ -1,24 +1,24 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import CollapsibleMenuItems from "@/components/layout/sidebar/CollapsibleMenuItems.tsx";
+import CollapsibleMenuItems from "@/components/layout/sidebar/CollapsibleMenuItems";
 import type { MenuItem } from "@/components/layout/sidebar/MenuItems";
-import PopoverMenuItems from "@/components/layout/sidebar/PopoverMenuItems.tsx";
+import PopoverMenuItems from "@/components/layout/sidebar/PopoverMenuItems";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible.tsx";
+} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover.tsx";
+} from "@/components/ui/popover";
 import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar.tsx";
-import { useAuthorize } from "@/hooks/useAuthorize.ts";
+} from "@/components/ui/sidebar";
+import { useAuthorize } from "@/hooks/useAuthorize";
 
 export default function AppSidebarItem({ item }: { item: MenuItem }) {
   const { isMobile, state } = useSidebar();

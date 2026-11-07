@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { TagDTO } from "./tagDTO.ts";
+import type { TagDTO } from "./tagDTO";
 
 export interface ArticleDTO {
   id: number;

@@ -5,7 +5,7 @@ import {
   getGetUsersV1QueryKey,
   useCreateUserV1,
   useGetRolesV1,
-} from "@/api/generated/default/default.ts";
+} from "@/api/generated/default/default";
 import { Button, ButtonLink } from "@/components/ui/button";
 import UserForm from "./-components/UserForm";
 

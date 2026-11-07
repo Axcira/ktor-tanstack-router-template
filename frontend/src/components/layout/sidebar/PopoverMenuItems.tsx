@@ -5,10 +5,10 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover.tsx";
-import { SidebarMenuSubButton } from "@/components/ui/sidebar.tsx";
+} from "@/components/ui/popover";
+import { SidebarMenuSubButton } from "@/components/ui/sidebar";
 
-import { useAuthorize } from "@/hooks/useAuthorize.ts";
+import { useAuthorize } from "@/hooks/useAuthorize";
 
 function PopoverMenuItem({ item }: { item: MenuItem }) {
   const { isAllowed } = useAuthorize(item.requiredPermission);

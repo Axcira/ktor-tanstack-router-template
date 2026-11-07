@@ -1,7 +1,7 @@
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
-import { useLogoutV1 } from "@/api/generated/default/default.ts";
-import { VersionStamp } from "@/components/layout/VersionStamp.tsx";
+import { useLogoutV1 } from "@/api/generated/default/default";
+import { VersionStamp } from "@/components/layout/VersionStamp";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,8 +24,8 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
-import { queryClient } from "@/routes/__root.tsx";
+} from "@/components/ui/tooltip";
+import { queryClient } from "@/routes/__root";
 
 export default function AppSidebarFooter() {
   const router = useRouter();

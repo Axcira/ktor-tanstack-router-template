@@ -7,7 +7,7 @@ import {
   getGetRolesV1QueryKey,
   useGetRoleByIdV1,
   useUpdateRoleV1,
-} from "@/api/generated/default/default.ts";
+} from "@/api/generated/default/default";
 import type { Permission } from "@/api/generated/schemas/permission";
 import { ButtonLink } from "@/components/ui/button";
 import { selfQueryOptions } from "@/lib/self";

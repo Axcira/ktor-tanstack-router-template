@@ -4,7 +4,7 @@ import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useThemeEffect } from "@/hooks/useThemeEffect.ts";
+import { useThemeEffect } from "@/hooks/useThemeEffect";
 import "../styles.css";
 
 export const Route = createRootRoute({

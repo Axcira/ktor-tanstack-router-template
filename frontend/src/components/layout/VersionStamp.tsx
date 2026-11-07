@@ -1,9 +1,9 @@
-import { useVersionV1 } from "@/api/generated/default/default.ts";
+import { useVersionV1 } from "@/api/generated/default/default";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip.tsx";
+} from "@/components/ui/tooltip";
 
 const bundled = __APP_VERSION__;
 const VERSION_STALE_MS = 5 * 60 * 1000;

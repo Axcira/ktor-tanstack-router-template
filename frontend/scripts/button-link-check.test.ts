@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buttonLinkIssuesInSource } from "./button-link-check.ts";
+import { buttonLinkIssuesInSource } from "./button-link-check";
 
 describe("buttonLinkIssuesInSource", () => {
   it("flags Button render props that point at Link or an anchor", () => {

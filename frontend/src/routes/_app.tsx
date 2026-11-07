@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import Header from "@/components/layout/header/Header.tsx";
-import { AppSidebar } from "@/components/layout/sidebar/AppSidebar.tsx";
+import Header from "@/components/layout/header/Header";
+import { AppSidebar } from "@/components/layout/sidebar/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { loadSession } from "@/lib/self";
 

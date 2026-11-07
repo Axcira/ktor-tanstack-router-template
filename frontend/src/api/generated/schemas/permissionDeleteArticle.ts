@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { PermissionDeleteArticleType } from "./permissionDeleteArticleType.ts";
+import type { PermissionDeleteArticleType } from "./permissionDeleteArticleType";
 
 export interface PermissionDeleteArticle {
   type: PermissionDeleteArticleType;

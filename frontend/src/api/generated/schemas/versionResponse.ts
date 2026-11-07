@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { VersionIdentity } from "./versionIdentity.ts";
+import type { VersionIdentity } from "./versionIdentity";
 
 export interface VersionResponse {
   commit: string;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lineHasOpenSelect } from "./select-check.ts";
+import { lineHasOpenSelect } from "./select-check";
 
 describe("lineHasOpenSelect", () => {
   it("matches an opening select tag, including one split before its attributes", () => {

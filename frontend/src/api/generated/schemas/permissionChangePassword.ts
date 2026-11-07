@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { PermissionChangePasswordType } from "./permissionChangePasswordType.ts";
+import type { PermissionChangePasswordType } from "./permissionChangePasswordType";
 
 export interface PermissionChangePassword {
   type: PermissionChangePasswordType;

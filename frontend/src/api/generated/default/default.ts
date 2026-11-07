@@ -45,8 +45,8 @@ import type {
   VersionResponse,
 } from "../schemas";
 
-import { customFetch } from "../../client.ts";
-import type { ErrorType } from "../../client.ts";
+import { customFetch } from "../../client";
+import type { ErrorType } from "../../client";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 

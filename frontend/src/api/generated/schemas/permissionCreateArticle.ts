@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { PermissionCreateArticleType } from "./permissionCreateArticleType.ts";
+import type { PermissionCreateArticleType } from "./permissionCreateArticleType";
 
 export interface PermissionCreateArticle {
   type: PermissionCreateArticleType;

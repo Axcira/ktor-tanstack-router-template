@@ -4,7 +4,7 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { PermissionAdministratorType } from "./permissionAdministratorType.ts";
+import type { PermissionAdministratorType } from "./permissionAdministratorType";
 
 export interface PermissionAdministrator {
   type: PermissionAdministratorType;

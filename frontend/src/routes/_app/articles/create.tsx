@@ -4,11 +4,11 @@ import { ArrowLeft } from "lucide-react";
 import {
   getListArticlesV1QueryKey,
   useCreateArticleV1,
-} from "@/api/generated/default/default.ts";
-import LoadingSpinner from "@/components/LoadingSpinner.tsx";
-import NoPermission from "@/components/NoPermission.tsx";
+} from "@/api/generated/default/default";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import NoPermission from "@/components/NoPermission";
 import { ButtonLink } from "@/components/ui/button";
-import { useAuthorize } from "@/hooks/useAuthorize.ts";
+import { useAuthorize } from "@/hooks/useAuthorize";
 import ArticleForm, { type ArticleFormValues } from "./-components/ArticleForm";
 
 export const Route = createFileRoute("/_app/articles/create")({

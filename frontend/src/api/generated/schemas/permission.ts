@@ -4,14 +4,14 @@
  * My API
  * OpenAPI spec version: 1.0
  */
-import type { PermissionAdministrator } from "./permissionAdministrator.ts";
-import type { PermissionChangePassword } from "./permissionChangePassword.ts";
-import type { PermissionCreateArticle } from "./permissionCreateArticle.ts";
-import type { PermissionDeleteArticle } from "./permissionDeleteArticle.ts";
-import type { PermissionManageArticles } from "./permissionManageArticles.ts";
-import type { PermissionManageRoles } from "./permissionManageRoles.ts";
-import type { PermissionManageUsers } from "./permissionManageUsers.ts";
-import type { PermissionUpdateArticle } from "./permissionUpdateArticle.ts";
+import type { PermissionAdministrator } from "./permissionAdministrator";
+import type { PermissionChangePassword } from "./permissionChangePassword";
+import type { PermissionCreateArticle } from "./permissionCreateArticle";
+import type { PermissionDeleteArticle } from "./permissionDeleteArticle";
+import type { PermissionManageArticles } from "./permissionManageArticles";
+import type { PermissionManageRoles } from "./permissionManageRoles";
+import type { PermissionManageUsers } from "./permissionManageUsers";
+import type { PermissionUpdateArticle } from "./permissionUpdateArticle";
 
 export type Permission =
   | PermissionAdministrator

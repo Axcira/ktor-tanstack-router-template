@@ -1,10 +1,10 @@
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { ArrowLeft, Edit, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useGetArticleV1 } from "@/api/generated/default/default.ts";
+import { useGetArticleV1 } from "@/api/generated/default/default";
 import type { ArticleDTO } from "@/api/generated/schemas";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { useAuthorize } from "@/hooks/useAuthorize.ts";
+import { useAuthorize } from "@/hooks/useAuthorize";
 import DeleteArticleDialog from "./-components/DeleteArticleDialog";
 
 export const Route = createFileRoute("/_app/articles/$articleId/")({

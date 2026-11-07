@@ -1,4 +1,4 @@
-import ErrorCard from "@/components/ErrorCard.tsx";
+import ErrorCard from "@/components/ErrorCard";
 
 export default function NoPermission({
   errorMessage = "権限がありません。",

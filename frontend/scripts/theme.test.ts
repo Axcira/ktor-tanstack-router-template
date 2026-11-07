@@ -9,7 +9,7 @@ import {
   generateThemeCss,
   parseThemeArgs,
   themeHelpText,
-} from "./theme.ts";
+} from "./theme";
 
 function enumCliNames(): string[] {
   return Object.keys(Variant)

@@ -13,7 +13,7 @@ import {
   useDeleteUserV1,
   useGetRolesV1,
   useGetUsersV1,
-} from "@/api/generated/default/default.ts";
+} from "@/api/generated/default/default";
 import type { UserDTO } from "@/api/generated/schemas/userDTO";
 import { ResponsiveSelect } from "@/components/ResponsiveSelect";
 import { Button } from "@/components/ui/button";

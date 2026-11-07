@@ -1,6 +1,6 @@
 import { Frame, PanelLeft, PanelLeftClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SidebarHeader, useSidebar } from "@/components/ui/sidebar.tsx";
+import { SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 
 export default function AppSidebarHeader() {
   const { toggleSidebar } = useSidebar();

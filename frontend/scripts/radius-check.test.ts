@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   radiusIssuesInSource,
   radiusUtility,
-} from "./radius-check.ts";
+} from "./radius-check";
 
 function reasons(source: string): string[] {
   return radiusIssuesInSource(source).map((issue) => issue.reason);

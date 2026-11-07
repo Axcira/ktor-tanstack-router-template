@@ -47,7 +47,7 @@ import {
   getUpdateArticleV1ResponseMock,
   getUpdateRoleV1ResponseMock,
   getVersionV1ResponseMock,
-} from "./default.faker.ts";
+} from "./default.faker";
 
 export {
   getLoginV1ResponseMock,
@@ -66,7 +66,7 @@ export {
   getUpdateRoleV1ResponseMock,
   getHealthV1ResponseMock,
   getVersionV1ResponseMock,
-} from "./default.faker.ts";
+} from "./default.faker";
 
 export const getLoginV1MockHandler = (
   overrideResponse?:
