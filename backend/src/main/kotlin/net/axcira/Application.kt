@@ -23,12 +23,12 @@ fun Application.main() {
 }
 
 /**
- * /api/v{version} 以下にルーティングを設定する。
- * 指定されたバージョンとパスを基にルーティングを作成し、ブロック内で個別のエンドポイントを定義可能。
+ * Mounts routes under `/api/v{version}`.
+ * Builds the path from [version] and [route], then defines endpoints inside [block].
  *
- * @param route ルートのパス。指定された場合、"/api/v{version}/<path>" の形でルーティングが設定される。デフォルトはnull。
- * @param version APIバージョン。デフォルトは1。
- * @param block ルーティングブロック。Routeスコープ内でエンドポイントを定義可能。
+ * @param route Path appended after the version. When set, the route is `/api/v{version}/<path>`. Defaults to null.
+ * @param version API version. Defaults to 1.
+ * @param block Routing block. Endpoints are defined in a [Route] scope.
  */
 fun Application.apiRouting(
     route: String? = null,

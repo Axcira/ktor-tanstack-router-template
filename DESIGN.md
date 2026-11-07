@@ -104,58 +104,58 @@ Only `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl`, `rounded-full`, `ro
 
 Enforcement: `frontend/scripts/radius-check.ts` (part of `bun run frontend:check`). Changing a radius flag updates every `rounded-*` utility. The check still rejects arbitrary radii such as `rounded-[4px]`; pick a step on the scale instead of a one-off length.
 
-## 見た目の調整
+## Tuning the look
 
-ローカルで色味や角丸を試すときは、`frontend` で `bun run theme` にフラグを渡します。リポジトリルートからは `bun run --cwd frontend theme …` です。一覧は `bun run theme --help`。色の計算は `@material/material-color-utilities` に任せ、このリポジトリではトーンを手計算しません。
+To try colors or corner radii locally, pass flags to `bun run theme` from `frontend`. From the repo root, use `bun run --cwd frontend theme …`. `bun run theme --help` lists the flags. Color math stays in `@material/material-color-utilities`; this repo does not compute tones by hand.
 
-試した CSS は既定値と違うので `bun run theme:check` が失敗します。戻すときはフラグなしの `bun run theme`。採用する見た目をリポジトリの既定にするときは `frontend/scripts/theme.ts` の `DEFAULT_THEME` / `DEFAULT_RADIUS` / `DEFAULT_CONTRAST` を変えてから、同じ既定で再生成します。`package.json` に既定値のコピーはありません。生成ファイル先頭のコメントに、そのときのフラグがすべて残ります。
+Tried CSS differs from the defaults, so `bun run theme:check` fails. Restore the defaults with `bun run theme` and no flags. To adopt a look as the repo default, change `DEFAULT_THEME`, `DEFAULT_RADIUS`, and `DEFAULT_CONTRAST` in `frontend/scripts/theme.ts`, then regenerate with those same defaults. `package.json` does not copy the defaults. The header comment of the generated file records every flag from that run.
 
-| フラグ | 既定 | 効果 |
+| Flag | Default | Effect |
 | --- | --- | --- |
-| 位置引数の primary | `#0061f3` | スキームの種。primary そのものではなく、variant がこの色からロールを作ります |
-| `--variant=` | `tonal-spot` | 下の一覧。インストール済みライブラリの `Variant` 全部を受け、`--help` とエラーメッセージに列挙します |
-| `--contrast=` | `0` | `-1`（最低）から `1`（最大）。`0` が仕様どおり。primary / on-primary と outline の強さが変わります |
-| `--success=` | `#1b873f` | success の種 |
-| `--info=` | `#0277bd` | info の種 |
-| `--warning=` | `#f9a825` | warning の種 |
-| `--radius-sm=` | `0.375rem` | チェック、バッジ、ツールチップ（約 6px） |
-| `--radius-md=` | `0.5rem` | 入力、ボタン、セレクト（約 8px） |
-| `--radius-lg=` | `0.75rem` | カード、ポップオーバー、トースト。`--radius` もこれと同じ（約 12px） |
-| `--radius-xl=` | `1.25rem` | ダイアログ、シート、ドロワー（約 20px） |
+| Positional primary | `#0061f3` | Scheme seed. Not the primary color itself; the variant builds roles from this color |
+| `--variant=` | `tonal-spot` | One of the variants below. Accepts every `Variant` from the installed library, and `--help` plus the error message list them |
+| `--contrast=` | `0` | From `-1` (lowest) to `1` (highest). `0` is the spec default. Changes the strength of primary / on-primary and outline |
+| `--success=` | `#1b873f` | Success seed |
+| `--info=` | `#0277bd` | Info seed |
+| `--warning=` | `#f9a825` | Warning seed |
+| `--radius-sm=` | `0.375rem` | Checkbox, badge, tooltip (about 6px) |
+| `--radius-md=` | `0.5rem` | Input, button, select (about 8px) |
+| `--radius-lg=` | `0.75rem` | Card, popover, toast. `--radius` matches this (about 12px) |
+| `--radius-xl=` | `1.25rem` | Dialog, sheet, drawer (about 20px) |
 
-角丸は `0.25rem` のような rem か、`4px` のような px。`rounded-full` と `--radius-pill`（`9999px`）は固定で、フラグはありません。
+Radii are rem, such as `0.25rem`, or px, such as `4px`. `rounded-full` and `--radius-pill` (`9999px`) are fixed and have no flag.
 
-### variant の見え方
+### How variants look
 
-既定の primary `#0061f3`、contrast `0` での傾向です。
+Tendencies for the default primary `#0061f3` at contrast `0`.
 
-| variant | 傾向 |
+| variant | Tendency |
 | --- | --- |
-| `tonal-spot` | 既定。ニュートラルに種の色相が乗ります。この種だと背景 `--background` は `#faf8ff` で、わずかに青紫です。primary は `#4a5d92` まで落ち、白文字とのコントラストも種そのものより弱く見えます |
-| `neutral` | 彩度をほとんど抜いたグレー。背景は `#fcf8fa` で、青紫のティントはほぼ消えます |
-| `monochrome` | グレースケール。背景 `#f9f9f9`、primary は黒 |
-| `vibrant` | primary パレットの彩度を最大まで上げます |
-| `expressive` | 種の色相から意図的に離した、より遊んだ配色 |
-| `fidelity` | 種を primary container に置き、primary を種に近づけます（この種では `#004bc0`）。白とのコントラストも tonal-spot より強くなります |
-| `content` | fidelity と同じく種を primary container に置きます。このライブラリ版では色がほぼ fidelity と同じになることがあります |
-| `rainbow` | 遊び心のある配色。種の色相はテーマに出ません |
-| `fruit-salad` | rainbow と同様、種の色相を使わない遊び心のある配色 |
+| `tonal-spot` | Default. A neutral surface picks up the seed hue. With this seed, `--background` is `#faf8ff`, a faint blue-violet. Primary drops to `#4a5d92`, and contrast against white text looks weaker than the seed itself |
+| `neutral` | Gray with almost no chroma. Background is `#fcf8fa`, and the blue-violet tint is nearly gone |
+| `monochrome` | Grayscale. Background `#f9f9f9`, primary is black |
+| `vibrant` | Raises the primary palette chroma as far as it goes |
+| `expressive` | A more playful palette that deliberately leaves the seed hue |
+| `fidelity` | Places the seed on the primary container and pulls primary toward the seed (`#004bc0` for this seed). Contrast against white is stronger than tonal-spot |
+| `content` | Also places the seed on the primary container, like fidelity. This library version can produce colors that are almost the same as fidelity |
+| `rainbow` | A playful palette. The seed hue does not appear in the theme |
+| `fruit-salad` | Like rainbow, a playful palette that does not use the seed hue |
 
-### コントラスト
+### Contrast
 
-`--contrast` は `DynamicScheme` の `contrastLevel` です。背景色は variant 側の仕事で、tonal-spot の `#faf8ff` は contrast を動かしても変わりません。変わるのはロールのトーンです。
+`--contrast` is `DynamicScheme`'s `contrastLevel`. Background color belongs to the variant, so tonal-spot's `#faf8ff` does not change when contrast moves. Role tones do.
 
-- `0`: 今の見た目。primary `#4a5d92`、on-primary `#ffffff`、outline `#757680`、outline-variant `#c5c6d0`
-- `1` に近づける: primary は濃くなり（`#14295c`）、on-primary は白のまま、outline / outline-variant も濃くなります。文字と面のコントラストは上がります
-- `-1` に近づける: primary は薄くなり（`#6073aa`）、on-primary は純白ではなくなり、outline も薄くなります
+- `0`: the current look. Primary `#4a5d92`, on-primary `#ffffff`, outline `#757680`, outline-variant `#c5c6d0`
+- Toward `1`: primary gets darker (`#14295c`), on-primary stays white, and outline / outline-variant get darker. Contrast between text and surface goes up
+- Toward `-1`: primary gets lighter (`#6073aa`), on-primary is no longer pure white, and outline gets lighter
 
-背景の青紫を取りたいときは contrast ではなく `neutral` か `monochrome`。primary を種の青に戻してコントラストも上げたいときは `fidelity`（必要なら contrast も少し上げる）。
+To remove the blue-violet from the background, use `neutral` or `monochrome` rather than contrast. To bring primary back toward the seed blue and raise contrast, use `fidelity` (and raise contrast a little if needed).
 
-### 角丸
+### Corner radius
 
-値は `theme.generated.css` の `:root` に書き出され、`styles.css` の `@theme` 経由で `rounded-sm` / `md` / `lg` / `xl` 全部に流れます。クラス名は変えないでください。`radius:check` はクラス名だけを見て、数値は見ません。
+Values are written to `:root` in `theme.generated.css` and flow to every `rounded-sm` / `md` / `lg` / `xl` through `@theme` in `styles.css`. Do not change the class names. `radius:check` looks only at class names, not at the numbers.
 
-昔のシャープな角に近づける例（ニュートラル寄り、コントラストを上げ、半径を小さく）:
+Example that moves toward the old sharper corners (more neutral, higher contrast, smaller radii):
 
 ```bash
 bun run theme --variant=neutral --contrast=0.5 \
@@ -163,16 +163,16 @@ bun run theme --variant=neutral --contrast=0.5 \
   --radius-lg=0.375rem --radius-xl=0.5rem
 ```
 
-px でも同じです。`--radius-sm=2px --radius-md=4px --radius-lg=6px --radius-xl=8px`
+px works the same way: `--radius-sm=2px --radius-md=4px --radius-lg=6px --radius-xl=8px`
 
-### テキスト入力の背景
+### Text input background
 
-入力コンポーネント（`frontend/src/components/ui/input.tsx`）は `bg-input/50` です。色トークンは `--input`（Tailwind の `--color-input`）で、50% の不透明度で下地に載ります。
+The input component (`frontend/src/components/ui/input.tsx`) uses `bg-input/50`. The color token is `--input` (Tailwind's `--color-input`), painted at 50% opacity over the surface underneath.
 
-- ライト: `--input` は MD3 の `surface-container-highest`（既定では `#e3e2e9`）。`--border` と `--outline-variant` は `#c5c6d0` です。50% で `#faf8ff` の上に置くと、グレーの塗りが目立ちます
-- ダーク: `--input` は同じロールです（既定では `#33343a`）
+- Light: `--input` is MD3 `surface-container-highest` (`#e3e2e9` by default). `--border` and `--outline-variant` are `#c5c6d0`. At 50% over `#faf8ff`, the gray fill is visible
+- Dark: `--input` is the same role (`#33343a` by default)
 
-contrast を上げると `surface-container-highest` が濃くなり、このグレーはより目立ちます。薄くしたいときは contrast を上げず、`neutral` / `monochrome` で色相を抜くか、Input の `bg-input/50` を `bg-transparent` やより低い透明度に変えます。後者はフラグではなくコンポーネントのクラスです。
+Raising contrast darkens `surface-container-highest`, so this gray stands out more. To make it lighter, do not raise contrast; drop the hue with `neutral` / `monochrome`, or change Input's `bg-input/50` to `bg-transparent` or a lower opacity. The latter is a component class, not a flag.
 
 ## UI coding rules
 

@@ -40,7 +40,7 @@ bun run theme --variant=neutral --contrast=0.5 \
   --radius-lg=0.375rem --radius-xl=0.5rem
 ```
 
-試したファイルは `bun run theme:check` に失敗します。戻すときは引数なしの `bun run theme`。各フラグの効果、variant の見え方、入力欄の背景（`--input` / `bg-input/50`）は [DESIGN.md の「見た目の調整」](../DESIGN.md#見た目の調整) にまとめてあります。
+試したファイルは `bun run theme:check` に失敗します。戻すときは引数なしの `bun run theme`。各フラグの効果、variant の見え方、入力欄の背景（`--input` / `bg-input/50`）は [DESIGN.md の “Tuning the look”](../DESIGN.md#tuning-the-look) にまとめてあります。
 
 ## Notes
 

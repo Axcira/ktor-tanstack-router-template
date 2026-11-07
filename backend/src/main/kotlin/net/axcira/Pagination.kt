@@ -10,21 +10,19 @@ data class Pagination(
 )
 
 /**
- * 配列を指定されたページネーション設定に基づいてスライスします。
+ * Returns a slice of this array for [pagination].
  *
- * @param pagination ページネーション情報を含むオブジェクト。
- *                   このオブジェクトの `offset` はスライスの開始インデックスを、
- *                   `limit` は取得する要素数を示します。
- * @return ページネーション設定に従って切り取られた新しい配列。
+ * [Pagination.offset] is the start index and [Pagination.limit] is the number of elements.
+ *
+ * @return A new array containing the requested slice.
  */
 fun <T> Array<T>.paginate(pagination: Pagination) = slice(pagination.offset until pagination.offset + pagination.limit)
 
 /**
- * Queryオブジェクトにページネーション設定を適用します。
+ * Applies [pagination] to this query.
  *
- * @param pagination ページネーション情報を含むオブジェクト。
- *                   このオブジェクトの `offset` はスライスの開始インデックスを、
- *                   `limit` は取得する要素数を示します。
- * @return 適用されたQueryオブジェクト。
+ * [Pagination.offset] is the start index and [Pagination.limit] is the maximum row count.
+ *
+ * @return This query with offset and limit applied.
  */
 fun Query.paginate(pagination: Pagination) = this.offset(pagination.offset.toLong()).limit(pagination.limit)

@@ -136,12 +136,11 @@ fun javax.sql.DataSource.truncateAllTables() {
 }
 
 /**
- * データベースで指定されたブロックを非同期的に実行します。
- * この関数はI/Oスレッドで実行されるように設計されています。
+ * Runs [block] against this database on the I/O dispatcher.
  *
- * @param block 実行するデータベース操作を含むラムダブロック
- * @return ブロックの実行結果
- * @throws Exception 実行中に発生した例外
+ * @param block Database operations to run.
+ * @return The value returned by [block].
+ * @throws Exception Any exception thrown while [block] runs.
  */
 suspend fun <T> Database.dbQuery(block: suspend Database.() -> T) =
     withContext(Dispatchers.IO) {
