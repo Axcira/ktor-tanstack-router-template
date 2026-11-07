@@ -106,8 +106,7 @@ class AuthRoutingTest {
         test { client ->
             val email = "pw-change@example.com"
             login(client, email, listOf(Permission.ChangePassword))
-            val other = extraClient()
-            try {
+            extraClient().use { other ->
                 other
                     .post("/api/v1/auth/login") {
                         contentType(ContentType.Application.Json)
@@ -212,8 +211,6 @@ class AuthRoutingTest {
                         contentType(ContentType.Application.Json)
                         setBody(LoginRequest(email, "replacement-3"))
                     }.let { assertEquals(HttpStatusCode.OK, it.status) }
-            } finally {
-                other.close()
             }
         }
 
