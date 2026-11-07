@@ -16,10 +16,10 @@ import net.axcira.plugins.dbQuery
 import net.axcira.test
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ArticleRoutingTest {
     @Test
@@ -64,7 +64,7 @@ class ArticleRoutingTest {
                     }.assertStatus(HttpStatusCode.Created)
                     .body<ArticleDTO>()
                     .also { article ->
-                        assert(article.id > 0u)
+                        assertTrue(article.id > 0u)
                         assertEquals(user.id, article.userId)
                         assertEquals("Test Article", article.title)
                         assertEquals("This is a test article", article.description)
