@@ -31,10 +31,10 @@ class HealthService(
             HealthResponse(status = "ok", database = "up")
         } catch (e: Exception) {
             if (skipDatabase) {
-                log.debug("Database ping skipped (SKIP_DATABASE): {}", e.message)
+                log.debug("Database ping skipped (SKIP_DATABASE): ${e.message}")
                 HealthResponse(status = "ok", database = "skipped")
             } else {
-                log.warn("Database ping failed: {}", e.message)
+                log.warn("Database ping failed: ${e.message}")
                 HealthResponse(status = "unhealthy", database = "down")
             }
         }
