@@ -18,7 +18,24 @@ val pass = System.getenv("DB_PASSWORD") ?: "password"
 val maxPoolSize = System.getenv("DB_MAX_POOL_SIZE")?.toIntOrNull()?.takeIf { it > 0 } ?: 10
 val url = "jdbc:postgresql://$host:$port/$dbName"
 
-val hikariConfig by lazy {
+private val databaseLock = Any()
+
+@Volatile
+private var currentDataSource: HikariDataSource? = null
+
+@Volatile
+private var currentDatabase: Database? = null
+
+private val shutdownHookRegistered =
+    lazy {
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                closeDatabase()
+            },
+        )
+    }
+
+private fun createHikariConfig() =
     HikariConfig().apply {
         this.driverClassName = "org.postgresql.Driver"
         this.jdbcUrl = url
@@ -30,53 +47,53 @@ val hikariConfig by lazy {
         initializationFailTimeout = if (skipDatabase) -1 else 1
         validate()
     }
-}
 
-private val lazyDataSource =
-    lazy {
-        HikariDataSource(hikariConfig).also { ds ->
-            Runtime.getRuntime().addShutdownHook(
-                Thread {
-                    runCatching { ds.close() }
-                },
-            )
+val hikariConfig by lazy { createHikariConfig() }
+
+val dataSource: HikariDataSource
+    get() =
+        currentDataSource ?: synchronized(databaseLock) {
+            currentDataSource ?: HikariDataSource(createHikariConfig()).also { ds ->
+                shutdownHookRegistered.value
+                currentDataSource = ds
+            }
         }
-    }
 
-val dataSource: HikariDataSource by lazyDataSource
-
-private val lazyDatabase =
-    lazy {
-        if (!skipDatabase) {
-            Flyway
-                .configure()
-                .dataSource(dataSource)
-                .locations("classpath:db/migration")
-                .load()
-                .migrate()
+val database: Database
+    get() =
+        currentDatabase ?: synchronized(databaseLock) {
+            currentDatabase ?: run {
+                val ds = dataSource
+                if (!skipDatabase) {
+                    Flyway
+                        .configure()
+                        .dataSource(ds)
+                        .locations("classpath:db/migration")
+                        .load()
+                        .migrate()
+                }
+                Database.connect(ds).also { db ->
+                    currentDatabase = db
+                }
+            }
         }
-        Database.connect(dataSource).also { db ->
-            Runtime.getRuntime().addShutdownHook(
-                Thread {
-                    runCatching { TransactionManager.closeAndUnregister(db) }
-                },
-            )
-        }
-    }
-
-val database: Database by lazyDatabase
 
 fun database() = database
 
 /**
- * Closes the lazily initialized [database] and [dataSource] if they were created.
+ * Closes the initialized [database] and [dataSource] if they were created,
+ * and clears cached references so a subsequent startup in the same classloader can reinitialize them.
  */
 fun closeDatabase() {
-    if (lazyDatabase.isInitialized()) {
-        runCatching { TransactionManager.closeAndUnregister(database) }
-    }
-    if (lazyDataSource.isInitialized()) {
-        runCatching { dataSource.close() }
+    synchronized(databaseLock) {
+        currentDatabase?.let { db ->
+            currentDatabase = null
+            runCatching { TransactionManager.closeAndUnregister(db) }
+        }
+        currentDataSource?.let { ds ->
+            currentDataSource = null
+            runCatching { ds.close() }
+        }
     }
 }
 
