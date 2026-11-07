@@ -6,7 +6,6 @@ import io.ktor.http.*
 import net.axcira.assertStatus
 import net.axcira.test
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class AuthValidationTest {

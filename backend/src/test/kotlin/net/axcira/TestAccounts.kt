@@ -13,7 +13,6 @@ import net.axcira.features.users.UserService
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
-import kotlin.test.assertEquals
 
 suspend fun SharedTestContext.login(
     client: HttpClient,
