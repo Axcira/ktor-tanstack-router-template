@@ -36,6 +36,6 @@ suspend fun SharedTestContext.login(
             contentType(ContentType.Application.Json)
             setBody(LoginRequest(email, "password"))
         }
-    assertEquals(HttpStatusCode.OK, response.status)
+    response.assertStatus(HttpStatusCode.OK)
     return user
 }

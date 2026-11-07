@@ -4,6 +4,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
+import net.axcira.assertStatus
 import net.axcira.db.Role
 import net.axcira.extraClient
 import net.axcira.features.auth.LoginRequest
@@ -42,9 +43,7 @@ class ArticleRoutingTest {
                 .post("/api/v1/auth/login") {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("article-admin@example.com", "password"))
-                }.let {
-                    assertEquals(HttpStatusCode.OK, it.status)
-                }
+                }.assertStatus(HttpStatusCode.OK)
 
             // Create test article
             val createdArticle =
@@ -63,7 +62,7 @@ class ArticleRoutingTest {
                             ),
                         )
                     }.let {
-                        assertEquals(HttpStatusCode.Created, it.status)
+                        it.assertStatus(HttpStatusCode.Created)
                         val article = it.body<ArticleDTO>()
                         assert(article.id > 0u)
                         assertEquals(user.id, article.userId)
@@ -107,12 +106,10 @@ class ArticleRoutingTest {
                         }
                         """.trimIndent(),
                     )
-                }.let {
-                    assertEquals(HttpStatusCode.OK, it.status)
-                }
+                }.assertStatus(HttpStatusCode.OK)
 
             client.get("/api/v1/articles/${createdArticle.id}").let {
-                assertEquals(HttpStatusCode.OK, it.status)
+                it.assertStatus(HttpStatusCode.OK)
                 val article = it.body<ArticleDTO>()
                 assertContains(article.title, "Updated")
                 assertContains(article.description, "updated")
@@ -121,8 +118,8 @@ class ArticleRoutingTest {
             }
 
             // Delete article
-            assertEquals(HttpStatusCode.NoContent, client.delete("/api/v1/articles/${createdArticle.id}").status)
-            assertEquals(HttpStatusCode.NotFound, client.get("/api/v1/articles/${createdArticle.id}").status)
+            client.delete("/api/v1/articles/${createdArticle.id}").assertStatus(HttpStatusCode.NoContent)
+            client.get("/api/v1/articles/${createdArticle.id}").assertStatus(HttpStatusCode.NotFound)
             assertEquals(1, client.get("/api/v1/articles").body<List<ArticleDTO>>().size)
         }
 
@@ -138,14 +135,11 @@ class ArticleRoutingTest {
 
                 val input = CreateArticleInput("Owner Article", "Desc", "Body", emptyList())
 
-                assertEquals(
-                    HttpStatusCode.Forbidden,
-                    readerClient
-                        .post("/api/v1/articles") {
-                            contentType(ContentType.Application.Json)
-                            setBody(input)
-                        }.status,
-                )
+                readerClient
+                    .post("/api/v1/articles") {
+                        contentType(ContentType.Application.Json)
+                        setBody(input)
+                    }.assertStatus(HttpStatusCode.Forbidden)
 
                 val created =
                     authorClient
@@ -154,14 +148,11 @@ class ArticleRoutingTest {
                             setBody(input)
                         }.body<ArticleDTO>()
 
-                assertEquals(
-                    HttpStatusCode.Forbidden,
-                    staffClient
-                        .patch("/api/v1/articles/${created.id}") {
-                            contentType(ContentType.Application.Json)
-                            setBody("{\"title\":\"Hijacked\"}")
-                        }.status,
-                )
+                staffClient
+                    .patch("/api/v1/articles/${created.id}") {
+                        contentType(ContentType.Application.Json)
+                        setBody("{\"title\":\"Hijacked\"}")
+                    }.assertStatus(HttpStatusCode.Forbidden)
             } finally {
                 readerClient.close()
                 staffClient.close()

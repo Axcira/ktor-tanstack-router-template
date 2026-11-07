@@ -3,6 +3,7 @@ package net.axcira.features.auth
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import net.axcira.assertStatus
 import net.axcira.test
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -17,7 +18,7 @@ class AuthValidationTest {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("", "password"))
                 }.let { response ->
-                    assertEquals(HttpStatusCode.BadRequest, response.status)
+                    response.assertStatus(HttpStatusCode.BadRequest)
                     val body = response.bodyAsText()
                     assertTrue(body.contains("email"), "expected email validation reason in: $body")
                 }
@@ -31,7 +32,7 @@ class AuthValidationTest {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("user@example.com", "short"))
                 }.let { response ->
-                    assertEquals(HttpStatusCode.BadRequest, response.status)
+                    response.assertStatus(HttpStatusCode.BadRequest)
                     val body = response.bodyAsText()
                     assertTrue(body.contains("password"), "expected password validation reason in: $body")
                 }

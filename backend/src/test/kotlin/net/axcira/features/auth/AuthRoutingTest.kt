@@ -5,6 +5,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.*
+import net.axcira.assertStatus
 import net.axcira.db.Role
 import net.axcira.db.SessionsTable
 import net.axcira.extraClient
@@ -56,25 +57,18 @@ class AuthRoutingTest {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("api-auth@example.com", "password"))
                 }.let {
-                    assertEquals(HttpStatusCode.OK, it.status)
+                    it.assertStatus(HttpStatusCode.OK)
                     val session = it.body<UserSession>()
                     assert(session.user.id > 0u)
                 }
 
             // Access to protected resources
-            client.get("/api/v1/users/me").let {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
+            client.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
             // Logout
-            client.post("/api/v1/auth/logout").let {
-                assertEquals(HttpStatusCode.NoContent, it.status)
-            }
+            client.post("/api/v1/auth/logout").assertStatus(HttpStatusCode.NoContent)
 
             // Access to protected resources again
-            client.get("/api/v1/users/me").let {
-                assertEquals(HttpStatusCode.Unauthorized, it.status)
-            }
+            client.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
         }
 
     @Test
@@ -91,14 +85,14 @@ class AuthRoutingTest {
                         ),
                     )
                 }
-            assertEquals(HttpStatusCode.Forbidden, denied.status)
+            denied.assertStatus(HttpStatusCode.Forbidden)
 
-            client.post("/api/v1/auth/logout").let { assertEquals(HttpStatusCode.NoContent, it.status) }
+            client.post("/api/v1/auth/logout").assertStatus(HttpStatusCode.NoContent)
             client
                 .post("/api/v1/auth/login") {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("pw-manage@example.com", "password"))
-                }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                }.assertStatus(HttpStatusCode.OK)
         }
 
     @Test
@@ -111,8 +105,8 @@ class AuthRoutingTest {
                     .post("/api/v1/auth/login") {
                         contentType(ContentType.Application.Json)
                         setBody(LoginRequest(email, "password"))
-                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
-                assertEquals(HttpStatusCode.OK, other.get("/api/v1/users/me").status)
+                    }.assertStatus(HttpStatusCode.OK)
+                other.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
 
                 val wrong =
                     client.post("/api/v1/auth/password") {
@@ -124,8 +118,8 @@ class AuthRoutingTest {
                             ),
                         )
                     }
-                assertEquals(HttpStatusCode.Unauthorized, wrong.status)
-                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
+                wrong.assertStatus(HttpStatusCode.Unauthorized)
+                client.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
 
                 val same =
                     client.post("/api/v1/auth/password") {
@@ -137,7 +131,7 @@ class AuthRoutingTest {
                             ),
                         )
                     }
-                assertEquals(HttpStatusCode.BadRequest, same.status)
+                same.assertStatus(HttpStatusCode.BadRequest)
                 assertTrue(same.body<ValidationErrorBody>().reasons.any { it.contains("differ") })
 
                 val short =
@@ -150,7 +144,7 @@ class AuthRoutingTest {
                             ),
                         )
                     }
-                assertEquals(HttpStatusCode.BadRequest, short.status)
+                short.assertStatus(HttpStatusCode.BadRequest)
 
                 val shortCurrent =
                     client.post("/api/v1/auth/password") {
@@ -162,15 +156,15 @@ class AuthRoutingTest {
                             ),
                         )
                     }
-                assertEquals(HttpStatusCode.BadRequest, shortCurrent.status)
+                shortCurrent.assertStatus(HttpStatusCode.BadRequest)
 
                 client
                     .post("/api/v1/auth/password") {
                         contentType(ContentType.Application.Json)
                         setBody("{\"currentPassword\":\"password\",\"newPassword\":\"replacement-1\"}")
-                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
-                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.OK, other.get("/api/v1/users/me").status)
+                    }.assertStatus(HttpStatusCode.NoContent)
+                client.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
+                other.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
 
                 client
                     .post("/api/v1/auth/password") {
@@ -182,9 +176,9 @@ class AuthRoutingTest {
                                 logoutOtherSessions = false,
                             ),
                         )
-                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
-                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.OK, other.get("/api/v1/users/me").status)
+                    }.assertStatus(HttpStatusCode.NoContent)
+                client.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
+                other.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
 
                 client
                     .post("/api/v1/auth/password") {
@@ -196,21 +190,21 @@ class AuthRoutingTest {
                                 logoutOtherSessions = true,
                             ),
                         )
-                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
-                assertEquals(HttpStatusCode.OK, client.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.Unauthorized, other.get("/api/v1/users/me").status)
+                    }.assertStatus(HttpStatusCode.NoContent)
+                client.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
+                other.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
 
-                client.post("/api/v1/auth/logout").let { assertEquals(HttpStatusCode.NoContent, it.status) }
+                client.post("/api/v1/auth/logout").assertStatus(HttpStatusCode.NoContent)
                 client
                     .post("/api/v1/auth/login") {
                         contentType(ContentType.Application.Json)
                         setBody(LoginRequest(email, "password"))
-                    }.let { assertEquals(HttpStatusCode.Unauthorized, it.status) }
+                    }.assertStatus(HttpStatusCode.Unauthorized)
                 client
                     .post("/api/v1/auth/login") {
                         contentType(ContentType.Application.Json)
                         setBody(LoginRequest(email, "replacement-3"))
-                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                    }.assertStatus(HttpStatusCode.OK)
             }
         }
 
@@ -227,7 +221,7 @@ class AuthRoutingTest {
                         ),
                     )
                 }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            response.assertStatus(HttpStatusCode.Unauthorized)
         }
 
     @Test
@@ -250,13 +244,13 @@ class AuthRoutingTest {
                                 ),
                             )
                         }.let {
-                            assertEquals(HttpStatusCode.Created, it.status)
+                            it.assertStatus(HttpStatusCode.Created)
                             it.body<ArticleDTO>()
                         }
 
-                assertEquals(HttpStatusCode.NoContent, adminClient.delete("/api/v1/users/delete/${author.id}").status)
-                assertEquals(HttpStatusCode.NotFound, adminClient.get("/api/v1/articles/${createdArticle.id}").status)
-                assertEquals(HttpStatusCode.Unauthorized, authorClient.get("/api/v1/users/me").status)
+                adminClient.delete("/api/v1/users/delete/${author.id}").assertStatus(HttpStatusCode.NoContent)
+                adminClient.get("/api/v1/articles/${createdArticle.id}").assertStatus(HttpStatusCode.NotFound)
+                authorClient.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
                 val database: Database by application.dependencies
                 database.dbQuery {
                     assertEquals(
@@ -280,7 +274,7 @@ class AuthRoutingTest {
                     .post("/api/v1/auth/login") {
                         contentType(ContentType.Application.Json)
                         setBody(LoginRequest(targetEmail, "password"))
-                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                    }.assertStatus(HttpStatusCode.OK)
                 login(admin, "pw-force-admin@example.com", listOf(Permission.ManageUsers))
                 login(bystander, "pw-bystander@example.com", listOf(Permission.ChangePassword))
 
@@ -294,22 +288,22 @@ class AuthRoutingTest {
                     .post("/api/v1/users/$targetId/password") {
                         contentType(ContentType.Application.Json)
                         setBody(ForceChangePasswordRequest(newPassword = "replacement-1"))
-                    }.let { assertEquals(HttpStatusCode.Forbidden, it.status) }
+                    }.assertStatus(HttpStatusCode.Forbidden)
 
                 admin
                     .post("/api/v1/users/$targetId/password") {
                         contentType(ContentType.Application.Json)
                         setBody(ForceChangePasswordRequest(newPassword = "short"))
-                    }.let { assertEquals(HttpStatusCode.BadRequest, it.status) }
+                    }.assertStatus(HttpStatusCode.BadRequest)
 
                 admin
                     .post("/api/v1/users/$targetId/password") {
                         contentType(ContentType.Application.Json)
                         setBody("{\"newPassword\":\"replacement-1\"}")
-                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
-                assertEquals(HttpStatusCode.OK, target.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.OK, targetOther.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.OK, admin.get("/api/v1/users/me").status)
+                    }.assertStatus(HttpStatusCode.NoContent)
+                target.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
+                targetOther.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
+                admin.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
 
                 admin
                     .post("/api/v1/users/$targetId/password") {
@@ -320,9 +314,9 @@ class AuthRoutingTest {
                                 logoutSessions = false,
                             ),
                         )
-                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
-                assertEquals(HttpStatusCode.OK, target.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.OK, targetOther.get("/api/v1/users/me").status)
+                    }.assertStatus(HttpStatusCode.NoContent)
+                target.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
+                targetOther.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
 
                 admin
                     .post("/api/v1/users/$targetId/password") {
@@ -333,28 +327,28 @@ class AuthRoutingTest {
                                 logoutSessions = true,
                             ),
                         )
-                    }.let { assertEquals(HttpStatusCode.NoContent, it.status) }
-                assertEquals(HttpStatusCode.Unauthorized, target.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.Unauthorized, targetOther.get("/api/v1/users/me").status)
-                assertEquals(HttpStatusCode.OK, admin.get("/api/v1/users/me").status)
+                    }.assertStatus(HttpStatusCode.NoContent)
+                target.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
+                targetOther.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
+                admin.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)
 
                 target
                     .post("/api/v1/auth/login") {
                         contentType(ContentType.Application.Json)
                         setBody(LoginRequest(targetEmail, "password"))
-                    }.let { assertEquals(HttpStatusCode.Unauthorized, it.status) }
+                    }.assertStatus(HttpStatusCode.Unauthorized)
                 target
                     .post("/api/v1/auth/login") {
                         contentType(ContentType.Application.Json)
                         setBody(LoginRequest(targetEmail, "replacement-3"))
-                    }.let { assertEquals(HttpStatusCode.OK, it.status) }
+                    }.assertStatus(HttpStatusCode.OK)
 
                 admin
                     .post("/api/v1/users/999999/password") {
                         contentType(ContentType.Application.Json)
                         setBody(ForceChangePasswordRequest(newPassword = "replacement-4"))
                     }.let {
-                        assertEquals(HttpStatusCode.NotFound, it.status)
+                        it.assertStatus(HttpStatusCode.NotFound)
                         assertEquals("\"User not found\"", it.bodyAsText())
                     }
             } finally {
@@ -372,7 +366,7 @@ class AuthRoutingTest {
                     contentType(ContentType.Application.Json)
                     setBody(ForceChangePasswordRequest(newPassword = "replacement-1"))
                 }
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            response.assertStatus(HttpStatusCode.Unauthorized)
         }
 
     @Test
@@ -398,7 +392,7 @@ class AuthRoutingTest {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("first-session@example.com", "password"))
                 }
-            assertEquals(HttpStatusCode.OK, firstResponse.status)
+            firstResponse.assertStatus(HttpStatusCode.OK)
             val setCookieHeaders = firstResponse.headers.getAll(HttpHeaders.SetCookie).orEmpty()
             assertTrue(setCookieHeaders.any { it.contains("SameSite=Lax", ignoreCase = true) })
             assertTrue(setCookieHeaders.any { it.contains("Max-Age=$SESSION_MAX_AGE_SECONDS", ignoreCase = true) })
@@ -421,7 +415,7 @@ class AuthRoutingTest {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("second-session@example.com", "password"))
                 }
-            assertEquals(HttpStatusCode.OK, secondResponse.status)
+            secondResponse.assertStatus(HttpStatusCode.OK)
 
             database.dbQuery {
                 assertEquals(
@@ -456,7 +450,7 @@ class AuthRoutingTest {
                 }
             }
 
-            assertEquals(HttpStatusCode.Unauthorized, client.get("/api/v1/users/me").status)
+            client.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
             database.dbQuery {
                 assertEquals(
                     0L,
@@ -472,7 +466,7 @@ class AuthRoutingTest {
                         it[expiresAt] = null
                     }
                 }
-                assertEquals(HttpStatusCode.Unauthorized, nullExpiryClient.get("/api/v1/users/me").status)
+                nullExpiryClient.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
                 database.dbQuery {
                     assertEquals(
                         0L,
@@ -501,18 +495,18 @@ class AuthRoutingTest {
                 login(manager, "get-user-manager@example.com", listOf(Permission.ManageUsers))
                 val readerUser = login(reader, "get-user-target@example.com", emptyList())
 
-                assertEquals(HttpStatusCode.Forbidden, reader.get("/api/v1/users/${readerUser.id}").status)
+                reader.get("/api/v1/users/${readerUser.id}").assertStatus(HttpStatusCode.Forbidden)
 
                 val fetched =
                     manager.get("/api/v1/users/${readerUser.id}").let {
-                        assertEquals(HttpStatusCode.OK, it.status)
+                        it.assertStatus(HttpStatusCode.OK)
                         it.body<UserDTO>()
                     }
                 assertEquals(readerUser.id, fetched.id)
                 assertEquals(readerUser.email, fetched.email)
 
-                assertEquals(HttpStatusCode.NotFound, manager.get("/api/v1/users/999999").status)
-                assertEquals(HttpStatusCode.BadRequest, manager.get("/api/v1/users/not-a-number").status)
+                manager.get("/api/v1/users/999999").assertStatus(HttpStatusCode.NotFound)
+                manager.get("/api/v1/users/not-a-number").assertStatus(HttpStatusCode.BadRequest)
             }
         }
 }

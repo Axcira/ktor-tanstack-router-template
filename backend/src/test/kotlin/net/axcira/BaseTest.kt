@@ -5,6 +5,8 @@ import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.cookies.*
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.testing.*
@@ -17,6 +19,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.testcontainers.containers.PostgreSQLContainer
 import java.time.Duration
+import kotlin.test.assertEquals
 
 /**
  * Receiver for [test] blocks. Exposes the shared application and a per-test [client]
@@ -230,4 +233,11 @@ private fun resetDatabase() {
     // Schema is migrated once at suite startup; per-test isolation uses TRUNCATE.
     // Any pool connected to sharedTestJdbc is fine — same Postgres.
     testDataSource.truncateAllTables()
+}
+
+/**
+ * A small utility function to assert the status code of an HttpResponse.
+ */
+fun HttpResponse.assertStatus(status: HttpStatusCode) {
+    assertEquals(status, this.status)
 }
