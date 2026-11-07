@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
 val skipDatabase = System.getenv("SKIP_DATABASE") == "true"
@@ -14,36 +15,87 @@ val port = System.getenv("DB_PORT")?.toInt() ?: 5432
 val dbName = System.getenv("DB_NAME") ?: "postgres"
 val user = System.getenv("DB_USER") ?: "postgres"
 val pass = System.getenv("DB_PASSWORD") ?: "password"
+val maxPoolSize = System.getenv("DB_MAX_POOL_SIZE")?.toIntOrNull()?.takeIf { it > 0 } ?: 10
 val url = "jdbc:postgresql://$host:$port/$dbName"
 
-val hikariConfig =
+private val databaseLock = Any()
+
+@Volatile
+private var currentDataSource: HikariDataSource? = null
+
+@Volatile
+private var currentDatabase: Database? = null
+
+private val shutdownHookRegistered =
+    lazy {
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                closeDatabase()
+            },
+        )
+    }
+
+private fun createHikariConfig() =
     HikariConfig().apply {
         this.driverClassName = "org.postgresql.Driver"
         this.jdbcUrl = url
         this.username = user
         this.password = pass
 
-        maximumPoolSize = 3
+        maximumPoolSize = maxPoolSize
         isAutoCommit = false
-        initializationFailTimeout = if (skipDatabase) 0 else 1
+        initializationFailTimeout = if (skipDatabase) -1 else 1
         validate()
     }
 
-val dataSource = HikariDataSource(hikariConfig)
+val hikariConfig by lazy { createHikariConfig() }
 
-val database by lazy {
-    if (!skipDatabase) {
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .locations("classpath:db/migration")
-            .load()
-            .migrate()
-    }
-    Database.connect(dataSource)
-}
+val dataSource: HikariDataSource
+    get() =
+        currentDataSource ?: synchronized(databaseLock) {
+            currentDataSource ?: HikariDataSource(createHikariConfig()).also { ds ->
+                shutdownHookRegistered.value
+                currentDataSource = ds
+            }
+        }
+
+val database: Database
+    get() =
+        currentDatabase ?: synchronized(databaseLock) {
+            currentDatabase ?: run {
+                val ds = dataSource
+                if (!skipDatabase) {
+                    Flyway
+                        .configure()
+                        .dataSource(ds)
+                        .locations("classpath:db/migration")
+                        .load()
+                        .migrate()
+                }
+                Database.connect(ds).also { db ->
+                    currentDatabase = db
+                }
+            }
+        }
 
 fun database() = database
+
+/**
+ * Closes the initialized [database] and [dataSource] if they were created,
+ * and clears cached references so a subsequent startup in the same classloader can reinitialize them.
+ */
+fun closeDatabase() {
+    synchronized(databaseLock) {
+        currentDatabase?.let { db ->
+            currentDatabase = null
+            runCatching { TransactionManager.closeAndUnregister(db) }
+        }
+        currentDataSource?.let { ds ->
+            currentDataSource = null
+            runCatching { ds.close() }
+        }
+    }
+}
 
 /**
  * Truncates all application tables in the public schema while keeping the schema and

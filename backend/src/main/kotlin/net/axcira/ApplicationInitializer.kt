@@ -7,6 +7,7 @@ import net.axcira.features.auth.PasswordHasher
 import net.axcira.features.permissions.*
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserService
+import net.axcira.plugins.closeDatabase
 
 fun Application.subscribe() {
     PasswordHasher.ensureConfigured()
@@ -14,6 +15,9 @@ fun Application.subscribe() {
         launch {
             initialize()
         }
+    }
+    monitor.subscribe(ApplicationStopped) {
+        closeDatabase()
     }
 }
 
