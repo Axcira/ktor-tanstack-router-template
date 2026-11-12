@@ -45,6 +45,7 @@ Wire new features in `Application.kt` (`provide<XService>()` in `dependencies`) 
 
 - Ktor reads process env vars directly (does not load `.env`). See [`.env.example`](.env.example) for all variables and defaults.
 - Without a built SPA on disk, `/` serves Scalar and `/openapi.json`. With a SPA present (`/app/static` or `./static`), `/` serves the SPA and disables Scalar.
+- Production container images (`Dockerfile`, `Dockerfile.source` runtime stage) use `gcr.io/distroless/java25-debian13:nonroot` (no shell, no OS package manager). Argon2 uses JNA with `linux-x86-64/libargon2.so` bundled in `argon2-jvm` — no `libargon2` apt package. For an interactive shell when debugging a container, swap the runtime base to `gcr.io/distroless/java25-debian13:debug` (same layout under `/app`).
 
 ## Verify
 

@@ -5,23 +5,18 @@
 #   static/            frontend/dist                       (bun run frontend:build)
 # To compile inside the image instead:
 #   podman build -f Dockerfile.source -t backend .
-FROM docker.io/eclipse-temurin:25-jre
+# Runtime has no shell or package manager; for an interactive shell use
+# gcr.io/distroless/java25-debian13:debug with the same layout under /app.
+FROM gcr.io/distroless/java25-debian13:nonroot
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libargon2-1 \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd -r appuser && useradd -r -g appuser appuser
-
+# UID/GID 65532 is the distroless nonroot user.
 # Dependency jars change only when Gradle lockfiles / catalogs change.
-COPY --chown=appuser:appuser lib /app/lib
+COPY --chown=65532:65532 lib /app/lib
 # Frontend static assets change independently of backend code.
-COPY static /app/static
+COPY --chown=65532:65532 static /app/static
 # Thin application jar — small layer on code-only changes.
-COPY app.jar /app/app.jar
-RUN chown -R appuser:appuser /app
-
-USER appuser
+COPY --chown=65532:65532 app.jar /app/app.jar
 
 EXPOSE 8080
 
