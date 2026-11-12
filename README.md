@@ -221,6 +221,7 @@ cd backend
 #### Docker Container (Recommended)
 
 CI と同じく、ビルド済み成果物だけを `Dockerfile` でパッケージします（イメージ内ではコンパイルしません）。
+ランタイムは `gcr.io/distroless/java25-debian13:nonroot` です（シェルや apt はありません）。コンテナ内でシェルが必要なときは、同じ `/app` レイアウトで `gcr.io/distroless/java25-debian13:debug` を使ってください。
 ローカルでは先にバックエンド JAR とフロントの `dist` を作り、`image-context/` に揃えてからビルドします。
 
 ```bash
