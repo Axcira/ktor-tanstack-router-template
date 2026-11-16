@@ -175,9 +175,7 @@ export type LoginV1MutationBody = LoginRequest | undefined;
 export type LoginV1MutationError = ErrorType<void>;
 export type LoginV1MutationVariables = { data?: LoginRequest };
 
-/**
- * @summary Authenticate (Login)
- */
+/** @summary Authenticate (Login) */
 export const useLoginV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -266,9 +264,7 @@ export type LogoutV1MutationResult = NonNullable<
 
 export type LogoutV1MutationError = ErrorType<unknown>;
 
-/**
- * @summary Logout
- */
+/** @summary Logout */
 export const useLogoutV1 = <TError = ErrorType<unknown>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -515,6 +511,7 @@ export type GetUsersV1QueryResult = NonNullable<
 >;
 export type GetUsersV1QueryError = ErrorType<unknown>;
 
+/** @summary Get all users with pagination */
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
   TError = ErrorType<unknown>,
@@ -538,6 +535,7 @@ export function useGetUsersV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get all users with pagination */
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
   TError = ErrorType<unknown>,
@@ -561,6 +559,7 @@ export function useGetUsersV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get all users with pagination */
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
   TError = ErrorType<unknown>,
@@ -576,10 +575,7 @@ export function useGetUsersV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Get all users with pagination
- */
-
+/** @summary Get all users with pagination */
 export function useGetUsersV1<
   TData = Awaited<ReturnType<typeof getUsersV1>>,
   TError = ErrorType<unknown>,
@@ -688,6 +684,7 @@ export type GetUserByIdV1QueryResult = NonNullable<
 >;
 export type GetUserByIdV1QueryError = ErrorType<void | string>;
 
+/** @summary Get a user by ID */
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
   TError = ErrorType<void | string>,
@@ -711,6 +708,7 @@ export function useGetUserByIdV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get a user by ID */
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
   TError = ErrorType<void | string>,
@@ -734,6 +732,7 @@ export function useGetUserByIdV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get a user by ID */
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
   TError = ErrorType<void | string>,
@@ -749,10 +748,7 @@ export function useGetUserByIdV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Get a user by ID
- */
-
+/** @summary Get a user by ID */
 export function useGetUserByIdV1<
   TData = Awaited<ReturnType<typeof getUserByIdV1>>,
   TError = ErrorType<void | string>,
@@ -1044,9 +1040,7 @@ export type CreateUserV1MutationBody = CreateUserInput | undefined;
 export type CreateUserV1MutationError = ErrorType<string | void>;
 export type CreateUserV1MutationVariables = { data?: CreateUserInput };
 
-/**
- * @summary Create a new user
- */
+/** @summary Create a new user */
 export const useCreateUserV1 = <
   TError = ErrorType<string | void>,
   TContext = unknown,
@@ -1194,9 +1188,7 @@ export type UpdateUserV1MutationVariables = {
   data?: UpdateUserInput;
 };
 
-/**
- * @summary Update a user by ID
- */
+/** @summary Update a user by ID */
 export const useUpdateUserV1 = <
   TError = ErrorType<string | void>,
   TContext = unknown,
@@ -1292,9 +1284,7 @@ export type DeleteUserV1MutationResult = NonNullable<
 export type DeleteUserV1MutationError = ErrorType<unknown>;
 export type DeleteUserV1MutationVariables = { id: string };
 
-/**
- * @summary Delete a user by ID
- */
+/** @summary Delete a user by ID */
 export const useDeleteUserV1 = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -1424,9 +1414,7 @@ export type UpdateMeV1MutationBody = UpdateUserInput | undefined;
 export type UpdateMeV1MutationError = ErrorType<ValidationErrorBody>;
 export type UpdateMeV1MutationVariables = { data?: UpdateUserInput };
 
-/**
- * @summary Update the current user
- */
+/** @summary Update the current user */
 export const useUpdateMeV1 = <
   TError = ErrorType<ValidationErrorBody>,
   TContext = unknown,
@@ -1518,9 +1506,7 @@ export type DeleteMeV1MutationResult = NonNullable<
 
 export type DeleteMeV1MutationError = ErrorType<unknown>;
 
-/**
- * @summary Delete the current user
- */
+/** @summary Delete the current user */
 export const useDeleteMeV1 = <TError = ErrorType<unknown>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -1598,6 +1584,7 @@ export type GetSelfV1QueryResult = NonNullable<
 >;
 export type GetSelfV1QueryError = ErrorType<unknown>;
 
+/** @summary Get current user */
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
   TError = ErrorType<unknown>,
@@ -1620,6 +1607,7 @@ export function useGetSelfV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get current user */
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
   TError = ErrorType<unknown>,
@@ -1642,6 +1630,7 @@ export function useGetSelfV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get current user */
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
   TError = ErrorType<unknown>,
@@ -1656,10 +1645,7 @@ export function useGetSelfV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Get current user
- */
-
+/** @summary Get current user */
 export function useGetSelfV1<
   TData = Awaited<ReturnType<typeof getSelfV1>>,
   TError = ErrorType<unknown>,
@@ -1783,9 +1769,7 @@ export type CreateArticleV1MutationBody = CreateArticleInput | undefined;
 export type CreateArticleV1MutationError = ErrorType<unknown>;
 export type CreateArticleV1MutationVariables = { data?: CreateArticleInput };
 
-/**
- * @summary Create an article
- */
+/** @summary Create an article */
 export const useCreateArticleV1 = <
   TError = ErrorType<unknown>,
   TContext = unknown,
@@ -1885,6 +1869,7 @@ export type ListArticlesV1QueryResult = NonNullable<
 >;
 export type ListArticlesV1QueryError = ErrorType<unknown>;
 
+/** @summary List articles */
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
   TError = ErrorType<unknown>,
@@ -1908,6 +1893,7 @@ export function useListArticlesV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary List articles */
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
   TError = ErrorType<unknown>,
@@ -1931,6 +1917,7 @@ export function useListArticlesV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary List articles */
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
   TError = ErrorType<unknown>,
@@ -1946,10 +1933,7 @@ export function useListArticlesV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary List articles
- */
-
+/** @summary List articles */
 export function useListArticlesV1<
   TData = Awaited<ReturnType<typeof listArticlesV1>>,
   TError = ErrorType<unknown>,
@@ -2059,9 +2043,7 @@ export type DeleteArticleV1MutationResult = NonNullable<
 export type DeleteArticleV1MutationError = ErrorType<void>;
 export type DeleteArticleV1MutationVariables = { id: string };
 
-/**
- * @summary Delete an article
- */
+/** @summary Delete an article */
 export const useDeleteArticleV1 = <
   TError = ErrorType<void>,
   TContext = unknown,
@@ -2159,6 +2141,7 @@ export type GetArticleV1QueryResult = NonNullable<
 >;
 export type GetArticleV1QueryError = ErrorType<void>;
 
+/** @summary Get a single article */
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
   TError = ErrorType<void>,
@@ -2182,6 +2165,7 @@ export function useGetArticleV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get a single article */
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
   TError = ErrorType<void>,
@@ -2205,6 +2189,7 @@ export function useGetArticleV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get a single article */
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
   TError = ErrorType<void>,
@@ -2220,10 +2205,7 @@ export function useGetArticleV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Get a single article
- */
-
+/** @summary Get a single article */
 export function useGetArticleV1<
   TData = Awaited<ReturnType<typeof getArticleV1>>,
   TError = ErrorType<void>,
@@ -2371,9 +2353,7 @@ export type UpdateArticleV1MutationVariables = {
   data?: UpdateArticleInput;
 };
 
-/**
- * @summary Update an article
- */
+/** @summary Update an article */
 export const useUpdateArticleV1 = <
   TError = ErrorType<void>,
   TContext = unknown,
@@ -2493,6 +2473,7 @@ export type GetUserPermissionsV1QueryResult = NonNullable<
 >;
 export type GetUserPermissionsV1QueryError = ErrorType<void>;
 
+/** @summary Get permissions for a specific user */
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
   TError = ErrorType<void>,
@@ -2520,6 +2501,7 @@ export function useGetUserPermissionsV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get permissions for a specific user */
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
   TError = ErrorType<void>,
@@ -2547,6 +2529,7 @@ export function useGetUserPermissionsV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get permissions for a specific user */
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
   TError = ErrorType<void>,
@@ -2566,10 +2549,7 @@ export function useGetUserPermissionsV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Get permissions for a specific user
- */
-
+/** @summary Get permissions for a specific user */
 export function useGetUserPermissionsV1<
   TData = Awaited<ReturnType<typeof getUserPermissionsV1>>,
   TError = ErrorType<void>,
@@ -2706,9 +2686,7 @@ export type CanIV1MutationBody = Permission | undefined;
 export type CanIV1MutationError = ErrorType<void>;
 export type CanIV1MutationVariables = { data?: Permission };
 
-/**
- * @summary Check permission for user
- */
+/** @summary Check permission for user */
 export const useCanIV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -2835,9 +2813,7 @@ export type CreateRoleV1MutationBody = CreateRoleInput | undefined;
 export type CreateRoleV1MutationError = ErrorType<void>;
 export type CreateRoleV1MutationVariables = { data?: CreateRoleInput };
 
-/**
- * @summary Create a new role
- */
+/** @summary Create a new role */
 export const useCreateRoleV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -2931,6 +2907,7 @@ export type GetRolesV1QueryResult = NonNullable<
 >;
 export type GetRolesV1QueryError = ErrorType<unknown>;
 
+/** @summary Get all roles */
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
   TError = ErrorType<unknown>,
@@ -2954,6 +2931,7 @@ export function useGetRolesV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get all roles */
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
   TError = ErrorType<unknown>,
@@ -2977,6 +2955,7 @@ export function useGetRolesV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get all roles */
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
   TError = ErrorType<unknown>,
@@ -2992,10 +2971,7 @@ export function useGetRolesV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Get all roles
- */
-
+/** @summary Get all roles */
 export function useGetRolesV1<
   TData = Awaited<ReturnType<typeof getRolesV1>>,
   TError = ErrorType<unknown>,
@@ -3099,6 +3075,7 @@ export type GetRoleByIdV1QueryResult = NonNullable<
 >;
 export type GetRoleByIdV1QueryError = ErrorType<void>;
 
+/** @summary Get role by ID */
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
   TError = ErrorType<void>,
@@ -3122,6 +3099,7 @@ export function useGetRoleByIdV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get role by ID */
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
   TError = ErrorType<void>,
@@ -3145,6 +3123,7 @@ export function useGetRoleByIdV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Get role by ID */
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
   TError = ErrorType<void>,
@@ -3160,10 +3139,7 @@ export function useGetRoleByIdV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Get role by ID
- */
-
+/** @summary Get role by ID */
 export function useGetRoleByIdV1<
   TData = Awaited<ReturnType<typeof getRoleByIdV1>>,
   TError = ErrorType<void>,
@@ -3303,9 +3279,7 @@ export type DeleteRoleV1MutationVariables = {
   params?: DeleteRoleV1Params;
 };
 
-/**
- * @summary Delete a role by ID with a fallback role
- */
+/** @summary Delete a role by ID with a fallback role */
 export const useDeleteRoleV1 = <
   TError = ErrorType<string | void>,
   TContext = unknown,
@@ -3455,9 +3429,7 @@ export type UpdateRoleV1MutationVariables = {
   data?: UpdateRoleInput;
 };
 
-/**
- * @summary Update a role by ID
- */
+/** @summary Update a role by ID */
 export const useUpdateRoleV1 = <TError = ErrorType<void>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -3543,6 +3515,7 @@ export type HealthV1QueryResult = NonNullable<
 >;
 export type HealthV1QueryError = ErrorType<HealthResponse>;
 
+/** @summary Health check (DB connectivity) */
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
   TError = ErrorType<HealthResponse>,
@@ -3565,6 +3538,7 @@ export function useHealthV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Health check (DB connectivity) */
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
   TError = ErrorType<HealthResponse>,
@@ -3587,6 +3561,7 @@ export function useHealthV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Health check (DB connectivity) */
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
   TError = ErrorType<HealthResponse>,
@@ -3601,10 +3576,7 @@ export function useHealthV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Health check (DB connectivity)
- */
-
+/** @summary Health check (DB connectivity) */
 export function useHealthV1<
   TData = Awaited<ReturnType<typeof healthV1>>,
   TError = ErrorType<HealthResponse>,
@@ -3687,6 +3659,7 @@ export type VersionV1QueryResult = NonNullable<
 >;
 export type VersionV1QueryError = ErrorType<unknown>;
 
+/** @summary Deployed build identity (backend and bundled frontend when present) */
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
   TError = ErrorType<unknown>,
@@ -3709,6 +3682,7 @@ export function useVersionV1<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Deployed build identity (backend and bundled frontend when present) */
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
   TError = ErrorType<unknown>,
@@ -3731,6 +3705,7 @@ export function useVersionV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/** @summary Deployed build identity (backend and bundled frontend when present) */
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
   TError = ErrorType<unknown>,
@@ -3745,10 +3720,7 @@ export function useVersionV1<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-/**
- * @summary Deployed build identity (backend and bundled frontend when present)
- */
-
+/** @summary Deployed build identity (backend and bundled frontend when present) */
 export function useVersionV1<
   TData = Awaited<ReturnType<typeof versionV1>>,
   TError = ErrorType<unknown>,
