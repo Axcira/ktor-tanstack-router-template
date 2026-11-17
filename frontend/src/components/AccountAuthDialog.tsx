@@ -27,27 +27,37 @@ export function AccountAuthDialog({
   mode,
   email,
   onOpenChange,
+  onOpenChangeComplete,
   onSuccess,
 }: {
   open: boolean;
   mode: "add" | "reauth";
   email: string;
   onOpenChange: (open: boolean) => void;
+  onOpenChangeComplete?: (open: boolean) => void;
   onSuccess: (accountIndex: number) => void;
 }) {
   const [draftEmail, setDraftEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const loginMutation = useLoginV1();
-  const reauth = mode === "reauth";
-  const emailValue = reauth ? email : draftEmail;
+  const [surface, setSurface] = useState({ mode, email });
+  const reauth = surface.mode === "reauth";
+  const emailValue = reauth ? surface.email : draftEmail;
 
   useEffect(() => {
     if (!open) return;
+    setSurface({ mode, email });
+    setPassword("");
+    setErrorMessage(null);
+    if (mode !== "reauth") setDraftEmail("");
+  }, [open, mode, email]);
+
+  const resetFields = () => {
     setPassword("");
     setErrorMessage(null);
     if (!reauth) setDraftEmail("");
-  }, [open, reauth]);
+  };
 
   const handleSubmit: SubmitEventHandler = (event) => {
     event.preventDefault();
@@ -92,6 +102,10 @@ export function AccountAuthDialog({
           return;
         }
         onOpenChange(next);
+      }}
+      onOpenChangeComplete={(next) => {
+        if (!next) resetFields();
+        onOpenChangeComplete?.(next);
       }}
     >
       <DialogContent>
@@ -138,18 +152,12 @@ export function AccountAuthDialog({
               />
             </Label>
           </div>
-          <DialogFooter>
+          <DialogFooter className="sm:justify-stretch">
             <Button
-              type="button"
-              variant="outline"
+              type="submit"
+              className="w-full sm:w-auto"
               disabled={loginMutation.isPending}
-              onClick={() => {
-                if (!loginMutation.isPending) onOpenChange(false);
-              }}
             >
-              キャンセル
-            </Button>
-            <Button type="submit" disabled={loginMutation.isPending}>
               {loginMutation.isPending
                 ? "ログイン中..."
                 : reauth

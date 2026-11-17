@@ -60,10 +60,7 @@ const expired: AccountSummary = {
 
 function accountRow(email: string) {
   return screen.getByRole("button", {
-    name: (name) =>
-      name.includes(email) &&
-      !name.includes("ログアウト") &&
-      !name.includes("に再ログイン"),
+    name: (name) => name.includes(email) && !name.includes("ログアウト"),
   });
 }
 
@@ -292,7 +289,7 @@ describe("account switcher", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("メールアドレス")).toHaveValue("");
 
-    await user.click(screen.getByRole("button", { name: "キャンセル" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(router.state.location.pathname).toBe("/");
     expect(assign).not.toHaveBeenCalled();
   });
@@ -303,7 +300,10 @@ describe("account switcher", () => {
       .mockImplementation(() => {});
     const { user, onSwitch } = await renderSwitcher(0, [...accounts, expired]);
 
-    expect(screen.getByText("再ログインが必要")).toBeInTheDocument();
+    expect(accountRow("expired@example.com")).toHaveAttribute(
+      "title",
+      "再ログインが必要",
+    );
     await user.click(accountRow("expired@example.com"));
     expect(onSwitch).not.toHaveBeenCalled();
     expect(
@@ -312,7 +312,7 @@ describe("account switcher", () => {
     expect(screen.getByLabelText("メールアドレス")).toHaveValue(
       "expired@example.com",
     );
-    await user.click(screen.getByRole("button", { name: "キャンセル" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(assign).not.toHaveBeenCalled();
     expect(
       screen.getByRole("button", {
@@ -355,8 +355,8 @@ describe("account switcher", () => {
       await within(dialog).findByRole("button", { name: "ログイン中..." }),
     ).toBeDisabled();
     expect(
-      within(dialog).getByRole("button", { name: "キャンセル" }),
-    ).toBeDisabled();
+      within(dialog).queryByRole("button", { name: "キャンセル" }),
+    ).not.toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: "Close" }));
     await user.keyboard("{Escape}");

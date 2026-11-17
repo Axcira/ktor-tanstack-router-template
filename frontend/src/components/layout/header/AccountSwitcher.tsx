@@ -1,4 +1,4 @@
-import { Check, LogIn, LogOut, UserPlus } from "lucide-react";
+import { Check, LogOut, UserPlus } from "lucide-react";
 import type { AccountSummary } from "@/api/generated/schemas/accountSummary";
 import {
   AlertDialog,
@@ -10,7 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { activeAccountIndex } from "@/lib/account-dialog";
 
@@ -67,6 +66,12 @@ export function AccountSwitcherList({
               <button
                 type="button"
                 aria-current={active ? "true" : undefined}
+                aria-label={
+                  reauth
+                    ? `${account.displayName}（${account.email}）。再ログインが必要`
+                    : undefined
+                }
+                title={reauth ? "再ログインが必要" : undefined}
                 className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted"
                 onClick={() => {
                   if (reauth) {
@@ -112,11 +117,6 @@ export function AccountSwitcherList({
                     {account.email}
                   </span>
                 </span>
-                {reauth ? (
-                  <Badge className="shrink-0 bg-warning-container text-warning-container-foreground">
-                    再ログインが必要
-                  </Badge>
-                ) : null}
                 {active ? (
                   <Check
                     className="size-4 shrink-0 text-primary"
@@ -124,18 +124,6 @@ export function AccountSwitcherList({
                   />
                 ) : null}
               </button>
-              {reauth ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="text-warning"
-                  aria-label={`${account.email} に再ログイン`}
-                  onClick={() => onReauth(account)}
-                >
-                  <LogIn />
-                </Button>
-              ) : null}
               {active ? null : (
                 <Button
                   type="button"

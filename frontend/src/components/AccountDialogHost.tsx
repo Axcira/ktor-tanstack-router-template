@@ -1,5 +1,5 @@
 import { useSearch } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useListAccountsV1 } from "@/api/generated/default/default";
 import { AccountAuthDialog } from "@/components/AccountAuthDialog";
 import {
@@ -26,6 +26,11 @@ export function AccountDialogHost() {
       : mode === "reauth"
         ? (urlAccount?.email ?? "")
         : "";
+  const [open, setOpen] = useState(mode !== null);
+
+  useEffect(() => {
+    if (mode !== null) setOpen(true);
+  }, [mode]);
 
   useEffect(() => {
     if (urlAccount) return;
@@ -39,6 +44,7 @@ export function AccountDialogHost() {
 
   const finish = (accountIndex: number) => {
     closeAccountDialog();
+    setOpen(false);
     accountNavigation.assign(
       accountSwitchUrl(accountNavigation.href(), accountIndex),
     );
@@ -55,18 +61,31 @@ export function AccountDialogHost() {
     );
   };
 
+  const handleCloseComplete = () => {
+    if (requested?.mode === "add") {
+      closeAccountDialog();
+      return;
+    }
+    cancel();
+  };
+
+  if (mode === null && !open) return null;
+
   return (
     <AccountAuthDialog
-      open={mode !== null}
+      open={open}
       mode={mode ?? "add"}
       email={email}
-      onOpenChange={(open) => {
-        if (open) return;
-        if (requested?.mode === "add") {
-          closeAccountDialog();
+      onOpenChange={(next) => {
+        if (next) {
+          setOpen(true);
           return;
         }
-        cancel();
+        setOpen(false);
+      }}
+      onOpenChangeComplete={(next) => {
+        if (next) return;
+        handleCloseComplete();
       }}
       onSuccess={finish}
     />
