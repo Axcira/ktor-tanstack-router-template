@@ -23,7 +23,6 @@ import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.*
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import io.ktor.server.sessions.Sessions as KtorSessions
 
@@ -41,22 +40,11 @@ const val ACCOUNT_LIMIT_REACHED = "ACCOUNT_LIMIT_REACHED"
 const val SESSION_SUPERSEDED = "SESSION_SUPERSEDED"
 const val MAX_ACCOUNTS_PER_DEVICE = 10
 
-/** Shared validation copy for account index route parameters. */
-val ACCOUNT_INDEX_VALIDATION_REASON: String
-    get() = "index must be an integer from 0 to ${MAX_ACCOUNTS_PER_DEVICE - 1}"
-
-/** Human-readable body when [ACCOUNT_LIMIT_REACHED] is returned from login. */
-val ACCOUNT_LIMIT_REACHED_MESSAGE: String
-    get() =
-        "This browser already has $MAX_ACCOUNTS_PER_DEVICE signed-in accounts. " +
-            "Sign out of one before adding another."
-
 /**
  * Default session lifetime applied to the session cookie and the device session row.
  * Account sessions store the same lifetime in milliseconds.
  */
-val SESSION_MAX_AGE: Duration = 7.days
-val SESSION_MAX_AGE_SECONDS: Long = SESSION_MAX_AGE.inWholeSeconds
+val SESSION_MAX_AGE_SECONDS: Long = 7.days.inWholeSeconds
 
 val AccountIndexInvalidKey = AttributeKey<Boolean>("AccountIndexInvalid")
 val AccountReauthRequiredKey = AttributeKey<Boolean>("AccountReauthRequired")

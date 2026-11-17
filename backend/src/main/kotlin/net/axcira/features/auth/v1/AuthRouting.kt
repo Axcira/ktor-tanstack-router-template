@@ -13,7 +13,6 @@ import io.ktor.server.sessions.*
 import io.ktor.utils.io.*
 import net.axcira.apiRouting
 import net.axcira.features.auth.ACCOUNT_LIMIT_REACHED
-import net.axcira.features.auth.ACCOUNT_LIMIT_REACHED_MESSAGE
 import net.axcira.features.auth.AccountPlan
 import net.axcira.features.auth.AuthService
 import net.axcira.features.auth.ChangePasswordRequest
@@ -22,6 +21,7 @@ import net.axcira.features.auth.DeviceSession
 import net.axcira.features.auth.ErrorResponse
 import net.axcira.features.auth.LoginRequest
 import net.axcira.features.auth.LoginResponse
+import net.axcira.features.auth.MAX_ACCOUNTS_PER_DEVICE
 import net.axcira.features.auth.SESSION_COOKIE_NAME
 import net.axcira.features.auth.SESSION_SUPERSEDED
 import net.axcira.features.auth.UserSession
@@ -57,7 +57,9 @@ fun Application.auth() {
                         HttpStatusCode.Conflict,
                         ErrorResponse(
                             code = ACCOUNT_LIMIT_REACHED,
-                            message = ACCOUNT_LIMIT_REACHED_MESSAGE,
+                            message =
+                                "This browser already has $MAX_ACCOUNTS_PER_DEVICE signed-in accounts. " +
+                                    "Sign out of one account before adding another.",
                         ),
                     )
                 }
