@@ -7,8 +7,9 @@ import {
   Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AccountSummary } from "@/api/generated/schemas/accountSummary";
@@ -26,6 +27,7 @@ import {
   useAccountDialog,
 } from "@/lib/account-dialog";
 import { accountNavigation } from "@/lib/authuser";
+import { server } from "@/test/msw";
 import { createTestQueryClient } from "@/test/render";
 
 const accounts: AccountSummary[] = [
@@ -317,5 +319,52 @@ describe("account switcher", () => {
         name: "expired@example.com からログアウト",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("keeps the login dialog open while sign-in is pending", async () => {
+    const assign = vi
+      .spyOn(accountNavigation, "assign")
+      .mockImplementation(() => {});
+    let releaseLogin = () => {};
+    const pendingLogin = new Promise<void>((resolve) => {
+      releaseLogin = resolve;
+    });
+    server.use(
+      http.post("*/api/v1/auth/login", async () => {
+        await pendingLogin;
+        return HttpResponse.json(
+          { code: "INVALID_CREDENTIALS", message: "no" },
+          { status: 401 },
+        );
+      }),
+    );
+    const { user } = await renderSwitcher(0);
+
+    await user.click(screen.getByRole("button", { name: "アカウントを追加" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.type(
+      within(dialog).getByLabelText("メールアドレス"),
+      "new@example.com",
+    );
+    await user.type(within(dialog).getByLabelText("パスワード"), "secret");
+    await user.click(
+      within(dialog).getByRole("button", { name: "アカウントを追加" }),
+    );
+
+    expect(
+      await within(dialog).findByRole("button", { name: "ログイン中..." }),
+    ).toBeDisabled();
+    expect(
+      within(dialog).getByRole("button", { name: "キャンセル" }),
+    ).toBeDisabled();
+
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+    await user.keyboard("{Escape}");
+
+    expect(
+      screen.getByRole("heading", { name: "アカウントを追加" }),
+    ).toBeInTheDocument();
+    expect(assign).not.toHaveBeenCalled();
+    releaseLogin();
   });
 });

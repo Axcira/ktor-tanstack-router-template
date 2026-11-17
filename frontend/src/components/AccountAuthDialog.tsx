@@ -84,7 +84,16 @@ export function AccountAuthDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next, eventDetails) => {
+        if (!next && loginMutation.isPending) {
+          eventDetails.cancel();
+          return;
+        }
+        onOpenChange(next);
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -133,7 +142,10 @@ export function AccountAuthDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              disabled={loginMutation.isPending}
+              onClick={() => {
+                if (!loginMutation.isPending) onOpenChange(false);
+              }}
             >
               キャンセル
             </Button>

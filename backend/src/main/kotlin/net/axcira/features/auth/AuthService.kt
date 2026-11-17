@@ -95,6 +95,14 @@ class AuthService(
     private val log = LoggerFactory.getLogger(AuthService::class.java)
 
     companion object {
+        /**
+         * Test pauses. Each value is an array of two [java.util.concurrent.CountDownLatch]es:
+         * the first is counted down when the code reaches the pause, and the second is awaited.
+         * Latches live on the bootstrap classpath, so they are visible from the Ktor test classloader.
+         */
+        internal const val PAUSE_AFTER_SNAPSHOT = "axcira.test.afterAccountSnapshot"
+        internal const val PAUSE_BEFORE_REVOKE = "axcira.test.beforeRevokeLocks"
+
         /** Set `SKIP_LOGIN_MIN_WAIT=true` in tests to avoid timing-mitigation delays on every login. */
         private val loginMinWait: Duration =
             if (System.getenv("SKIP_LOGIN_MIN_WAIT") == "true") {
@@ -254,7 +262,14 @@ class AuthService(
                     } else {
                         val sessionExpiresAt = locked[Sessions.expiresAt]
                         val live = sessionExpiresAt != null && sessionExpiresAt > nowMillis / 1000
-                        if (addAccount && live) activeAccounts(deviceSessionId, nowMillis) else emptyList()
+                        val accounts =
+                            if (addAccount && live) {
+                                activeAccounts(deviceSessionId, nowMillis)
+                            } else {
+                                emptyList()
+                            }
+                        awaitTestPause(PAUSE_AFTER_SNAPSHOT)
+                        accounts
                     }
                 }
             val already = existing.find { it.userId == userId }
@@ -400,6 +415,12 @@ class AuthService(
     ): LogoutAccountResult {
         val nowMillis = System.currentTimeMillis()
         return database.dbQuery {
+            // Same order as login and revocation: the device session, then its account rows.
+            Sessions
+                .selectAll()
+                .where { Sessions.sessionId eq deviceSessionId }
+                .forUpdate()
+                .singleOrNull()
             if (!deviceSessionLive(deviceSessionId, nowMillis / 1000)) {
                 return@dbQuery LogoutAccountResult.Unauthenticated
             }
@@ -425,7 +446,7 @@ class AuthService(
         }
     }
 
-    private fun revokeAccountSessions(
+    private suspend fun revokeAccountSessions(
         userId: UInt,
         keepDeviceSessionId: String?,
     ) {
@@ -445,18 +466,37 @@ class AuthService(
                 .where { ownedAndActive() }
                 .map { it[AccountSessions.deviceSessionId] }
                 .distinct()
+        awaitTestPause(PAUSE_BEFORE_REVOKE)
         if (deviceIds.isNotEmpty()) {
             // Lock the device rows before revoking so a login cannot copy these accounts afterward.
-            // The update below is by user id, so it also covers a session id allocated while we waited.
             Sessions
                 .select(Sessions.sessionId)
                 .where { Sessions.sessionId inList deviceIds }
                 .forUpdate()
                 .toList()
         }
+        // Wait for a login that already snapshotted these rows. The update is a later statement,
+        // so it also flags the device session that login inserts before this one resumes.
+        AccountSessions
+            .select(AccountSessions.id)
+            .where { ownedAndActive() }
+            .forUpdate()
+            .toList()
         AccountSessions.update({ ownedAndActive() }) {
             it[requiresReauth] = true
         }
+    }
+
+    /**
+     * Blocks only when a test installed a latch pair under [key]. Production never sets it.
+     * Waiting here keeps the surrounding transaction and its row locks open.
+     */
+    private fun awaitTestPause(key: String) {
+        val pair = System.getProperties()[key] as? Array<*> ?: return
+        val entered = pair[0] as java.util.concurrent.CountDownLatch
+        val resume = pair[1] as java.util.concurrent.CountDownLatch
+        entered.countDown()
+        resume.await()
     }
 
     private fun deviceSessionLive(
@@ -494,7 +534,8 @@ class AuthService(
             .where {
                 (AccountSessions.deviceSessionId eq deviceSessionId) and
                     AccountSessions.revokedAt.isNull()
-            }.map { row ->
+            }.forUpdate()
+            .map { row ->
                 StoredAccount(
                     index = row[AccountSessions.accountIndex],
                     userId = row[AccountSessions.userId],

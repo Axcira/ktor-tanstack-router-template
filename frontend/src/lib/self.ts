@@ -7,6 +7,8 @@ import {
   accountIndexSelection,
   holdReauthAccount,
   isAccountReauthRequired,
+  pinAccountIndex,
+  readPinnedAccountIndex,
 } from "@/lib/authuser";
 import { queryClient } from "@/routes/__root";
 
@@ -25,6 +27,7 @@ export const selfQueryOptions = queryOptions({
 });
 
 export async function loadSession() {
+  await pinDisplayedAccount();
   try {
     return await queryClient.ensureQueryData(selfQueryOptions);
   } catch (error) {
@@ -40,6 +43,51 @@ export async function loadSession() {
       return null;
     }
   }
+}
+
+/** Remember the account this page loaded so later requests do not follow a default chosen by another tab. */
+export async function pinDisplayedAccount() {
+  if (typeof window === "undefined") return;
+  const selection = accountIndexSelection(window.location.search);
+  if (selection.kind === "valid") {
+    pinAccountIndex(selection.index);
+    return;
+  }
+  if (selection.kind !== "absent" || readPinnedAccountIndex() !== undefined) {
+    return;
+  }
+  try {
+    const response = await fetch("/api/v1/accounts", {
+      credentials: "same-origin",
+    });
+    if (!response.ok) return;
+    const accounts: unknown = await response.json();
+    if (!Array.isArray(accounts)) return;
+    const usable = accounts.filter(isUsableAccount);
+    const chosen = usable.find((account) => account.isDefault) ?? usable[0];
+    if (!chosen) return;
+    pinAccountIndex(chosen.index);
+  } catch {
+    return;
+  }
+}
+
+function isUsableAccount(
+  value: unknown,
+): value is { index: number; isDefault: boolean; requiresReauth?: boolean } {
+  if (value == null || typeof value !== "object") return false;
+  const account = value as {
+    index?: unknown;
+    isDefault?: unknown;
+    requiresReauth?: unknown;
+  };
+  return (
+    typeof account.index === "number" &&
+    Number.isInteger(account.index) &&
+    account.index >= 0 &&
+    account.index <= 9 &&
+    account.requiresReauth !== true
+  );
 }
 
 function isReauthError(error: unknown): boolean {

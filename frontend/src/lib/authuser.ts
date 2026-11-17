@@ -49,8 +49,9 @@ export function accountIndexSelection(search: string): AccountIndexSelection {
 }
 
 let heldReauthIndex: number | undefined;
+let pinnedIndex: number | undefined;
 
-/** While this index needs another sign-in, requests use the default account instead. */
+/** While this index needs another sign-in, reads use another signed-in account. Writes keep the index. */
 export function holdReauthAccount(index: number) {
   heldReauthIndex = index;
 }
@@ -63,16 +64,32 @@ export function clearReauthHold() {
   heldReauthIndex = undefined;
 }
 
+/** The account this page is showing. Sent when the URL has no authuser, so a newer default cannot take over. */
+export function pinAccountIndex(index: number) {
+  pinnedIndex = index;
+}
+
+export function readPinnedAccountIndex(): number | undefined {
+  return pinnedIndex;
+}
+
 export function mergeAccountIndex(
   init: RequestInit | undefined,
   search: string,
 ): RequestInit {
   const selection = accountIndexSelection(search);
-  if (selection.kind !== "valid" || selection.index === heldReauthIndex) {
-    return init ?? {};
+  const method = (init?.method ?? "GET").toUpperCase();
+  const writing = method !== "GET" && method !== "HEAD";
+  if (selection.kind === "valid" && selection.index === heldReauthIndex) {
+    if (!writing) return init ?? {};
+    const headers = new Headers(init?.headers);
+    headers.set(ACCOUNT_INDEX_HEADER, String(selection.index));
+    return { ...init, headers };
   }
+  const index = selection.kind === "valid" ? selection.index : pinnedIndex;
+  if (index === undefined) return init ?? {};
   const headers = new Headers(init?.headers);
-  headers.set(ACCOUNT_INDEX_HEADER, String(selection.index));
+  headers.set(ACCOUNT_INDEX_HEADER, String(index));
   return { ...init, headers };
 }
 
@@ -135,6 +152,7 @@ let recovering = false;
 export function resetAccountIndexRecovery() {
   recovering = false;
   heldReauthIndex = undefined;
+  pinnedIndex = undefined;
 }
 
 /**

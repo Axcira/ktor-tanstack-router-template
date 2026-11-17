@@ -661,6 +661,10 @@ ${darkBlock.css}
 }
 
 ${md3ThemeAliases(lightScheme, lightBlock.claimed)}
+html,
+body {
+    background-color: var(--background);
+}
 `;
 }
 

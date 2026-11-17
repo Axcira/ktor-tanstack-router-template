@@ -45,7 +45,9 @@ export function fallbackAccountIndex(
   const usable = accounts.filter(
     (account) => !account.requiresReauth && account.index !== avoid,
   );
-  const remembered = Number(sessionStorage.getItem(LAST_USABLE_AUTHUSER_KEY));
+  const stored = sessionStorage.getItem(LAST_USABLE_AUTHUSER_KEY);
+  const remembered =
+    stored == null || stored === "" ? undefined : Number(stored);
   return (
     usable.find((account) => account.index === remembered)?.index ??
     usable.find((account) => account.isDefault)?.index ??

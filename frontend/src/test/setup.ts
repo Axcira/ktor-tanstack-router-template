@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import { resetAccountIndexRecovery } from "@/lib/authuser";
 import { server } from "./msw";
 
 vi.mock("@tanstack/react-devtools", () => ({
@@ -41,6 +42,7 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  resetAccountIndexRecovery();
 });
 
 afterAll(() => {

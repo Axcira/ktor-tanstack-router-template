@@ -5,6 +5,8 @@ import {
   ACCOUNT_INDEX_INVALID,
   ACCOUNT_REAUTH_REQUIRED,
   accountNavigation,
+  holdReauthAccount,
+  pinAccountIndex,
   reauthHoldIndex,
   resetAccountIndexRecovery,
 } from "@/lib/authuser";
@@ -45,6 +47,45 @@ describe("customFetch account index", () => {
     await customFetch("/api/v1/users/me");
 
     expect(header).toBeNull();
+  });
+
+  it("sends the pinned index when authuser is absent", async () => {
+    pinAccountIndex(3);
+    window.history.pushState({}, "", "/dashboard");
+    let header: string | null = null;
+    server.use(
+      http.get("*/api/v1/users/me", ({ request }) => {
+        header = request.headers.get("X-Account-Index");
+        return HttpResponse.json({ user: { id: 1 }, permissions: [] });
+      }),
+    );
+
+    await customFetch("/api/v1/users/me");
+
+    expect(header).toBe("3");
+  });
+
+  it("sends a reauth index on writes and omits it on reads", async () => {
+    holdReauthAccount(4);
+    window.history.pushState({}, "", "/dashboard?authuser=4");
+    let readHeader: string | null = "unset";
+    let writeHeader: string | null = "unset";
+    server.use(
+      http.get("*/api/v1/users/me", ({ request }) => {
+        readHeader = request.headers.get("X-Account-Index");
+        return HttpResponse.json({ user: { id: 1 }, permissions: [] });
+      }),
+      http.post("*/api/v1/articles", ({ request }) => {
+        writeHeader = request.headers.get("X-Account-Index");
+        return HttpResponse.json({ id: 1 });
+      }),
+    );
+
+    await customFetch("/api/v1/users/me");
+    await customFetch("/api/v1/articles", { method: "POST" });
+
+    expect(readHeader).toBeNull();
+    expect(writeHeader).toBe("4");
   });
 
   it("starts recovery when the selected account index is rejected", async () => {

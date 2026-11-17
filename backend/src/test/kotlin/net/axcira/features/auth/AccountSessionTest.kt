@@ -14,8 +14,12 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.plugins.di.dependencies
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import net.axcira.assertStatus
 import net.axcira.db.AccountSessions
 import net.axcira.db.Roles
@@ -34,10 +38,13 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.jupiter.api.Test
 import java.net.URLDecoder
 import java.net.URLEncoder
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -519,6 +526,122 @@ class AccountSessionTest {
                 adder.close()
             }
         }
+
+    @Test
+    fun `a second login cannot publish a snapshot taken before revocation`() =
+        test { client ->
+            val keeper = createUser("ordered-keeper@example.com", listOf(Permission.ManageUsers))
+            val victim = createUser("ordered-victim@example.com", emptyList())
+            val firstAdded = createUser("ordered-added-1@example.com", emptyList())
+            val secondAdded = createUser("ordered-added-2@example.com", emptyList())
+            login(client, keeper.email)
+            val originalCookie = cookieValue(login(client, victim.email, addAccount = true))
+            val adminDevice = extraClient()
+            val adder = extraClient()
+            val revokeEntered = CountDownLatch(1)
+            val resumeRevoke = CountDownLatch(1)
+            val secondSnapshotted = CountDownLatch(1)
+            val resumeSecondLogin = CountDownLatch(1)
+            System.getProperties()[AuthService.PAUSE_BEFORE_REVOKE] =
+                arrayOf(revokeEntered, resumeRevoke)
+            try {
+                login(adminDevice, keeper.email)
+                coroutineScope {
+                    val revoking =
+                        async {
+                            adminDevice.post("/api/v1/users/${victim.id}/password") {
+                                contentType(ContentType.Application.Json)
+                                setBody(
+                                    ForceChangePasswordRequest(
+                                        newPassword = "replacement-ordered",
+                                        logoutSessions = true,
+                                    ),
+                                )
+                            }
+                        }
+                    assertTrue(
+                        withContext(Dispatchers.IO) { revokeEntered.await(15, TimeUnit.SECONDS) },
+                    )
+                    val firstLogin =
+                        adder.post("/api/v1/auth/login") {
+                            header(HttpHeaders.Cookie, sessionCookie(originalCookie))
+                            contentType(ContentType.Application.Json)
+                            setBody(LoginRequest(firstAdded.email, "password", addAccount = true))
+                        }
+                    firstLogin.assertStatus(HttpStatusCode.OK)
+                    val rotatedCookie = cookieValue(firstLogin)
+                    System.getProperties()[AuthService.PAUSE_AFTER_SNAPSHOT] =
+                        arrayOf(secondSnapshotted, resumeSecondLogin)
+                    val secondLogin =
+                        async {
+                            adder.post("/api/v1/auth/login") {
+                                header(HttpHeaders.Cookie, sessionCookie(rotatedCookie))
+                                contentType(ContentType.Application.Json)
+                                setBody(LoginRequest(secondAdded.email, "password", addAccount = true))
+                            }
+                        }
+                    assertTrue(
+                        withContext(Dispatchers.IO) {
+                            secondSnapshotted.await(15, TimeUnit.SECONDS)
+                        },
+                    )
+                    resumeRevoke.countDown()
+                    withTimeout(10_000) {
+                        while (ungrantedLockCount() == 0L) {
+                            check(!revoking.isCompleted) {
+                                "revocation finished before the second login released its account locks"
+                            }
+                            delay(20)
+                        }
+                    }
+                    resumeSecondLogin.countDown()
+                    secondLogin.await().assertStatus(HttpStatusCode.OK)
+                    revoking.await().assertStatus(HttpStatusCode.NoContent)
+                }
+                val database: Database by application.dependencies
+                database.dbQuery {
+                    assertEquals(
+                        1L,
+                        AccountSessions
+                            .selectAll()
+                            .where {
+                                (AccountSessions.userId eq victim.id) and
+                                    AccountSessions.revokedAt.isNull() and
+                                    (AccountSessions.requiresReauth eq true)
+                            }.count(),
+                    )
+                    assertEquals(
+                        0L,
+                        AccountSessions
+                            .selectAll()
+                            .where {
+                                (AccountSessions.userId eq victim.id) and
+                                    AccountSessions.revokedAt.isNull() and
+                                    (AccountSessions.requiresReauth eq false)
+                            }.count(),
+                    )
+                }
+            } finally {
+                resumeRevoke.countDown()
+                resumeSecondLogin.countDown()
+                System.getProperties().remove(AuthService.PAUSE_BEFORE_REVOKE)
+                System.getProperties().remove(AuthService.PAUSE_AFTER_SNAPSHOT)
+                adminDevice.close()
+                adder.close()
+            }
+        }
+
+    private suspend fun net.axcira.SharedTestContext.ungrantedLockCount(): Long {
+        val database: Database by application.dependencies
+        return database.dbQuery {
+            TransactionManager.current().exec(
+                "SELECT COUNT(*) FROM pg_locks WHERE NOT granted",
+            ) { rs ->
+                rs.next()
+                rs.getLong(1)
+            } ?: 0L
+        }
+    }
 
     private suspend fun net.axcira.SharedTestContext.createUser(
         email: String,

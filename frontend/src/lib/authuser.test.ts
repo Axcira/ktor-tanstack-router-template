@@ -12,6 +12,7 @@ import {
   isAccountReauthRequired,
   mergeAccountIndex,
   parseAuthUser,
+  pinAccountIndex,
   readAuthUser,
   recoverInvalidAccountIndex,
   resetAccountIndexRecovery,
@@ -104,12 +105,28 @@ describe("authuser", () => {
     ).toBe("http://localhost/dashboard");
   });
 
-  it("omits the account header while that slot needs another sign-in", () => {
+  it("omits the account header on reads while that slot needs another sign-in", () => {
     holdReauthAccount(4);
     const held = mergeAccountIndex(undefined, "?authuser=4");
     expect(new Headers(held.headers).get(ACCOUNT_INDEX_HEADER)).toBeNull();
     const other = mergeAccountIndex(undefined, "?authuser=1");
     expect(new Headers(other.headers).get(ACCOUNT_INDEX_HEADER)).toBe("1");
+  });
+
+  it("keeps the held index on writes so they are not sent as the default account", () => {
+    holdReauthAccount(4);
+    const write = mergeAccountIndex({ method: "POST" }, "?authuser=4");
+    expect(new Headers(write.headers).get(ACCOUNT_INDEX_HEADER)).toBe("4");
+    const remove = mergeAccountIndex({ method: "DELETE" }, "?authuser=4");
+    expect(new Headers(remove.headers).get(ACCOUNT_INDEX_HEADER)).toBe("4");
+  });
+
+  it("sends the pinned index when the URL has no authuser", () => {
+    pinAccountIndex(3);
+    const pinned = mergeAccountIndex(undefined, "");
+    expect(new Headers(pinned.headers).get(ACCOUNT_INDEX_HEADER)).toBe("3");
+    const explicit = mergeAccountIndex(undefined, "?authuser=1");
+    expect(new Headers(explicit.headers).get(ACCOUNT_INDEX_HEADER)).toBe("1");
   });
 
   it("drops authuser and reloads when another account is still signed in", async () => {

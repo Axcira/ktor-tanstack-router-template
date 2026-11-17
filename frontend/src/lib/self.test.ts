@@ -42,4 +42,30 @@ describe("loadSession", () => {
     expect(session?.user.email).toBe("ok@example.com");
     expect(assign).not.toHaveBeenCalled();
   });
+
+  it("pins the default account and sends that index when authuser is absent", async () => {
+    window.history.pushState({}, "", "/dashboard");
+    const seen: Array<string | null> = [];
+    server.use(
+      http.get("*/api/v1/accounts", () =>
+        HttpResponse.json([
+          { index: 0, isDefault: false, requiresReauth: false },
+          { index: 3, isDefault: true, requiresReauth: false },
+          { index: 4, isDefault: false, requiresReauth: true },
+        ]),
+      ),
+      http.get("*/api/v1/users/me", ({ request }) => {
+        seen.push(request.headers.get("X-Account-Index"));
+        return HttpResponse.json({
+          user: { id: 9, email: "pinned@example.com", roleId: 1 },
+          permissions: [],
+        });
+      }),
+    );
+
+    const session = await loadSession();
+
+    expect(session?.user.email).toBe("pinned@example.com");
+    expect(seen).toEqual(["3"]);
+  });
 });
