@@ -13,6 +13,7 @@ import io.ktor.server.sessions.*
 import io.ktor.utils.io.*
 import net.axcira.apiRouting
 import net.axcira.features.auth.ACCOUNT_LIMIT_REACHED
+import net.axcira.features.auth.ACCOUNT_LIMIT_REACHED_MESSAGE
 import net.axcira.features.auth.AccountPlan
 import net.axcira.features.auth.AuthService
 import net.axcira.features.auth.ChangePasswordRequest
@@ -56,8 +57,7 @@ fun Application.auth() {
                         HttpStatusCode.Conflict,
                         ErrorResponse(
                             code = ACCOUNT_LIMIT_REACHED,
-                            message =
-                                "This browser already has 10 signed-in accounts. Sign out of one before adding another.",
+                            message = ACCOUNT_LIMIT_REACHED_MESSAGE,
                         ),
                     )
                 }

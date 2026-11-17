@@ -9,6 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import net.axcira.apiRouting
+import net.axcira.features.auth.ACCOUNT_INDEX_VALIDATION_REASON
 import net.axcira.features.auth.AuthService
 import net.axcira.features.auth.LogoutAccountResult
 import net.axcira.features.auth.MAX_ACCOUNTS_PER_DEVICE
@@ -50,7 +51,7 @@ fun Application.accounts() {
             if (index == null || index !in 0 until MAX_ACCOUNTS_PER_DEVICE) {
                 call.respond(
                     HttpStatusCode.BadRequest,
-                    ValidationErrorBody(reasons = listOf("index must be an integer from 0 to 9")),
+                    ValidationErrorBody(reasons = listOf(ACCOUNT_INDEX_VALIDATION_REASON)),
                 )
                 return@post
             }
