@@ -6,10 +6,12 @@ import {
 import { render, waitFor } from "@testing-library/react";
 import { expect } from "vitest";
 import { routeTree } from "@/routeTree.gen";
-import { resetAppQueryClient } from "./handlers";
+import { resetAppQueryClient, usableAccountsHandler } from "./handlers";
+import { server } from "./msw";
 
 export async function renderApp(initialEntry: string) {
   resetAppQueryClient();
+  server.use(usableAccountsHandler());
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [initialEntry] }),

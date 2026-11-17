@@ -5,12 +5,20 @@ import type { LoginResponse } from "@/api/generated/schemas/loginResponse";
 import type { UserSession } from "@/api/generated/schemas/userSession";
 import {
   accountIndexSelection,
+  effectiveAccountIndex,
   holdReauthAccount,
   isAccountReauthRequired,
   pinAccountIndex,
   readPinnedAccountIndex,
 } from "@/lib/authuser";
 import { queryClient } from "@/routes/__root";
+
+export class PinAccountError extends Error {
+  constructor(message = "Could not resolve which signed-in account to use") {
+    super(message);
+    this.name = "PinAccountError";
+  }
+}
 
 export function sessionFromLogin(response: LoginResponse): UserSession {
   return { user: response.user, permissions: response.permissions };
@@ -27,15 +35,20 @@ export const selfQueryOptions = queryOptions({
 });
 
 export async function loadSession() {
-  await pinDisplayedAccount();
+  try {
+    await pinDisplayedAccount();
+  } catch (error) {
+    if (error instanceof PinAccountError) return null;
+    throw error;
+  }
   try {
     return await queryClient.ensureQueryData(selfQueryOptions);
   } catch (error) {
     if (!isReauthError(error)) return null;
-    const selection = accountIndexSelection(
+    const index = effectiveAccountIndex(
       typeof window === "undefined" ? "" : window.location.search,
     );
-    if (selection.kind === "valid") holdReauthAccount(selection.index);
+    if (index !== undefined) holdReauthAccount(index);
     queryClient.removeQueries({ queryKey: selfQueryOptions.queryKey });
     try {
       return await queryClient.fetchQuery(selfQueryOptions);
@@ -60,15 +73,16 @@ export async function pinDisplayedAccount() {
     const response = await fetch("/api/v1/accounts", {
       credentials: "same-origin",
     });
-    if (!response.ok) return;
+    if (!response.ok) throw new PinAccountError();
     const accounts: unknown = await response.json();
-    if (!Array.isArray(accounts)) return;
+    if (!Array.isArray(accounts)) throw new PinAccountError();
     const usable = accounts.filter(isUsableAccount);
     const chosen = usable.find((account) => account.isDefault) ?? usable[0];
-    if (!chosen) return;
+    if (!chosen) throw new PinAccountError();
     pinAccountIndex(chosen.index);
-  } catch {
-    return;
+  } catch (error) {
+    if (error instanceof PinAccountError) throw error;
+    throw new PinAccountError();
   }
 }
 

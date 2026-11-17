@@ -11,6 +11,7 @@ import {
   accountNavigation,
   isAccountLimitReached,
   isSessionSuperseded,
+  pinAccountIndex,
   signedInAccountUrl,
 } from "@/lib/authuser";
 import { selfQueryOptions, sessionFromLogin } from "@/lib/self";
@@ -44,6 +45,7 @@ export function LoginForm({ addAccount = false }: { addAccount?: boolean }) {
             );
             return;
           }
+          pinAccountIndex(data.data.accountIndex);
           const session = sessionFromLogin(data.data);
           queryClient.clear();
           hookQueryClient.clear();

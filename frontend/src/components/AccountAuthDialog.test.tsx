@@ -1,5 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
 import { AccountAuthDialog } from "@/components/AccountAuthDialog";
@@ -33,7 +34,8 @@ describe("AccountAuthDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("tabs from password to the submit button", () => {
+  it("tabs from password to the submit button", async () => {
+    const user = userEvent.setup();
     renderDialog(
       <AccountAuthDialog
         open
@@ -46,12 +48,8 @@ describe("AccountAuthDialog", () => {
 
     const password = screen.getByLabelText("パスワード");
     const submit = screen.getByRole("button", { name: "ログイン" });
-    const afterPassword = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        "input, button, select, textarea, a[href], [tabindex]:not([tabindex='-1'])",
-      ),
-    ).filter((node) => !node.hasAttribute("disabled"));
-    const passwordIndex = afterPassword.indexOf(password);
-    expect(afterPassword[passwordIndex + 1]).toBe(submit);
+    await user.click(password);
+    await user.tab();
+    expect(submit).toHaveFocus();
   });
 });

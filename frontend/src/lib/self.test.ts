@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ACCOUNT_REAUTH_REQUIRED,
   accountNavigation,
+  pinAccountIndex,
   resetAccountIndexRecovery,
 } from "@/lib/authuser";
 import { loadSession } from "@/lib/self";
@@ -67,5 +68,50 @@ describe("loadSession", () => {
 
     expect(session?.user.email).toBe("pinned@example.com");
     expect(seen).toEqual(["3"]);
+  });
+
+  it("does not call self when pinning the default account fails", async () => {
+    window.history.pushState({}, "", "/dashboard");
+    let meRequested = false;
+    server.use(
+      http.get("*/api/v1/accounts", () =>
+        HttpResponse.json({ message: "down" }, { status: 503 }),
+      ),
+      http.get("*/api/v1/users/me", () => {
+        meRequested = true;
+        return HttpResponse.json({
+          user: { id: 1, email: "nope@example.com", roleId: 1 },
+          permissions: [],
+        });
+      }),
+    );
+
+    const session = await loadSession();
+
+    expect(session).toBeNull();
+    expect(meRequested).toBe(false);
+  });
+
+  it("retries self on another account when the pinned index needs another sign-in", async () => {
+    window.history.pushState({}, "", "/dashboard");
+    pinAccountIndex(4);
+    server.use(
+      http.get("*/api/v1/users/me", ({ request }) => {
+        if (request.headers.get("X-Account-Index") === "4") {
+          return HttpResponse.json(
+            { code: ACCOUNT_REAUTH_REQUIRED, message: "sign in again" },
+            { status: 401 },
+          );
+        }
+        return HttpResponse.json({
+          user: { id: 2, email: "ok@example.com", roleId: 1 },
+          permissions: [],
+        });
+      }),
+    );
+
+    const session = await loadSession();
+
+    expect(session?.user.email).toBe("ok@example.com");
   });
 });

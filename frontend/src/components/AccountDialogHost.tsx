@@ -1,5 +1,5 @@
 import { useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useListAccountsV1 } from "@/api/generated/default/default";
 import { AccountAuthDialog } from "@/components/AccountAuthDialog";
 import {
@@ -27,9 +27,11 @@ export function AccountDialogHost() {
         ? (urlAccount?.email ?? "")
         : "";
   const [open, setOpen] = useState(mode !== null);
+  const succeededRef = useRef(false);
 
   useEffect(() => {
-    if (mode !== null) setOpen(true);
+    setOpen(mode !== null);
+    if (mode !== null) succeededRef.current = false;
   }, [mode]);
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export function AccountDialogHost() {
   }, [accounts, authuser, urlAccount]);
 
   const finish = (accountIndex: number) => {
+    succeededRef.current = true;
     closeAccountDialog();
     setOpen(false);
     accountNavigation.assign(
@@ -62,6 +65,10 @@ export function AccountDialogHost() {
   };
 
   const handleCloseComplete = () => {
+    if (succeededRef.current) {
+      succeededRef.current = false;
+      return;
+    }
     if (requested?.mode === "add") {
       closeAccountDialog();
       return;

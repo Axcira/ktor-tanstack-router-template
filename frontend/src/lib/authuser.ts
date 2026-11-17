@@ -73,21 +73,21 @@ export function readPinnedAccountIndex(): number | undefined {
   return pinnedIndex;
 }
 
+/** URL authuser when valid; otherwise the pinned index for this page load. */
+export function effectiveAccountIndex(search: string): number | undefined {
+  const selection = accountIndexSelection(search);
+  return selection.kind === "valid" ? selection.index : pinnedIndex;
+}
+
 export function mergeAccountIndex(
   init: RequestInit | undefined,
   search: string,
 ): RequestInit {
-  const selection = accountIndexSelection(search);
   const method = (init?.method ?? "GET").toUpperCase();
   const writing = method !== "GET" && method !== "HEAD";
-  if (selection.kind === "valid" && selection.index === heldReauthIndex) {
-    if (!writing) return init ?? {};
-    const headers = new Headers(init?.headers);
-    headers.set(ACCOUNT_INDEX_HEADER, String(selection.index));
-    return { ...init, headers };
-  }
-  const index = selection.kind === "valid" ? selection.index : pinnedIndex;
+  const index = effectiveAccountIndex(search);
   if (index === undefined) return init ?? {};
+  if (index === heldReauthIndex && !writing) return init ?? {};
   const headers = new Headers(init?.headers);
   headers.set(ACCOUNT_INDEX_HEADER, String(index));
   return { ...init, headers };

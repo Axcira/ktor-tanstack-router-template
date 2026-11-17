@@ -11,14 +11,20 @@ import {
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getLoginV1MockHandler } from "@/api/generated/default/default.msw";
 import type { LoginResponse } from "@/api/generated/schemas/loginResponse";
 import { LoginForm } from "@/components/LoginForm";
-import { accountNavigation, parseAuthUser } from "@/lib/authuser";
+import {
+  accountNavigation,
+  parseAuthUser,
+  readPinnedAccountIndex,
+  resetAccountIndexRecovery,
+} from "@/lib/authuser";
 import { selfQueryOptions } from "@/lib/self";
 import { queryClient as rootQueryClient } from "@/routes/__root";
 import { guardLogin } from "@/routes/login";
+import { usableAccountsHandler } from "@/test/handlers";
 import { server } from "@/test/msw";
 import { createTestQueryClient } from "@/test/render";
 import { makeSession } from "@/test/session";
@@ -95,6 +101,10 @@ async function renderLogin(addAccount = false, entry = "/login") {
 }
 
 describe("LoginForm", () => {
+  afterEach(() => {
+    resetAccountIndexRecovery();
+  });
+
   beforeEach(() => {
     toastAdd.mockClear();
     vi.restoreAllMocks();
@@ -122,7 +132,10 @@ describe("LoginForm", () => {
   it("toasts and navigates to the dashboard on success", async () => {
     server.use(
       getLoginV1MockHandler(
-        loginBody(makeSession([{ type: "ManageUsers" }], { email: "a@b.com" })),
+        loginBody(
+          makeSession([{ type: "ManageUsers" }], { email: "a@b.com" }),
+          0,
+        ),
       ),
     );
 
@@ -139,6 +152,7 @@ describe("LoginForm", () => {
       });
       expect(router.state.location.pathname).toBe("/dashboard");
       expect(router.state.location.searchStr).not.toContain("authuser");
+      expect(readPinnedAccountIndex()).toBe(0);
     });
   });
 
@@ -291,6 +305,7 @@ describe("LoginForm", () => {
   });
 
   it("stays on add-account login when a session already exists", async () => {
+    server.use(usableAccountsHandler());
     rootQueryClient.setQueryData(selfQueryOptions.queryKey, makeSession());
     await expect(guardLogin(true)).resolves.toBeUndefined();
     await expect(guardLogin(false)).rejects.toBeTruthy();

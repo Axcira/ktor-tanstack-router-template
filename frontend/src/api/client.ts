@@ -1,6 +1,7 @@
 import {
   ACCOUNT_INDEX_INVALID,
   accountIndexSelection,
+  effectiveAccountIndex,
   holdReauthAccount,
   isAccountIndexInvalid,
   isAccountReauthRequired,
@@ -63,8 +64,8 @@ export const customFetch = async <T>(
       typeof window !== "undefined" &&
       isAccountReauthRequired(res.status, data)
     ) {
-      const selection = accountIndexSelection(search);
-      if (selection.kind === "valid") holdReauthAccount(selection.index);
+      const index = effectiveAccountIndex(search);
+      if (index !== undefined) holdReauthAccount(index);
     } else if (
       typeof window !== "undefined" &&
       isAccountIndexInvalid(res.status, data)

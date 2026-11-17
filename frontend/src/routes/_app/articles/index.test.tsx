@@ -26,7 +26,9 @@ describe("ArticlesListView authorization", () => {
     await renderApp("/articles");
 
     const createLink = await screen.findByRole("link", { name: /記事を書く/ });
-    expect(createLink).toHaveAttribute("href", "/articles/create");
+    expect(createLink.getAttribute("href")).toMatch(
+      /^\/articles\/create(?:\?|$)/,
+    );
     expect(createLink).not.toHaveAttribute("role", "button");
     expect(screen.getByText("記事がありません。")).toBeInTheDocument();
     expect(
@@ -48,10 +50,9 @@ describe("ArticlesListView authorization", () => {
     await renderApp("/articles");
 
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: /記事を書く/ })).toHaveAttribute(
-        "href",
-        "/articles/create",
-      );
+      expect(
+        screen.getByRole("link", { name: /記事を書く/ }).getAttribute("href"),
+      ).toMatch(/^\/articles\/create(?:\?|$)/);
     });
   });
 

@@ -65,6 +65,37 @@ describe("customFetch account index", () => {
     expect(header).toBe("3");
   });
 
+  it("holds the pinned index when reauth is required without authuser in the URL", async () => {
+    pinAccountIndex(2);
+    window.history.pushState({}, "", "/dashboard");
+    server.use(
+      http.get("*/api/v1/users/me", () =>
+        HttpResponse.json(
+          { code: ACCOUNT_REAUTH_REQUIRED, message: "sign in again" },
+          { status: 401 },
+        ),
+      ),
+    );
+
+    await expect(customFetch("/api/v1/users/me")).rejects.toBeInstanceOf(
+      ApiError,
+    );
+    expect(reauthHoldIndex()).toBe(2);
+
+    let header: string | null = "unset";
+    server.use(
+      http.get("*/api/v1/users/me", ({ request }) => {
+        header = request.headers.get("X-Account-Index");
+        return HttpResponse.json({
+          user: { id: 2, email: "ok@example.com", roleId: 1 },
+          permissions: [],
+        });
+      }),
+    );
+    await customFetch("/api/v1/users/me");
+    expect(header).toBeNull();
+  });
+
   it("sends a reauth index on writes and omits it on reads", async () => {
     holdReauthAccount(4);
     window.history.pushState({}, "", "/dashboard?authuser=4");

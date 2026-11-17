@@ -113,6 +113,15 @@ describe("authuser", () => {
     expect(new Headers(other.headers).get(ACCOUNT_INDEX_HEADER)).toBe("1");
   });
 
+  it("omits the account header on reads for a pinned index that needs another sign-in", () => {
+    pinAccountIndex(5);
+    holdReauthAccount(5);
+    const held = mergeAccountIndex(undefined, "");
+    expect(new Headers(held.headers).get(ACCOUNT_INDEX_HEADER)).toBeNull();
+    const write = mergeAccountIndex({ method: "POST" }, "");
+    expect(new Headers(write.headers).get(ACCOUNT_INDEX_HEADER)).toBe("5");
+  });
+
   it("keeps the held index on writes so they are not sent as the default account", () => {
     holdReauthAccount(4);
     const write = mergeAccountIndex({ method: "POST" }, "?authuser=4");
