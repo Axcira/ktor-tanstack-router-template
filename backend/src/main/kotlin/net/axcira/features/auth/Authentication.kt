@@ -32,6 +32,7 @@ const val SESSION_COOKIE_NAME = "user_session"
 const val ACCOUNT_INDEX_HEADER = "X-Account-Index"
 
 const val ACCOUNT_INDEX_INVALID = "ACCOUNT_INDEX_INVALID"
+const val ACCOUNT_REAUTH_REQUIRED = "ACCOUNT_REAUTH_REQUIRED"
 const val ACCOUNT_LIMIT_REACHED = "ACCOUNT_LIMIT_REACHED"
 
 /** Another login already consumed this device session. The client should reload and use the winning cookie. */
@@ -45,6 +46,7 @@ const val MAX_ACCOUNTS_PER_DEVICE = 10
 const val SESSION_MAX_AGE_SECONDS: Long = 7L * 24 * 60 * 60
 
 val AccountIndexInvalidKey = AttributeKey<Boolean>("AccountIndexInvalid")
+val AccountReauthRequiredKey = AttributeKey<Boolean>("AccountReauthRequired")
 
 /** Same Json instance Ktor uses for the device-session document. */
 internal val sessionJson = Json
@@ -100,6 +102,7 @@ data class StoredAccount(
     val createdAt: Long,
     val expiresAt: Long,
     val activatedAt: Long,
+    val requiresReauth: Boolean = false,
 )
 
 /**
@@ -121,6 +124,7 @@ data class AccountSummary(
     val email: String,
     val avatarUrl: String? = null,
     val isDefault: Boolean,
+    val requiresReauth: Boolean,
 )
 
 class DatabaseSessionStorage(
@@ -194,6 +198,7 @@ class DatabaseSessionStorage(
                             it[createdAt] = account.createdAt
                             it[expiresAt] = account.expiresAt
                             it[activatedAt] = account.activatedAt
+                            it[requiresReauth] = account.requiresReauth
                         }
                     }
                 }
@@ -236,13 +241,26 @@ fun Application.configureAuthentication() {
                         null
                     }
 
+                    AccountResolution.ReauthRequired -> {
+                        attributes.put(AccountReauthRequiredKey, true)
+                        null
+                    }
+
                     AccountResolution.Missing -> {
                         null
                     }
                 }
             }
             challenge {
-                if (call.attributes.getOrNull(AccountIndexInvalidKey) == true) {
+                if (call.attributes.getOrNull(AccountReauthRequiredKey) == true) {
+                    call.respond(
+                        HttpStatusCode.Unauthorized,
+                        ErrorResponse(
+                            code = ACCOUNT_REAUTH_REQUIRED,
+                            message = "This account needs to sign in again.",
+                        ),
+                    )
+                } else if (call.attributes.getOrNull(AccountIndexInvalidKey) == true) {
                     call.respond(
                         HttpStatusCode.Unauthorized,
                         ErrorResponse(

@@ -169,7 +169,7 @@ class AccountSessionTest {
             }
             val expired = client.get("/api/v1/users/me") { header(ACCOUNT_INDEX_HEADER, "1") }
             expired.assertStatus(HttpStatusCode.Unauthorized)
-            assertEquals(ACCOUNT_INDEX_INVALID, expired.body<ErrorResponse>().code)
+            assertEquals(ACCOUNT_REAUTH_REQUIRED, expired.body<ErrorResponse>().code)
 
             assertEquals(first.id, client.me().user.id)
             assertEquals(first.id, client.me(0).user.id)
@@ -332,6 +332,61 @@ class AccountSessionTest {
         }
 
     @Test
+    fun `a password logout keeps the slot and asks that account to sign in again`() =
+        test { client ->
+            val keeper = createUser("reauth-keep@example.com", listOf(Permission.Administrator))
+            val locked = createUser("reauth-locked@example.com", emptyList())
+            login(client, keeper.email)
+            login(client, locked.email, addAccount = true)
+
+            client
+                .post("/api/v1/users/${locked.id}/password") {
+                    contentType(ContentType.Application.Json)
+                    header(ACCOUNT_INDEX_HEADER, "0")
+                    setBody(ForceChangePasswordRequest(newPassword = "replacement-1", logoutSessions = true))
+                }.assertStatus(HttpStatusCode.NoContent)
+
+            val listed = client.get("/api/v1/accounts").body<List<AccountSummary>>()
+            val lockedSummary = listed.single { it.email == locked.email }
+            assertEquals(1, lockedSummary.index)
+            assertEquals("reauth-locked", lockedSummary.displayName)
+            assertTrue(lockedSummary.requiresReauth)
+            assertFalse(lockedSummary.isDefault)
+            assertEquals(keeper.email, listed.single { it.isDefault }.email)
+
+            val reauth = client.get("/api/v1/users/me") { header(ACCOUNT_INDEX_HEADER, "1") }
+            reauth.assertStatus(HttpStatusCode.Unauthorized)
+            assertEquals(ACCOUNT_REAUTH_REQUIRED, reauth.body<ErrorResponse>().code)
+            val missing = client.get("/api/v1/users/me") { header(ACCOUNT_INDEX_HEADER, "8") }
+            missing.assertStatus(HttpStatusCode.Unauthorized)
+            assertEquals(ACCOUNT_INDEX_INVALID, missing.body<ErrorResponse>().code)
+            assertEquals(keeper.id, client.me().user.id)
+
+            val again =
+                client.post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest(locked.email, "replacement-1", addAccount = true))
+                }
+            again.assertStatus(HttpStatusCode.OK)
+            assertEquals(1, again.body<LoginResponse>().accountIndex)
+            val restored = client.get("/api/v1/accounts").body<List<AccountSummary>>().single { it.index == 1 }
+            assertFalse(restored.requiresReauth)
+            assertEquals(locked.id, client.me(1).user.id)
+
+            client
+                .post("/api/v1/users/${locked.id}/password") {
+                    contentType(ContentType.Application.Json)
+                    header(ACCOUNT_INDEX_HEADER, "0")
+                    setBody(ForceChangePasswordRequest(newPassword = "replacement-2", logoutSessions = true))
+                }.assertStatus(HttpStatusCode.NoContent)
+            client.post("/api/v1/accounts/1/logout").assertStatus(HttpStatusCode.NoContent)
+            assertTrue(client.get("/api/v1/accounts").body<List<AccountSummary>>().none { it.index == 1 })
+            val gone = client.get("/api/v1/users/me") { header(ACCOUNT_INDEX_HEADER, "1") }
+            gone.assertStatus(HttpStatusCode.Unauthorized)
+            assertEquals(ACCOUNT_INDEX_INVALID, gone.body<ErrorResponse>().code)
+        }
+
+    @Test
     fun `two tabs adding accounts from one device session cannot both claim the free index`() =
         test { client ->
             val first = createUser("concurrent-a@example.com", emptyList())
@@ -427,11 +482,24 @@ class AccountSessionTest {
                 val database: Database by application.dependencies
                 database.dbQuery {
                     assertEquals(
+                        1L,
+                        AccountSessions
+                            .selectAll()
+                            .where {
+                                (AccountSessions.userId eq victim.id) and
+                                    AccountSessions.revokedAt.isNull() and
+                                    (AccountSessions.requiresReauth eq true)
+                            }.count(),
+                    )
+                    assertEquals(
                         0L,
                         AccountSessions
                             .selectAll()
-                            .where { (AccountSessions.userId eq victim.id) and AccountSessions.revokedAt.isNull() }
-                            .count(),
+                            .where {
+                                (AccountSessions.userId eq victim.id) and
+                                    AccountSessions.revokedAt.isNull() and
+                                    (AccountSessions.requiresReauth eq false)
+                            }.count(),
                     )
                     assertEquals(
                         1L,

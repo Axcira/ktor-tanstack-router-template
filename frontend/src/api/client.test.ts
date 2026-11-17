@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError, customFetch } from "@/api/client";
 import {
   ACCOUNT_INDEX_INVALID,
+  ACCOUNT_REAUTH_REQUIRED,
   accountNavigation,
+  reauthHoldIndex,
   resetAccountIndexRecovery,
 } from "@/lib/authuser";
 import { server } from "@/test/msw";
@@ -92,6 +94,41 @@ describe("customFetch account index", () => {
     });
     expect(requested).toBe(false);
     await viWaitFor(() => accountListRequested);
+  });
+
+  it("does not reload when the selected account needs to sign in again", async () => {
+    window.history.pushState({}, "", "/dashboard?authuser=1");
+    const assign = vi
+      .spyOn(accountNavigation, "assign")
+      .mockImplementation(() => {});
+    server.use(
+      http.get("*/api/v1/users/me", () =>
+        HttpResponse.json(
+          { code: ACCOUNT_REAUTH_REQUIRED, message: "sign in again" },
+          { status: 401 },
+        ),
+      ),
+    );
+
+    await expect(customFetch("/api/v1/users/me")).rejects.toMatchObject({
+      status: 401,
+      data: { code: ACCOUNT_REAUTH_REQUIRED },
+    });
+    expect(assign).not.toHaveBeenCalled();
+    expect(reauthHoldIndex()).toBe(1);
+
+    let header: string | null = "unset";
+    server.use(
+      http.get("*/api/v1/users/me", ({ request }) => {
+        header = request.headers.get("X-Account-Index");
+        return HttpResponse.json({
+          user: { id: 2, email: "ok@example.com", roleId: 1 },
+          permissions: [],
+        });
+      }),
+    );
+    await customFetch("/api/v1/users/me");
+    expect(header).toBeNull();
   });
 });
 

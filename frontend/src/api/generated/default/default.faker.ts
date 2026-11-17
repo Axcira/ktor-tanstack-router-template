@@ -128,6 +128,7 @@ export const getListAccountsV1ResponseMock = (): AccountSummary[] =>
       null,
     ]),
     isDefault: faker.datatype.boolean(),
+    requiresReauth: faker.datatype.boolean(),
   }));
 
 export const getGetUsersV1ResponseMock = (): UserDTO[] =>

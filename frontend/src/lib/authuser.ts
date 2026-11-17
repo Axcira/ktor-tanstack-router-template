@@ -1,5 +1,6 @@
 export const ACCOUNT_INDEX_HEADER = "X-Account-Index";
 export const ACCOUNT_INDEX_INVALID = "ACCOUNT_INDEX_INVALID";
+export const ACCOUNT_REAUTH_REQUIRED = "ACCOUNT_REAUTH_REQUIRED";
 export const ACCOUNT_LIMIT_REACHED = "ACCOUNT_LIMIT_REACHED";
 export const SESSION_SUPERSEDED = "SESSION_SUPERSEDED";
 
@@ -47,15 +48,45 @@ export function accountIndexSelection(search: string): AccountIndexSelection {
   return { kind: "valid", index };
 }
 
+let heldReauthIndex: number | undefined;
+
+/** While this index needs another sign-in, requests use the default account instead. */
+export function holdReauthAccount(index: number) {
+  heldReauthIndex = index;
+}
+
+export function reauthHoldIndex(): number | undefined {
+  return heldReauthIndex;
+}
+
+export function clearReauthHold() {
+  heldReauthIndex = undefined;
+}
+
 export function mergeAccountIndex(
   init: RequestInit | undefined,
   search: string,
 ): RequestInit {
   const selection = accountIndexSelection(search);
-  if (selection.kind !== "valid") return init ?? {};
+  if (selection.kind !== "valid" || selection.index === heldReauthIndex) {
+    return init ?? {};
+  }
   const headers = new Headers(init?.headers);
   headers.set(ACCOUNT_INDEX_HEADER, String(selection.index));
   return { ...init, headers };
+}
+
+/**
+ * Same URL with an illegal authuser removed. Null when the query is absent or a real index.
+ * Relative hrefs stay relative so a router redirect does not change the origin.
+ */
+export function invalidAuthUserHref(href: string): string | null {
+  const url = new URL(href, "http://localhost");
+  if (accountIndexSelection(url.search).kind !== "invalid") return null;
+  url.searchParams.delete("authuser");
+  const path = `${url.pathname}${url.search}${url.hash}`;
+  if (/^https?:/i.test(href)) return url.toString();
+  return path;
 }
 
 export function accountSwitchUrl(href: string, index: number): string {
@@ -81,6 +112,14 @@ export function isAccountIndexInvalid(status: number, data: unknown): boolean {
   return (data as { code?: unknown }).code === ACCOUNT_INDEX_INVALID;
 }
 
+export function isAccountReauthRequired(
+  status: number,
+  data: unknown,
+): boolean {
+  if (status !== 401 || data == null || typeof data !== "object") return false;
+  return (data as { code?: unknown }).code === ACCOUNT_REAUTH_REQUIRED;
+}
+
 export function isAccountLimitReached(status: number, data: unknown): boolean {
   if (status !== 409 || data == null || typeof data !== "object") return false;
   return (data as { code?: unknown }).code === ACCOUNT_LIMIT_REACHED;
@@ -95,6 +134,7 @@ let recovering = false;
 
 export function resetAccountIndexRecovery() {
   recovering = false;
+  heldReauthIndex = undefined;
 }
 
 /**

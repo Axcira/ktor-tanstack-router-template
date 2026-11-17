@@ -5,8 +5,11 @@ import {
   accountNavigation,
   accountSwitchUrl,
   clearedAuthUserUrl,
+  holdReauthAccount,
+  invalidAuthUserHref,
   isAccountIndexInvalid,
   isAccountLimitReached,
+  isAccountReauthRequired,
   mergeAccountIndex,
   parseAuthUser,
   readAuthUser,
@@ -80,6 +83,33 @@ describe("authuser", () => {
     expect(isAccountLimitReached(409, { code: "ACCOUNT_LIMIT_REACHED" })).toBe(
       true,
     );
+    expect(
+      isAccountReauthRequired(401, { code: "ACCOUNT_REAUTH_REQUIRED" }),
+    ).toBe(true);
+    expect(
+      isAccountIndexInvalid(401, { code: "ACCOUNT_REAUTH_REQUIRED" }),
+    ).toBe(false);
+  });
+
+  it("strips an illegal authuser and keeps the rest of the URL", () => {
+    expect(invalidAuthUserHref("/dashboard?authuser=nope&page=2")).toBe(
+      "/dashboard?page=2",
+    );
+    expect(invalidAuthUserHref("/dashboard?authuser=")).toBe("/dashboard");
+    expect(invalidAuthUserHref("/dashboard?authuser=10")).toBe("/dashboard");
+    expect(invalidAuthUserHref("/dashboard?authuser=2&page=2")).toBeNull();
+    expect(invalidAuthUserHref("/dashboard?page=2")).toBeNull();
+    expect(
+      invalidAuthUserHref("http://localhost/dashboard?authuser=nope"),
+    ).toBe("http://localhost/dashboard");
+  });
+
+  it("omits the account header while that slot needs another sign-in", () => {
+    holdReauthAccount(4);
+    const held = mergeAccountIndex(undefined, "?authuser=4");
+    expect(new Headers(held.headers).get(ACCOUNT_INDEX_HEADER)).toBeNull();
+    const other = mergeAccountIndex(undefined, "?authuser=1");
+    expect(new Headers(other.headers).get(ACCOUNT_INDEX_HEADER)).toBe("1");
   });
 
   it("drops authuser and reloads when another account is still signed in", async () => {

@@ -12,4 +12,5 @@ export interface AccountSummary {
   /** @nullable */
   avatarUrl?: string | null;
   isDefault: boolean;
+  requiresReauth: boolean;
 }

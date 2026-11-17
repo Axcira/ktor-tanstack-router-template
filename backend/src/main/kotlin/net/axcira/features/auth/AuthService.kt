@@ -12,7 +12,6 @@ import net.axcira.isDevelopment
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.lessEq
@@ -59,6 +58,9 @@ sealed interface AccountResolution {
     data object Missing : AccountResolution
 
     data object InvalidIndex : AccountResolution
+
+    /** The slot is still on this device, but the account has to sign in again. */
+    data object ReauthRequired : AccountResolution
 }
 
 sealed interface LogoutAccountResult {
@@ -262,7 +264,7 @@ class AuthService(
                 accounts =
                     existing.map { account ->
                         if (account.userId == userId) {
-                            account.copy(expiresAt = expiresAt, activatedAt = nowMillis)
+                            account.copy(expiresAt = expiresAt, activatedAt = nowMillis, requiresReauth = false)
                         } else {
                             account
                         }
@@ -282,6 +284,7 @@ class AuthService(
                         createdAt = nowMillis,
                         expiresAt = expiresAt,
                         activatedAt = nowMillis,
+                        requiresReauth = false,
                     )
             }
             if (deviceSessionId != null &&
@@ -304,6 +307,7 @@ class AuthService(
                     it[createdAt] = account.createdAt
                     it[AccountSessions.expiresAt] = account.expiresAt
                     it[activatedAt] = account.activatedAt
+                    it[requiresReauth] = account.requiresReauth
                 }
             }
             AccountPlan.Ready(accounts, index, newSessionId)
@@ -312,8 +316,9 @@ class AuthService(
 
     /**
      * Resolves the principal for [deviceSessionId].
-     * A blank [accountIndexHeader] uses the default account. An explicit index that is missing,
-     * expired, or revoked is [AccountResolution.InvalidIndex].
+     * A blank [accountIndexHeader] uses the default usable account. An explicit index that is missing
+     * or revoked is [AccountResolution.InvalidIndex]. A slot that is still listed but must sign in
+     * again is [AccountResolution.ReauthRequired].
      * A successful explicit index that is not already the default becomes the default.
      */
     suspend fun resolveAccount(
@@ -326,19 +331,22 @@ class AuthService(
                 if (!deviceSessionLive(deviceSessionId, nowMillis / 1000)) return@dbQuery null
                 activeAccounts(deviceSessionId, nowMillis)
             } ?: return AccountResolution.Missing
+        val usable = accounts.filter { !it.requiresReauth }
         if (accounts.isEmpty()) return AccountResolution.Missing
         val header = accountIndexHeader?.takeIf { it.isNotBlank() }
         val selected =
             if (header == null) {
-                accounts.defaultAccount()
+                usable.defaultAccount()
             } else {
                 val index = header.toIntOrNull()
                 if (index == null || index !in 0 until MAX_ACCOUNTS_PER_DEVICE) {
                     return AccountResolution.InvalidIndex
                 }
-                accounts.find { it.index == index } ?: return AccountResolution.InvalidIndex
+                val slot = accounts.find { it.index == index } ?: return AccountResolution.InvalidIndex
+                if (slot.requiresReauth) return AccountResolution.ReauthRequired
+                slot
             } ?: return AccountResolution.Missing
-        val defaultAccount = accounts.defaultAccount()
+        val defaultAccount = usable.defaultAccount()
         if (header != null && defaultAccount != null && selected.index != defaultAccount.index) {
             database.dbQuery {
                 markDefault(deviceSessionId, selected, nowMillis)
@@ -354,7 +362,7 @@ class AuthService(
         return database.dbQuery {
             if (!deviceSessionLive(deviceSessionId, nowMillis / 1000)) return@dbQuery null
             val accounts = activeAccounts(deviceSessionId, nowMillis)
-            val defaultIndex = accounts.defaultAccount()?.index
+            val defaultIndex = accounts.filter { !it.requiresReauth }.defaultAccount()?.index
             accounts
                 .sortedBy { it.index }
                 .mapNotNull { account ->
@@ -371,6 +379,7 @@ class AuthService(
                         email = email,
                         avatarUrl = null,
                         isDefault = account.index == defaultIndex,
+                        requiresReauth = account.requiresReauth,
                     )
                 }
         }
@@ -398,14 +407,13 @@ class AuthService(
                 AccountSessions.update({
                     (AccountSessions.deviceSessionId eq deviceSessionId) and
                         (AccountSessions.accountIndex eq index) and
-                        AccountSessions.revokedAt.isNull() and
-                        (AccountSessions.expiresAt greater nowMillis)
+                        AccountSessions.revokedAt.isNull()
                 }) {
                     it[revokedAt] = nowMillis
                 }
             if (updated == 0) return@dbQuery LogoutAccountResult.NotFound
             val remaining = activeAccounts(deviceSessionId, nowMillis)
-            val next = remaining.defaultAccount()
+            val next = remaining.filter { !it.requiresReauth }.defaultAccount()
             if (next == null) {
                 Sessions.update({ Sessions.sessionId eq deviceSessionId }) {
                     it[userId] = null
@@ -447,7 +455,7 @@ class AuthService(
                 .toList()
         }
         AccountSessions.update({ ownedAndActive() }) {
-            it[revokedAt] = now
+            it[requiresReauth] = true
         }
     }
 
@@ -465,7 +473,10 @@ class AuthService(
         return expiresAt > nowSeconds
     }
 
-    /** Revokes expired slots, then returns accounts that are still signed in. Must run inside a transaction. */
+    /**
+     * Marks expired slots as needing another sign-in, then returns every slot that is still listed.
+     * Must run inside a transaction. Rows with [StoredAccount.requiresReauth] keep their index.
+     */
     private fun activeAccounts(
         deviceSessionId: String,
         nowMillis: Long,
@@ -473,16 +484,16 @@ class AuthService(
         AccountSessions.update({
             (AccountSessions.deviceSessionId eq deviceSessionId) and
                 AccountSessions.revokedAt.isNull() and
+                (AccountSessions.requiresReauth eq false) and
                 (AccountSessions.expiresAt lessEq nowMillis)
         }) {
-            it[revokedAt] = nowMillis
+            it[requiresReauth] = true
         }
         return AccountSessions
             .selectAll()
             .where {
                 (AccountSessions.deviceSessionId eq deviceSessionId) and
-                    AccountSessions.revokedAt.isNull() and
-                    (AccountSessions.expiresAt greater nowMillis)
+                    AccountSessions.revokedAt.isNull()
             }.map { row ->
                 StoredAccount(
                     index = row[AccountSessions.accountIndex],
@@ -490,6 +501,7 @@ class AuthService(
                     createdAt = row[AccountSessions.createdAt],
                     expiresAt = row[AccountSessions.expiresAt],
                     activatedAt = row[AccountSessions.activatedAt],
+                    requiresReauth = row[AccountSessions.requiresReauth],
                 )
             }
     }
