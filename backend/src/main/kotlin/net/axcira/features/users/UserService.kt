@@ -3,13 +3,20 @@ package net.axcira.features.users
 import kotlinx.serialization.Serializable
 import net.axcira.Pagination
 import net.axcira.UpdateResult
+import net.axcira.db.AccountSessions
 import net.axcira.db.Sessions
 import net.axcira.db.Users
+import net.axcira.features.auth.DeviceSession
 import net.axcira.features.auth.PasswordHasher
+import net.axcira.features.auth.StoredAccount
+import net.axcira.features.auth.defaultAccount
+import net.axcira.features.auth.sessionJson
 import net.axcira.paginate
 import net.axcira.plugins.Optional
 import net.axcira.plugins.dbQuery
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.jdbc.*
 import org.slf4j.LoggerFactory
 
@@ -80,12 +87,60 @@ class UserService(
     }
 
     /**
-     * Deletes the user with [id] along with all of their active sessions.
+     * Deletes the user with [id] and their account sessions.
+     * A device session that still has other accounts stays; an empty one is removed.
      */
     suspend fun delete(id: UInt) {
         database.dbQuery {
-            Sessions.deleteWhere { Sessions.userId eq id }
+            val deviceIds =
+                AccountSessions
+                    .select(AccountSessions.deviceSessionId)
+                    .where { AccountSessions.userId eq id }
+                    .map { it[AccountSessions.deviceSessionId] }
+                    .distinct()
             Users.deleteWhere { Users.id eq id }
+            for (deviceId in deviceIds) {
+                val remaining =
+                    AccountSessions
+                        .selectAll()
+                        .where {
+                            (AccountSessions.deviceSessionId eq deviceId) and AccountSessions.revokedAt.isNull()
+                        }.map { row ->
+                            StoredAccount(
+                                index = row[AccountSessions.accountIndex],
+                                userId = row[AccountSessions.userId],
+                                createdAt = row[AccountSessions.createdAt],
+                                expiresAt = row[AccountSessions.expiresAt],
+                                activatedAt = row[AccountSessions.activatedAt],
+                            )
+                        }
+                if (remaining.isEmpty()) {
+                    AccountSessions.deleteWhere { AccountSessions.deviceSessionId eq deviceId }
+                    Sessions.deleteWhere { Sessions.sessionId eq deviceId }
+                } else {
+                    val next = remaining.defaultAccount() ?: continue
+                    val payload =
+                        Sessions
+                            .select(Sessions.session)
+                            .where { Sessions.sessionId eq deviceId }
+                            .singleOrNull()
+                            ?.get(Sessions.session)
+                    val updatedPayload =
+                        payload?.let { raw ->
+                            runCatching {
+                                val device = sessionJson.decodeFromString(DeviceSession.serializer(), raw)
+                                sessionJson.encodeToString(
+                                    DeviceSession.serializer(),
+                                    device.copy(defaultUserId = next.userId),
+                                )
+                            }.getOrDefault(raw)
+                        }
+                    Sessions.update({ Sessions.sessionId eq deviceId }) {
+                        it[userId] = next.userId
+                        if (updatedPayload != null) it[session] = updatedPayload
+                    }
+                }
+            }
         }
         log.info("User deleted: id=$id")
     }

@@ -44,14 +44,15 @@ describe("auth and permission gates", () => {
       ),
     );
 
-    const { router } = await renderApp("/articles");
+    const { router } = await renderApp("/articles?authuser=2");
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/");
+      expect(router.state.location.search).toMatchObject({ authuser: 2 });
     });
     expect(
       await screen.findByRole("link", { name: "ログイン" }),
-    ).toHaveAttribute("href", "/login");
+    ).toHaveAttribute("href", "/login?authuser=2");
   });
 
   it("sends an existing session from / and /login to /dashboard", async () => {

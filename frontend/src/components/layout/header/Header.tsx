@@ -1,5 +1,20 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, Key, Mail, Menu, Shield, ShieldAlert } from "lucide-react";
-import { useGetRolesV1 } from "@/api/generated/default/default";
+import { useState } from "react";
+import {
+  getListAccountsV1QueryKey,
+  useGetRolesV1,
+  useListAccountsV1,
+  useLogoutAccountV1,
+  useLogoutV1,
+} from "@/api/generated/default/default";
+import {
+  AccountLogoutDialog,
+  AccountSwitcherList,
+  activeAccountIndex,
+  nextLogoutDialogState,
+  SignOutAllDialog,
+} from "@/components/layout/header/AccountSwitcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,13 +24,66 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/components/ui/sidebar";
+import { toast } from "@/components/ui/toast";
+import { openAccountDialog } from "@/lib/account-dialog";
+import { accountNavigation, accountSwitchUrl } from "@/lib/authuser";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
+import { Route as RootRoute } from "@/routes/__root";
 import { Route } from "@/routes/_app";
 
 export default function AppHeader() {
   const { toggleSidebar } = useSidebar();
   const { session } = Route.useRouteContext();
+  const { authuser } = RootRoute.useSearch();
   const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRolesV1();
+  const accountsQuery = useListAccountsV1();
+  const accounts = accountsQuery.data?.data ?? [];
+  const queryClient = useQueryClient();
+  const [logoutDialog, setLogoutDialog] = useState<{
+    account: (typeof accounts)[number] | null;
+    open: boolean;
+  }>({ account: null, open: false });
+  const [signOutAllOpen, setSignOutAllOpen] = useState(false);
+  const activeIndex = activeAccountIndex(authuser, accounts);
+  const logoutAccount = useLogoutAccountV1({
+    mutation: {
+      onSuccess: (_data, variables) => {
+        const index = Number(variables.index);
+        if (index === activeIndex) {
+          const next = accounts.find(
+            (account) => account.index !== index && !account.requiresReauth,
+          );
+          accountNavigation.assign(
+            next ? accountSwitchUrl(accountNavigation.href(), next.index) : "/",
+          );
+          return;
+        }
+        setLogoutDialog((state) =>
+          nextLogoutDialogState(state, { type: "open", open: false }),
+        );
+        void queryClient.invalidateQueries({
+          queryKey: getListAccountsV1QueryKey(),
+        });
+      },
+      onError: () => {
+        toast.add({ type: "error", title: "ログアウトに失敗しました" });
+        setLogoutDialog((state) =>
+          nextLogoutDialogState(state, { type: "open", open: false }),
+        );
+      },
+    },
+  });
+  const signOutAll = useLogoutV1({
+    mutation: {
+      onSuccess: () => {
+        accountNavigation.assign("/");
+      },
+      onError: () => {
+        toast.add({ type: "error", title: "ログアウトに失敗しました" });
+        setSignOutAllOpen(false);
+      },
+    },
+  });
 
   const userEmail = session?.user?.email || "User";
   const fallbackChar = userEmail[0].toUpperCase();
@@ -50,7 +118,10 @@ export default function AppHeader() {
         <DropdownMenuTrigger
           nativeButton={false}
           render={
-            <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all select-none">
+            <Avatar
+              aria-label={userEmail}
+              className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all select-none"
+            >
               <AvatarImage src="" alt={userEmail} />
               <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                 {fallbackChar}
@@ -62,6 +133,34 @@ export default function AppHeader() {
           align="end"
           className="w-80 p-3 rounded-lg bg-card border shadow-xl"
         >
+          <AccountSwitcherList
+            accounts={accounts}
+            activeIndex={activeIndex}
+            onSwitch={(index) => {
+              accountNavigation.assign(
+                accountSwitchUrl(accountNavigation.href(), index),
+              );
+            }}
+            onReauth={(account) => {
+              openAccountDialog({
+                mode: "reauth",
+                email: account.email,
+                index: account.index,
+              });
+            }}
+            onAddAccount={() => {
+              openAccountDialog({ mode: "add" });
+            }}
+            onLogoutRequest={(index) => {
+              const account = accounts.find((item) => item.index === index);
+              if (!account) return;
+              setLogoutDialog((state) =>
+                nextLogoutDialogState(state, { type: "request", account }),
+              );
+            }}
+            onSignOutAllRequest={() => setSignOutAllOpen(true)}
+          />
+          <DropdownMenuSeparator className="my-2" />
           <div className="flex flex-col space-y-2.5 p-2">
             <div className="flex items-center space-x-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -167,6 +266,33 @@ export default function AppHeader() {
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      <AccountLogoutDialog
+        account={logoutDialog.account}
+        open={logoutDialog.open}
+        pending={logoutAccount.isPending}
+        onOpenChange={(open) => {
+          setLogoutDialog((state) =>
+            nextLogoutDialogState(state, { type: "open", open }),
+          );
+        }}
+        onOpenChangeComplete={(open) => {
+          if (!open) {
+            setLogoutDialog((state) =>
+              nextLogoutDialogState(state, { type: "closed" }),
+            );
+          }
+        }}
+        onConfirm={() => {
+          if (logoutDialog.account === null) return;
+          logoutAccount.mutate({ index: String(logoutDialog.account.index) });
+        }}
+      />
+      <SignOutAllDialog
+        open={signOutAllOpen}
+        pending={signOutAll.isPending}
+        onOpenChange={setSignOutAllOpen}
+        onConfirm={() => signOutAll.mutate()}
+      />
     </header>
   );
 }

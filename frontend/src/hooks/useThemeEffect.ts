@@ -11,16 +11,14 @@ export function useThemeEffect() {
     const applyTheme = () => {
       root.classList.remove("light", "dark");
 
-      if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
-        root.classList.add(systemTheme);
-        return;
-      }
-
-      root.classList.add(theme);
+      const applied =
+        theme === "system"
+          ? window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light"
+          : theme;
+      root.classList.add(applied);
+      root.style.colorScheme = applied;
     };
 
     applyTheme();

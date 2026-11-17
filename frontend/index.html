@@ -4,6 +4,37 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>frontend</title>
+    <link rel="stylesheet" href="/src/theme.generated.css"/>
+    <script>
+      (() => {
+        let raw = null;
+        let theme = "system";
+        let dark = false;
+        let root = document.documentElement;
+        try {
+          raw = localStorage.getItem("ui-theme");
+          if (raw) {
+            try {
+              theme = JSON.parse(raw);
+            } catch {
+              theme = raw;
+            }
+          }
+          if (theme !== "light" && theme !== "dark" && theme !== "system") {
+            theme = "system";
+          }
+          dark =
+            theme === "dark" ||
+            (theme === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          root = document.documentElement;
+          root.classList.add(dark ? "dark" : "light");
+          root.style.colorScheme = dark ? "dark" : "light";
+        } catch {
+          /* keep the default light background */
+        }
+      })();
+    </script>
 </head>
 <body>
 <div id="app"></div>

@@ -6,18 +6,35 @@ import {
   createRouter,
   Outlet,
   RouterProvider,
+  retainSearchParams,
 } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getLoginV1MockHandler } from "@/api/generated/default/default.msw";
+import type { LoginResponse } from "@/api/generated/schemas/loginResponse";
 import { LoginForm } from "@/components/LoginForm";
+import {
+  accountNavigation,
+  parseAuthUser,
+  readPinnedAccountIndex,
+  resetAccountIndexRecovery,
+} from "@/lib/authuser";
 import { selfQueryOptions } from "@/lib/self";
 import { queryClient as rootQueryClient } from "@/routes/__root";
+import { guardLogin } from "@/routes/login";
+import { usableAccountsHandler } from "@/test/handlers";
 import { server } from "@/test/msw";
 import { createTestQueryClient } from "@/test/render";
 import { makeSession } from "@/test/session";
+
+function loginBody(
+  session: ReturnType<typeof makeSession>,
+  accountIndex = 0,
+): LoginResponse {
+  return { ...session, accountIndex };
+}
 
 const toastAdd = vi.fn();
 
@@ -27,9 +44,16 @@ vi.mock("@/components/ui/toast", () => ({
   },
 }));
 
-async function renderLogin() {
+async function renderLogin(addAccount = false, entry = "/login") {
   const queryClient = createTestQueryClient();
   const rootRoute = createRootRoute({
+    validateSearch: (search: Record<string, unknown>) => {
+      const authuser = parseAuthUser(search.authuser);
+      return authuser === undefined ? {} : { authuser };
+    },
+    search: {
+      middlewares: [retainSearchParams(["authuser"])],
+    },
     component: () => (
       <QueryClientProvider client={queryClient}>
         <Outlet />
@@ -39,7 +63,7 @@ async function renderLogin() {
   const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/login",
-    component: LoginForm,
+    component: () => <LoginForm addAccount={addAccount} />,
   });
   const homeRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -53,7 +77,7 @@ async function renderLogin() {
   });
   const router = createRouter({
     routeTree: rootRoute.addChildren([loginRoute, homeRoute, dashboardRoute]),
-    history: createMemoryHistory({ initialEntries: ["/login"] }),
+    history: createMemoryHistory({ initialEntries: [entry] }),
   });
 
   const view = render(<RouterProvider router={router} />);
@@ -62,7 +86,9 @@ async function renderLogin() {
   });
   await waitFor(() => {
     expect(
-      screen.getByRole("heading", { name: "ログイン" }),
+      screen.getByRole("heading", {
+        name: addAccount ? "アカウントを追加" : "ログイン",
+      }),
     ).toBeInTheDocument();
   });
 
@@ -75,8 +101,13 @@ async function renderLogin() {
 }
 
 describe("LoginForm", () => {
+  afterEach(() => {
+    resetAccountIndexRecovery();
+  });
+
   beforeEach(() => {
     toastAdd.mockClear();
+    vi.restoreAllMocks();
   });
 
   it("shows inline error on 401", async () => {
@@ -101,11 +132,14 @@ describe("LoginForm", () => {
   it("toasts and navigates to the dashboard on success", async () => {
     server.use(
       getLoginV1MockHandler(
-        makeSession([{ type: "ManageUsers" }], { email: "a@b.com" }),
+        loginBody(
+          makeSession([{ type: "ManageUsers" }], { email: "a@b.com" }),
+          0,
+        ),
       ),
     );
 
-    const { user, router } = await renderLogin();
+    const { user, router } = await renderLogin(false, "/login?authuser=2");
 
     await user.type(screen.getByLabelText("メールアドレス"), "a@b.com");
     await user.type(screen.getByLabelText("パスワード"), "password");
@@ -117,7 +151,33 @@ describe("LoginForm", () => {
         title: "ログインに成功しました",
       });
       expect(router.state.location.pathname).toBe("/dashboard");
+      expect(router.state.location.searchStr).not.toContain("authuser");
+      expect(readPinnedAccountIndex()).toBe(0);
     });
+  });
+
+  it("reloads into the winning session when this login lost the race", async () => {
+    const assign = vi
+      .spyOn(accountNavigation, "assign")
+      .mockImplementation(() => {});
+    server.use(
+      http.post("*/api/v1/auth/login", () =>
+        HttpResponse.json(
+          { code: "SESSION_SUPERSEDED", message: "replaced" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    const { user } = await renderLogin(true);
+    await user.type(screen.getByLabelText("メールアドレス"), "extra@b.com");
+    await user.type(screen.getByLabelText("パスワード"), "password");
+    await user.click(screen.getByRole("button", { name: "アカウントを追加" }));
+
+    await waitFor(() => {
+      expect(assign).toHaveBeenCalledWith("/dashboard");
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("shows inline error when the request fails", async () => {
@@ -166,7 +226,7 @@ describe("LoginForm", () => {
     });
     const stalePermissionKey = ["authorize", { type: "Administrator" }];
 
-    server.use(getLoginV1MockHandler(nextSession));
+    server.use(getLoginV1MockHandler(loginBody(nextSession)));
 
     const { user, queryClient: hookQueryClient } = await renderLogin();
     hookQueryClient.setDefaultOptions({
@@ -193,5 +253,62 @@ describe("LoginForm", () => {
     });
     expect(rootQueryClient.getQueryData(stalePermissionKey)).toBeUndefined();
     expect(hookQueryClient.getQueryData(stalePermissionKey)).toBeUndefined();
+  });
+
+  it("adds an account and reloads into that account", async () => {
+    const assign = vi
+      .spyOn(accountNavigation, "assign")
+      .mockImplementation(() => {});
+    let body: unknown;
+    server.use(
+      getLoginV1MockHandler(async (info) => {
+        body = await info.request.json();
+        return loginBody(
+          makeSession([{ type: "ManageUsers" }], { email: "extra@b.com" }),
+          4,
+        );
+      }),
+    );
+
+    const { user } = await renderLogin(true);
+    await user.type(screen.getByLabelText("メールアドレス"), "extra@b.com");
+    await user.type(screen.getByLabelText("パスワード"), "password");
+    await user.click(screen.getByRole("button", { name: "アカウントを追加" }));
+
+    await waitFor(() => {
+      expect(body).toMatchObject({
+        email: "extra@b.com",
+        addAccount: true,
+      });
+      expect(assign).toHaveBeenCalledWith(
+        `${window.location.origin}/dashboard?authuser=4`,
+      );
+    });
+  });
+
+  it("explains when the browser already has 10 accounts", async () => {
+    server.use(
+      http.post("*/api/v1/auth/login", () =>
+        HttpResponse.json(
+          { code: "ACCOUNT_LIMIT_REACHED", message: "limit" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    const { user } = await renderLogin(true);
+    await user.type(screen.getByLabelText("メールアドレス"), "extra@b.com");
+    await user.type(screen.getByLabelText("パスワード"), "password");
+    await user.click(screen.getByRole("button", { name: "アカウントを追加" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("10個");
+  });
+
+  it("stays on add-account login when a session already exists", async () => {
+    server.use(usableAccountsHandler());
+    rootQueryClient.setQueryData(selfQueryOptions.queryKey, makeSession());
+    await expect(guardLogin(true)).resolves.toBeUndefined();
+    await expect(guardLogin(false)).rejects.toBeTruthy();
+    rootQueryClient.clear();
   });
 });

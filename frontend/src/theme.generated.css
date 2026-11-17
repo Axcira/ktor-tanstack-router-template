@@ -716,3 +716,7 @@
     --color-md-surface-variant: var(--md-surface-variant);
     --color-surface-variant: var(--md-surface-variant);
 }
+html,
+body {
+    background-color: var(--background);
+}

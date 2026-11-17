@@ -7,8 +7,10 @@
 import { faker } from "@faker-js/faker";
 
 import type {
+  AccountSummary,
   ArticleDTO,
   HealthResponse,
+  LoginResponse,
   Permission,
   PermissionAdministrator,
   PermissionChangePassword,
@@ -87,8 +89,8 @@ export const getLoginV1ResponsePermissionUpdateArticleMock = (
 });
 
 export const getLoginV1ResponseMock = (
-  overrideResponse: Partial<Extract<UserSession, object>> = {},
-): UserSession => ({
+  overrideResponse: Partial<Extract<LoginResponse, object>> = {},
+): LoginResponse => ({
   user: {
     id: faker.number.int(),
     email: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -109,8 +111,25 @@ export const getLoginV1ResponseMock = (
       { ...getLoginV1ResponsePermissionUpdateArticleMock() },
     ]),
   ),
+  accountIndex: faker.number.int(),
   ...overrideResponse,
 });
+
+export const getListAccountsV1ResponseMock = (): AccountSummary[] =>
+  Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    index: faker.number.int(),
+    displayName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    avatarUrl: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      null,
+    ]),
+    isDefault: faker.datatype.boolean(),
+    requiresReauth: faker.datatype.boolean(),
+  }));
 
 export const getGetUsersV1ResponseMock = (): UserDTO[] =>
   Array.from(

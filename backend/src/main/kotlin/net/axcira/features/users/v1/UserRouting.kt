@@ -11,7 +11,9 @@ import io.ktor.server.sessions.*
 import kotlinx.serialization.json.Json
 import net.axcira.*
 import net.axcira.features.auth.AuthService
+import net.axcira.features.auth.DeviceSession
 import net.axcira.features.auth.ForceChangePasswordRequest
+import net.axcira.features.auth.SESSION_COOKIE_NAME
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.*
 import net.axcira.features.users.CreateUserInput
@@ -127,7 +129,7 @@ fun Application.users() {
 
                 /**
                  * Replace another user's password without the current one.
-                 * Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+                 * Requires ManageUsers. When logoutSessions is true, every account session for that user is revoked.
                  * Omitted or false leaves their sessions in place.
                  *
                  * OperationID: forceChangePasswordV1
@@ -200,8 +202,12 @@ fun Application.users() {
             delete("/me") {
                 val principal = call.principal<UserSession>() ?: throw IllegalArgumentException("User not authenticated")
                 val userId = principal.user.id
+                val deviceSessionId = call.request.cookies[SESSION_COOKIE_NAME]
                 userService.delete(userId)
-                call.sessions.clear<UserSession>()
+                val keepDevice = deviceSessionId != null && authService.hasActiveAccounts(deviceSessionId)
+                if (!keepDevice) {
+                    call.sessions.clear<DeviceSession>()
+                }
                 call.respond(HttpStatusCode.NoContent)
             }
         }

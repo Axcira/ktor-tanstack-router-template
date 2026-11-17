@@ -57,8 +57,11 @@ class AuthRoutingTest {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest("api-auth@example.com", "password"))
                 }.assertStatus(HttpStatusCode.OK)
-                .body<UserSession>()
-                .also { assertTrue(it.user.id > 0u) }
+                .body<LoginResponse>()
+                .also {
+                    assertTrue(it.user.id > 0u)
+                    assertEquals(0, it.accountIndex)
+                }
 
             // Access to protected resources
             client.get("/api/v1/users/me").assertStatus(HttpStatusCode.OK)

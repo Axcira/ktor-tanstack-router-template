@@ -1,3 +1,14 @@
+import {
+  ACCOUNT_INDEX_INVALID,
+  accountIndexSelection,
+  effectiveAccountIndex,
+  holdReauthAccount,
+  isAccountIndexInvalid,
+  isAccountReauthRequired,
+  mergeAccountIndex,
+  recoverInvalidAccountIndex,
+} from "@/lib/authuser";
+
 export class ApiError<T = unknown> extends Error {
   readonly status: number;
   readonly data: T;
@@ -18,7 +29,22 @@ export const customFetch = async <T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> => {
-  const res = await fetch(url, options);
+  const search = typeof window === "undefined" ? "" : window.location.search;
+  if (
+    typeof window !== "undefined" &&
+    accountIndexSelection(search).kind === "invalid"
+  ) {
+    void recoverInvalidAccountIndex();
+    throw new ApiError(
+      401,
+      {
+        code: ACCOUNT_INDEX_INVALID,
+        message: "The selected account is not signed in on this browser.",
+      },
+      new Headers(),
+    );
+  }
+  const res = await fetch(url, mergeAccountIndex(options, search));
   const isNoBody = [204, 205, 304].includes(res.status);
   const body = isNoBody ? null : await res.text();
 
@@ -34,6 +60,18 @@ export const customFetch = async <T>(
   }
 
   if (!res.ok) {
+    if (
+      typeof window !== "undefined" &&
+      isAccountReauthRequired(res.status, data)
+    ) {
+      const index = effectiveAccountIndex(search);
+      if (index !== undefined) holdReauthAccount(index);
+    } else if (
+      typeof window !== "undefined" &&
+      isAccountIndexInvalid(res.status, data)
+    ) {
+      void recoverInvalidAccountIndex();
+    }
     throw new ApiError(res.status, data, res.headers);
   }
 

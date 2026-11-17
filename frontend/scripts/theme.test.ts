@@ -125,6 +125,9 @@ describe("theme generator output", () => {
       "variant: tonal-spot  contrast: 0  success: #1b873f  info: #0277bd  warning: #f9a825  radius-sm: 0.375rem  radius-md: 0.5rem  radius-lg: 0.75rem  radius-xl: 1.25rem",
     );
     expect(css).toContain("--background: #faf8ff;");
+    expect(css).toContain(
+      "html,\nbody {\n    background-color: var(--background);\n}",
+    );
     expect(css).toContain("--primary: #4a5d92;");
     expect(css).toContain("--primary-foreground: #ffffff;");
     expect(css).toContain("--outline: #757680;");

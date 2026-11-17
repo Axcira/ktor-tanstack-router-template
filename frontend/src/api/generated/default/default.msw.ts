@@ -12,6 +12,7 @@ import type {
 } from "msw";
 
 import type {
+  AccountSummary,
   ArticleDTO,
   ChangePasswordRequest,
   CreateArticleInput,
@@ -20,6 +21,7 @@ import type {
   ForceChangePasswordRequest,
   HealthResponse,
   LoginRequest,
+  LoginResponse,
   Permission,
   RoleDTO,
   UpdateArticleInput,
@@ -42,6 +44,7 @@ import {
   getGetUserPermissionsV1ResponseMock,
   getGetUsersV1ResponseMock,
   getHealthV1ResponseMock,
+  getListAccountsV1ResponseMock,
   getListArticlesV1ResponseMock,
   getLoginV1ResponseMock,
   getUpdateArticleV1ResponseMock,
@@ -51,6 +54,7 @@ import {
 
 export {
   getLoginV1ResponseMock,
+  getListAccountsV1ResponseMock,
   getGetUsersV1ResponseMock,
   getGetUserByIdV1ResponseMock,
   getCreateUserV1ResponseMock,
@@ -70,10 +74,10 @@ export {
 
 export const getLoginV1MockHandler = (
   overrideResponse?:
-    | UserSession
+    | LoginResponse
     | ((
         info: Parameters<HttpResponseResolver<PathParams, LoginRequest>>[0],
-      ) => Promise<UserSession> | UserSession),
+      ) => Promise<LoginResponse> | LoginResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.post<PathParams, LoginRequest>(
@@ -130,6 +134,51 @@ export const getChangePasswordV1MockHandler = (
         HttpResponseResolver<PathParams, ChangePasswordRequest>
       >[0],
     ) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
+export const getListAccountsV1MockHandler = (
+  overrideResponse?:
+    | AccountSummary[]
+    | ((
+        info: Parameters<HttpResponseResolver>[0],
+      ) => Promise<AccountSummary[]> | AccountSummary[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/accounts",
+    async (info: Parameters<HttpResponseResolver>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListAccountsV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getLogoutAccountV1MockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<HttpResponseResolver<{ index: string }>>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post<{ index: string }>(
+    "*/api/v1/accounts/:index/logout",
+    async (info: Parameters<HttpResponseResolver<{ index: string }>>[0]) => {
       if (typeof overrideResponse === "function") {
         await overrideResponse(info);
       }
@@ -709,6 +758,8 @@ export const getDefaultMock = () => [
   getLoginV1MockHandler(),
   getLogoutV1MockHandler(),
   getChangePasswordV1MockHandler(),
+  getListAccountsV1MockHandler(),
+  getLogoutAccountV1MockHandler(),
   getGetUsersV1MockHandler(),
   getGetUserByIdV1MockHandler(),
   getForceChangePasswordV1MockHandler(),

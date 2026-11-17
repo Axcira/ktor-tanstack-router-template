@@ -21,12 +21,14 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AccountSummary,
   ArticleDTO,
   ChangePasswordRequest,
   CreateArticleInput,
   CreateRoleInput,
   CreateUserInput,
   DeleteRoleV1Params,
+  ErrorResponse,
   ForceChangePasswordRequest,
   GetRolesV1Params,
   GetUserPermissionsV1Params,
@@ -34,6 +36,7 @@ import type {
   HealthResponse,
   ListArticlesV1Params,
   LoginRequest,
+  LoginResponse,
   Permission,
   RoleDTO,
   UpdateArticleInput,
@@ -69,7 +72,7 @@ const withQueryKey = <T extends object, K>(
 };
 
 export type loginV1Response200 = {
-  data: UserSession;
+  data: LoginResponse;
   status: 200;
 };
 
@@ -78,10 +81,15 @@ export type loginV1Response401 = {
   status: 401;
 };
 
+export type loginV1Response409 = {
+  data: ErrorResponse;
+  status: 409;
+};
+
 export type loginV1ResponseSuccess = loginV1Response200 & {
   headers: Headers;
 };
-export type loginV1ResponseError = loginV1Response401 & {
+export type loginV1ResponseError = (loginV1Response401 | loginV1Response409) & {
   headers: Headers;
 };
 
@@ -131,7 +139,7 @@ export const loginV1 = async (
 export const getLoginV1MutationKey = () => ["loginV1"] as const;
 
 export const getLoginV1MutationOptions = <
-  TError = ErrorType<void>,
+  TError = ErrorType<void | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -172,11 +180,14 @@ export type LoginV1MutationResult = NonNullable<
   Awaited<ReturnType<typeof loginV1>>
 >;
 export type LoginV1MutationBody = LoginRequest | undefined;
-export type LoginV1MutationError = ErrorType<void>;
+export type LoginV1MutationError = ErrorType<void | ErrorResponse>;
 export type LoginV1MutationVariables = { data?: LoginRequest };
 
 /** @summary Authenticate (Login) */
-export const useLoginV1 = <TError = ErrorType<void>, TContext = unknown>(
+export const useLoginV1 = <
+  TError = ErrorType<void | ErrorResponse>,
+  TContext = unknown,
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof loginV1>>,
@@ -316,8 +327,9 @@ export const getChangePasswordV1Url = () => {
 /**
  * @summary Change the signed-in user's password.
 Requires ChangePassword and the current password.
-When logoutOtherSessions is true, other cookie sessions for this user are deleted.
-The current session stays. Omitted or false leaves other sessions in place.
+When logoutOtherSessions is true, this user's account sessions on other device sessions are revoked.
+The account on this device stays, including any other accounts signed in beside it.
+Omitted or false leaves other account sessions in place.
  */
 export const changePasswordV1 = async (
   changePasswordRequest?: ChangePasswordRequest,
@@ -412,8 +424,9 @@ export type ChangePasswordV1MutationVariables = {
 /**
  * @summary Change the signed-in user's password.
 Requires ChangePassword and the current password.
-When logoutOtherSessions is true, other cookie sessions for this user are deleted.
-The current session stays. Omitted or false leaves other sessions in place.
+When logoutOtherSessions is true, this user's account sessions on other device sessions are revoked.
+The account on this device stays, including any other accounts signed in beside it.
+Omitted or false leaves other account sessions in place.
  */
 export const useChangePasswordV1 = <
   TError = ErrorType<ValidationErrorBody | void>,
@@ -436,6 +449,293 @@ export const useChangePasswordV1 = <
   TContext
 > => {
   return useMutation(getChangePasswordV1MutationOptions(options), queryClient);
+};
+export type listAccountsV1Response200 = {
+  data: AccountSummary[];
+  status: 200;
+};
+
+export type listAccountsV1Response401 = {
+  data: void;
+  status: 401;
+};
+
+export type listAccountsV1ResponseSuccess = listAccountsV1Response200 & {
+  headers: Headers;
+};
+export type listAccountsV1ResponseError = listAccountsV1Response401 & {
+  headers: Headers;
+};
+
+export const getListAccountsV1Url = () => {
+  return `/api/v1/accounts`;
+};
+
+/**
+ * @summary List the accounts signed in on this browser.
+Does not require X-Account-Index. Never returns tokens or session ids.
+ */
+export const listAccountsV1 = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<listAccountsV1ResponseSuccess> => {
+  return customFetch<listAccountsV1ResponseSuccess>(getListAccountsV1Url(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListAccountsV1QueryKey = () => {
+  return [`/api/v1/accounts`] as const;
+};
+
+export const getListAccountsV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof listAccountsV1>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof listAccountsV1>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListAccountsV1QueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listAccountsV1>>> = ({
+    signal,
+  }) => listAccountsV1({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listAccountsV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListAccountsV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof listAccountsV1>>
+>;
+export type ListAccountsV1QueryError = ErrorType<void>;
+
+/**
+ * @summary List the accounts signed in on this browser.
+Does not require X-Account-Index. Never returns tokens or session ids.
+ */
+export function useListAccountsV1<
+  TData = Awaited<ReturnType<typeof listAccountsV1>>,
+  TError = ErrorType<void>,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listAccountsV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAccountsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listAccountsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary List the accounts signed in on this browser.
+Does not require X-Account-Index. Never returns tokens or session ids.
+ */
+export function useListAccountsV1<
+  TData = Awaited<ReturnType<typeof listAccountsV1>>,
+  TError = ErrorType<void>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listAccountsV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAccountsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listAccountsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary List the accounts signed in on this browser.
+Does not require X-Account-Index. Never returns tokens or session ids.
+ */
+export function useListAccountsV1<
+  TData = Awaited<ReturnType<typeof listAccountsV1>>,
+  TError = ErrorType<void>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listAccountsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary List the accounts signed in on this browser.
+Does not require X-Account-Index. Never returns tokens or session ids.
+ */
+export function useListAccountsV1<
+  TData = Awaited<ReturnType<typeof listAccountsV1>>,
+  TError = ErrorType<void>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listAccountsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListAccountsV1QueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type logoutAccountV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type logoutAccountV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type logoutAccountV1Response401 = {
+  data: void;
+  status: 401;
+};
+
+export type logoutAccountV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type logoutAccountV1ResponseSuccess = logoutAccountV1Response204 & {
+  headers: Headers;
+};
+export type logoutAccountV1ResponseError = (
+  | logoutAccountV1Response400
+  | logoutAccountV1Response401
+  | logoutAccountV1Response404
+) & {
+  headers: Headers;
+};
+
+export const getLogoutAccountV1Url = (index: string) => {
+  return `/api/v1/accounts/${index}/logout`;
+};
+
+/**
+ * @summary Sign out one account on this browser. Other accounts stay signed in.
+ */
+export const logoutAccountV1 = async (
+  index: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<logoutAccountV1ResponseSuccess> => {
+  return customFetch<logoutAccountV1ResponseSuccess>(
+    getLogoutAccountV1Url(index),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getLogoutAccountV1MutationKey = () => ["logoutAccountV1"] as const;
+
+export const getLogoutAccountV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logoutAccountV1>>,
+    TError,
+    LogoutAccountV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof logoutAccountV1>>,
+  TError,
+  LogoutAccountV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getLogoutAccountV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof logoutAccountV1>>,
+    LogoutAccountV1MutationVariables
+  > = (props) => {
+    const { index } = props ?? {};
+
+    return logoutAccountV1(index, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LogoutAccountV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof logoutAccountV1>>
+>;
+
+export type LogoutAccountV1MutationError =
+  ErrorType<ValidationErrorBody | void>;
+export type LogoutAccountV1MutationVariables = { index: string };
+
+/** @summary Sign out one account on this browser. Other accounts stay signed in. */
+export const useLogoutAccountV1 = <
+  TError = ErrorType<ValidationErrorBody | void>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof logoutAccountV1>>,
+      TError,
+      LogoutAccountV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof logoutAccountV1>>,
+  TError,
+  LogoutAccountV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getLogoutAccountV1MutationOptions(options), queryClient);
 };
 export type getUsersV1Response200 = {
   data: UserDTO[];
@@ -799,7 +1099,7 @@ export const getForceChangePasswordV1Url = (id: string) => {
 
 /**
  * @summary Replace another user's password without the current one.
-Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+Requires ManageUsers. When logoutSessions is true, every account session for that user is revoked.
 Omitted or false leaves their sessions in place.
  */
 export const forceChangePasswordV1 = async (
@@ -897,7 +1197,7 @@ export type ForceChangePasswordV1MutationVariables = {
 
 /**
  * @summary Replace another user's password without the current one.
-Requires ManageUsers. When logoutSessions is true, every session for that user is deleted.
+Requires ManageUsers. When logoutSessions is true, every account session for that user is revoked.
 Omitted or false leaves their sessions in place.
  */
 export const useForceChangePasswordV1 = <
