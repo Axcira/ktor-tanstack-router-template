@@ -14,6 +14,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.plugins.di.dependencies
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import net.axcira.assertStatus
 import net.axcira.db.AccountSessions
 import net.axcira.db.Roles
@@ -35,6 +37,7 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.jupiter.api.Test
 import java.net.URLDecoder
+import java.net.URLEncoder
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -328,6 +331,127 @@ class AccountSessionTest {
             }
         }
 
+    @Test
+    fun `two tabs adding accounts from one device session cannot both claim the free index`() =
+        test { client ->
+            val first = createUser("concurrent-a@example.com", emptyList())
+            val second = createUser("concurrent-b@example.com", emptyList())
+            val third = createUser("concurrent-c@example.com", emptyList())
+            val cookie = cookieValue(login(client, first.email))
+            val left = extraClient()
+            val right = extraClient()
+            try {
+                val (leftResponse, rightResponse) =
+                    coroutineScope {
+                        val leftLogin =
+                            async {
+                                left.post("/api/v1/auth/login") {
+                                    header(HttpHeaders.Cookie, sessionCookie(cookie))
+                                    contentType(ContentType.Application.Json)
+                                    setBody(LoginRequest(second.email, "password", addAccount = true))
+                                }
+                            }
+                        val rightLogin =
+                            async {
+                                right.post("/api/v1/auth/login") {
+                                    header(HttpHeaders.Cookie, sessionCookie(cookie))
+                                    contentType(ContentType.Application.Json)
+                                    setBody(LoginRequest(third.email, "password", addAccount = true))
+                                }
+                            }
+                        leftLogin.await() to rightLogin.await()
+                    }
+                val responses = listOf(leftResponse, rightResponse)
+                val won = responses.single { it.status == HttpStatusCode.OK }
+                val lost = responses.single { it.status == HttpStatusCode.Conflict }
+                assertEquals(1, won.body<LoginResponse>().accountIndex)
+                assertEquals(SESSION_SUPERSEDED, lost.body<ErrorResponse>().code)
+                val winnerId = if (won === leftResponse) second.id else third.id
+                val loserId = if (won === leftResponse) third.id else second.id
+                val database: Database by application.dependencies
+                database.dbQuery {
+                    assertEquals(0L, Sessions.selectAll().where { Sessions.sessionId eq cookie }.count())
+                    assertEquals(1L, Sessions.selectAll().count())
+                    val active =
+                        AccountSessions
+                            .selectAll()
+                            .where { AccountSessions.revokedAt.isNull() }
+                            .map { it[AccountSessions.userId] }
+                    assertEquals(setOf(first.id, winnerId), active.toSet())
+                    assertFalse(loserId in active)
+                }
+            } finally {
+                left.close()
+                right.close()
+            }
+        }
+
+    @Test
+    fun `a concurrent password logout is not undone by adding an account`() =
+        test { client ->
+            val admin = createUser("concurrent-admin@example.com", listOf(Permission.ManageUsers))
+            val victim = createUser("concurrent-victim@example.com", emptyList())
+            val added = createUser("concurrent-added@example.com", emptyList())
+            login(client, admin.email)
+            val sharedCookie = cookieValue(login(client, victim.email, addAccount = true))
+            val adminDevice = extraClient()
+            val adder = extraClient()
+            try {
+                login(adminDevice, admin.email)
+                val (addedResponse, revokedResponse) =
+                    coroutineScope {
+                        val adding =
+                            async {
+                                adder.post("/api/v1/auth/login") {
+                                    header(HttpHeaders.Cookie, sessionCookie(sharedCookie))
+                                    contentType(ContentType.Application.Json)
+                                    setBody(LoginRequest(added.email, "password", addAccount = true))
+                                }
+                            }
+                        val revoking =
+                            async {
+                                adminDevice.post("/api/v1/users/${victim.id}/password") {
+                                    contentType(ContentType.Application.Json)
+                                    setBody(
+                                        ForceChangePasswordRequest(
+                                            newPassword = "replacement-1",
+                                            logoutSessions = true,
+                                        ),
+                                    )
+                                }
+                            }
+                        adding.await() to revoking.await()
+                    }
+                addedResponse.assertStatus(HttpStatusCode.OK)
+                revokedResponse.assertStatus(HttpStatusCode.NoContent)
+                val database: Database by application.dependencies
+                database.dbQuery {
+                    assertEquals(
+                        0L,
+                        AccountSessions
+                            .selectAll()
+                            .where { (AccountSessions.userId eq victim.id) and AccountSessions.revokedAt.isNull() }
+                            .count(),
+                    )
+                    assertEquals(
+                        1L,
+                        AccountSessions
+                            .selectAll()
+                            .where { (AccountSessions.userId eq added.id) and AccountSessions.revokedAt.isNull() }
+                            .count(),
+                    )
+                }
+                adder
+                    .post("/api/v1/auth/login") {
+                        contentType(ContentType.Application.Json)
+                        setBody(LoginRequest(victim.email, "password"))
+                    }.assertStatus(HttpStatusCode.Unauthorized)
+            } finally {
+                adminDevice.close()
+                adder.close()
+            }
+        }
+
     private suspend fun net.axcira.SharedTestContext.createUser(
         email: String,
         permissions: List<Permission>,
@@ -367,6 +491,8 @@ class AccountSessionTest {
             header(ACCOUNT_INDEX_HEADER, "0")
         }.assertStatus(HttpStatusCode.NoContent)
     }
+
+    private fun sessionCookie(value: String): String = "user_session=${URLEncoder.encode(value, Charsets.UTF_8)}"
 
     private fun cookieValue(response: HttpResponse): String {
         val header =

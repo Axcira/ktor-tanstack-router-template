@@ -70,7 +70,6 @@ function SwitcherHarness({
         }}
         onConfirm={() => {
           if (logoutIndex !== null) onLogout(logoutIndex);
-          setLogoutIndex(null);
         }}
       />
     </>
@@ -160,7 +159,13 @@ describe("account switcher", () => {
 
     await user.click(screen.getByRole("button", { name: "ログアウト" }));
     expect(onLogout).toHaveBeenCalledWith(2);
+    expect(
+      screen.getByRole("heading", {
+        name: "このアカウントからログアウトしますか？",
+      }),
+    ).toBeInTheDocument();
 
+    await user.click(screen.getByRole("button", { name: "キャンセル" }));
     await user.click(screen.getByRole("link", { name: "アカウントを追加" }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/login");
