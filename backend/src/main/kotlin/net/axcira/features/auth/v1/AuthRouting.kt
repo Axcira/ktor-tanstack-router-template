@@ -12,10 +12,16 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.utils.io.*
 import net.axcira.apiRouting
+import net.axcira.features.auth.ACCOUNT_LIMIT_REACHED
+import net.axcira.features.auth.AccountPlan
 import net.axcira.features.auth.AuthService
 import net.axcira.features.auth.ChangePasswordRequest
 import net.axcira.features.auth.ChangePasswordResult
+import net.axcira.features.auth.DeviceSession
+import net.axcira.features.auth.ErrorResponse
 import net.axcira.features.auth.LoginRequest
+import net.axcira.features.auth.LoginResponse
+import net.axcira.features.auth.SESSION_COOKIE_NAME
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.Permission
 import net.axcira.features.permissions.withPermission
@@ -32,17 +38,55 @@ fun Application.auth() {
          */
         post("/login") {
             val request = call.receive<LoginRequest>()
-            val session = authService.login(request.email, request.password) ?: return@post call.respond(HttpStatusCode.Unauthorized)
-            call.request.cookies["user_session"]?.let { previousSessionId ->
-                authService.deleteSessionById(previousSessionId)
+            val authenticated =
+                authService.login(request.email, request.password)
+                    ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            val previousSessionId = call.request.cookies[SESSION_COOKIE_NAME]
+            when (
+                val plan =
+                    authService.planLogin(
+                        deviceSessionId = previousSessionId,
+                        userId = authenticated.user.id,
+                        addAccount = request.addAccount,
+                    )
+            ) {
+                AccountPlan.LimitReached -> {
+                    call.respond(
+                        HttpStatusCode.Conflict,
+                        ErrorResponse(
+                            code = ACCOUNT_LIMIT_REACHED,
+                            message =
+                                "This browser already has 10 signed-in accounts. Sign out of one before adding another.",
+                        ),
+                    )
+                }
+
+                is AccountPlan.Ready -> {
+                    // Rotate the device session id (session fixation). Account rows are carried in the
+                    // new session document and inserted when the new id is stored.
+                    if (previousSessionId != null) {
+                        authService.deleteSessionById(previousSessionId)
+                    }
+                    call.sessions.clear<DeviceSession>()
+                    @Suppress("UNCHECKED_CAST")
+                    call.attributes.allKeys
+                        .filter { it.name == "SessionId" }
+                        .forEach { key -> call.attributes.remove(key as io.ktor.util.AttributeKey<Any>) }
+                    call.sessions.set(
+                        DeviceSession(
+                            defaultUserId = authenticated.user.id,
+                            accounts = plan.accounts,
+                        ),
+                    )
+                    call.respond(
+                        LoginResponse(
+                            user = authenticated.user,
+                            permissions = authenticated.permissions,
+                            accountIndex = plan.accountIndex,
+                        ),
+                    )
+                }
             }
-            call.sessions.clear<UserSession>()
-            @Suppress("UNCHECKED_CAST")
-            call.attributes.allKeys
-                .filter { it.name == "SessionId" }
-                .forEach { key -> call.attributes.remove(key as io.ktor.util.AttributeKey<Any>) }
-            call.sessions.set(session)
-            call.respond(session)
         }
 
         /**
@@ -51,7 +95,7 @@ fun Application.auth() {
          * OperationID: logoutV1
          */
         post("/logout") {
-            call.sessions.clear<UserSession>()
+            call.sessions.clear<DeviceSession>()
             call.respond(HttpStatusCode.NoContent)
         }
 
@@ -60,8 +104,9 @@ fun Application.auth() {
                 /**
                  * Change the signed-in user's password.
                  * Requires ChangePassword and the current password.
-                 * When logoutOtherSessions is true, other cookie sessions for this user are deleted.
-                 * The current session stays. Omitted or false leaves other sessions in place.
+                 * When logoutOtherSessions is true, this user's account sessions on other device sessions are revoked.
+                 * The account on this device stays, including any other accounts signed in beside it.
+                 * Omitted or false leaves other account sessions in place.
                  *
                  * OperationID: changePasswordV1
                  */
@@ -75,7 +120,7 @@ fun Application.auth() {
                                 currentPassword = request.currentPassword,
                                 newPassword = request.newPassword,
                                 logoutOtherSessions = request.logoutOtherSessions,
-                                keepSessionId = call.request.cookies["user_session"],
+                                keepSessionId = call.request.cookies[SESSION_COOKIE_NAME],
                             )
                     ) {
                         ChangePasswordResult.Success -> {

@@ -1,6 +1,12 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getSelfV1 } from "@/api/generated/default/default";
+import type { LoginResponse } from "@/api/generated/schemas/loginResponse";
+import type { UserSession } from "@/api/generated/schemas/userSession";
 import { queryClient } from "@/routes/__root";
+
+export function sessionFromLogin(response: LoginResponse): UserSession {
+  return { user: response.user, permissions: response.permissions };
+}
 
 export const selfQueryOptions = queryOptions({
   queryKey: ["self"],

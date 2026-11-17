@@ -1,4 +1,3 @@
-import { useNavigate, useRouter } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useLogoutV1 } from "@/api/generated/default/default";
 import { VersionStamp } from "@/components/layout/VersionStamp";
@@ -25,21 +24,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { queryClient } from "@/routes/__root";
+import { accountNavigation } from "@/lib/authuser";
 
 export default function AppSidebarFooter() {
-  const router = useRouter();
-  const navigate = useNavigate();
   const { isMobile, state } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
 
   const logoutMutation = useLogoutV1({
     mutation: {
-      onSuccess: async () => {
-        console.log("サーバー側のログアウトに成功しました");
-        queryClient.clear();
-        await router.invalidate();
-        await navigate({ to: "/" });
+      onSuccess: () => {
+        accountNavigation.assign("/");
       },
       onError: (error) => {
         console.error("ログアウト処理でエラーが発生しました:", error);
@@ -48,7 +42,7 @@ export default function AppSidebarFooter() {
   });
   const logOutLabel = logoutMutation.isPending
     ? "ログアウト中..."
-    : "ログアウト";
+    : "全てのアカウントからログアウト";
 
   const _sidebarMenuButton = (
     <SidebarMenuButton
@@ -64,9 +58,11 @@ export default function AppSidebarFooter() {
       <AlertDialogOverlay className="fixed inset-0 z-50 bg-black/5 backdrop-blur-sm" />
       <AlertDialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg duration-100 data-open:animate-in data-open:zoom-in-95 data-closed:animate-out data-closed:zoom-out-95">
         <AlertDialogHeader>
-          <AlertDialogTitle>ログアウトしますか？</AlertDialogTitle>
+          <AlertDialogTitle>
+            全てのアカウントからログアウトしますか？
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            ログアウトすると、再度ログインするまで一部の機能が利用できなくなります。
+            このブラウザにサインインしているすべてのアカウントからログアウトします。
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -75,7 +71,7 @@ export default function AppSidebarFooter() {
             onClick={() => logoutMutation.mutate()}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            ログアウト
+            全てのアカウントからログアウト
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

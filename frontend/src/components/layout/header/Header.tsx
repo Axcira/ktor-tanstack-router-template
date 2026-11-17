@@ -1,5 +1,15 @@
 import { Check, Key, Mail, Menu, Shield, ShieldAlert } from "lucide-react";
-import { useGetRolesV1 } from "@/api/generated/default/default";
+import { useState } from "react";
+import {
+  useGetRolesV1,
+  useListAccountsV1,
+  useLogoutAccountV1,
+} from "@/api/generated/default/default";
+import {
+  AccountLogoutDialog,
+  AccountSwitcherList,
+  activeAccountIndex,
+} from "@/components/layout/header/AccountSwitcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,13 +19,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/components/ui/sidebar";
+import { accountNavigation, accountSwitchUrl } from "@/lib/authuser";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
+import { Route as RootRoute } from "@/routes/__root";
 import { Route } from "@/routes/_app";
 
 export default function AppHeader() {
   const { toggleSidebar } = useSidebar();
   const { session } = Route.useRouteContext();
+  const { authuser } = RootRoute.useSearch();
   const { data: rolesResponse, isLoading: isLoadingRoles } = useGetRolesV1();
+  const accountsQuery = useListAccountsV1();
+  const accounts = accountsQuery.data?.data ?? [];
+  const [logoutIndex, setLogoutIndex] = useState<number | null>(null);
+  const logoutAccount = useLogoutAccountV1({
+    mutation: {
+      onSuccess: () => {
+        window.location.reload();
+      },
+    },
+  });
+  const logoutTarget =
+    accounts.find((account) => account.index === logoutIndex) ?? null;
 
   const userEmail = session?.user?.email || "User";
   const fallbackChar = userEmail[0].toUpperCase();
@@ -50,7 +75,10 @@ export default function AppHeader() {
         <DropdownMenuTrigger
           nativeButton={false}
           render={
-            <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all select-none">
+            <Avatar
+              aria-label={userEmail}
+              className="h-10 w-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all select-none"
+            >
               <AvatarImage src="" alt={userEmail} />
               <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                 {fallbackChar}
@@ -62,6 +90,17 @@ export default function AppHeader() {
           align="end"
           className="w-80 p-3 rounded-lg bg-card border shadow-xl"
         >
+          <AccountSwitcherList
+            accounts={accounts}
+            activeIndex={activeAccountIndex(authuser, accounts)}
+            onSwitch={(index) => {
+              accountNavigation.assign(
+                accountSwitchUrl(accountNavigation.href(), index),
+              );
+            }}
+            onLogoutRequest={setLogoutIndex}
+          />
+          <DropdownMenuSeparator className="my-2" />
           <div className="flex flex-col space-y-2.5 p-2">
             <div className="flex items-center space-x-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -167,6 +206,17 @@ export default function AppHeader() {
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      <AccountLogoutDialog
+        account={logoutTarget}
+        pending={logoutAccount.isPending}
+        onOpenChange={(open) => {
+          if (!open) setLogoutIndex(null);
+        }}
+        onConfirm={() => {
+          if (logoutIndex === null) return;
+          logoutAccount.mutate({ index: String(logoutIndex) });
+        }}
+      />
     </header>
   );
 }

@@ -2,6 +2,7 @@ package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
 import kotlinx.coroutines.*
+import net.axcira.db.AccountSessions
 import net.axcira.db.Roles
 import net.axcira.db.Sessions
 import net.axcira.db.Users
@@ -10,9 +11,13 @@ import net.axcira.isDevelopment
 import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.greater
+import org.jetbrains.exposed.v1.core.isNull
+import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import org.slf4j.LoggerFactory
@@ -28,6 +33,33 @@ sealed interface ChangePasswordResult {
     data class Invalid(
         val reasons: List<String>,
     ) : ChangePasswordResult
+}
+
+sealed interface AccountPlan {
+    data class Ready(
+        val accounts: List<StoredAccount>,
+        val accountIndex: Int,
+    ) : AccountPlan
+
+    data object LimitReached : AccountPlan
+}
+
+sealed interface AccountResolution {
+    data class Ready(
+        val session: UserSession,
+    ) : AccountResolution
+
+    data object Missing : AccountResolution
+
+    data object InvalidIndex : AccountResolution
+}
+
+sealed interface LogoutAccountResult {
+    data object Success : LogoutAccountResult
+
+    data object Unauthenticated : LogoutAccountResult
+
+    data object NotFound : LogoutAccountResult
 }
 
 suspend fun <T> minWait(
@@ -139,7 +171,7 @@ class AuthService(
                 it[passwordHash] = nextHash
             }
             if (logoutOtherSessions) {
-                invalidateSessions(userId, keepSessionId)
+                revokeAccountSessions(userId, keepSessionId)
             }
         }
         log.info("Password changed for user id=$userId, logoutOtherSessions=$logoutOtherSessions")
@@ -165,7 +197,7 @@ class AuthService(
                     }
                 if (updated == 0) return@dbQuery false
                 if (logoutSessions) {
-                    invalidateSessions(userId, keepSessionId = null)
+                    revokeAccountSessions(userId, keepDeviceSessionId = null)
                 }
                 true
             }
@@ -176,27 +208,280 @@ class AuthService(
     }
 
     /**
-     * Deletes a specific session row by [sessionId] when rotating sessions on login.
+     * Deletes a device session and every account session attached to it.
+     * Used when rotating the device session id on login.
      */
     suspend fun deleteSessionById(sessionId: String) {
         database.dbQuery {
+            AccountSessions.deleteWhere { AccountSessions.deviceSessionId eq sessionId }
             Sessions.deleteWhere { Sessions.sessionId eq sessionId }
         }
     }
 
-    private fun invalidateSessions(
+    /**
+     * Plans the account list for a login.
+     *
+     * [addAccount] false replaces the device session with only [userId] at index 0.
+     * [addAccount] true keeps the other accounts, reuses [userId]'s index when that user is already
+     * signed in, and otherwise takes the lowest free index. The signed-in account becomes the default
+     * because its [StoredAccount.activatedAt] is the newest.
+     */
+    suspend fun planLogin(
+        deviceSessionId: String?,
         userId: UInt,
-        keepSessionId: String?,
-    ) {
-        Sessions.deleteWhere {
-            val owned = Sessions.userId eq userId
-            if (keepSessionId == null) {
-                owned
-            } else {
-                owned and (Sessions.sessionId neq keepSessionId)
+        addAccount: Boolean,
+        nowMillis: Long = System.currentTimeMillis(),
+    ): AccountPlan {
+        val expiresAt = nowMillis + SESSION_MAX_AGE_SECONDS * 1000
+        return database.dbQuery {
+            val existing =
+                if (addAccount && deviceSessionId != null && deviceSessionLive(deviceSessionId, nowMillis / 1000)) {
+                    activeAccounts(deviceSessionId, nowMillis)
+                } else {
+                    emptyList()
+                }
+            val already = existing.find { it.userId == userId }
+            if (already != null) {
+                val refreshed =
+                    existing.map { account ->
+                        if (account.userId == userId) {
+                            account.copy(expiresAt = expiresAt, activatedAt = nowMillis)
+                        } else {
+                            account
+                        }
+                    }
+                return@dbQuery AccountPlan.Ready(refreshed, already.index)
             }
+            if (existing.size >= MAX_ACCOUNTS_PER_DEVICE) {
+                log.warn("Rejected adding account for user id=$userId; device session already has $MAX_ACCOUNTS_PER_DEVICE accounts")
+                return@dbQuery AccountPlan.LimitReached
+            }
+            val used = existing.map { it.index }.toSet()
+            val index = (0 until MAX_ACCOUNTS_PER_DEVICE).first { it !in used }
+            val created =
+                StoredAccount(
+                    index = index,
+                    userId = userId,
+                    createdAt = nowMillis,
+                    expiresAt = expiresAt,
+                    activatedAt = nowMillis,
+                )
+            AccountPlan.Ready(existing + created, index)
         }
     }
+
+    /**
+     * Resolves the principal for [deviceSessionId].
+     * A blank [accountIndexHeader] uses the default account. An explicit index that is missing,
+     * expired, or revoked is [AccountResolution.InvalidIndex].
+     * A successful explicit index that is not already the default becomes the default.
+     */
+    suspend fun resolveAccount(
+        deviceSessionId: String,
+        accountIndexHeader: String?,
+    ): AccountResolution {
+        val nowMillis = System.currentTimeMillis()
+        val accounts =
+            database.dbQuery {
+                if (!deviceSessionLive(deviceSessionId, nowMillis / 1000)) return@dbQuery null
+                activeAccounts(deviceSessionId, nowMillis)
+            } ?: return AccountResolution.Missing
+        if (accounts.isEmpty()) return AccountResolution.Missing
+        val header = accountIndexHeader?.takeIf { it.isNotBlank() }
+        val selected =
+            if (header == null) {
+                accounts.defaultAccount()
+            } else {
+                val index = header.toIntOrNull()
+                if (index == null || index !in 0 until MAX_ACCOUNTS_PER_DEVICE) {
+                    return AccountResolution.InvalidIndex
+                }
+                accounts.find { it.index == index } ?: return AccountResolution.InvalidIndex
+            } ?: return AccountResolution.Missing
+        val defaultAccount = accounts.defaultAccount()
+        if (header != null && defaultAccount != null && selected.index != defaultAccount.index) {
+            database.dbQuery {
+                markDefault(deviceSessionId, selected, nowMillis)
+            }
+        }
+        val session = loadUserSession(selected.userId) ?: return AccountResolution.Missing
+        return AccountResolution.Ready(session)
+    }
+
+    /** Accounts on a live device session. Null when the device session is missing or expired. */
+    suspend fun listAccounts(deviceSessionId: String): List<AccountSummary>? {
+        val nowMillis = System.currentTimeMillis()
+        return database.dbQuery {
+            if (!deviceSessionLive(deviceSessionId, nowMillis / 1000)) return@dbQuery null
+            val accounts = activeAccounts(deviceSessionId, nowMillis)
+            val defaultIndex = accounts.defaultAccount()?.index
+            accounts
+                .sortedBy { it.index }
+                .mapNotNull { account ->
+                    val email =
+                        Users
+                            .selectAll()
+                            .where { Users.id eq account.userId }
+                            .singleOrNull()
+                            ?.get(Users.email)
+                            ?: return@mapNotNull null
+                    AccountSummary(
+                        index = account.index,
+                        displayName = displayNameForEmail(email),
+                        email = email,
+                        avatarUrl = null,
+                        isDefault = account.index == defaultIndex,
+                    )
+                }
+        }
+    }
+
+    suspend fun hasActiveAccounts(deviceSessionId: String): Boolean {
+        val nowMillis = System.currentTimeMillis()
+        return database.dbQuery {
+            if (!deviceSessionLive(deviceSessionId, nowMillis / 1000)) return@dbQuery false
+            activeAccounts(deviceSessionId, nowMillis).isNotEmpty()
+        }
+    }
+
+    /** Revokes one account slot. Other accounts on the device stay signed in. */
+    suspend fun logoutAccount(
+        deviceSessionId: String,
+        index: Int,
+    ): LogoutAccountResult {
+        val nowMillis = System.currentTimeMillis()
+        return database.dbQuery {
+            if (!deviceSessionLive(deviceSessionId, nowMillis / 1000)) {
+                return@dbQuery LogoutAccountResult.Unauthenticated
+            }
+            val updated =
+                AccountSessions.update({
+                    (AccountSessions.deviceSessionId eq deviceSessionId) and
+                        (AccountSessions.accountIndex eq index) and
+                        AccountSessions.revokedAt.isNull() and
+                        (AccountSessions.expiresAt greater nowMillis)
+                }) {
+                    it[revokedAt] = nowMillis
+                }
+            if (updated == 0) return@dbQuery LogoutAccountResult.NotFound
+            val remaining = activeAccounts(deviceSessionId, nowMillis)
+            val next = remaining.defaultAccount()
+            if (next == null) {
+                Sessions.update({ Sessions.sessionId eq deviceSessionId }) {
+                    it[userId] = null
+                }
+            } else {
+                markDefault(deviceSessionId, next, next.activatedAt)
+            }
+            LogoutAccountResult.Success
+        }
+    }
+
+    private fun revokeAccountSessions(
+        userId: UInt,
+        keepDeviceSessionId: String?,
+    ) {
+        val now = System.currentTimeMillis()
+        AccountSessions.update({
+            val owned = AccountSessions.userId eq userId
+            val active = AccountSessions.revokedAt.isNull()
+            if (keepDeviceSessionId == null) {
+                owned and active
+            } else {
+                owned and active and (AccountSessions.deviceSessionId neq keepDeviceSessionId)
+            }
+        }) {
+            it[revokedAt] = now
+        }
+    }
+
+    private fun deviceSessionLive(
+        deviceSessionId: String,
+        nowSeconds: Long,
+    ): Boolean {
+        val row =
+            Sessions
+                .select(Sessions.expiresAt)
+                .where { Sessions.sessionId eq deviceSessionId }
+                .singleOrNull()
+                ?: return false
+        val expiresAt = row[Sessions.expiresAt] ?: return false
+        return expiresAt > nowSeconds
+    }
+
+    /** Revokes expired slots, then returns accounts that are still signed in. Must run inside a transaction. */
+    private fun activeAccounts(
+        deviceSessionId: String,
+        nowMillis: Long,
+    ): List<StoredAccount> {
+        AccountSessions.update({
+            (AccountSessions.deviceSessionId eq deviceSessionId) and
+                AccountSessions.revokedAt.isNull() and
+                (AccountSessions.expiresAt lessEq nowMillis)
+        }) {
+            it[revokedAt] = nowMillis
+        }
+        return AccountSessions
+            .selectAll()
+            .where {
+                (AccountSessions.deviceSessionId eq deviceSessionId) and
+                    AccountSessions.revokedAt.isNull() and
+                    (AccountSessions.expiresAt greater nowMillis)
+            }.map { row ->
+                StoredAccount(
+                    index = row[AccountSessions.accountIndex],
+                    userId = row[AccountSessions.userId],
+                    createdAt = row[AccountSessions.createdAt],
+                    expiresAt = row[AccountSessions.expiresAt],
+                    activatedAt = row[AccountSessions.activatedAt],
+                )
+            }
+    }
+
+    private fun markDefault(
+        deviceSessionId: String,
+        account: StoredAccount,
+        activatedAt: Long,
+    ) {
+        AccountSessions.update({
+            (AccountSessions.deviceSessionId eq deviceSessionId) and
+                (AccountSessions.accountIndex eq account.index) and
+                AccountSessions.revokedAt.isNull()
+        }) {
+            it[AccountSessions.activatedAt] = activatedAt
+        }
+        val payload =
+            Sessions
+                .select(Sessions.session)
+                .where { Sessions.sessionId eq deviceSessionId }
+                .singleOrNull()
+                ?.get(Sessions.session)
+        val updatedPayload =
+            payload?.let { raw ->
+                runCatching {
+                    val device = sessionJson.decodeFromString(DeviceSession.serializer(), raw)
+                    sessionJson.encodeToString(DeviceSession.serializer(), device.copy(defaultUserId = account.userId))
+                }.getOrDefault(raw)
+            }
+        Sessions.update({ Sessions.sessionId eq deviceSessionId }) {
+            it[userId] = account.userId
+            if (updatedPayload != null) it[session] = updatedPayload
+        }
+    }
+
+    private suspend fun loadUserSession(userId: UInt): UserSession? =
+        database.dbQuery {
+            (Users innerJoin Roles)
+                .selectAll()
+                .where { Users.id eq userId }
+                .singleOrNull()
+                ?.let { row ->
+                    UserSession(
+                        UserDTO(row[Users.id].value, row[Users.email], row[Users.roleId].value),
+                        row[Roles.permissions],
+                    )
+                }
+        }
 }
 
 object PasswordHasher {
