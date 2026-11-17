@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/toast";
 import {
   accountNavigation,
   isAccountLimitReached,
+  isSessionSuperseded,
   signedInAccountUrl,
 } from "@/lib/authuser";
 import { selfQueryOptions, sessionFromLogin } from "@/lib/self";
@@ -49,9 +50,19 @@ export function LoginForm({ addAccount = false }: { addAccount?: boolean }) {
           queryClient.setQueryData(selfQueryOptions.queryKey, session);
           hookQueryClient.setQueryData(selfQueryOptions.queryKey, session);
           toast.add({ type: "success", title: "ログインに成功しました" });
-          navigate({ to: "/dashboard" }).then();
+          navigate({
+            to: "/dashboard",
+            search: { authuser: undefined },
+          }).then();
         },
         onError: (error) => {
+          if (
+            error instanceof ApiError &&
+            isSessionSuperseded(error.status, error.data)
+          ) {
+            accountNavigation.assign("/dashboard");
+            return;
+          }
           if (
             error instanceof ApiError &&
             isAccountLimitReached(error.status, error.data)

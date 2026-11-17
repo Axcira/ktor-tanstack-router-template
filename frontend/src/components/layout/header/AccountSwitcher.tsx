@@ -130,7 +130,10 @@ export function AccountLogoutDialog({
           <AlertDialogCancel>キャンセル</AlertDialogCancel>
           <AlertDialogAction
             disabled={pending}
-            onClick={onConfirm}
+            onClick={(event) => {
+              event.preventDefault();
+              onConfirm();
+            }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             ログアウト

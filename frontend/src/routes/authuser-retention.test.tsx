@@ -39,6 +39,17 @@ function createAuthUserRouter(initialEntry: string) {
           >
             2ページ目
           </button>
+          <button
+            type="button"
+            onClick={() =>
+              navigate({
+                to: "/articles",
+                search: (prev) => ({ ...prev, authuser: undefined, page: 1 }),
+              })
+            }
+          >
+            authuserを外す
+          </button>
           <Outlet />
         </>
       );
@@ -92,6 +103,22 @@ describe("authuser retention", () => {
         authuser: 0,
         page: 2,
       });
+    });
+  });
+
+  it("drops authuser when navigation sets it to undefined", async () => {
+    const router = createAuthUserRouter("/articles?authuser=2&page=1");
+    render(<RouterProvider router={router} />);
+    const user = userEvent.setup();
+
+    await user.click(
+      await screen.findByRole("button", { name: "authuserを外す" }),
+    );
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/articles");
+      expect(router.state.location.searchStr).not.toContain("authuser");
+      expect(router.state.location.search).toMatchObject({ page: 1 });
     });
   });
 });

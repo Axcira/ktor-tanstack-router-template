@@ -22,6 +22,7 @@ import net.axcira.features.auth.ErrorResponse
 import net.axcira.features.auth.LoginRequest
 import net.axcira.features.auth.LoginResponse
 import net.axcira.features.auth.SESSION_COOKIE_NAME
+import net.axcira.features.auth.SESSION_SUPERSEDED
 import net.axcira.features.auth.UserSession
 import net.axcira.features.permissions.Permission
 import net.axcira.features.permissions.withPermission
@@ -44,7 +45,7 @@ fun Application.auth() {
             val previousSessionId = call.request.cookies[SESSION_COOKIE_NAME]
             when (
                 val plan =
-                    authService.planLogin(
+                    authService.rotateLogin(
                         deviceSessionId = previousSessionId,
                         userId = authenticated.user.id,
                         addAccount = request.addAccount,
@@ -61,17 +62,26 @@ fun Application.auth() {
                     )
                 }
 
+                AccountPlan.SessionConflict -> {
+                    call.respond(
+                        HttpStatusCode.Conflict,
+                        ErrorResponse(
+                            code = SESSION_SUPERSEDED,
+                            message =
+                                "This browser session was already replaced. Reload and continue with the signed-in accounts.",
+                        ),
+                    )
+                }
+
                 is AccountPlan.Ready -> {
-                    // Rotate the device session id (session fixation). Account rows are carried in the
-                    // new session document and inserted when the new id is stored.
-                    if (previousSessionId != null) {
-                        authService.deleteSessionById(previousSessionId)
-                    }
+                    // clear() invalidates whatever id the tracker still holds. Do that before pointing
+                    // the tracker at the id rotateLogin already stored, or the new rows would be deleted.
                     call.sessions.clear<DeviceSession>()
                     @Suppress("UNCHECKED_CAST")
                     call.attributes.allKeys
                         .filter { it.name == "SessionId" }
                         .forEach { key -> call.attributes.remove(key as io.ktor.util.AttributeKey<Any>) }
+                    call.attributes.put(io.ktor.util.AttributeKey<String>("SessionId"), plan.sessionId)
                     call.sessions.set(
                         DeviceSession(
                             defaultUserId = authenticated.user.id,

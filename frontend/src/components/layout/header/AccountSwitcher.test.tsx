@@ -70,6 +70,7 @@ function SwitcherHarness({
         }}
         onConfirm={() => {
           if (logoutIndex !== null) onLogout(logoutIndex);
+          setLogoutIndex(null);
         }}
       />
     </>

@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/components/ui/sidebar";
+import { toast } from "@/components/ui/toast";
 import { accountNavigation, accountSwitchUrl } from "@/lib/authuser";
 import { PERMISSION_UI_DEFS } from "@/lib/permissions";
 import { Route as RootRoute } from "@/routes/__root";
@@ -36,6 +37,10 @@ export default function AppHeader() {
     mutation: {
       onSuccess: () => {
         window.location.reload();
+      },
+      onError: () => {
+        toast.add({ type: "error", title: "ログアウトに失敗しました" });
+        setLogoutIndex(null);
       },
     },
   });

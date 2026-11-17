@@ -67,6 +67,32 @@ describe("customFetch account index", () => {
     );
     await viWaitFor(() => accountListRequested);
   });
+
+  it("recovers an invalid authuser without calling the API as the default account", async () => {
+    window.history.pushState({}, "", "/dashboard?authuser=10");
+    vi.spyOn(accountNavigation, "assign").mockImplementation(() => {});
+    let requested = false;
+    let accountListRequested = false;
+    server.use(
+      http.get("*/api/v1/users/me", () => {
+        requested = true;
+        return HttpResponse.json({ user: { id: 1 }, permissions: [] });
+      }),
+      http.get("*/api/v1/accounts", () => {
+        accountListRequested = true;
+        return HttpResponse.json([
+          { index: 0, email: "a@b.com", displayName: "a", isDefault: true },
+        ]);
+      }),
+    );
+
+    await expect(customFetch("/api/v1/users/me")).rejects.toMatchObject({
+      status: 401,
+      data: { code: ACCOUNT_INDEX_INVALID },
+    });
+    expect(requested).toBe(false);
+    await viWaitFor(() => accountListRequested);
+  });
 });
 
 async function viWaitFor(ready: () => boolean) {

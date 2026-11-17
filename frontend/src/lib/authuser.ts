@@ -1,6 +1,7 @@
 export const ACCOUNT_INDEX_HEADER = "X-Account-Index";
 export const ACCOUNT_INDEX_INVALID = "ACCOUNT_INDEX_INVALID";
 export const ACCOUNT_LIMIT_REACHED = "ACCOUNT_LIMIT_REACHED";
+export const SESSION_SUPERSEDED = "SESSION_SUPERSEDED";
 
 const MAX_ACCOUNT_INDEX = 9;
 
@@ -28,19 +29,32 @@ export function parseAuthUser(value: unknown): number | undefined {
 }
 
 export function readAuthUser(search: string): number | undefined {
-  return parseAuthUser(
-    new URLSearchParams(search).get("authuser") ?? undefined,
-  );
+  const selection = accountIndexSelection(search);
+  return selection.kind === "valid" ? selection.index : undefined;
+}
+
+export type AccountIndexSelection =
+  | { kind: "absent" }
+  | { kind: "valid"; index: number }
+  | { kind: "invalid" };
+
+/** Absent means use the default account. Invalid must not be treated as absent. */
+export function accountIndexSelection(search: string): AccountIndexSelection {
+  const params = new URLSearchParams(search);
+  if (!params.has("authuser")) return { kind: "absent" };
+  const index = parseAuthUser(params.get("authuser"));
+  if (index === undefined) return { kind: "invalid" };
+  return { kind: "valid", index };
 }
 
 export function mergeAccountIndex(
   init: RequestInit | undefined,
   search: string,
 ): RequestInit {
-  const index = readAuthUser(search);
-  if (index === undefined) return init ?? {};
+  const selection = accountIndexSelection(search);
+  if (selection.kind !== "valid") return init ?? {};
   const headers = new Headers(init?.headers);
-  headers.set(ACCOUNT_INDEX_HEADER, String(index));
+  headers.set(ACCOUNT_INDEX_HEADER, String(selection.index));
   return { ...init, headers };
 }
 
@@ -70,6 +84,11 @@ export function isAccountIndexInvalid(status: number, data: unknown): boolean {
 export function isAccountLimitReached(status: number, data: unknown): boolean {
   if (status !== 409 || data == null || typeof data !== "object") return false;
   return (data as { code?: unknown }).code === ACCOUNT_LIMIT_REACHED;
+}
+
+export function isSessionSuperseded(status: number, data: unknown): boolean {
+  if (status !== 409 || data == null || typeof data !== "object") return false;
+  return (data as { code?: unknown }).code === SESSION_SUPERSEDED;
 }
 
 let recovering = false;

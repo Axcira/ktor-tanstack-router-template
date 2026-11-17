@@ -29,6 +29,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
@@ -101,6 +102,7 @@ class AccountSessionTest {
             val database: Database by application.dependencies
             database.dbQuery {
                 assertEquals(0L, Sessions.selectAll().where { Sessions.sessionId eq firstCookie }.count())
+                assertEquals(1L, Sessions.selectAll().count())
                 assertEquals(
                     2L,
                     AccountSessions
@@ -292,6 +294,38 @@ class AccountSessionTest {
             assertEquals(ACCOUNT_INDEX_INVALID, removed.body<ErrorResponse>().code)
             assertEquals(survivor.id, client.me(2).user.id)
             assertEquals(admin.id, client.me(0).user.id)
+        }
+
+    @Test
+    fun `adding an account to a device session that is already gone does not start a second session`() =
+        test { client ->
+            val user = createUser("superseded@example.com", emptyList())
+            val first = login(client, user.email)
+            val cookie = cookieValue(first)
+            val database: Database by application.dependencies
+            database.dbQuery {
+                AccountSessions.deleteWhere { AccountSessions.deviceSessionId eq cookie }
+                Sessions.deleteWhere { Sessions.sessionId eq cookie }
+            }
+
+            val again =
+                client.post("/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest(user.email, "password", addAccount = true))
+                }
+            again.assertStatus(HttpStatusCode.Conflict)
+            assertEquals(SESSION_SUPERSEDED, again.body<ErrorResponse>().code)
+            client.get("/api/v1/users/me").assertStatus(HttpStatusCode.Unauthorized)
+            database.dbQuery {
+                assertEquals(0L, Sessions.selectAll().count())
+            }
+
+            val replaced = login(client, user.email)
+            assertEquals(0, replaced.body<LoginResponse>().accountIndex)
+            assertEquals(user.id, client.me().user.id)
+            database.dbQuery {
+                assertEquals(1L, Sessions.selectAll().count())
+            }
         }
 
     private suspend fun net.axcira.SharedTestContext.createUser(

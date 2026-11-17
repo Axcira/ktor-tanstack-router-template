@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ACCOUNT_INDEX_HEADER,
+  accountIndexSelection,
   accountNavigation,
   accountSwitchUrl,
   clearedAuthUserUrl,
@@ -44,6 +45,16 @@ describe("authuser", () => {
 
     const without = mergeAccountIndex(undefined, "");
     expect(new Headers(without.headers).has(ACCOUNT_INDEX_HEADER)).toBe(false);
+
+    for (const search of ["?authuser=10", "?authuser=nope", "?authuser="]) {
+      expect(accountIndexSelection(search)).toEqual({ kind: "invalid" });
+      expect(
+        new Headers(mergeAccountIndex(undefined, search).headers).has(
+          ACCOUNT_INDEX_HEADER,
+        ),
+      ).toBe(false);
+    }
+    expect(accountIndexSelection("?page=2")).toEqual({ kind: "absent" });
   });
 
   it("builds switch and add-account urls", () => {

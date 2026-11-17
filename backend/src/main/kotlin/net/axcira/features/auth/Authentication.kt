@@ -33,6 +33,9 @@ const val ACCOUNT_INDEX_HEADER = "X-Account-Index"
 
 const val ACCOUNT_INDEX_INVALID = "ACCOUNT_INDEX_INVALID"
 const val ACCOUNT_LIMIT_REACHED = "ACCOUNT_LIMIT_REACHED"
+
+/** Another login already consumed this device session. The client should reload and use the winning cookie. */
+const val SESSION_SUPERSEDED = "SESSION_SUPERSEDED"
 const val MAX_ACCOUNTS_PER_DEVICE = 10
 
 /**
@@ -165,9 +168,10 @@ class DatabaseSessionStorage(
                     .select(sessionId)
                     .where { Sessions.expiresAt.isNull() or (Sessions.expiresAt lessEq now) }
                     .map { it[sessionId] }
-            if (expiredIds.isNotEmpty()) {
-                AccountSessions.deleteWhere { AccountSessions.deviceSessionId inList expiredIds }
-                Sessions.deleteWhere { sessionId inList expiredIds }
+            // One statement cannot bind more than 65,535 JDBC parameters. An empty list deletes nothing.
+            expiredIds.chunked(10_000).forEach { batch ->
+                AccountSessions.deleteWhere { AccountSessions.deviceSessionId inList batch }
+                Sessions.deleteWhere { sessionId inList batch }
             }
             Sessions.upsert {
                 it[sessionId] = id

@@ -1,4 +1,6 @@
 import {
+  ACCOUNT_INDEX_INVALID,
+  accountIndexSelection,
   isAccountIndexInvalid,
   mergeAccountIndex,
   recoverInvalidAccountIndex,
@@ -25,6 +27,20 @@ export const customFetch = async <T>(
   options?: RequestInit,
 ): Promise<T> => {
   const search = typeof window === "undefined" ? "" : window.location.search;
+  if (
+    typeof window !== "undefined" &&
+    accountIndexSelection(search).kind === "invalid"
+  ) {
+    void recoverInvalidAccountIndex();
+    throw new ApiError(
+      401,
+      {
+        code: ACCOUNT_INDEX_INVALID,
+        message: "The selected account is not signed in on this browser.",
+      },
+      new Headers(),
+    );
+  }
   const res = await fetch(url, mergeAccountIndex(options, search));
   const isNoBody = [204, 205, 304].includes(res.status);
   const body = isNoBody ? null : await res.text();

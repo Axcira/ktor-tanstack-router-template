@@ -1,6 +1,7 @@
 package net.axcira.features.auth
 
 import de.mkammerer.argon2.Argon2Factory
+import io.ktor.util.generateNonceSuspend
 import kotlinx.coroutines.*
 import net.axcira.db.AccountSessions
 import net.axcira.db.Roles
@@ -12,11 +13,13 @@ import net.axcira.plugins.dbQuery
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
@@ -39,9 +42,13 @@ sealed interface AccountPlan {
     data class Ready(
         val accounts: List<StoredAccount>,
         val accountIndex: Int,
+        val sessionId: String,
     ) : AccountPlan
 
     data object LimitReached : AccountPlan
+
+    /** The presented device session was already consumed by another login. */
+    data object SessionConflict : AccountPlan
 }
 
 sealed interface AccountResolution {
@@ -208,41 +215,51 @@ class AuthService(
     }
 
     /**
-     * Deletes a device session and every account session attached to it.
-     * Used when rotating the device session id on login.
-     */
-    suspend fun deleteSessionById(sessionId: String) {
-        database.dbQuery {
-            AccountSessions.deleteWhere { AccountSessions.deviceSessionId eq sessionId }
-            Sessions.deleteWhere { Sessions.sessionId eq sessionId }
-        }
-    }
-
-    /**
-     * Plans the account list for a login.
+     * Plans a login and consumes the previous device session in one transaction.
+     *
+     * The previous session row is locked, so a second login cannot allocate the same free index
+     * or copy accounts that a revocation committed before this transaction. Account rows for the
+     * new id are inserted here. The later session write finds them and does not insert them again.
      *
      * [addAccount] false replaces the device session with only [userId] at index 0.
-     * [addAccount] true keeps the other accounts, reuses [userId]'s index when that user is already
-     * signed in, and otherwise takes the lowest free index. The signed-in account becomes the default
-     * because its [StoredAccount.activatedAt] is the newest.
+     * [addAccount] true keeps the other live accounts, reuses [userId]'s index when that user is
+     * already signed in, and otherwise takes the lowest free index. A missing previous row while
+     * adding an account is [AccountPlan.SessionConflict] instead of a second device session.
+     * A missing row on a replace login starts a fresh session, which is how an expired cookie signs in.
      */
-    suspend fun planLogin(
+    suspend fun rotateLogin(
         deviceSessionId: String?,
         userId: UInt,
         addAccount: Boolean,
         nowMillis: Long = System.currentTimeMillis(),
     ): AccountPlan {
+        val newSessionId = generateNonceSuspend()
         val expiresAt = nowMillis + SESSION_MAX_AGE_SECONDS * 1000
         return database.dbQuery {
             val existing =
-                if (addAccount && deviceSessionId != null && deviceSessionLive(deviceSessionId, nowMillis / 1000)) {
-                    activeAccounts(deviceSessionId, nowMillis)
-                } else {
+                if (deviceSessionId == null) {
                     emptyList()
+                } else {
+                    val locked =
+                        Sessions
+                            .selectAll()
+                            .where { Sessions.sessionId eq deviceSessionId }
+                            .forUpdate()
+                            .singleOrNull()
+                    if (locked == null) {
+                        if (addAccount) return@dbQuery AccountPlan.SessionConflict
+                        emptyList()
+                    } else {
+                        val sessionExpiresAt = locked[Sessions.expiresAt]
+                        val live = sessionExpiresAt != null && sessionExpiresAt > nowMillis / 1000
+                        if (addAccount && live) activeAccounts(deviceSessionId, nowMillis) else emptyList()
+                    }
                 }
             val already = existing.find { it.userId == userId }
+            val accounts: List<StoredAccount>
+            val index: Int
             if (already != null) {
-                val refreshed =
+                accounts =
                     existing.map { account ->
                         if (account.userId == userId) {
                             account.copy(expiresAt = expiresAt, activatedAt = nowMillis)
@@ -250,23 +267,46 @@ class AuthService(
                             account
                         }
                     }
-                return@dbQuery AccountPlan.Ready(refreshed, already.index)
-            }
-            if (existing.size >= MAX_ACCOUNTS_PER_DEVICE) {
+                index = already.index
+            } else if (existing.size >= MAX_ACCOUNTS_PER_DEVICE) {
                 log.warn("Rejected adding account for user id=$userId; device session already has $MAX_ACCOUNTS_PER_DEVICE accounts")
                 return@dbQuery AccountPlan.LimitReached
+            } else {
+                val used = existing.map { it.index }.toSet()
+                index = (0 until MAX_ACCOUNTS_PER_DEVICE).first { it !in used }
+                accounts =
+                    existing +
+                    StoredAccount(
+                        index = index,
+                        userId = userId,
+                        createdAt = nowMillis,
+                        expiresAt = expiresAt,
+                        activatedAt = nowMillis,
+                    )
             }
-            val used = existing.map { it.index }.toSet()
-            val index = (0 until MAX_ACCOUNTS_PER_DEVICE).first { it !in used }
-            val created =
-                StoredAccount(
-                    index = index,
-                    userId = userId,
-                    createdAt = nowMillis,
-                    expiresAt = expiresAt,
-                    activatedAt = nowMillis,
-                )
-            AccountPlan.Ready(existing + created, index)
+            if (deviceSessionId != null &&
+                Sessions.selectAll().where { Sessions.sessionId eq deviceSessionId }.count() > 0L
+            ) {
+                AccountSessions.deleteWhere { AccountSessions.deviceSessionId eq deviceSessionId }
+                Sessions.deleteWhere { Sessions.sessionId eq deviceSessionId }
+            }
+            Sessions.insert {
+                it[sessionId] = newSessionId
+                it[session] = "{}"
+                it[Sessions.userId] = userId
+                it[Sessions.expiresAt] = nowMillis / 1000 + SESSION_MAX_AGE_SECONDS
+            }
+            accounts.forEach { account ->
+                AccountSessions.insert {
+                    it[AccountSessions.deviceSessionId] = newSessionId
+                    it[accountIndex] = account.index
+                    it[AccountSessions.userId] = account.userId
+                    it[createdAt] = account.createdAt
+                    it[AccountSessions.expiresAt] = account.expiresAt
+                    it[activatedAt] = account.activatedAt
+                }
+            }
+            AccountPlan.Ready(accounts, index, newSessionId)
         }
     }
 
@@ -382,7 +422,7 @@ class AuthService(
         keepDeviceSessionId: String?,
     ) {
         val now = System.currentTimeMillis()
-        AccountSessions.update({
+        val ownedAndActive = {
             val owned = AccountSessions.userId eq userId
             val active = AccountSessions.revokedAt.isNull()
             if (keepDeviceSessionId == null) {
@@ -390,7 +430,23 @@ class AuthService(
             } else {
                 owned and active and (AccountSessions.deviceSessionId neq keepDeviceSessionId)
             }
-        }) {
+        }
+        val deviceIds =
+            AccountSessions
+                .select(AccountSessions.deviceSessionId)
+                .where { ownedAndActive() }
+                .map { it[AccountSessions.deviceSessionId] }
+                .distinct()
+        if (deviceIds.isNotEmpty()) {
+            // Lock the device rows before revoking so a login cannot copy these accounts afterward.
+            // The update below is by user id, so it also covers a session id allocated while we waited.
+            Sessions
+                .select(Sessions.sessionId)
+                .where { Sessions.sessionId inList deviceIds }
+                .forUpdate()
+                .toList()
+        }
+        AccountSessions.update({ ownedAndActive() }) {
             it[revokedAt] = now
         }
     }

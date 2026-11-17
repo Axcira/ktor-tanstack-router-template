@@ -6,6 +6,7 @@ import {
   createRouter,
   Outlet,
   RouterProvider,
+  retainSearchParams,
 } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -14,7 +15,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getLoginV1MockHandler } from "@/api/generated/default/default.msw";
 import type { LoginResponse } from "@/api/generated/schemas/loginResponse";
 import { LoginForm } from "@/components/LoginForm";
-import { accountNavigation } from "@/lib/authuser";
+import { accountNavigation, parseAuthUser } from "@/lib/authuser";
 import { selfQueryOptions } from "@/lib/self";
 import { queryClient as rootQueryClient } from "@/routes/__root";
 import { guardLogin } from "@/routes/login";
@@ -37,9 +38,16 @@ vi.mock("@/components/ui/toast", () => ({
   },
 }));
 
-async function renderLogin(addAccount = false) {
+async function renderLogin(addAccount = false, entry = "/login") {
   const queryClient = createTestQueryClient();
   const rootRoute = createRootRoute({
+    validateSearch: (search: Record<string, unknown>) => {
+      const authuser = parseAuthUser(search.authuser);
+      return authuser === undefined ? {} : { authuser };
+    },
+    search: {
+      middlewares: [retainSearchParams(["authuser"])],
+    },
     component: () => (
       <QueryClientProvider client={queryClient}>
         <Outlet />
@@ -63,7 +71,7 @@ async function renderLogin(addAccount = false) {
   });
   const router = createRouter({
     routeTree: rootRoute.addChildren([loginRoute, homeRoute, dashboardRoute]),
-    history: createMemoryHistory({ initialEntries: ["/login"] }),
+    history: createMemoryHistory({ initialEntries: [entry] }),
   });
 
   const view = render(<RouterProvider router={router} />);
@@ -118,7 +126,7 @@ describe("LoginForm", () => {
       ),
     );
 
-    const { user, router } = await renderLogin();
+    const { user, router } = await renderLogin(false, "/login?authuser=2");
 
     await user.type(screen.getByLabelText("メールアドレス"), "a@b.com");
     await user.type(screen.getByLabelText("パスワード"), "password");
@@ -130,7 +138,32 @@ describe("LoginForm", () => {
         title: "ログインに成功しました",
       });
       expect(router.state.location.pathname).toBe("/dashboard");
+      expect(router.state.location.searchStr).not.toContain("authuser");
     });
+  });
+
+  it("reloads into the winning session when this login lost the race", async () => {
+    const assign = vi
+      .spyOn(accountNavigation, "assign")
+      .mockImplementation(() => {});
+    server.use(
+      http.post("*/api/v1/auth/login", () =>
+        HttpResponse.json(
+          { code: "SESSION_SUPERSEDED", message: "replaced" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    const { user } = await renderLogin(true);
+    await user.type(screen.getByLabelText("メールアドレス"), "extra@b.com");
+    await user.type(screen.getByLabelText("パスワード"), "password");
+    await user.click(screen.getByRole("button", { name: "アカウントを追加" }));
+
+    await waitFor(() => {
+      expect(assign).toHaveBeenCalledWith("/dashboard");
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("shows inline error when the request fails", async () => {
