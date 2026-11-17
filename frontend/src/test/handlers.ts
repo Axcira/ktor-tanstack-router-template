@@ -1,6 +1,6 @@
 import { HttpResponse, http } from "msw";
-import type { AccountSummary } from "@/api/generated/schemas/accountSummary";
 import { getListAccountsV1MockHandler } from "@/api/generated/default/default.msw";
+import type { AccountSummary } from "@/api/generated/schemas/accountSummary";
 import { resetAccountIndexRecovery } from "@/lib/authuser";
 import { queryClient as appQueryClient } from "@/routes/__root";
 
