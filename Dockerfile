@@ -20,6 +20,9 @@ COPY --chown=65532:65532 app.jar /app/app.jar
 
 EXPOSE 8080
 
+# CVE-2026-114938 (Java4Shell): remove after upgrading to a fixed JDK base image (17.0.21.1 / 21.0.13.1 / 25.0.5.1+).
+ENV JAVA_TOOL_OPTIONS="-XX:-UseBASE64Intrinsics"
+
 # Presence of /app/static/index.html disables Scalar and serves the SPA at /.
 ENTRYPOINT ["java", \
     "--enable-native-access=ALL-UNNAMED", \
