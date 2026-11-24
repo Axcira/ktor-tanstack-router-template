@@ -82,22 +82,30 @@ VSCodeなど、他のエディターを使用している場合は、以下の�
 
 ### Fast path — one command
 
-プロジェクトルートで `dev.sh` を実行すると、PostgreSQL の起動と接続確認を行い、後続のコマンドを表示します。
+プロジェクトルートで次を実行すると、PostgreSQL（Compose）・バックエンド（Ktor dev）・フロントエンド（Vite dev）がまとめて起動します。ログは `db` / `backend` / `frontend` のプレフィックス付きで出力されます。**Ctrl-C** で3つとも停止します（DB は `compose up` を前面実行しているため、Compose がコンテナを終了します）。
 
 ```bash
-./dev.sh
+bun run dev
 ```
 
-データベースが起動したら、表示されたコマンドをそれぞれ別のターミナルで実行してください。
+既定では **Podman Compose**（`podman compose up postgres`）です。Docker を使う場合は起動時に `COMPOSE_CMD` を指定してください（例: `COMPOSE_CMD='docker compose' bun run dev`）。
+
+バックエンドは DB の起動を待つため、起動時に JDBC 接続をリトライします（本番でも同様）。
 
 ### Manual steps
 
 **データベースの起動**
-Docker Compose経由で、Postgresが起動します。
-`--wait` フラグにより、Postgres が接続を受け付けるのを待ってから終了します。
+Compose で Postgres を起動します（バックグラウンドにしたい場合の例）。
 
 ```bash
-docker compose up -d --wait
+podman compose up -d --wait
+# or: COMPOSE_CMD='docker compose' docker compose up -d --wait
+```
+
+DB だけ前面実行する例（`bun run dev` の DB 側と同じ）:
+
+```bash
+podman compose up postgres
 ```
 
 **バックエンドの起動**
@@ -147,6 +155,9 @@ bun run orval:watch
 プロジェクトルートから共通操作を実行できます。
 
 ```bash
+# All-in-one local dev
+bun run dev                 # Postgres + backend + frontend (see Fast path above)
+
 # Frontend
 bun run frontend:dev        # Vite dev server (HMR, port 3000)
 bun run frontend:build      # Production build

@@ -53,9 +53,14 @@ val hikariConfig by lazy { createHikariConfig() }
 val dataSource: HikariDataSource
     get() =
         currentDataSource ?: synchronized(databaseLock) {
-            currentDataSource ?: HikariDataSource(createHikariConfig()).also { ds ->
-                shutdownHookRegistered
-                currentDataSource = ds
+            currentDataSource ?: run {
+                if (!skipDatabase) {
+                    awaitJdbcConnectivity(url, user, pass)
+                }
+                HikariDataSource(createHikariConfig()).also { ds ->
+                    shutdownHookRegistered
+                    currentDataSource = ds
+                }
             }
         }
 
