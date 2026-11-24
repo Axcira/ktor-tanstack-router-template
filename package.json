@@ -5,11 +5,13 @@
     "frontend"
   ],
   "devDependencies": {
+    "concurrently": "9.2.1",
     "lefthook": "2.2.2",
     "@types/node": "26.6.6"
   },
   "scripts": {
     "prepare": "lefthook install",
+    "dev": "bash scripts/dev-all.sh",
     "frontend:dev": "bun run --cwd frontend dev",
     "frontend:build": "bun run --cwd frontend build",
     "frontend:test": "bun run --cwd frontend test",

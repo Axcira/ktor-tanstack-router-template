@@ -12,20 +12,15 @@ if [ ! -d node_modules ]; then
   echo ""
 fi
 
-# ---- dependency checks ----
-if ! command -v docker &>/dev/null; then
-  echo "Error: docker is not installed or not in PATH." >&2
-  exit 1
-fi
+# shellcheck source=scripts/lib/compose.sh
+source "$script_dir/scripts/lib/compose.sh"
 
-if ! docker compose version &>/dev/null; then
-  echo "Error: docker compose (v2 plugin) is not available." >&2
-  exit 1
-fi
+compose_cmd="$(resolve_compose_cmd)"
 
 # ---- start PostgreSQL ----
-echo "Starting PostgreSQL via Docker Compose..."
-docker compose up -d --wait
+echo "Starting PostgreSQL via Compose ($compose_cmd)..."
+# shellcheck disable=SC2086
+$compose_cmd up -d --wait
 
 echo ""
 echo "PostgreSQL is ready on port 5432."
