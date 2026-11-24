@@ -68,6 +68,8 @@ GitHubの "Use this template" ボタンをクリックし、このテンプレ�
 このプロジェクトは [Bun workspace](https://bun.sh/docs/install/workspace) 構成です。
 ルートで `bun install` を実行すると、フロントエンドと Lefthook の依存が一度にインストールされます。
 
+必要な Bun のバージョンはルート [`package.json`](package.json) の `packageManager`（例: `bun@1.4.5`）が正本です。CI と `Dockerfile.source` も同じ版を参照します。Bun を上げるときは `packageManager` を更新し、`bun install` で `bun.lock` を再生成してください（lockfile の形式が変わる場合があります）。
+
 ```bash
 bun install
 ```
