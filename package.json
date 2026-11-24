@@ -1,6 +1,7 @@
 {
   "name": "ktor-tanstack-router-template",
   "private": true,
+  "packageManager": "bun@1.4.5",
   "workspaces": [
     "frontend"
   ],
