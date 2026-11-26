@@ -4,6 +4,9 @@ import kotlinx.serialization.Serializable
 import net.axcira.*
 import net.axcira.db.*
 import net.axcira.db.Articles.title
+import net.axcira.features.masters.FractionalIndex
+import net.axcira.features.masters.collateC
+import net.axcira.features.masters.nowUtc
 import net.axcira.plugins.*
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
@@ -44,11 +47,26 @@ data class ArticleDTO(
 private fun upsertTags(tags: List<String>) =
     run {
         val existingTags = Tags.selectAll().where { Tags.name inList tags }.toList()
-        val newTags = tags.filter { tag -> tag !in existingTags.map { it[Tags.name] } }
+        val existingNames = existingTags.map { it[Tags.name] }.toSet()
+        val newTags = tags.distinct().filter { it !in existingNames }
+        val now = nowUtc()
+        var previous =
+            Tags
+                .select(Tags.sortKey)
+                .orderBy(collateC(Tags.sortKey) to SortOrder.DESC)
+                .limit(1)
+                .firstOrNull()
+                ?.get(Tags.sortKey)
         val generatedTags =
             Tags
-                .batchInsert(newTags) {
-                    this[Tags.name] = it
+                .batchInsert(newTags) { name ->
+                    val key = FractionalIndex.generateKeyBetween(previous, null)
+                    previous = key
+                    this[Tags.name] = name
+                    this[Tags.sortKey] = key
+                    this[Tags.isActive] = true
+                    this[Tags.createdAt] = now
+                    this[Tags.updatedAt] = now
                 }.map { TagDTO(it[Tags.id].value, it[Tags.name]) }
         listOf(existingTags.map { TagDTO(it[Tags.id].value, it[Tags.name]) }, generatedTags).flatten()
     }

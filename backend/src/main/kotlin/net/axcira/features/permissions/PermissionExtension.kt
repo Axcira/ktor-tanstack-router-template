@@ -53,3 +53,27 @@ inline fun <reified T : Permission> Route.withPermission(
         block()
     }
 }
+
+/**
+ * Requires [Permission.ManageMasters] for [masterId].
+ * The plugin name includes the id so two masters do not share one installation.
+ */
+fun Route.requireMaster(
+    masterId: String,
+    block: Route.() -> Unit,
+) {
+    val permission = Permission.ManageMasters(masterId)
+    createChild(PermissionRouteSelector("ManageMasters:$masterId")).apply {
+        install(
+            createRouteScopedPlugin("RequireManageMasters_$masterId") {
+                on(AuthenticationChecked) { call ->
+                    val principal = call.principal<UserSession>() ?: return@on
+                    if (!principal.permissions.satisfies(permission)) {
+                        throw NoPermissionException(permission)
+                    }
+                }
+            },
+        )
+        block()
+    }
+}

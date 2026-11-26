@@ -144,4 +144,17 @@ export const PERMISSION_UI_DEFS = {
       },
     },
   },
+  ManageMasters: {
+    label: "マスタの管理",
+    description:
+      "指定したマスタの追加、編集、削除、並び替えができます。管理者はマスタ ID を指定しなくてもすべてのマスタを操作できます。",
+    props: {
+      masterId: {
+        label: "マスタ ID",
+        description:
+          "カンマ区切り。例: tags, customers, products。新しいマスタは ID を足すだけで、権限の種類は増やしません。",
+        type: "string",
+      },
+    },
+  },
 } satisfies UI_Requirement<Permission>;

@@ -77,4 +77,19 @@ sealed interface Permission {
             return true
         }
     }
+
+    /**
+     * Manage one master-data table. [masterId] is the route id (`tags`, `customers`, `products`, …).
+     * A grant satisfies only the same id. [Administrator] still bypasses this check.
+     */
+    @Serializable
+    @SerialName("ManageMasters")
+    data class ManageMasters(
+        val masterId: String,
+    ) : Permission {
+        override fun check(required: Permission): Boolean {
+            if (required !is ManageMasters) return false
+            return masterId == required.masterId
+        }
+    }
 }

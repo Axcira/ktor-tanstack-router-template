@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Database,
   FileText,
   LayoutDashboard,
   Palette,
@@ -7,6 +8,7 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 import type { Permission } from "@/api/generated/schemas";
+import { MASTER_TABS } from "@/routes/_app/masters/-components/masters";
 
 export interface MenuItem {
   text: string;
@@ -36,6 +38,12 @@ const menuItems: MenuItem[] = [
         requiredPermission: { type: "CreateArticle" },
       },
     ],
+  },
+  {
+    text: "マスタ",
+    icon: <Database />,
+    to: "/masters",
+    requiredPermission: MASTER_TABS.map((tab) => tab.permission),
   },
   {
     text: "Settings",

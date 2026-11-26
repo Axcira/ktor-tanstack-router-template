@@ -9,6 +9,7 @@ import type { PermissionChangePassword } from "./permissionChangePassword";
 import type { PermissionCreateArticle } from "./permissionCreateArticle";
 import type { PermissionDeleteArticle } from "./permissionDeleteArticle";
 import type { PermissionManageArticles } from "./permissionManageArticles";
+import type { PermissionManageMasters } from "./permissionManageMasters";
 import type { PermissionManageRoles } from "./permissionManageRoles";
 import type { PermissionManageUsers } from "./permissionManageUsers";
 import type { PermissionUpdateArticle } from "./permissionUpdateArticle";
@@ -19,6 +20,7 @@ export type Permission =
   | PermissionCreateArticle
   | PermissionDeleteArticle
   | PermissionManageArticles
+  | PermissionManageMasters
   | PermissionManageRoles
   | PermissionManageUsers
   | PermissionUpdateArticle;

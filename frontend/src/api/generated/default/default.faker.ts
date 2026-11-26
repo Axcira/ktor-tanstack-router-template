@@ -9,6 +9,8 @@ import { faker } from "@faker-js/faker";
 import type {
   AccountSummary,
   ArticleDTO,
+  CustomerDTO,
+  CustomerList,
   HealthResponse,
   LoginResponse,
   Permission,
@@ -17,10 +19,15 @@ import type {
   PermissionCreateArticle,
   PermissionDeleteArticle,
   PermissionManageArticles,
+  PermissionManageMasters,
   PermissionManageRoles,
   PermissionManageUsers,
   PermissionUpdateArticle,
+  ProductDTO,
+  ProductList,
   RoleDTO,
+  TagMasterDTO,
+  TagMasterList,
   UserDTO,
   UserSession,
   VersionResponse,
@@ -61,6 +68,16 @@ export const getLoginV1ResponsePermissionManageArticlesMock = (
   overrideResponse: Partial<PermissionManageArticles> = {},
 ): PermissionManageArticles => ({
   ...{ type: faker.helpers.arrayElement(["ManageArticles"] as const) },
+  ...overrideResponse,
+});
+
+export const getLoginV1ResponsePermissionManageMastersMock = (
+  overrideResponse: Partial<PermissionManageMasters> = {},
+): PermissionManageMasters => ({
+  ...{
+    type: faker.helpers.arrayElement(["ManageMasters"] as const),
+    masterId: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
   ...overrideResponse,
 });
 
@@ -106,6 +123,7 @@ export const getLoginV1ResponseMock = (
       { ...getLoginV1ResponsePermissionCreateArticleMock() },
       { ...getLoginV1ResponsePermissionDeleteArticleMock() },
       { ...getLoginV1ResponsePermissionManageArticlesMock() },
+      { ...getLoginV1ResponsePermissionManageMastersMock() },
       { ...getLoginV1ResponsePermissionManageRolesMock() },
       { ...getLoginV1ResponsePermissionManageUsersMock() },
       { ...getLoginV1ResponsePermissionUpdateArticleMock() },
@@ -197,6 +215,16 @@ export const getGetSelfV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetSelfV1ResponsePermissionManageMastersMock = (
+  overrideResponse: Partial<PermissionManageMasters> = {},
+): PermissionManageMasters => ({
+  ...{
+    type: faker.helpers.arrayElement(["ManageMasters"] as const),
+    masterId: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  ...overrideResponse,
+});
+
 export const getGetSelfV1ResponsePermissionManageRolesMock = (
   overrideResponse: Partial<PermissionManageRoles> = {},
 ): PermissionManageRoles => ({
@@ -239,6 +267,7 @@ export const getGetSelfV1ResponseMock = (
       { ...getGetSelfV1ResponsePermissionCreateArticleMock() },
       { ...getGetSelfV1ResponsePermissionDeleteArticleMock() },
       { ...getGetSelfV1ResponsePermissionManageArticlesMock() },
+      { ...getGetSelfV1ResponsePermissionManageMastersMock() },
       { ...getGetSelfV1ResponsePermissionManageRolesMock() },
       { ...getGetSelfV1ResponsePermissionManageUsersMock() },
       { ...getGetSelfV1ResponsePermissionUpdateArticleMock() },
@@ -320,6 +349,219 @@ export const getUpdateArticleV1ResponseMock = (
   ...overrideResponse,
 });
 
+export const getCreateTagV1ResponseMock = (
+  overrideResponse: Partial<Extract<TagMasterDTO, object>> = {},
+): TagMasterDTO => ({
+  id: faker.number.int(),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getListTagsV1ResponseMock = (
+  overrideResponse: Partial<Extract<TagMasterList, object>> = {},
+): TagMasterList => ({
+  items: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.number.int(),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    isActive: faker.datatype.boolean(),
+    createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  })),
+  totalCount: faker.number.int(),
+  ...overrideResponse,
+});
+
+export const getGetTagV1ResponseMock = (
+  overrideResponse: Partial<Extract<TagMasterDTO, object>> = {},
+): TagMasterDTO => ({
+  id: faker.number.int(),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getUpdateTagV1ResponseMock = (
+  overrideResponse: Partial<Extract<TagMasterDTO, object>> = {},
+): TagMasterDTO => ({
+  id: faker.number.int(),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getReorderTagV1ResponseMock = (
+  overrideResponse: Partial<Extract<TagMasterDTO, object>> = {},
+): TagMasterDTO => ({
+  id: faker.number.int(),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getCreateCustomerV1ResponseMock = (
+  overrideResponse: Partial<Extract<CustomerDTO, object>> = {},
+): CustomerDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getListCustomersV1ResponseMock = (
+  overrideResponse: Partial<Extract<CustomerList, object>> = {},
+): CustomerList => ({
+  items: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.number.int(),
+    code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    isActive: faker.datatype.boolean(),
+    createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  })),
+  totalCount: faker.number.int(),
+  ...overrideResponse,
+});
+
+export const getGetCustomerV1ResponseMock = (
+  overrideResponse: Partial<Extract<CustomerDTO, object>> = {},
+): CustomerDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getUpdateCustomerV1ResponseMock = (
+  overrideResponse: Partial<Extract<CustomerDTO, object>> = {},
+): CustomerDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getReorderCustomerV1ResponseMock = (
+  overrideResponse: Partial<Extract<CustomerDTO, object>> = {},
+): CustomerDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getCreateProductV1ResponseMock = (
+  overrideResponse: Partial<Extract<ProductDTO, object>> = {},
+): ProductDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  customerId: faker.number.int(),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getListProductsV1ResponseMock = (
+  overrideResponse: Partial<Extract<ProductList, object>> = {},
+): ProductList => ({
+  items: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.number.int(),
+    code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    customerId: faker.number.int(),
+    sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    isActive: faker.datatype.boolean(),
+    createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  })),
+  totalCount: faker.number.int(),
+  ...overrideResponse,
+});
+
+export const getGetProductV1ResponseMock = (
+  overrideResponse: Partial<Extract<ProductDTO, object>> = {},
+): ProductDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  customerId: faker.number.int(),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getUpdateProductV1ResponseMock = (
+  overrideResponse: Partial<Extract<ProductDTO, object>> = {},
+): ProductDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  customerId: faker.number.int(),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getReorderProductV1ResponseMock = (
+  overrideResponse: Partial<Extract<ProductDTO, object>> = {},
+): ProductDTO => ({
+  id: faker.number.int(),
+  code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  customerId: faker.number.int(),
+  sortKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  isActive: faker.datatype.boolean(),
+  createdAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
 export const getGetUserPermissionsV1ResponsePermissionAdministratorMock = (
   overrideResponse: Partial<PermissionAdministrator> = {},
 ): PermissionAdministrator => ({
@@ -358,6 +600,16 @@ export const getGetUserPermissionsV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetUserPermissionsV1ResponsePermissionManageMastersMock = (
+  overrideResponse: Partial<PermissionManageMasters> = {},
+): PermissionManageMasters => ({
+  ...{
+    type: faker.helpers.arrayElement(["ManageMasters"] as const),
+    masterId: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  ...overrideResponse,
+});
+
 export const getGetUserPermissionsV1ResponsePermissionManageRolesMock = (
   overrideResponse: Partial<PermissionManageRoles> = {},
 ): PermissionManageRoles => ({
@@ -393,6 +645,7 @@ export const getGetUserPermissionsV1ResponseMock = (): Permission[] =>
       { ...getGetUserPermissionsV1ResponsePermissionCreateArticleMock() },
       { ...getGetUserPermissionsV1ResponsePermissionDeleteArticleMock() },
       { ...getGetUserPermissionsV1ResponsePermissionManageArticlesMock() },
+      { ...getGetUserPermissionsV1ResponsePermissionManageMastersMock() },
       { ...getGetUserPermissionsV1ResponsePermissionManageRolesMock() },
       { ...getGetUserPermissionsV1ResponsePermissionManageUsersMock() },
       { ...getGetUserPermissionsV1ResponsePermissionUpdateArticleMock() },
@@ -437,6 +690,16 @@ export const getCreateRoleV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getCreateRoleV1ResponsePermissionManageMastersMock = (
+  overrideResponse: Partial<PermissionManageMasters> = {},
+): PermissionManageMasters => ({
+  ...{
+    type: faker.helpers.arrayElement(["ManageMasters"] as const),
+    masterId: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  ...overrideResponse,
+});
+
 export const getCreateRoleV1ResponsePermissionManageRolesMock = (
   overrideResponse: Partial<PermissionManageRoles> = {},
 ): PermissionManageRoles => ({
@@ -477,6 +740,7 @@ export const getCreateRoleV1ResponseMock = (
       { ...getCreateRoleV1ResponsePermissionCreateArticleMock() },
       { ...getCreateRoleV1ResponsePermissionDeleteArticleMock() },
       { ...getCreateRoleV1ResponsePermissionManageArticlesMock() },
+      { ...getCreateRoleV1ResponsePermissionManageMastersMock() },
       { ...getCreateRoleV1ResponsePermissionManageRolesMock() },
       { ...getCreateRoleV1ResponsePermissionManageUsersMock() },
       { ...getCreateRoleV1ResponsePermissionUpdateArticleMock() },
@@ -523,6 +787,16 @@ export const getGetRolesV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetRolesV1ResponsePermissionManageMastersMock = (
+  overrideResponse: Partial<PermissionManageMasters> = {},
+): PermissionManageMasters => ({
+  ...{
+    type: faker.helpers.arrayElement(["ManageMasters"] as const),
+    masterId: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  ...overrideResponse,
+});
+
 export const getGetRolesV1ResponsePermissionManageRolesMock = (
   overrideResponse: Partial<PermissionManageRoles> = {},
 ): PermissionManageRoles => ({
@@ -565,6 +839,7 @@ export const getGetRolesV1ResponseMock = (): RoleDTO[] =>
         { ...getGetRolesV1ResponsePermissionCreateArticleMock() },
         { ...getGetRolesV1ResponsePermissionDeleteArticleMock() },
         { ...getGetRolesV1ResponsePermissionManageArticlesMock() },
+        { ...getGetRolesV1ResponsePermissionManageMastersMock() },
         { ...getGetRolesV1ResponsePermissionManageRolesMock() },
         { ...getGetRolesV1ResponsePermissionManageUsersMock() },
         { ...getGetRolesV1ResponsePermissionUpdateArticleMock() },
@@ -610,6 +885,16 @@ export const getGetRoleByIdV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getGetRoleByIdV1ResponsePermissionManageMastersMock = (
+  overrideResponse: Partial<PermissionManageMasters> = {},
+): PermissionManageMasters => ({
+  ...{
+    type: faker.helpers.arrayElement(["ManageMasters"] as const),
+    masterId: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  ...overrideResponse,
+});
+
 export const getGetRoleByIdV1ResponsePermissionManageRolesMock = (
   overrideResponse: Partial<PermissionManageRoles> = {},
 ): PermissionManageRoles => ({
@@ -650,6 +935,7 @@ export const getGetRoleByIdV1ResponseMock = (
       { ...getGetRoleByIdV1ResponsePermissionCreateArticleMock() },
       { ...getGetRoleByIdV1ResponsePermissionDeleteArticleMock() },
       { ...getGetRoleByIdV1ResponsePermissionManageArticlesMock() },
+      { ...getGetRoleByIdV1ResponsePermissionManageMastersMock() },
       { ...getGetRoleByIdV1ResponsePermissionManageRolesMock() },
       { ...getGetRoleByIdV1ResponsePermissionManageUsersMock() },
       { ...getGetRoleByIdV1ResponsePermissionUpdateArticleMock() },
@@ -696,6 +982,16 @@ export const getUpdateRoleV1ResponsePermissionManageArticlesMock = (
   ...overrideResponse,
 });
 
+export const getUpdateRoleV1ResponsePermissionManageMastersMock = (
+  overrideResponse: Partial<PermissionManageMasters> = {},
+): PermissionManageMasters => ({
+  ...{
+    type: faker.helpers.arrayElement(["ManageMasters"] as const),
+    masterId: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  ...overrideResponse,
+});
+
 export const getUpdateRoleV1ResponsePermissionManageRolesMock = (
   overrideResponse: Partial<PermissionManageRoles> = {},
 ): PermissionManageRoles => ({
@@ -736,6 +1032,7 @@ export const getUpdateRoleV1ResponseMock = (
       { ...getUpdateRoleV1ResponsePermissionCreateArticleMock() },
       { ...getUpdateRoleV1ResponsePermissionDeleteArticleMock() },
       { ...getUpdateRoleV1ResponsePermissionManageArticlesMock() },
+      { ...getUpdateRoleV1ResponsePermissionManageMastersMock() },
       { ...getUpdateRoleV1ResponsePermissionManageRolesMock() },
       { ...getUpdateRoleV1ResponsePermissionManageUsersMock() },
       { ...getUpdateRoleV1ResponsePermissionUpdateArticleMock() },

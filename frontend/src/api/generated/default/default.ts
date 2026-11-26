@@ -24,9 +24,15 @@ import type {
   AccountSummary,
   ArticleDTO,
   ChangePasswordRequest,
+  ConflictErrorBody,
   CreateArticleInput,
+  CreateCustomerInput,
+  CreateProductInput,
   CreateRoleInput,
+  CreateTagMasterInput,
   CreateUserInput,
+  CustomerDTO,
+  CustomerList,
   DeleteRoleV1Params,
   ErrorResponse,
   ForceChangePasswordRequest,
@@ -35,12 +41,23 @@ import type {
   GetUsersV1Params,
   HealthResponse,
   ListArticlesV1Params,
+  ListCustomersV1Params,
+  ListProductsV1Params,
+  ListTagsV1Params,
   LoginRequest,
   LoginResponse,
   Permission,
+  ProductDTO,
+  ProductList,
+  ReorderMasterInput,
   RoleDTO,
+  TagMasterDTO,
+  TagMasterList,
   UpdateArticleInput,
+  UpdateCustomerInput,
+  UpdateProductInput,
   UpdateRoleInput,
+  UpdateTagMasterInput,
   UpdateUserInput,
   UserDTO,
   UserSession,
@@ -2537,6 +2554,2666 @@ export const useUpdateArticleV1 = <
   TContext
 > => {
   return useMutation(getUpdateArticleV1MutationOptions(options), queryClient);
+};
+export type createTagV1Response201 = {
+  data: TagMasterDTO;
+  status: 201;
+};
+
+export type createTagV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type createTagV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type createTagV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type createTagV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type createTagV1ResponseSuccess = (
+  | createTagV1Response201
+  | createTagV1Response204
+) & {
+  headers: Headers;
+};
+export type createTagV1ResponseError = (
+  | createTagV1Response400
+  | createTagV1Response404
+  | createTagV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getCreateTagV1Url = () => {
+  return `/api/v1/tags`;
+};
+
+/**
+ * @summary Create a tag master
+ */
+export const createTagV1 = async (
+  createTagMasterInput?: CreateTagMasterInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<createTagV1ResponseSuccess> => {
+  return customFetch<createTagV1ResponseSuccess>(getCreateTagV1Url(), {
+    ...options,
+    method: "POST",
+    headers: getHeaders(
+      { "Content-Type": "application/json" },
+      options?.headers,
+    ),
+    body: JSON.stringify(createTagMasterInput),
+  });
+};
+
+export const getCreateTagV1MutationKey = () => ["createTagV1"] as const;
+
+export const getCreateTagV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createTagV1>>,
+    TError,
+    CreateTagV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createTagV1>>,
+  TError,
+  CreateTagV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getCreateTagV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createTagV1>>,
+    CreateTagV1MutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createTagV1(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateTagV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof createTagV1>>
+>;
+export type CreateTagV1MutationBody = CreateTagMasterInput | undefined;
+export type CreateTagV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type CreateTagV1MutationVariables = { data?: CreateTagMasterInput };
+
+/** @summary Create a tag master */
+export const useCreateTagV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createTagV1>>,
+      TError,
+      CreateTagV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createTagV1>>,
+  TError,
+  CreateTagV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getCreateTagV1MutationOptions(options), queryClient);
+};
+export type listTagsV1Response200 = {
+  data: TagMasterList;
+  status: 200;
+};
+
+export type listTagsV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type listTagsV1ResponseSuccess = listTagsV1Response200 & {
+  headers: Headers;
+};
+export type listTagsV1ResponseError = listTagsV1Response400 & {
+  headers: Headers;
+};
+
+export const getListTagsV1Url = (params?: ListTagsV1Params) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/tags?${stringifiedParams}`
+    : `/api/v1/tags`;
+};
+
+/**
+ * @summary List tag masters
+ */
+export const listTagsV1 = async (
+  params?: ListTagsV1Params,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<listTagsV1ResponseSuccess> => {
+  return customFetch<listTagsV1ResponseSuccess>(getListTagsV1Url(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListTagsV1QueryKey = (params?: ListTagsV1Params) => {
+  return [`/api/v1/tags`, ...(params ? [params] : [])] as const;
+};
+
+export const getListTagsV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof listTagsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListTagsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listTagsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListTagsV1QueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listTagsV1>>> = ({
+    signal,
+  }) => listTagsV1(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listTagsV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListTagsV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof listTagsV1>>
+>;
+export type ListTagsV1QueryError = ErrorType<ValidationErrorBody>;
+
+/** @summary List tag masters */
+export function useListTagsV1<
+  TData = Awaited<ReturnType<typeof listTagsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params: undefined | ListTagsV1Params,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listTagsV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listTagsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listTagsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List tag masters */
+export function useListTagsV1<
+  TData = Awaited<ReturnType<typeof listTagsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListTagsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listTagsV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listTagsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listTagsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List tag masters */
+export function useListTagsV1<
+  TData = Awaited<ReturnType<typeof listTagsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListTagsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listTagsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List tag masters */
+export function useListTagsV1<
+  TData = Awaited<ReturnType<typeof listTagsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListTagsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listTagsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListTagsV1QueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type deleteTagV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type deleteTagV1Response400 = {
+  data: void;
+  status: 400;
+};
+
+export type deleteTagV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type deleteTagV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type deleteTagV1ResponseSuccess = deleteTagV1Response204 & {
+  headers: Headers;
+};
+export type deleteTagV1ResponseError = (
+  | deleteTagV1Response400
+  | deleteTagV1Response404
+  | deleteTagV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getDeleteTagV1Url = (id: string) => {
+  return `/api/v1/tags/${id}`;
+};
+
+/**
+ * @summary Delete a tag master. Referenced tags return 409.
+ */
+export const deleteTagV1 = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteTagV1ResponseSuccess> => {
+  return customFetch<deleteTagV1ResponseSuccess>(getDeleteTagV1Url(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteTagV1MutationKey = () => ["deleteTagV1"] as const;
+
+export const getDeleteTagV1MutationOptions = <
+  TError = ErrorType<void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteTagV1>>,
+    TError,
+    DeleteTagV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteTagV1>>,
+  TError,
+  DeleteTagV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getDeleteTagV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteTagV1>>,
+    DeleteTagV1MutationVariables
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteTagV1(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteTagV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteTagV1>>
+>;
+
+export type DeleteTagV1MutationError = ErrorType<void | ConflictErrorBody>;
+export type DeleteTagV1MutationVariables = { id: string };
+
+/** @summary Delete a tag master. Referenced tags return 409. */
+export const useDeleteTagV1 = <
+  TError = ErrorType<void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteTagV1>>,
+      TError,
+      DeleteTagV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteTagV1>>,
+  TError,
+  DeleteTagV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getDeleteTagV1MutationOptions(options), queryClient);
+};
+export type getTagV1Response200 = {
+  data: TagMasterDTO;
+  status: 200;
+};
+
+export type getTagV1Response400 = {
+  data: void;
+  status: 400;
+};
+
+export type getTagV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type getTagV1ResponseSuccess = getTagV1Response200 & {
+  headers: Headers;
+};
+export type getTagV1ResponseError = (
+  | getTagV1Response400
+  | getTagV1Response404
+) & {
+  headers: Headers;
+};
+
+export const getGetTagV1Url = (id: string) => {
+  return `/api/v1/tags/${id}`;
+};
+
+/**
+ * @summary Get a tag master
+ */
+export const getTagV1 = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getTagV1ResponseSuccess> => {
+  return customFetch<getTagV1ResponseSuccess>(getGetTagV1Url(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTagV1QueryKey = (id: string) => {
+  return [`/api/v1/tags/${id}`] as const;
+};
+
+export const getGetTagV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof getTagV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTagV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTagV1QueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTagV1>>> = ({
+    signal,
+  }) => getTagV1(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getTagV1>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetTagV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTagV1>>
+>;
+export type GetTagV1QueryError = ErrorType<void>;
+
+/** @summary Get a tag master */
+export function useGetTagV1<
+  TData = Awaited<ReturnType<typeof getTagV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTagV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagV1>>,
+          TError,
+          Awaited<ReturnType<typeof getTagV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a tag master */
+export function useGetTagV1<
+  TData = Awaited<ReturnType<typeof getTagV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTagV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagV1>>,
+          TError,
+          Awaited<ReturnType<typeof getTagV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a tag master */
+export function useGetTagV1<
+  TData = Awaited<ReturnType<typeof getTagV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTagV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a tag master */
+export function useGetTagV1<
+  TData = Awaited<ReturnType<typeof getTagV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getTagV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetTagV1QueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type updateTagV1Response200 = {
+  data: TagMasterDTO;
+  status: 200;
+};
+
+export type updateTagV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type updateTagV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type updateTagV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type updateTagV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type updateTagV1ResponseSuccess = (
+  | updateTagV1Response200
+  | updateTagV1Response204
+) & {
+  headers: Headers;
+};
+export type updateTagV1ResponseError = (
+  | updateTagV1Response400
+  | updateTagV1Response404
+  | updateTagV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getUpdateTagV1Url = (id: string) => {
+  return `/api/v1/tags/${id}`;
+};
+
+/**
+ * @summary Update a tag master
+ */
+export const updateTagV1 = async (
+  id: string,
+  updateTagMasterInput?: UpdateTagMasterInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateTagV1ResponseSuccess> => {
+  return customFetch<updateTagV1ResponseSuccess>(getUpdateTagV1Url(id), {
+    ...options,
+    method: "PATCH",
+    headers: getHeaders(
+      { "Content-Type": "application/json" },
+      options?.headers,
+    ),
+    body: JSON.stringify(updateTagMasterInput),
+  });
+};
+
+export const getUpdateTagV1MutationKey = () => ["updateTagV1"] as const;
+
+export const getUpdateTagV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateTagV1>>,
+    TError,
+    UpdateTagV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateTagV1>>,
+  TError,
+  UpdateTagV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateTagV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateTagV1>>,
+    UpdateTagV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateTagV1(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateTagV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateTagV1>>
+>;
+export type UpdateTagV1MutationBody = UpdateTagMasterInput | undefined;
+export type UpdateTagV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type UpdateTagV1MutationVariables = {
+  id: string;
+  data?: UpdateTagMasterInput;
+};
+
+/** @summary Update a tag master */
+export const useUpdateTagV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateTagV1>>,
+      TError,
+      UpdateTagV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateTagV1>>,
+  TError,
+  UpdateTagV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateTagV1MutationOptions(options), queryClient);
+};
+export type reorderTagV1Response200 = {
+  data: TagMasterDTO;
+  status: 200;
+};
+
+export type reorderTagV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type reorderTagV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type reorderTagV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type reorderTagV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type reorderTagV1ResponseSuccess = (
+  | reorderTagV1Response200
+  | reorderTagV1Response204
+) & {
+  headers: Headers;
+};
+export type reorderTagV1ResponseError = (
+  | reorderTagV1Response400
+  | reorderTagV1Response404
+  | reorderTagV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getReorderTagV1Url = (id: string) => {
+  return `/api/v1/tags/${id}/sort`;
+};
+
+/**
+ * @summary Store a client-generated fractional sort key.
+ */
+export const reorderTagV1 = async (
+  id: string,
+  reorderMasterInput?: ReorderMasterInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<reorderTagV1ResponseSuccess> => {
+  return customFetch<reorderTagV1ResponseSuccess>(getReorderTagV1Url(id), {
+    ...options,
+    method: "PATCH",
+    headers: getHeaders(
+      { "Content-Type": "application/json" },
+      options?.headers,
+    ),
+    body: JSON.stringify(reorderMasterInput),
+  });
+};
+
+export const getReorderTagV1MutationKey = () => ["reorderTagV1"] as const;
+
+export const getReorderTagV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reorderTagV1>>,
+    TError,
+    ReorderTagV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reorderTagV1>>,
+  TError,
+  ReorderTagV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getReorderTagV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reorderTagV1>>,
+    ReorderTagV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return reorderTagV1(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReorderTagV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof reorderTagV1>>
+>;
+export type ReorderTagV1MutationBody = ReorderMasterInput | undefined;
+export type ReorderTagV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type ReorderTagV1MutationVariables = {
+  id: string;
+  data?: ReorderMasterInput;
+};
+
+/** @summary Store a client-generated fractional sort key. */
+export const useReorderTagV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof reorderTagV1>>,
+      TError,
+      ReorderTagV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof reorderTagV1>>,
+  TError,
+  ReorderTagV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getReorderTagV1MutationOptions(options), queryClient);
+};
+export type createCustomerV1Response201 = {
+  data: CustomerDTO;
+  status: 201;
+};
+
+export type createCustomerV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type createCustomerV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type createCustomerV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type createCustomerV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type createCustomerV1ResponseSuccess = (
+  | createCustomerV1Response201
+  | createCustomerV1Response204
+) & {
+  headers: Headers;
+};
+export type createCustomerV1ResponseError = (
+  | createCustomerV1Response400
+  | createCustomerV1Response404
+  | createCustomerV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getCreateCustomerV1Url = () => {
+  return `/api/v1/customers`;
+};
+
+/**
+ * @summary Create a customer
+ */
+export const createCustomerV1 = async (
+  createCustomerInput?: CreateCustomerInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<createCustomerV1ResponseSuccess> => {
+  return customFetch<createCustomerV1ResponseSuccess>(
+    getCreateCustomerV1Url(),
+    {
+      ...options,
+      method: "POST",
+      headers: getHeaders(
+        { "Content-Type": "application/json" },
+        options?.headers,
+      ),
+      body: JSON.stringify(createCustomerInput),
+    },
+  );
+};
+
+export const getCreateCustomerV1MutationKey = () =>
+  ["createCustomerV1"] as const;
+
+export const getCreateCustomerV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCustomerV1>>,
+    TError,
+    CreateCustomerV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCustomerV1>>,
+  TError,
+  CreateCustomerV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getCreateCustomerV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCustomerV1>>,
+    CreateCustomerV1MutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createCustomerV1(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCustomerV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCustomerV1>>
+>;
+export type CreateCustomerV1MutationBody = CreateCustomerInput | undefined;
+export type CreateCustomerV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type CreateCustomerV1MutationVariables = { data?: CreateCustomerInput };
+
+/** @summary Create a customer */
+export const useCreateCustomerV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createCustomerV1>>,
+      TError,
+      CreateCustomerV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createCustomerV1>>,
+  TError,
+  CreateCustomerV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getCreateCustomerV1MutationOptions(options), queryClient);
+};
+export type listCustomersV1Response200 = {
+  data: CustomerList;
+  status: 200;
+};
+
+export type listCustomersV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type listCustomersV1ResponseSuccess = listCustomersV1Response200 & {
+  headers: Headers;
+};
+export type listCustomersV1ResponseError = listCustomersV1Response400 & {
+  headers: Headers;
+};
+
+export const getListCustomersV1Url = (params?: ListCustomersV1Params) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/customers?${stringifiedParams}`
+    : `/api/v1/customers`;
+};
+
+/**
+ * @summary List customers
+ */
+export const listCustomersV1 = async (
+  params?: ListCustomersV1Params,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<listCustomersV1ResponseSuccess> => {
+  return customFetch<listCustomersV1ResponseSuccess>(
+    getListCustomersV1Url(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListCustomersV1QueryKey = (params?: ListCustomersV1Params) => {
+  return [`/api/v1/customers`, ...(params ? [params] : [])] as const;
+};
+
+export const getListCustomersV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof listCustomersV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListCustomersV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomersV1>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListCustomersV1QueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listCustomersV1>>> = ({
+    signal,
+  }) => listCustomersV1(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listCustomersV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListCustomersV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof listCustomersV1>>
+>;
+export type ListCustomersV1QueryError = ErrorType<ValidationErrorBody>;
+
+/** @summary List customers */
+export function useListCustomersV1<
+  TData = Awaited<ReturnType<typeof listCustomersV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params: undefined | ListCustomersV1Params,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomersV1>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCustomersV1>>,
+          TError,
+          Awaited<ReturnType<typeof listCustomersV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List customers */
+export function useListCustomersV1<
+  TData = Awaited<ReturnType<typeof listCustomersV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListCustomersV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomersV1>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCustomersV1>>,
+          TError,
+          Awaited<ReturnType<typeof listCustomersV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List customers */
+export function useListCustomersV1<
+  TData = Awaited<ReturnType<typeof listCustomersV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListCustomersV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomersV1>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List customers */
+export function useListCustomersV1<
+  TData = Awaited<ReturnType<typeof listCustomersV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListCustomersV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomersV1>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListCustomersV1QueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type deleteCustomerV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type deleteCustomerV1Response400 = {
+  data: void;
+  status: 400;
+};
+
+export type deleteCustomerV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type deleteCustomerV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type deleteCustomerV1ResponseSuccess = deleteCustomerV1Response204 & {
+  headers: Headers;
+};
+export type deleteCustomerV1ResponseError = (
+  | deleteCustomerV1Response400
+  | deleteCustomerV1Response404
+  | deleteCustomerV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getDeleteCustomerV1Url = (id: string) => {
+  return `/api/v1/customers/${id}`;
+};
+
+/**
+ * @summary Delete a customer. Customers referenced by products return 409.
+ */
+export const deleteCustomerV1 = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteCustomerV1ResponseSuccess> => {
+  return customFetch<deleteCustomerV1ResponseSuccess>(
+    getDeleteCustomerV1Url(id),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getDeleteCustomerV1MutationKey = () =>
+  ["deleteCustomerV1"] as const;
+
+export const getDeleteCustomerV1MutationOptions = <
+  TError = ErrorType<void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCustomerV1>>,
+    TError,
+    DeleteCustomerV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCustomerV1>>,
+  TError,
+  DeleteCustomerV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getDeleteCustomerV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCustomerV1>>,
+    DeleteCustomerV1MutationVariables
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteCustomerV1(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCustomerV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCustomerV1>>
+>;
+
+export type DeleteCustomerV1MutationError = ErrorType<void | ConflictErrorBody>;
+export type DeleteCustomerV1MutationVariables = { id: string };
+
+/** @summary Delete a customer. Customers referenced by products return 409. */
+export const useDeleteCustomerV1 = <
+  TError = ErrorType<void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteCustomerV1>>,
+      TError,
+      DeleteCustomerV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCustomerV1>>,
+  TError,
+  DeleteCustomerV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getDeleteCustomerV1MutationOptions(options), queryClient);
+};
+export type getCustomerV1Response200 = {
+  data: CustomerDTO;
+  status: 200;
+};
+
+export type getCustomerV1Response400 = {
+  data: void;
+  status: 400;
+};
+
+export type getCustomerV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type getCustomerV1ResponseSuccess = getCustomerV1Response200 & {
+  headers: Headers;
+};
+export type getCustomerV1ResponseError = (
+  | getCustomerV1Response400
+  | getCustomerV1Response404
+) & {
+  headers: Headers;
+};
+
+export const getGetCustomerV1Url = (id: string) => {
+  return `/api/v1/customers/${id}`;
+};
+
+/**
+ * @summary Get a customer
+ */
+export const getCustomerV1 = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getCustomerV1ResponseSuccess> => {
+  return customFetch<getCustomerV1ResponseSuccess>(getGetCustomerV1Url(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCustomerV1QueryKey = (id: string) => {
+  return [`/api/v1/customers/${id}`] as const;
+};
+
+export const getGetCustomerV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof getCustomerV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCustomerV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCustomerV1QueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCustomerV1>>> = ({
+    signal,
+  }) => getCustomerV1(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCustomerV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetCustomerV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCustomerV1>>
+>;
+export type GetCustomerV1QueryError = ErrorType<void>;
+
+/** @summary Get a customer */
+export function useGetCustomerV1<
+  TData = Awaited<ReturnType<typeof getCustomerV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCustomerV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCustomerV1>>,
+          TError,
+          Awaited<ReturnType<typeof getCustomerV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a customer */
+export function useGetCustomerV1<
+  TData = Awaited<ReturnType<typeof getCustomerV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCustomerV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCustomerV1>>,
+          TError,
+          Awaited<ReturnType<typeof getCustomerV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a customer */
+export function useGetCustomerV1<
+  TData = Awaited<ReturnType<typeof getCustomerV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCustomerV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a customer */
+export function useGetCustomerV1<
+  TData = Awaited<ReturnType<typeof getCustomerV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCustomerV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetCustomerV1QueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type updateCustomerV1Response200 = {
+  data: CustomerDTO;
+  status: 200;
+};
+
+export type updateCustomerV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type updateCustomerV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type updateCustomerV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type updateCustomerV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type updateCustomerV1ResponseSuccess = (
+  | updateCustomerV1Response200
+  | updateCustomerV1Response204
+) & {
+  headers: Headers;
+};
+export type updateCustomerV1ResponseError = (
+  | updateCustomerV1Response400
+  | updateCustomerV1Response404
+  | updateCustomerV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getUpdateCustomerV1Url = (id: string) => {
+  return `/api/v1/customers/${id}`;
+};
+
+/**
+ * @summary Update a customer
+ */
+export const updateCustomerV1 = async (
+  id: string,
+  updateCustomerInput?: UpdateCustomerInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateCustomerV1ResponseSuccess> => {
+  return customFetch<updateCustomerV1ResponseSuccess>(
+    getUpdateCustomerV1Url(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: getHeaders(
+        { "Content-Type": "application/json" },
+        options?.headers,
+      ),
+      body: JSON.stringify(updateCustomerInput),
+    },
+  );
+};
+
+export const getUpdateCustomerV1MutationKey = () =>
+  ["updateCustomerV1"] as const;
+
+export const getUpdateCustomerV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCustomerV1>>,
+    TError,
+    UpdateCustomerV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCustomerV1>>,
+  TError,
+  UpdateCustomerV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateCustomerV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCustomerV1>>,
+    UpdateCustomerV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateCustomerV1(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCustomerV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCustomerV1>>
+>;
+export type UpdateCustomerV1MutationBody = UpdateCustomerInput | undefined;
+export type UpdateCustomerV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type UpdateCustomerV1MutationVariables = {
+  id: string;
+  data?: UpdateCustomerInput;
+};
+
+/** @summary Update a customer */
+export const useUpdateCustomerV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateCustomerV1>>,
+      TError,
+      UpdateCustomerV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateCustomerV1>>,
+  TError,
+  UpdateCustomerV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateCustomerV1MutationOptions(options), queryClient);
+};
+export type reorderCustomerV1Response200 = {
+  data: CustomerDTO;
+  status: 200;
+};
+
+export type reorderCustomerV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type reorderCustomerV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type reorderCustomerV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type reorderCustomerV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type reorderCustomerV1ResponseSuccess = (
+  | reorderCustomerV1Response200
+  | reorderCustomerV1Response204
+) & {
+  headers: Headers;
+};
+export type reorderCustomerV1ResponseError = (
+  | reorderCustomerV1Response400
+  | reorderCustomerV1Response404
+  | reorderCustomerV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getReorderCustomerV1Url = (id: string) => {
+  return `/api/v1/customers/${id}/sort`;
+};
+
+/**
+ * @summary Store a client-generated fractional sort key.
+ */
+export const reorderCustomerV1 = async (
+  id: string,
+  reorderMasterInput?: ReorderMasterInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<reorderCustomerV1ResponseSuccess> => {
+  return customFetch<reorderCustomerV1ResponseSuccess>(
+    getReorderCustomerV1Url(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: getHeaders(
+        { "Content-Type": "application/json" },
+        options?.headers,
+      ),
+      body: JSON.stringify(reorderMasterInput),
+    },
+  );
+};
+
+export const getReorderCustomerV1MutationKey = () =>
+  ["reorderCustomerV1"] as const;
+
+export const getReorderCustomerV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reorderCustomerV1>>,
+    TError,
+    ReorderCustomerV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reorderCustomerV1>>,
+  TError,
+  ReorderCustomerV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getReorderCustomerV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reorderCustomerV1>>,
+    ReorderCustomerV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return reorderCustomerV1(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReorderCustomerV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof reorderCustomerV1>>
+>;
+export type ReorderCustomerV1MutationBody = ReorderMasterInput | undefined;
+export type ReorderCustomerV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type ReorderCustomerV1MutationVariables = {
+  id: string;
+  data?: ReorderMasterInput;
+};
+
+/** @summary Store a client-generated fractional sort key. */
+export const useReorderCustomerV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof reorderCustomerV1>>,
+      TError,
+      ReorderCustomerV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof reorderCustomerV1>>,
+  TError,
+  ReorderCustomerV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getReorderCustomerV1MutationOptions(options), queryClient);
+};
+export type createProductV1Response201 = {
+  data: ProductDTO;
+  status: 201;
+};
+
+export type createProductV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type createProductV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type createProductV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type createProductV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type createProductV1ResponseSuccess = (
+  | createProductV1Response201
+  | createProductV1Response204
+) & {
+  headers: Headers;
+};
+export type createProductV1ResponseError = (
+  | createProductV1Response400
+  | createProductV1Response404
+  | createProductV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getCreateProductV1Url = () => {
+  return `/api/v1/products`;
+};
+
+/**
+ * @summary Create a product
+ */
+export const createProductV1 = async (
+  createProductInput?: CreateProductInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<createProductV1ResponseSuccess> => {
+  return customFetch<createProductV1ResponseSuccess>(getCreateProductV1Url(), {
+    ...options,
+    method: "POST",
+    headers: getHeaders(
+      { "Content-Type": "application/json" },
+      options?.headers,
+    ),
+    body: JSON.stringify(createProductInput),
+  });
+};
+
+export const getCreateProductV1MutationKey = () => ["createProductV1"] as const;
+
+export const getCreateProductV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createProductV1>>,
+    TError,
+    CreateProductV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createProductV1>>,
+  TError,
+  CreateProductV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getCreateProductV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createProductV1>>,
+    CreateProductV1MutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createProductV1(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateProductV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof createProductV1>>
+>;
+export type CreateProductV1MutationBody = CreateProductInput | undefined;
+export type CreateProductV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type CreateProductV1MutationVariables = { data?: CreateProductInput };
+
+/** @summary Create a product */
+export const useCreateProductV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createProductV1>>,
+      TError,
+      CreateProductV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createProductV1>>,
+  TError,
+  CreateProductV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getCreateProductV1MutationOptions(options), queryClient);
+};
+export type listProductsV1Response200 = {
+  data: ProductList;
+  status: 200;
+};
+
+export type listProductsV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type listProductsV1ResponseSuccess = listProductsV1Response200 & {
+  headers: Headers;
+};
+export type listProductsV1ResponseError = listProductsV1Response400 & {
+  headers: Headers;
+};
+
+export const getListProductsV1Url = (params?: ListProductsV1Params) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/products?${stringifiedParams}`
+    : `/api/v1/products`;
+};
+
+/**
+ * @summary List products
+ */
+export const listProductsV1 = async (
+  params?: ListProductsV1Params,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<listProductsV1ResponseSuccess> => {
+  return customFetch<listProductsV1ResponseSuccess>(
+    getListProductsV1Url(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListProductsV1QueryKey = (params?: ListProductsV1Params) => {
+  return [`/api/v1/products`, ...(params ? [params] : [])] as const;
+};
+
+export const getListProductsV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof listProductsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListProductsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listProductsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListProductsV1QueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listProductsV1>>> = ({
+    signal,
+  }) => listProductsV1(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listProductsV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListProductsV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof listProductsV1>>
+>;
+export type ListProductsV1QueryError = ErrorType<ValidationErrorBody>;
+
+/** @summary List products */
+export function useListProductsV1<
+  TData = Awaited<ReturnType<typeof listProductsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params: undefined | ListProductsV1Params,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listProductsV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProductsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listProductsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List products */
+export function useListProductsV1<
+  TData = Awaited<ReturnType<typeof listProductsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListProductsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listProductsV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProductsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listProductsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List products */
+export function useListProductsV1<
+  TData = Awaited<ReturnType<typeof listProductsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListProductsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listProductsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary List products */
+export function useListProductsV1<
+  TData = Awaited<ReturnType<typeof listProductsV1>>,
+  TError = ErrorType<ValidationErrorBody>,
+>(
+  params?: ListProductsV1Params,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listProductsV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListProductsV1QueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type deleteProductV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type deleteProductV1Response400 = {
+  data: void;
+  status: 400;
+};
+
+export type deleteProductV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type deleteProductV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type deleteProductV1ResponseSuccess = deleteProductV1Response204 & {
+  headers: Headers;
+};
+export type deleteProductV1ResponseError = (
+  | deleteProductV1Response400
+  | deleteProductV1Response404
+  | deleteProductV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getDeleteProductV1Url = (id: string) => {
+  return `/api/v1/products/${id}`;
+};
+
+/**
+ * @summary Delete a product
+ */
+export const deleteProductV1 = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteProductV1ResponseSuccess> => {
+  return customFetch<deleteProductV1ResponseSuccess>(
+    getDeleteProductV1Url(id),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getDeleteProductV1MutationKey = () => ["deleteProductV1"] as const;
+
+export const getDeleteProductV1MutationOptions = <
+  TError = ErrorType<void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteProductV1>>,
+    TError,
+    DeleteProductV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteProductV1>>,
+  TError,
+  DeleteProductV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getDeleteProductV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteProductV1>>,
+    DeleteProductV1MutationVariables
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteProductV1(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteProductV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteProductV1>>
+>;
+
+export type DeleteProductV1MutationError = ErrorType<void | ConflictErrorBody>;
+export type DeleteProductV1MutationVariables = { id: string };
+
+/** @summary Delete a product */
+export const useDeleteProductV1 = <
+  TError = ErrorType<void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteProductV1>>,
+      TError,
+      DeleteProductV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteProductV1>>,
+  TError,
+  DeleteProductV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getDeleteProductV1MutationOptions(options), queryClient);
+};
+export type getProductV1Response200 = {
+  data: ProductDTO;
+  status: 200;
+};
+
+export type getProductV1Response400 = {
+  data: void;
+  status: 400;
+};
+
+export type getProductV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type getProductV1ResponseSuccess = getProductV1Response200 & {
+  headers: Headers;
+};
+export type getProductV1ResponseError = (
+  | getProductV1Response400
+  | getProductV1Response404
+) & {
+  headers: Headers;
+};
+
+export const getGetProductV1Url = (id: string) => {
+  return `/api/v1/products/${id}`;
+};
+
+/**
+ * @summary Get a product
+ */
+export const getProductV1 = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getProductV1ResponseSuccess> => {
+  return customFetch<getProductV1ResponseSuccess>(getGetProductV1Url(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetProductV1QueryKey = (id: string) => {
+  return [`/api/v1/products/${id}`] as const;
+};
+
+export const getGetProductV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof getProductV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getProductV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetProductV1QueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getProductV1>>> = ({
+    signal,
+  }) => getProductV1(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getProductV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetProductV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProductV1>>
+>;
+export type GetProductV1QueryError = ErrorType<void>;
+
+/** @summary Get a product */
+export function useGetProductV1<
+  TData = Awaited<ReturnType<typeof getProductV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getProductV1>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProductV1>>,
+          TError,
+          Awaited<ReturnType<typeof getProductV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a product */
+export function useGetProductV1<
+  TData = Awaited<ReturnType<typeof getProductV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getProductV1>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProductV1>>,
+          TError,
+          Awaited<ReturnType<typeof getProductV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a product */
+export function useGetProductV1<
+  TData = Awaited<ReturnType<typeof getProductV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getProductV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Get a product */
+export function useGetProductV1<
+  TData = Awaited<ReturnType<typeof getProductV1>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getProductV1>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetProductV1QueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type updateProductV1Response200 = {
+  data: ProductDTO;
+  status: 200;
+};
+
+export type updateProductV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type updateProductV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type updateProductV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type updateProductV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type updateProductV1ResponseSuccess = (
+  | updateProductV1Response200
+  | updateProductV1Response204
+) & {
+  headers: Headers;
+};
+export type updateProductV1ResponseError = (
+  | updateProductV1Response400
+  | updateProductV1Response404
+  | updateProductV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getUpdateProductV1Url = (id: string) => {
+  return `/api/v1/products/${id}`;
+};
+
+/**
+ * @summary Update a product
+ */
+export const updateProductV1 = async (
+  id: string,
+  updateProductInput?: UpdateProductInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateProductV1ResponseSuccess> => {
+  return customFetch<updateProductV1ResponseSuccess>(
+    getUpdateProductV1Url(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: getHeaders(
+        { "Content-Type": "application/json" },
+        options?.headers,
+      ),
+      body: JSON.stringify(updateProductInput),
+    },
+  );
+};
+
+export const getUpdateProductV1MutationKey = () => ["updateProductV1"] as const;
+
+export const getUpdateProductV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateProductV1>>,
+    TError,
+    UpdateProductV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateProductV1>>,
+  TError,
+  UpdateProductV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateProductV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateProductV1>>,
+    UpdateProductV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateProductV1(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateProductV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateProductV1>>
+>;
+export type UpdateProductV1MutationBody = UpdateProductInput | undefined;
+export type UpdateProductV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type UpdateProductV1MutationVariables = {
+  id: string;
+  data?: UpdateProductInput;
+};
+
+/** @summary Update a product */
+export const useUpdateProductV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateProductV1>>,
+      TError,
+      UpdateProductV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateProductV1>>,
+  TError,
+  UpdateProductV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateProductV1MutationOptions(options), queryClient);
+};
+export type reorderProductV1Response200 = {
+  data: ProductDTO;
+  status: 200;
+};
+
+export type reorderProductV1Response204 = {
+  data: void;
+  status: 204;
+};
+
+export type reorderProductV1Response400 = {
+  data: ValidationErrorBody;
+  status: 400;
+};
+
+export type reorderProductV1Response404 = {
+  data: void;
+  status: 404;
+};
+
+export type reorderProductV1Response409 = {
+  data: ConflictErrorBody;
+  status: 409;
+};
+
+export type reorderProductV1ResponseSuccess = (
+  | reorderProductV1Response200
+  | reorderProductV1Response204
+) & {
+  headers: Headers;
+};
+export type reorderProductV1ResponseError = (
+  | reorderProductV1Response400
+  | reorderProductV1Response404
+  | reorderProductV1Response409
+) & {
+  headers: Headers;
+};
+
+export const getReorderProductV1Url = (id: string) => {
+  return `/api/v1/products/${id}/sort`;
+};
+
+/**
+ * @summary Store a client-generated fractional sort key.
+ */
+export const reorderProductV1 = async (
+  id: string,
+  reorderMasterInput?: ReorderMasterInput,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<reorderProductV1ResponseSuccess> => {
+  return customFetch<reorderProductV1ResponseSuccess>(
+    getReorderProductV1Url(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: getHeaders(
+        { "Content-Type": "application/json" },
+        options?.headers,
+      ),
+      body: JSON.stringify(reorderMasterInput),
+    },
+  );
+};
+
+export const getReorderProductV1MutationKey = () =>
+  ["reorderProductV1"] as const;
+
+export const getReorderProductV1MutationOptions = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reorderProductV1>>,
+    TError,
+    ReorderProductV1MutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reorderProductV1>>,
+  TError,
+  ReorderProductV1MutationVariables,
+  TContext
+> => {
+  const mutationKey = getReorderProductV1MutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reorderProductV1>>,
+    ReorderProductV1MutationVariables
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return reorderProductV1(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReorderProductV1MutationResult = NonNullable<
+  Awaited<ReturnType<typeof reorderProductV1>>
+>;
+export type ReorderProductV1MutationBody = ReorderMasterInput | undefined;
+export type ReorderProductV1MutationError = ErrorType<
+  ValidationErrorBody | void | ConflictErrorBody
+>;
+export type ReorderProductV1MutationVariables = {
+  id: string;
+  data?: ReorderMasterInput;
+};
+
+/** @summary Store a client-generated fractional sort key. */
+export const useReorderProductV1 = <
+  TError = ErrorType<ValidationErrorBody | void | ConflictErrorBody>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof reorderProductV1>>,
+      TError,
+      ReorderProductV1MutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof reorderProductV1>>,
+  TError,
+  ReorderProductV1MutationVariables,
+  TContext
+> => {
+  return useMutation(getReorderProductV1MutationOptions(options), queryClient);
 };
 export type getUserPermissionsV1Response200 = {
   data: Permission[];

@@ -7,6 +7,16 @@ import net.axcira.features.articles.UpdateArticleInput
 import net.axcira.features.auth.ChangePasswordRequest
 import net.axcira.features.auth.ForceChangePasswordRequest
 import net.axcira.features.auth.LoginRequest
+import net.axcira.features.masters.MASTER_CODE_MAX
+import net.axcira.features.masters.MASTER_NAME_MAX
+import net.axcira.features.masters.ReorderMasterInput
+import net.axcira.features.masters.customers.CreateCustomerInput
+import net.axcira.features.masters.customers.UpdateCustomerInput
+import net.axcira.features.masters.products.CreateProductInput
+import net.axcira.features.masters.products.UpdateProductInput
+import net.axcira.features.masters.sortKeyReasons
+import net.axcira.features.masters.tags.CreateTagMasterInput
+import net.axcira.features.masters.tags.UpdateTagMasterInput
 import net.axcira.features.permissions.CreateRoleInput
 import net.axcira.features.permissions.UpdateRoleInput
 import net.axcira.features.users.CreateUserInput
@@ -125,6 +135,85 @@ fun Application.configureRequestValidation() {
                     }
                 },
             )
+        }
+
+        validate<CreateTagMasterInput> { input ->
+            validationResult(
+                buildList {
+                    addAll(requiredMax("name", input.name, MASTER_NAME_MAX))
+                    input.sortKey?.let { addAll(sortKeyReasons(it)) }
+                },
+            )
+        }
+
+        validate<UpdateTagMasterInput> { input ->
+            validationResult(
+                buildList {
+                    when (val name = input.name) {
+                        is Optional.Present -> addAll(requiredMax("name", name.value, MASTER_NAME_MAX))
+                        is Optional.None -> Unit
+                    }
+                },
+            )
+        }
+
+        validate<CreateCustomerInput> { input ->
+            validationResult(
+                buildList {
+                    addAll(requiredMax("code", input.code, MASTER_CODE_MAX))
+                    addAll(requiredMax("name", input.name, MASTER_NAME_MAX))
+                    input.sortKey?.let { addAll(sortKeyReasons(it)) }
+                },
+            )
+        }
+
+        validate<UpdateCustomerInput> { input ->
+            validationResult(
+                buildList {
+                    when (val code = input.code) {
+                        is Optional.Present -> addAll(requiredMax("code", code.value, MASTER_CODE_MAX))
+                        is Optional.None -> Unit
+                    }
+                    when (val name = input.name) {
+                        is Optional.Present -> addAll(requiredMax("name", name.value, MASTER_NAME_MAX))
+                        is Optional.None -> Unit
+                    }
+                },
+            )
+        }
+
+        validate<CreateProductInput> { input ->
+            validationResult(
+                buildList {
+                    addAll(requiredMax("code", input.code, MASTER_CODE_MAX))
+                    addAll(requiredMax("name", input.name, MASTER_NAME_MAX))
+                    if (input.customerId == 0u) add("customerId must be greater than 0")
+                    input.sortKey?.let { addAll(sortKeyReasons(it)) }
+                },
+            )
+        }
+
+        validate<UpdateProductInput> { input ->
+            validationResult(
+                buildList {
+                    when (val code = input.code) {
+                        is Optional.Present -> addAll(requiredMax("code", code.value, MASTER_CODE_MAX))
+                        is Optional.None -> Unit
+                    }
+                    when (val name = input.name) {
+                        is Optional.Present -> addAll(requiredMax("name", name.value, MASTER_NAME_MAX))
+                        is Optional.None -> Unit
+                    }
+                    when (val customerId = input.customerId) {
+                        is Optional.Present -> if (customerId.value == 0u) add("customerId must be greater than 0")
+                        is Optional.None -> Unit
+                    }
+                },
+            )
+        }
+
+        validate<ReorderMasterInput> { input ->
+            validationResult(sortKeyReasons(input.sortKey))
         }
     }
 }
