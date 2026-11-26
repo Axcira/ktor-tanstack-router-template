@@ -29,6 +29,7 @@ import { RowActions } from "../RowActions";
 import { SortableRow, SortableRows } from "../SortableRows";
 import { movedSortKey, sortKeyBeforeFirst } from "../sort-keys";
 import { useMasterFilters } from "../useMasterFilters";
+import { useSaveLock } from "../useSaveLock";
 
 type Draft = { name: string; isActive: boolean };
 
@@ -51,7 +52,9 @@ export function TagMasterTable() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [deleteTarget, setDeleteTarget] = useState<TagMasterDTO | null>(null);
+  const saveLock = useSaveLock();
   const pending =
+    saveLock.locked ||
     createTag.isPending ||
     updateTag.isPending ||
     deleteTag.isPending ||
@@ -62,83 +65,94 @@ export function TagMasterTable() {
   }
 
   async function addRow() {
-    const name = creating.name.trim();
-    if (!name) {
-      toast.add({ type: "error", title: "名前を入力してください。" });
-      return;
-    }
-    try {
-      await createTag.mutateAsync({
-        data: {
-          name,
-          isActive: creating.isActive,
-          sortKey: sortKeyBeforeFirst(all.data?.data.items[0]?.sortKey ?? null),
-        },
-      });
-      setCreating(emptyDraft());
-      await refresh();
-      toast.add({ type: "success", title: "タグを追加しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "タグを追加できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      const name = creating.name.trim();
+      if (!name) {
+        toast.add({ type: "error", title: "名前を入力してください。" });
+        return;
+      }
+      try {
+        await createTag.mutateAsync({
+          data: {
+            name,
+            isActive: creating.isActive,
+            sortKey: sortKeyBeforeFirst(
+              all.data?.data.items[0]?.sortKey ?? null,
+            ),
+          },
+        });
+        setCreating(emptyDraft());
+        await refresh();
+        toast.add({ type: "success", title: "タグを追加しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "タグを追加できませんでした。"),
+        });
+      }
+    });
   }
 
   async function saveRow(id: number) {
-    const name = draft.name.trim();
-    if (!name) {
-      toast.add({ type: "error", title: "名前を入力してください。" });
-      return;
-    }
-    try {
-      await updateTag.mutateAsync({
-        id: String(id),
-        data: { name, isActive: draft.isActive },
-      });
-      setEditingId(null);
-      await refresh();
-      toast.add({ type: "success", title: "タグを保存しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "タグを保存できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      const name = draft.name.trim();
+      if (!name) {
+        toast.add({ type: "error", title: "名前を入力してください。" });
+        return;
+      }
+      try {
+        await updateTag.mutateAsync({
+          id: String(id),
+          data: { name, isActive: draft.isActive },
+        });
+        setEditingId(null);
+        await refresh();
+        toast.add({ type: "success", title: "タグを保存しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "タグを保存できませんでした。"),
+        });
+      }
+    });
   }
 
   async function confirmDelete() {
     if (!deleteTarget) return;
-    try {
-      await deleteTag.mutateAsync({ id: String(deleteTarget.id) });
-      if (editingId === deleteTarget.id) setEditingId(null);
-      setDeleteTarget(null);
-      await refresh();
-      toast.add({ type: "success", title: "タグを削除しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "タグを削除できませんでした。"),
-      });
-    }
+    const target = deleteTarget;
+    await saveLock.runLocked(async () => {
+      try {
+        await deleteTag.mutateAsync({ id: String(target.id) });
+        if (editingId === target.id) setEditingId(null);
+        setDeleteTarget(null);
+        await refresh();
+        toast.add({ type: "success", title: "タグを削除しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "タグを削除できませんでした。"),
+        });
+      }
+    });
   }
 
   async function reorder(activeId: number, overId: number) {
-    const moved = movedSortKey(items, activeId, overId);
-    if (!moved) return;
-    try {
-      await reorderTag.mutateAsync({
-        id: String(moved.id),
-        data: { sortKey: moved.sortKey },
-      });
-      await refresh();
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "並び順を更新できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      const moved = movedSortKey(items, activeId, overId);
+      if (!moved) return;
+      try {
+        await reorderTag.mutateAsync({
+          id: String(moved.id),
+          data: { sortKey: moved.sortKey },
+        });
+        await refresh();
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "並び順を更新できませんでした。"),
+        });
+      }
+    });
   }
 
   return (

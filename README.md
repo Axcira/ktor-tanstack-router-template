@@ -225,7 +225,7 @@ cd backend
 4. 権限は `Permission.ManageMasters(masterId)`。`masterId` はルートと同じ文字列（`tags` / `customers` / `products`）。同じ ID だけを満たし、`Administrator` は従来どおり全部を通す。ロール画面では「マスタの管理」を有効にし、マスタ ID をカンマ区切りで入れる（例: `tags, suppliers`）。
 5. `cd backend && ./gradlew generateMigrations` で SQL を作り、`DROP` や照合順序を確認してからコミットする。`sort_key` には `COLLATE "C"` を付ける。既存データがある列へ UNIQUE を足すときは、重複をリネームしてから制約を付ける（タグの V15 が例）。
 6. リポジトリルートで `bun run generate:client` を実行し、OpenAPI と Orval クライアントを更新する。
-7. `frontend/src/routes/_app/masters/-components/customers/` をコピーし、`masters/-components/masters.ts` の `MASTER_TABS` に 1 行足す。サイドバーは「マスタ」1 件のままで、表示条件はその一覧から作られる。
+7. `frontend/src/routes/_app/masters/customers.tsx` と `masters/-components/customers/` をコピーする。ルートファイルではルート ID、`masterId`、表示コンポーネントを新しい画面に合わせる。`routeTree.gen.ts` は Vite が再生成するので手で編集しない。`masters/-components/masters.ts` の `MASTER_TABS` に 1 行足す。タブとサイドバーの「マスタ」はどちらもその一覧を見る。タブごとの権限は `MasterTabTrigger` が 1 件ずつ確認するので、`MasterTabs.tsx` に分岐を足す必要はない。
 8. 空の画面にしないため、`CustomerService.seedIfEmpty` と同じように初期行を足す。`SKIP_BOOTSTRAP=true` のときは投入されない。
 
 一覧は `q`（code / name の部分一致。タグは name のみ）、`isActive`、任意の `limit` / `offset` を受け、`{ items, totalCount }` を返す。画面は全件を出すので、通常は limit を付けない。

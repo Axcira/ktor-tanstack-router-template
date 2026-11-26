@@ -6,6 +6,8 @@ import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import kotlinx.serialization.Serializable
+import net.axcira.features.masters.ConflictErrorBody
+import net.axcira.features.masters.RequestConflictException
 import net.axcira.features.permissions.NoPermissionException
 
 @Serializable
@@ -24,6 +26,9 @@ fun Application.statusPage() {
         exception<NoPermissionException> { call, cause ->
             appLog.warn("Access denied: ${call.request.local.uri}: ${cause.message}")
             call.respond(HttpStatusCode.Forbidden)
+        }
+        exception<RequestConflictException> { call, cause ->
+            call.respond(HttpStatusCode.Conflict, ConflictErrorBody(cause.message ?: "競合しています。"))
         }
         exception<Throwable> { call, cause ->
             appLog.error("Unhandled exception: ${call.request.local.uri}", cause)

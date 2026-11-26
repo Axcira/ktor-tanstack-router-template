@@ -23,6 +23,7 @@ import type {
   CreateUserInput,
   CustomerDTO,
   CustomerList,
+  CustomerOption,
   ForceChangePasswordRequest,
   HealthResponse,
   LoginRequest,
@@ -65,6 +66,7 @@ import {
   getHealthV1ResponseMock,
   getListAccountsV1ResponseMock,
   getListArticlesV1ResponseMock,
+  getListCustomerOptionsV1ResponseMock,
   getListCustomersV1ResponseMock,
   getListProductsV1ResponseMock,
   getListTagsV1ResponseMock,
@@ -96,6 +98,7 @@ export {
   getGetTagV1ResponseMock,
   getUpdateTagV1ResponseMock,
   getReorderTagV1ResponseMock,
+  getListCustomerOptionsV1ResponseMock,
   getCreateCustomerV1ResponseMock,
   getListCustomersV1ResponseMock,
   getGetCustomerV1ResponseMock,
@@ -741,6 +744,30 @@ export const getReorderTagV1MockHandler = (
   );
 };
 
+export const getListCustomerOptionsV1MockHandler = (
+  overrideResponse?:
+    | CustomerOption[]
+    | ((
+        info: Parameters<HttpResponseResolver>[0],
+      ) => Promise<CustomerOption[]> | CustomerOption[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/customers/options",
+    async (info: Parameters<HttpResponseResolver>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListCustomerOptionsV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
 export const getCreateCustomerV1MockHandler = (
   overrideResponse?:
     | CustomerDTO
@@ -1316,6 +1343,7 @@ export const getDefaultMock = () => [
   getGetTagV1MockHandler(),
   getUpdateTagV1MockHandler(),
   getReorderTagV1MockHandler(),
+  getListCustomerOptionsV1MockHandler(),
   getCreateCustomerV1MockHandler(),
   getListCustomersV1MockHandler(),
   getDeleteCustomerV1MockHandler(),

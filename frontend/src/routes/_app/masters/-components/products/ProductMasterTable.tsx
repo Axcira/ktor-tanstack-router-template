@@ -4,7 +4,7 @@ import {
   getListProductsV1QueryKey,
   useCreateProductV1,
   useDeleteProductV1,
-  useListCustomersV1,
+  useListCustomerOptionsV1,
   useListProductsV1,
   useReorderProductV1,
   useUpdateProductV1,
@@ -31,6 +31,7 @@ import { RowActions } from "../RowActions";
 import { SortableRow, SortableRows } from "../SortableRows";
 import { movedSortKey, sortKeyBeforeFirst } from "../sort-keys";
 import { useMasterFilters } from "../useMasterFilters";
+import { useSaveLock } from "../useSaveLock";
 
 type Draft = {
   code: string;
@@ -49,19 +50,17 @@ const emptyDraft = (): Draft => ({
 export function ProductMasterTable() {
   const filters = useMasterFilters();
   const queryClient = useQueryClient();
-  const customers = useListCustomersV1();
+  const customers = useListCustomerOptionsV1();
   const all = useListProductsV1();
   const filtered = useListProductsV1(filters.params, {
     query: { enabled: !filters.reorderEnabled },
   });
   const list = filters.reorderEnabled ? all : filtered;
   const items = list.data?.data.items ?? [];
-  const customerOptions = (customers.data?.data.items ?? []).map(
-    (customer) => ({
-      value: String(customer.id),
-      label: `${customer.code} ${customer.name}`,
-    }),
-  );
+  const customerOptions = (customers.data?.data ?? []).map((customer) => ({
+    value: String(customer.id),
+    label: `${customer.code} ${customer.name}`,
+  }));
   const createProduct = useCreateProductV1();
   const updateProduct = useUpdateProductV1();
   const deleteProduct = useDeleteProductV1();
@@ -70,14 +69,16 @@ export function ProductMasterTable() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [deleteTarget, setDeleteTarget] = useState<ProductDTO | null>(null);
+  const saveLock = useSaveLock();
   const pending =
+    saveLock.locked ||
     createProduct.isPending ||
     updateProduct.isPending ||
     deleteProduct.isPending ||
     reorderProduct.isPending;
 
   function customerLabel(customerId: number) {
-    const customer = customers.data?.data.items.find(
+    const customer = customers.data?.data.find(
       (item) => item.id === customerId,
     );
     return customer
@@ -113,82 +114,93 @@ export function ProductMasterTable() {
   async function addRow() {
     const next = requireDraft(creating);
     if (!next) return;
-    try {
-      await createProduct.mutateAsync({
-        data: {
-          code: next.code,
-          name: next.name,
-          customerId: Number(next.customerId),
-          isActive: next.isActive,
-          sortKey: sortKeyBeforeFirst(all.data?.data.items[0]?.sortKey ?? null),
-        },
-      });
-      setCreating(emptyDraft());
-      await refresh();
-      toast.add({ type: "success", title: "製品を追加しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "製品を追加できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      try {
+        await createProduct.mutateAsync({
+          data: {
+            code: next.code,
+            name: next.name,
+            customerId: Number(next.customerId),
+            isActive: next.isActive,
+            sortKey: sortKeyBeforeFirst(
+              all.data?.data.items[0]?.sortKey ?? null,
+            ),
+          },
+        });
+        setCreating(emptyDraft());
+        await refresh();
+        toast.add({ type: "success", title: "製品を追加しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "製品を追加できませんでした。"),
+        });
+      }
+    });
   }
 
   async function saveRow(id: number) {
     const next = requireDraft(draft);
     if (!next) return;
-    try {
-      await updateProduct.mutateAsync({
-        id: String(id),
-        data: {
-          code: next.code,
-          name: next.name,
-          customerId: Number(next.customerId),
-          isActive: next.isActive,
-        },
-      });
-      setEditingId(null);
-      await refresh();
-      toast.add({ type: "success", title: "製品を保存しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "製品を保存できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      try {
+        await updateProduct.mutateAsync({
+          id: String(id),
+          data: {
+            code: next.code,
+            name: next.name,
+            customerId: Number(next.customerId),
+            isActive: next.isActive,
+          },
+        });
+        setEditingId(null);
+        await refresh();
+        toast.add({ type: "success", title: "製品を保存しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "製品を保存できませんでした。"),
+        });
+      }
+    });
   }
 
   async function confirmDelete() {
     if (!deleteTarget) return;
-    try {
-      await deleteProduct.mutateAsync({ id: String(deleteTarget.id) });
-      if (editingId === deleteTarget.id) setEditingId(null);
-      setDeleteTarget(null);
-      await refresh();
-      toast.add({ type: "success", title: "製品を削除しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "製品を削除できませんでした。"),
-      });
-    }
+    const target = deleteTarget;
+    await saveLock.runLocked(async () => {
+      try {
+        await deleteProduct.mutateAsync({ id: String(target.id) });
+        if (editingId === target.id) setEditingId(null);
+        setDeleteTarget(null);
+        await refresh();
+        toast.add({ type: "success", title: "製品を削除しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "製品を削除できませんでした。"),
+        });
+      }
+    });
   }
 
   async function reorder(activeId: number, overId: number) {
     const moved = movedSortKey(items, activeId, overId);
     if (!moved) return;
-    try {
-      await reorderProduct.mutateAsync({
-        id: String(moved.id),
-        data: { sortKey: moved.sortKey },
-      });
-      await refresh();
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "並び順を更新できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      try {
+        await reorderProduct.mutateAsync({
+          id: String(moved.id),
+          data: { sortKey: moved.sortKey },
+        });
+        await refresh();
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "並び順を更新できませんでした。"),
+        });
+      }
+    });
   }
 
   const dragDisabled = !filters.reorderEnabled || editingId !== null || pending;

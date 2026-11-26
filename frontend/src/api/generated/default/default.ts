@@ -33,6 +33,7 @@ import type {
   CreateUserInput,
   CustomerDTO,
   CustomerList,
+  CustomerOption,
   DeleteRoleV1Params,
   ErrorResponse,
   ForceChangePasswordRequest,
@@ -3423,6 +3424,174 @@ export const useReorderTagV1 = <
 > => {
   return useMutation(getReorderTagV1MutationOptions(options), queryClient);
 };
+export type listCustomerOptionsV1Response200 = {
+  data: CustomerOption[];
+  status: 200;
+};
+
+export type listCustomerOptionsV1ResponseSuccess =
+  listCustomerOptionsV1Response200 & {
+    headers: Headers;
+  };
+
+export const getListCustomerOptionsV1Url = () => {
+  return `/api/v1/customers/options`;
+};
+
+/**
+ * @summary Customer labels for product editors
+ */
+export const listCustomerOptionsV1 = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<listCustomerOptionsV1ResponseSuccess> => {
+  return customFetch<listCustomerOptionsV1ResponseSuccess>(
+    getListCustomerOptionsV1Url(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListCustomerOptionsV1QueryKey = () => {
+  return [`/api/v1/customers/options`] as const;
+};
+
+export const getListCustomerOptionsV1QueryOptions = <
+  TData = Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListCustomerOptionsV1QueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listCustomerOptionsV1>>
+  > = ({ signal }) => listCustomerOptionsV1({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListCustomerOptionsV1QueryResult = NonNullable<
+  Awaited<ReturnType<typeof listCustomerOptionsV1>>
+>;
+export type ListCustomerOptionsV1QueryError = ErrorType<unknown>;
+
+/** @summary Customer labels for product editors */
+export function useListCustomerOptionsV1<
+  TData = Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+  TError = ErrorType<unknown>,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listCustomerOptionsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Customer labels for product editors */
+export function useListCustomerOptionsV1<
+  TData = Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+          TError,
+          Awaited<ReturnType<typeof listCustomerOptionsV1>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Customer labels for product editors */
+export function useListCustomerOptionsV1<
+  TData = Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/** @summary Customer labels for product editors */
+export function useListCustomerOptionsV1<
+  TData = Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCustomerOptionsV1>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListCustomerOptionsV1QueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export type createCustomerV1Response201 = {
   data: CustomerDTO;
   status: 201;

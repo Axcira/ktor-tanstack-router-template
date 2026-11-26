@@ -132,7 +132,6 @@ fun containsIgnoreCase(
 ): Op<Boolean> {
     val escaped =
         raw
-            .lowercase()
             .replace("\\", "\\\\")
             .replace("%", "\\%")
             .replace("_", "\\_")
@@ -142,11 +141,29 @@ fun containsIgnoreCase(
             queryBuilder {
                 append("LOWER(")
                 append(column)
-                append(") LIKE ")
+                append(") LIKE LOWER(")
                 registerArgument(TextColumnType(), pattern)
-                append(" ESCAPE '\\'")
+                append(") ESCAPE '\\'")
             }
     }
+}
+
+const val SORT_KEY_EXHAUSTED = "並び順の空きがありません。"
+const val TAG_NAME_TAKEN = "同じ名前のタグが既に存在します。"
+
+class RequestConflictException(
+    message: String,
+) : RuntimeException(message)
+
+fun nextFractionalKey(previous: String?): String {
+    val key =
+        try {
+            FractionalIndex.generateKeyBetween(previous, null)
+        } catch (_: IllegalArgumentException) {
+            throw RequestConflictException(SORT_KEY_EXHAUSTED)
+        }
+    if (key.length > FractionalIndex.MAX_LENGTH) throw RequestConflictException(SORT_KEY_EXHAUSTED)
+    return key
 }
 
 fun Query.page(query: MasterListQuery): Query {

@@ -39,11 +39,23 @@ export function RowActions({
 
   return (
     <div className="flex justify-end gap-1">
-      <Button type="button" size="sm" variant="outline" onClick={onEdit}>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={onEdit}
+        disabled={pending}
+      >
         <Pencil />
         編集
       </Button>
-      <Button type="button" size="sm" variant="destructive" onClick={onDelete}>
+      <Button
+        type="button"
+        size="sm"
+        variant="destructive"
+        onClick={onDelete}
+        disabled={pending}
+      >
         <Trash2 />
         削除
       </Button>

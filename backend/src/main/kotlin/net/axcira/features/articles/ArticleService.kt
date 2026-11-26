@@ -4,11 +4,15 @@ import kotlinx.serialization.Serializable
 import net.axcira.*
 import net.axcira.db.*
 import net.axcira.db.Articles.title
-import net.axcira.features.masters.FractionalIndex
+import net.axcira.features.masters.RequestConflictException
+import net.axcira.features.masters.TAG_NAME_TAKEN
 import net.axcira.features.masters.collateC
+import net.axcira.features.masters.isUniqueViolation
+import net.axcira.features.masters.nextFractionalKey
 import net.axcira.features.masters.nowUtc
 import net.axcira.plugins.*
 import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.*
 import org.slf4j.LoggerFactory
 
@@ -60,7 +64,7 @@ private fun upsertTags(tags: List<String>) =
         val generatedTags =
             Tags
                 .batchInsert(newTags) { name ->
-                    val key = FractionalIndex.generateKeyBetween(previous, null)
+                    val key = nextFractionalKey(previous)
                     previous = key
                     this[Tags.name] = name
                     this[Tags.sortKey] = key
@@ -120,7 +124,7 @@ class ArticleService(
         article: CreateArticleInput,
         userId: UInt,
     ): ArticleDTO =
-        database.dbQuery {
+        database.writeArticle {
             val createdArticle =
                 Articles
                     .insertReturning {
@@ -152,9 +156,9 @@ class ArticleService(
         id: UInt,
         article: UpdateArticleInput,
     ): UpdateResult<ArticleDTO> =
-        database.dbQuery {
+        database.writeArticle {
             val (title, description, body, tagList) = article
-            if (arrayOf(title, description, body, tagList).all { it is Optional.None }) return@dbQuery UpdateResult.NotModified
+            if (arrayOf(title, description, body, tagList).all { it is Optional.None }) return@writeArticle UpdateResult.NotModified
             val resultTags =
                 tagList.getOrNull()?.let { tags ->
                     val currentTags =
@@ -179,7 +183,7 @@ class ArticleService(
 
             if (arrayOf(title, description, body).all { it is Optional.None }) {
                 // Query the article to return
-                return@dbQuery Articles.selectAll().where { Articles.id eq id }.singleOrNull()?.let {
+                return@writeArticle Articles.selectAll().where { Articles.id eq id }.singleOrNull()?.let {
                     UpdateResult.Success(
                         ArticleDTO(
                             it[Articles.id].value,
@@ -190,10 +194,10 @@ class ArticleService(
                             resultTags,
                         ),
                     )
-                } ?: return@dbQuery UpdateResult.NotFound
+                } ?: return@writeArticle UpdateResult.NotFound
             }
 
-            return@dbQuery Articles
+            return@writeArticle Articles
                 .updateReturning(where = { Articles.id eq id }) {
                     if (title is Optional.Present) it[Articles.title] = title.value
                     if (description is Optional.Present) it[Articles.description] = description.value
@@ -221,3 +225,11 @@ class ArticleService(
         log.info("Article deleted: id=$id")
     }
 }
+
+private suspend fun <T> Database.writeArticle(block: suspend Database.() -> T): T =
+    try {
+        dbQuery(block)
+    } catch (e: ExposedSQLException) {
+        if (e.isUniqueViolation()) throw RequestConflictException(TAG_NAME_TAKEN)
+        throw e
+    }

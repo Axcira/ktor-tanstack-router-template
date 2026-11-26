@@ -79,22 +79,51 @@ END;
 $$;
 -- END axcira_next_sort_key
 
+-- BEGIN tag_name_dedupe
 DO $$
+DECLARE
+    tag_row record;
+    candidate text;
+    suffix text;
+    attempt int;
+    guard int := 0;
 BEGIN
     WHILE EXISTS (
         SELECT 1 FROM tags GROUP BY name HAVING count(*) > 1
     ) LOOP
-        UPDATE tags AS t
-        SET name = left(t.name, 200) || ' #' || t.id::text
-        WHERE t.id IN (
-            SELECT id FROM (
-                SELECT id, row_number() OVER (PARTITION BY name ORDER BY id) AS rn
+        guard := guard + 1;
+        IF guard > 1000 THEN
+            RAISE EXCEPTION 'could not disambiguate tag names';
+        END IF;
+        FOR tag_row IN
+            SELECT id, name
+            FROM (
+                SELECT id, name, row_number() OVER (PARTITION BY name ORDER BY id) AS rn
                 FROM tags
             ) ranked
             WHERE rn > 1
-        );
+        LOOP
+            attempt := 0;
+            LOOP
+                attempt := attempt + 1;
+                IF attempt > 100 THEN
+                    RAISE EXCEPTION 'could not disambiguate tag id %', tag_row.id;
+                END IF;
+                suffix := ' #' || tag_row.id::text;
+                IF attempt > 1 THEN
+                    suffix := suffix || '-' || attempt::text;
+                END IF;
+                candidate := left(tag_row.name, 255 - char_length(suffix)) || suffix;
+                EXIT WHEN candidate IS DISTINCT FROM tag_row.name
+                    AND NOT EXISTS (
+                        SELECT 1 FROM tags WHERE name = candidate AND id <> tag_row.id
+                    );
+            END LOOP;
+            UPDATE tags SET name = candidate WHERE id = tag_row.id;
+        END LOOP;
     END LOOP;
 END $$;
+-- END tag_name_dedupe
 
 ALTER TABLE tags ADD COLUMN sort_key VARCHAR(255) COLLATE "C";
 ALTER TABLE tags ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;

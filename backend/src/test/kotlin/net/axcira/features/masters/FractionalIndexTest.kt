@@ -38,6 +38,8 @@ class FractionalIndexTest {
         assertFalse(FractionalIndex.isValid("a0" + "0"))
         assertFalse(FractionalIndex.isValid("a".repeat(FractionalIndex.MAX_LENGTH + 1)))
         assertTrue(FractionalIndex.isValid("a0"))
+        assertTrue(FractionalIndex.isValid("a3"))
+        assertFalse(FractionalIndex.isValid("a~"))
         assertTrue(FractionalIndex.isValid("a0V"))
     }
 }

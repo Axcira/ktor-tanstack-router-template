@@ -1,46 +1,36 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthorize } from "@/hooks/useAuthorize";
-import { MASTER_TABS } from "./masters";
+import { MASTER_TABS, type MasterTab } from "./masters";
 
 export function MasterTabs() {
-  const tags = useAuthorize({ type: "ManageMasters", masterId: "tags" });
-  const customers = useAuthorize({
-    type: "ManageMasters",
-    masterId: "customers",
-  });
-  const products = useAuthorize({
-    type: "ManageMasters",
-    masterId: "products",
-  });
-  const allowed: Record<string, boolean> = {
-    tags: tags.isAllowed,
-    customers: customers.isAllowed,
-    products: products.isAllowed,
-  };
-  const visible = MASTER_TABS.filter((tab) => allowed[tab.id]);
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
   const current =
-    visible.find((tab) => pathname === tab.to)?.id ?? visible[0]?.id;
-
-  if (!current) return null;
+    MASTER_TABS.find((tab) => pathname === tab.to)?.id ?? MASTER_TABS[0].id;
 
   return (
     <Tabs value={current}>
       <TabsList aria-label="マスタ">
-        {visible.map((tab) => (
-          <TabsTrigger
-            key={tab.id}
-            value={tab.id}
-            nativeButton={false}
-            render={<Link to={tab.to} />}
-          >
-            {tab.label}
-          </TabsTrigger>
+        {MASTER_TABS.map((tab) => (
+          <MasterTabTrigger key={tab.id} tab={tab} />
         ))}
       </TabsList>
     </Tabs>
+  );
+}
+
+function MasterTabTrigger({ tab }: { tab: MasterTab }) {
+  const { isAllowed } = useAuthorize(tab.permission);
+  if (!isAllowed) return null;
+  return (
+    <TabsTrigger
+      value={tab.id}
+      nativeButton={false}
+      render={<Link to={tab.to} />}
+    >
+      {tab.label}
+    </TabsTrigger>
   );
 }

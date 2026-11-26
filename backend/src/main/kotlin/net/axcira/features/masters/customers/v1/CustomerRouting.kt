@@ -18,6 +18,7 @@ import net.axcira.features.masters.customers.CreateCustomerInput
 import net.axcira.features.masters.customers.CustomerService
 import net.axcira.features.masters.customers.UpdateCustomerInput
 import net.axcira.features.masters.parseMasterListQuery
+import net.axcira.features.permissions.requireAnyMaster
 import net.axcira.features.permissions.requireMaster
 import net.axcira.plugins.ValidationErrorBody
 
@@ -26,6 +27,16 @@ fun Application.customers() {
 
     apiRouting("/customers") {
         authenticate {
+            requireAnyMaster(listOf(MasterIds.CUSTOMERS, MasterIds.PRODUCTS)) {
+                /**
+                 * Customer labels for product editors
+                 *
+                 * OperationID: listCustomerOptionsV1
+                 */
+                get("/options") {
+                    call.respond(customerService.options())
+                }
+            }
             requireMaster(MasterIds.CUSTOMERS) {
                 /**
                  * List customers

@@ -29,6 +29,7 @@ import { RowActions } from "../RowActions";
 import { SortableRow, SortableRows } from "../SortableRows";
 import { movedSortKey, sortKeyBeforeFirst } from "../sort-keys";
 import { useMasterFilters } from "../useMasterFilters";
+import { useSaveLock } from "../useSaveLock";
 
 type Draft = { code: string; name: string; isActive: boolean };
 
@@ -51,7 +52,9 @@ export function CustomerMasterTable() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [deleteTarget, setDeleteTarget] = useState<CustomerDTO | null>(null);
+  const saveLock = useSaveLock();
   const pending =
+    saveLock.locked ||
     createCustomer.isPending ||
     updateCustomer.isPending ||
     deleteCustomer.isPending ||
@@ -76,71 +79,82 @@ export function CustomerMasterTable() {
   async function addRow() {
     const next = requireDraft(creating);
     if (!next) return;
-    try {
-      await createCustomer.mutateAsync({
-        data: {
-          ...next,
-          sortKey: sortKeyBeforeFirst(all.data?.data.items[0]?.sortKey ?? null),
-        },
-      });
-      setCreating(emptyDraft());
-      await refresh();
-      toast.add({ type: "success", title: "顧客を追加しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "顧客を追加できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      try {
+        await createCustomer.mutateAsync({
+          data: {
+            ...next,
+            sortKey: sortKeyBeforeFirst(
+              all.data?.data.items[0]?.sortKey ?? null,
+            ),
+          },
+        });
+        setCreating(emptyDraft());
+        await refresh();
+        toast.add({ type: "success", title: "顧客を追加しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "顧客を追加できませんでした。"),
+        });
+      }
+    });
   }
 
   async function saveRow(id: number) {
     const next = requireDraft(draft);
     if (!next) return;
-    try {
-      await updateCustomer.mutateAsync({ id: String(id), data: next });
-      setEditingId(null);
-      await refresh();
-      toast.add({ type: "success", title: "顧客を保存しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "顧客を保存できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      try {
+        await updateCustomer.mutateAsync({ id: String(id), data: next });
+        setEditingId(null);
+        await refresh();
+        toast.add({ type: "success", title: "顧客を保存しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "顧客を保存できませんでした。"),
+        });
+      }
+    });
   }
 
   async function confirmDelete() {
     if (!deleteTarget) return;
-    try {
-      await deleteCustomer.mutateAsync({ id: String(deleteTarget.id) });
-      if (editingId === deleteTarget.id) setEditingId(null);
-      setDeleteTarget(null);
-      await refresh();
-      toast.add({ type: "success", title: "顧客を削除しました" });
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "顧客を削除できませんでした。"),
-      });
-    }
+    const target = deleteTarget;
+    await saveLock.runLocked(async () => {
+      try {
+        await deleteCustomer.mutateAsync({ id: String(target.id) });
+        if (editingId === target.id) setEditingId(null);
+        setDeleteTarget(null);
+        await refresh();
+        toast.add({ type: "success", title: "顧客を削除しました" });
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "顧客を削除できませんでした。"),
+        });
+      }
+    });
   }
 
   async function reorder(activeId: number, overId: number) {
     const moved = movedSortKey(items, activeId, overId);
     if (!moved) return;
-    try {
-      await reorderCustomer.mutateAsync({
-        id: String(moved.id),
-        data: { sortKey: moved.sortKey },
-      });
-      await refresh();
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: apiErrorMessage(error, "並び順を更新できませんでした。"),
-      });
-    }
+    await saveLock.runLocked(async () => {
+      try {
+        await reorderCustomer.mutateAsync({
+          id: String(moved.id),
+          data: { sortKey: moved.sortKey },
+        });
+        await refresh();
+      } catch (error) {
+        toast.add({
+          type: "error",
+          title: apiErrorMessage(error, "並び順を更新できませんでした。"),
+        });
+      }
+    });
   }
 
   const dragDisabled = !filters.reorderEnabled || editingId !== null || pending;

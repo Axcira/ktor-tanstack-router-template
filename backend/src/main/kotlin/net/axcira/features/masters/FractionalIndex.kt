@@ -117,7 +117,14 @@ object FractionalIndex {
     private fun validateOrderKey(key: String) {
         if (key == smallestInteger) throw IllegalArgumentException("invalid order key: $key")
         val head = integerPart(key)
+        validateInteger(head)
+        for (ch in head.drop(1)) {
+            if (DIGITS.indexOf(ch) < 0) throw IllegalArgumentException("invalid digit")
+        }
         val fraction = key.substring(head.length)
+        for (ch in fraction) {
+            if (DIGITS.indexOf(ch) < 0) throw IllegalArgumentException("invalid digit")
+        }
         if (fraction.lastOrNull() == zero) throw IllegalArgumentException("invalid order key: $key")
     }
 

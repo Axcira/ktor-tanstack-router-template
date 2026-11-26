@@ -3,13 +3,13 @@ package net.axcira.features.masters.customers
 import kotlinx.serialization.Serializable
 import net.axcira.db.Customers
 import net.axcira.db.Products
-import net.axcira.features.masters.FractionalIndex
 import net.axcira.features.masters.MasterDeleteResult
 import net.axcira.features.masters.MasterListQuery
 import net.axcira.features.masters.MasterWriteResult
 import net.axcira.features.masters.containsIgnoreCase
 import net.axcira.features.masters.isForeignKeyViolation
 import net.axcira.features.masters.isUniqueViolation
+import net.axcira.features.masters.nextFractionalKey
 import net.axcira.features.masters.nowUtc
 import net.axcira.features.masters.page
 import net.axcira.features.masters.sortKeyOrder
@@ -32,6 +32,13 @@ import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.updateReturning
 import org.slf4j.LoggerFactory
+
+@Serializable
+data class CustomerOption(
+    val id: UInt,
+    val code: String,
+    val name: String,
+)
 
 @Serializable
 data class CreateCustomerInput(
@@ -94,6 +101,14 @@ class CustomerService(
                 .where { Customers.id eq id }
                 .singleOrNull()
                 ?.toDto()
+        }
+
+    suspend fun options(): List<CustomerOption> =
+        database.dbQuery {
+            Customers
+                .selectAll()
+                .orderBy(sortKeyOrder(Customers.sortKey), Customers.id to SortOrder.ASC)
+                .map { CustomerOption(it[Customers.id].value, it[Customers.code], it[Customers.name]) }
         }
 
     suspend fun create(input: CreateCustomerInput): MasterWriteResult<CustomerDTO> =
@@ -214,7 +229,7 @@ class CustomerService(
             val now = nowUtc()
             var previous: String? = null
             Customers.batchInsert(listOf("A001" to "株式会社アキシラ", "B002" to "ノースウインド商事")) { (code, name) ->
-                val key = FractionalIndex.generateKeyBetween(previous, null)
+                val key = nextFractionalKey(previous)
                 previous = key
                 this[Customers.code] = code
                 this[Customers.name] = name
@@ -243,7 +258,7 @@ private fun nextSortKey(): String {
             .limit(1)
             .firstOrNull()
             ?.get(Customers.sortKey)
-    return FractionalIndex.generateKeyBetween(current, null)
+    return nextFractionalKey(current)
 }
 
 private fun org.jetbrains.exposed.v1.core.ResultRow.toDto() =

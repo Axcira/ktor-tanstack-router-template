@@ -107,6 +107,11 @@ class MasterRoutingTest {
                 }.assertStatus(HttpStatusCode.Conflict)
                 .body<ConflictErrorBody>()
                 .also { assertContains(it.message, "並び順") }
+            client
+                .patch("/api/v1/tags/${beta.id}/sort") {
+                    contentType(ContentType.Application.Json)
+                    setBody(ReorderMasterInput("a~"))
+                }.assertStatus(HttpStatusCode.BadRequest)
 
             client
                 .patch("/api/v1/tags/${beta.id}/sort") {
@@ -171,7 +176,9 @@ class MasterRoutingTest {
             val customersOnly = extraClient()
             login(client, "master-admin@example.com")
             login(noPerm, "master-none@example.com", emptyList())
+            val productsOnly = extraClient()
             login(customersOnly, "master-customers@example.com", listOf(Permission.ManageMasters(MasterIds.CUSTOMERS)))
+            login(productsOnly, "master-products@example.com", listOf(Permission.ManageMasters(MasterIds.PRODUCTS)))
 
             noPerm.get("/api/v1/tags").assertStatus(HttpStatusCode.Forbidden)
             customersOnly.get("/api/v1/tags").assertStatus(HttpStatusCode.Forbidden)
@@ -189,6 +196,14 @@ class MasterRoutingTest {
                     }.assertStatus(HttpStatusCode.Created)
                     .body<CustomerDTO>()
             customersOnly.get("/api/v1/products").assertStatus(HttpStatusCode.Forbidden)
+            customersOnly.get("/api/v1/customers/options").assertStatus(HttpStatusCode.OK)
+            productsOnly.get("/api/v1/customers").assertStatus(HttpStatusCode.Forbidden)
+            productsOnly
+                .get("/api/v1/customers/options")
+                .assertStatus(HttpStatusCode.OK)
+                .body<List<net.axcira.features.masters.customers.CustomerOption>>()
+                .also { options -> assertTrue(options.any { it.id == customer.id }) }
+            noPerm.get("/api/v1/customers/options").assertStatus(HttpStatusCode.Forbidden)
             client.get("/api/v1/customers/${customer.id}").assertStatus(HttpStatusCode.OK)
 
             val customersPermission: Permission = Permission.ManageMasters(MasterIds.CUSTOMERS)
@@ -313,6 +328,41 @@ class MasterRoutingTest {
                     previous = next
                 }
                 tx.exec("DROP FUNCTION IF EXISTS axcira_next_sort_key(text)")
+            }
+        }
+
+    @Test
+    fun `tag name dedupe changes a name that already ends with its id suffix`() =
+        test { _ ->
+            val database: Database by application.dependencies
+            val stuck = "A".repeat(200) + " #2"
+            val dedupe =
+                checkNotNull(MasterRoutingTest::class.java.classLoader.getResource("db/migration/V15__MASTER_DATA.sql")) {
+                    "V15 migration missing"
+                }.readText()
+                    .substringAfter("-- BEGIN tag_name_dedupe")
+                    .substringBefore("-- END tag_name_dedupe")
+                    .replace(Regex("\\btags\\b"), "tag_name_dedupe_fixture")
+                    .trim()
+            database.dbQuery {
+                val tx = TransactionManager.current()
+                tx.exec(
+                    "CREATE TEMP TABLE tag_name_dedupe_fixture (id bigint PRIMARY KEY, name varchar(255) NOT NULL)",
+                )
+                tx.exec(
+                    "INSERT INTO tag_name_dedupe_fixture (id, name) VALUES (1, '$stuck'), (2, '$stuck')",
+                )
+                tx.exec(dedupe)
+                val names =
+                    tx.exec("SELECT name FROM tag_name_dedupe_fixture ORDER BY id") { rs ->
+                        buildList {
+                            while (rs.next()) add(rs.getString(1))
+                        }
+                    }
+                checkNotNull(names)
+                assertEquals(2, names.distinct().size)
+                assertEquals(stuck, names[0])
+                assertTrue(names[1] != stuck)
             }
         }
 }

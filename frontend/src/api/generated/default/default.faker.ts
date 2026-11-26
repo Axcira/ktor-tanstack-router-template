@@ -11,6 +11,7 @@ import type {
   ArticleDTO,
   CustomerDTO,
   CustomerList,
+  CustomerOption,
   HealthResponse,
   LoginResponse,
   Permission,
@@ -414,6 +415,16 @@ export const getReorderTagV1ResponseMock = (
   updatedAt: faker.string.alpha({ length: { min: 10, max: 20 } }),
   ...overrideResponse,
 });
+
+export const getListCustomerOptionsV1ResponseMock = (): CustomerOption[] =>
+  Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.number.int(),
+    code: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  }));
 
 export const getCreateCustomerV1ResponseMock = (
   overrideResponse: Partial<Extract<CustomerDTO, object>> = {},

@@ -3,12 +3,12 @@ package net.axcira.features.masters.products
 import kotlinx.serialization.Serializable
 import net.axcira.db.Customers
 import net.axcira.db.Products
-import net.axcira.features.masters.FractionalIndex
 import net.axcira.features.masters.MasterDeleteResult
 import net.axcira.features.masters.MasterListQuery
 import net.axcira.features.masters.MasterWriteResult
 import net.axcira.features.masters.containsIgnoreCase
 import net.axcira.features.masters.isUniqueViolation
+import net.axcira.features.masters.nextFractionalKey
 import net.axcira.features.masters.nowUtc
 import net.axcira.features.masters.page
 import net.axcira.features.masters.sortKeyOrder
@@ -226,7 +226,7 @@ class ProductService(
                     Triple("SETUP", "導入支援", northwind),
                 )
             Products.batchInsert(rows) { (code, name, customerId) ->
-                val key = FractionalIndex.generateKeyBetween(previous, null)
+                val key = nextFractionalKey(previous)
                 previous = key
                 this[Products.code] = code
                 this[Products.name] = name
@@ -256,7 +256,7 @@ private fun nextSortKey(): String {
             .limit(1)
             .firstOrNull()
             ?.get(Products.sortKey)
-    return FractionalIndex.generateKeyBetween(current, null)
+    return nextFractionalKey(current)
 }
 
 private fun org.jetbrains.exposed.v1.core.ResultRow.toDto() =

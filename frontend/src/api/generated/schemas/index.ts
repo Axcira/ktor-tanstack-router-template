@@ -17,6 +17,7 @@ export * from "./createTagMasterInput";
 export * from "./createUserInput";
 export * from "./customerDTO";
 export * from "./customerList";
+export * from "./customerOption";
 export * from "./deleteRoleV1Params";
 export * from "./errorResponse";
 export * from "./forceChangePasswordRequest";
