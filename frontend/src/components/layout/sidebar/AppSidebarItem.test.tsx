@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { getGetSelfV1MockHandler } from "@/api/generated/default/default.msw";
 import { renderApp } from "@/test/app";
-import { denyCanI } from "@/test/handlers";
+import { allowCanI, denyCanI } from "@/test/handlers";
 import { server } from "@/test/msw";
 import { makeSession } from "@/test/session";
 
@@ -71,6 +71,18 @@ describe("AppSidebar authorization", () => {
       screen.getByRole("link", { name: "Dashboard" }).getAttribute("href"),
     ).toBe("/dashboard?authuser=0");
     expect(screen.queryByText("Administration")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "マスタ" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows one マスタ entry when any master permission is allowed", async () => {
+    server.use(getGetSelfV1MockHandler(makeSession([])), allowCanI());
+
+    await renderApp("/dashboard");
+
+    const link = await screen.findByRole("link", { name: "マスタ" });
+    expect(link.getAttribute("href")).toMatch(/^\/masters(?:\?|$)/);
   });
 
   it("keeps parent menu labels in the mobile sheet after the desktop sidebar was collapsed", async () => {

@@ -52,6 +52,20 @@ const computeInitialPermissionStates = (
             ] as boolean) ?? false)
           : false;
       }
+      if (propMeta.type === "string") {
+        if (type === "ManageMasters" && propKey === "masterId") {
+          defaultProps[propKey] = (permissions ?? [])
+            .flatMap((permission) =>
+              permission.type === "ManageMasters" ? [permission.masterId] : [],
+            )
+            .join(", ");
+          return;
+        }
+        const raw = activePerm
+          ? (activePerm as unknown as Record<string, unknown>)[propKey]
+          : "";
+        defaultProps[propKey] = typeof raw === "string" ? raw : "";
+      }
     });
 
     states[type] = {
@@ -88,7 +102,11 @@ export default function RoleForm({
     }));
   };
 
-  const handlePropChange = (type: string, propKey: string, value: boolean) => {
+  const handlePropChange = (
+    type: string,
+    propKey: string,
+    value: boolean | string,
+  ) => {
     setPermissionStates((prev) => ({
       ...prev,
       [type]: {
@@ -111,15 +129,33 @@ export default function RoleForm({
     }
 
     const constructedPermissions: Permission[] = [];
-    permissionEntries.forEach(([type]) => {
+    for (const [type] of permissionEntries) {
       const state = permissionStates[type];
-      if (state?.enabled) {
-        constructedPermissions.push({
-          type,
-          ...state.props,
-        } as unknown as Permission);
+      if (!state?.enabled) continue;
+      if (type === "ManageMasters") {
+        const raw = String(state.props.masterId ?? "");
+        const ids = [
+          ...new Set(
+            raw
+              .split(/[,、]/)
+              .map((part) => part.trim())
+              .filter(Boolean),
+          ),
+        ];
+        if (ids.length === 0) {
+          setValidationError("マスタ ID を入力してください。");
+          return;
+        }
+        for (const masterId of ids) {
+          constructedPermissions.push({ type: "ManageMasters", masterId });
+        }
+        continue;
       }
-    });
+      constructedPermissions.push({
+        type,
+        ...state.props,
+      } as unknown as Permission);
+    }
 
     try {
       await onSubmit({
@@ -219,7 +255,11 @@ export default function RoleForm({
                     {Object.entries(def.props).map(([propKey, propMeta]) => (
                       <div
                         key={propKey}
-                        className="flex items-center justify-between pl-2"
+                        className={
+                          propMeta.type === "string"
+                            ? "space-y-1 pl-2"
+                            : "flex items-center justify-between pl-2"
+                        }
                       >
                         <Label
                           htmlFor={`prop-${type}-${propKey}`}
@@ -236,6 +276,26 @@ export default function RoleForm({
                             }
                             disabled={isSubmitting}
                           />
+                        )}
+                        {propMeta.type === "string" && (
+                          <div className="space-y-1 flex-1">
+                            <Input
+                              id={`prop-${type}-${propKey}`}
+                              value={String(state.props[propKey] ?? "")}
+                              placeholder="tags, customers, products"
+                              onChange={(event) =>
+                                handlePropChange(
+                                  type,
+                                  propKey,
+                                  event.target.value,
+                                )
+                              }
+                              disabled={isSubmitting}
+                            />
+                            <span className="text-xs text-muted-foreground block">
+                              {propMeta.description}
+                            </span>
+                          </div>
                         )}
                       </div>
                     ))}

@@ -16,16 +16,30 @@ import type {
   ArticleDTO,
   ChangePasswordRequest,
   CreateArticleInput,
+  CreateCustomerInput,
+  CreateProductInput,
   CreateRoleInput,
+  CreateTagMasterInput,
   CreateUserInput,
+  CustomerDTO,
+  CustomerList,
+  CustomerOption,
   ForceChangePasswordRequest,
   HealthResponse,
   LoginRequest,
   LoginResponse,
   Permission,
+  ProductDTO,
+  ProductList,
+  ReorderMasterInput,
   RoleDTO,
+  TagMasterDTO,
+  TagMasterList,
   UpdateArticleInput,
+  UpdateCustomerInput,
+  UpdateProductInput,
   UpdateRoleInput,
+  UpdateTagMasterInput,
   UpdateUserInput,
   UserDTO,
   UserSession,
@@ -34,21 +48,37 @@ import type {
 
 import {
   getCreateArticleV1ResponseMock,
+  getCreateCustomerV1ResponseMock,
+  getCreateProductV1ResponseMock,
   getCreateRoleV1ResponseMock,
+  getCreateTagV1ResponseMock,
   getCreateUserV1ResponseMock,
   getGetArticleV1ResponseMock,
+  getGetCustomerV1ResponseMock,
+  getGetProductV1ResponseMock,
   getGetRoleByIdV1ResponseMock,
   getGetRolesV1ResponseMock,
   getGetSelfV1ResponseMock,
+  getGetTagV1ResponseMock,
   getGetUserByIdV1ResponseMock,
   getGetUserPermissionsV1ResponseMock,
   getGetUsersV1ResponseMock,
   getHealthV1ResponseMock,
   getListAccountsV1ResponseMock,
   getListArticlesV1ResponseMock,
+  getListCustomerOptionsV1ResponseMock,
+  getListCustomersV1ResponseMock,
+  getListProductsV1ResponseMock,
+  getListTagsV1ResponseMock,
   getLoginV1ResponseMock,
+  getReorderCustomerV1ResponseMock,
+  getReorderProductV1ResponseMock,
+  getReorderTagV1ResponseMock,
   getUpdateArticleV1ResponseMock,
+  getUpdateCustomerV1ResponseMock,
+  getUpdateProductV1ResponseMock,
   getUpdateRoleV1ResponseMock,
+  getUpdateTagV1ResponseMock,
   getVersionV1ResponseMock,
 } from "./default.faker";
 
@@ -63,6 +93,22 @@ export {
   getListArticlesV1ResponseMock,
   getGetArticleV1ResponseMock,
   getUpdateArticleV1ResponseMock,
+  getCreateTagV1ResponseMock,
+  getListTagsV1ResponseMock,
+  getGetTagV1ResponseMock,
+  getUpdateTagV1ResponseMock,
+  getReorderTagV1ResponseMock,
+  getListCustomerOptionsV1ResponseMock,
+  getCreateCustomerV1ResponseMock,
+  getListCustomersV1ResponseMock,
+  getGetCustomerV1ResponseMock,
+  getUpdateCustomerV1ResponseMock,
+  getReorderCustomerV1ResponseMock,
+  getCreateProductV1ResponseMock,
+  getListProductsV1ResponseMock,
+  getGetProductV1ResponseMock,
+  getUpdateProductV1ResponseMock,
+  getReorderProductV1ResponseMock,
   getGetUserPermissionsV1ResponseMock,
   getCreateRoleV1ResponseMock,
   getGetRolesV1ResponseMock,
@@ -533,6 +579,523 @@ export const getUpdateArticleV1MockHandler = (
   );
 };
 
+export const getCreateTagV1MockHandler = (
+  overrideResponse?:
+    | TagMasterDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<PathParams, CreateTagMasterInput>
+        >[0],
+      ) => Promise<TagMasterDTO | void> | TagMasterDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post<PathParams, CreateTagMasterInput>(
+    "*/api/v1/tags",
+    async (
+      info: Parameters<
+        HttpResponseResolver<PathParams, CreateTagMasterInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateTagV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 201 });
+    },
+    options,
+  );
+};
+
+export const getListTagsV1MockHandler = (
+  overrideResponse?:
+    | TagMasterList
+    | ((
+        info: Parameters<HttpResponseResolver>[0],
+      ) => Promise<TagMasterList> | TagMasterList),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/tags",
+    async (info: Parameters<HttpResponseResolver>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListTagsV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDeleteTagV1MockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete<{ id: string }>(
+    "*/api/v1/tags/:id",
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
+export const getGetTagV1MockHandler = (
+  overrideResponse?:
+    | TagMasterDTO
+    | ((
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
+      ) => Promise<TagMasterDTO> | TagMasterDTO),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get<{ id: string }>(
+    "*/api/v1/tags/:id",
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetTagV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateTagV1MockHandler = (
+  overrideResponse?:
+    | TagMasterDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, UpdateTagMasterInput>
+        >[0],
+      ) => Promise<TagMasterDTO | void> | TagMasterDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch<{ id: string }, UpdateTagMasterInput>(
+    "*/api/v1/tags/:id",
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, UpdateTagMasterInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateTagV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 200 });
+    },
+    options,
+  );
+};
+
+export const getReorderTagV1MockHandler = (
+  overrideResponse?:
+    | TagMasterDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, ReorderMasterInput>
+        >[0],
+      ) => Promise<TagMasterDTO | void> | TagMasterDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch<{ id: string }, ReorderMasterInput>(
+    "*/api/v1/tags/:id/sort",
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, ReorderMasterInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getReorderTagV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 200 });
+    },
+    options,
+  );
+};
+
+export const getListCustomerOptionsV1MockHandler = (
+  overrideResponse?:
+    | CustomerOption[]
+    | ((
+        info: Parameters<HttpResponseResolver>[0],
+      ) => Promise<CustomerOption[]> | CustomerOption[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/customers/options",
+    async (info: Parameters<HttpResponseResolver>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListCustomerOptionsV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateCustomerV1MockHandler = (
+  overrideResponse?:
+    | CustomerDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<PathParams, CreateCustomerInput>
+        >[0],
+      ) => Promise<CustomerDTO | void> | CustomerDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post<PathParams, CreateCustomerInput>(
+    "*/api/v1/customers",
+    async (
+      info: Parameters<
+        HttpResponseResolver<PathParams, CreateCustomerInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateCustomerV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 201 });
+    },
+    options,
+  );
+};
+
+export const getListCustomersV1MockHandler = (
+  overrideResponse?:
+    | CustomerList
+    | ((
+        info: Parameters<HttpResponseResolver>[0],
+      ) => Promise<CustomerList> | CustomerList),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/customers",
+    async (info: Parameters<HttpResponseResolver>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListCustomersV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDeleteCustomerV1MockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete<{ id: string }>(
+    "*/api/v1/customers/:id",
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
+export const getGetCustomerV1MockHandler = (
+  overrideResponse?:
+    | CustomerDTO
+    | ((
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
+      ) => Promise<CustomerDTO> | CustomerDTO),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get<{ id: string }>(
+    "*/api/v1/customers/:id",
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetCustomerV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateCustomerV1MockHandler = (
+  overrideResponse?:
+    | CustomerDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, UpdateCustomerInput>
+        >[0],
+      ) => Promise<CustomerDTO | void> | CustomerDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch<{ id: string }, UpdateCustomerInput>(
+    "*/api/v1/customers/:id",
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, UpdateCustomerInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateCustomerV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 200 });
+    },
+    options,
+  );
+};
+
+export const getReorderCustomerV1MockHandler = (
+  overrideResponse?:
+    | CustomerDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, ReorderMasterInput>
+        >[0],
+      ) => Promise<CustomerDTO | void> | CustomerDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch<{ id: string }, ReorderMasterInput>(
+    "*/api/v1/customers/:id/sort",
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, ReorderMasterInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getReorderCustomerV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 200 });
+    },
+    options,
+  );
+};
+
+export const getCreateProductV1MockHandler = (
+  overrideResponse?:
+    | ProductDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<PathParams, CreateProductInput>
+        >[0],
+      ) => Promise<ProductDTO | void> | ProductDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post<PathParams, CreateProductInput>(
+    "*/api/v1/products",
+    async (
+      info: Parameters<HttpResponseResolver<PathParams, CreateProductInput>>[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateProductV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 201 });
+    },
+    options,
+  );
+};
+
+export const getListProductsV1MockHandler = (
+  overrideResponse?:
+    | ProductList
+    | ((
+        info: Parameters<HttpResponseResolver>[0],
+      ) => Promise<ProductList> | ProductList),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/products",
+    async (info: Parameters<HttpResponseResolver>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListProductsV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDeleteProductV1MockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete<{ id: string }>(
+    "*/api/v1/products/:id",
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
+export const getGetProductV1MockHandler = (
+  overrideResponse?:
+    | ProductDTO
+    | ((
+        info: Parameters<HttpResponseResolver<{ id: string }>>[0],
+      ) => Promise<ProductDTO> | ProductDTO),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get<{ id: string }>(
+    "*/api/v1/products/:id",
+    async (info: Parameters<HttpResponseResolver<{ id: string }>>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetProductV1ResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateProductV1MockHandler = (
+  overrideResponse?:
+    | ProductDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, UpdateProductInput>
+        >[0],
+      ) => Promise<ProductDTO | void> | ProductDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch<{ id: string }, UpdateProductInput>(
+    "*/api/v1/products/:id",
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, UpdateProductInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateProductV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 200 });
+    },
+    options,
+  );
+};
+
+export const getReorderProductV1MockHandler = (
+  overrideResponse?:
+    | ProductDTO
+    | void
+    | ((
+        info: Parameters<
+          HttpResponseResolver<{ id: string }, ReorderMasterInput>
+        >[0],
+      ) => Promise<ProductDTO | void> | ProductDTO | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch<{ id: string }, ReorderMasterInput>(
+    "*/api/v1/products/:id/sort",
+    async (
+      info: Parameters<
+        HttpResponseResolver<{ id: string }, ReorderMasterInput>
+      >[0],
+    ) => {
+      const resolvedBody =
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getReorderProductV1ResponseMock();
+      return resolvedBody === undefined
+        ? new HttpResponse(null, { status: 204 })
+        : HttpResponse.json(resolvedBody, { status: 200 });
+    },
+    options,
+  );
+};
+
 export const getGetUserPermissionsV1MockHandler = (
   overrideResponse?:
     | Permission[]
@@ -774,6 +1337,25 @@ export const getDefaultMock = () => [
   getDeleteArticleV1MockHandler(),
   getGetArticleV1MockHandler(),
   getUpdateArticleV1MockHandler(),
+  getCreateTagV1MockHandler(),
+  getListTagsV1MockHandler(),
+  getDeleteTagV1MockHandler(),
+  getGetTagV1MockHandler(),
+  getUpdateTagV1MockHandler(),
+  getReorderTagV1MockHandler(),
+  getListCustomerOptionsV1MockHandler(),
+  getCreateCustomerV1MockHandler(),
+  getListCustomersV1MockHandler(),
+  getDeleteCustomerV1MockHandler(),
+  getGetCustomerV1MockHandler(),
+  getUpdateCustomerV1MockHandler(),
+  getReorderCustomerV1MockHandler(),
+  getCreateProductV1MockHandler(),
+  getListProductsV1MockHandler(),
+  getDeleteProductV1MockHandler(),
+  getGetProductV1MockHandler(),
+  getUpdateProductV1MockHandler(),
+  getReorderProductV1MockHandler(),
   getGetUserPermissionsV1MockHandler(),
   getCanIV1MockHandler(),
   getCreateRoleV1MockHandler(),

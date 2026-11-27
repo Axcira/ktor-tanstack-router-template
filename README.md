@@ -215,6 +215,27 @@ cd backend
 
 // TODO: フロントエンドをもうちょっとちゃんと詰めてここを書く
 
+### マスタの足し方
+
+マスタはテーブルごとに API と画面を持ちます。共通なのは列の形、一覧クエリ、並び替え、権限の型だけです。顧客 (`customers`) をコピーするのが一番短い手順です。
+
+1. `backend/src/main/kotlin/net/axcira/db/Masters.kt` にテーブルを足す。列は `id`、`name`、コードがあるマスタは `code`（UNIQUE）、`sort_key`（VARCHAR。マイグレーションで `COLLATE "C"`）、`is_active`（default true）、`created_at` / `updated_at`。
+2. `backend/src/main/kotlin/net/axcira/features/masters/customers/` をコピーし、パッケージ名とパスを新しいマスタ ID（例: `suppliers`）に変える。ルートは `GET/POST /api/v1/<id>`、`GET/PATCH/DELETE /api/v1/<id>/{id}`、並び替えは `PATCH /api/v1/<id>/{id}/sort`（body は `{ "sortKey": "..." }`）。
+3. `Application.kt` の `dependencies` と `application.yaml` の `modules` に登録する。各ルートの KDoc に `OperationID:` を書く。
+4. 権限は `Permission.ManageMasters(masterId)`。`masterId` はルートと同じ文字列（`tags` / `customers` / `products`）。同じ ID だけを満たし、`Administrator` は従来どおり全部を通す。ロール画面では「マスタの管理」を有効にし、マスタ ID をカンマ区切りで入れる（例: `tags, suppliers`）。
+5. `cd backend && ./gradlew generateMigrations` で SQL を作り、`DROP` や照合順序を確認してからコミットする。`sort_key` には `COLLATE "C"` を付ける。既存データがある列へ UNIQUE を足すときは、重複をリネームしてから制約を付ける（タグの V15 が例）。
+6. リポジトリルートで `bun run generate:client` を実行し、OpenAPI と Orval クライアントを更新する。
+7. `frontend/src/routes/_app/masters/customers.tsx` と `masters/-components/customers/` をコピーする。ルートファイルではルート ID、`masterId`、表示コンポーネントを新しい画面に合わせる。`routeTree.gen.ts` は Vite が再生成するので手で編集しない。`masters/-components/masters.ts` の `MASTER_TABS` に 1 行足す。タブとサイドバーの「マスタ」はどちらもその一覧を見る。タブごとの権限は `MasterTabTrigger` が 1 件ずつ確認するので、`MasterTabs.tsx` に分岐を足す必要はない。
+8. 空の画面にしないため、`CustomerService.seedIfEmpty` と同じように初期行を足す。`SKIP_BOOTSTRAP=true` のときは投入されない。
+
+一覧は `q`（code / name の部分一致。タグは name のみ）、`isActive`、任意の `limit` / `offset` を受け、`{ items, totalCount }` を返す。画面は全件を出すので、通常は limit を付けない。
+
+並び替えはクライアントが `fractional-indexing` の `generateKeyBetween` で隣のキーの間の値を作り、`PATCH .../{id}/sort` に送る。サーバーはその形式と一意性を検証して保存する。絞り込み中のドラッグは、見えていない行を飛び越すので無効。
+
+削除は物理削除。タグが記事から、顧客が製品から参照されていると 409。無効化は `isActive: false` で、参照があってもできる。コード（タグは名前）の重複も 409。同じ名前の顧客や製品は、コードが違えば作れる。
+
+記事フォームのカンマ区切りタグは今までどおり upsert する。新しいタグはマスタの末尾に有効な行として足される。
+
 ## 4. Backend tests
 
 バックエンドのテストは Testcontainers で PostgreSQL を 1 回起動し、スキーマ移行はスイートごとに 1 回だけ行います。

@@ -15,9 +15,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppArticlesRouteImport } from './routes/_app/articles'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppDocumentationRouteImport } from './routes/_app/documentation'
+import { Route as AppMastersRouteImport } from './routes/_app/masters'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppArticlesIndexRouteImport } from './routes/_app/articles/index'
 import { Route as AppArticlesCreateRouteImport } from './routes/_app/articles/create'
+import { Route as AppMastersIndexRouteImport } from './routes/_app/masters/index'
+import { Route as AppMastersCustomersRouteImport } from './routes/_app/masters/customers'
+import { Route as AppMastersProductsRouteImport } from './routes/_app/masters/products'
+import { Route as AppMastersTagsRouteImport } from './routes/_app/masters/tags'
 import { Route as AppPermissionsRolesRouteImport } from './routes/_app/permissions/roles'
 import { Route as AppPermissionsUsersRouteImport } from './routes/_app/permissions/users'
 import { Route as AppPlaygroundNav11RouteImport } from './routes/_app/playground/nav1-1'
@@ -69,6 +74,11 @@ const AppDocumentationRoute = AppDocumentationRouteImport.update({
   path: '/documentation',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMastersRoute = AppMastersRouteImport.update({
+  id: '/masters',
+  path: '/masters',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -83,6 +93,26 @@ const AppArticlesCreateRoute = AppArticlesCreateRouteImport.update({
   id: '/create',
   path: '/create',
   getParentRoute: () => AppArticlesRoute,
+} as any)
+const AppMastersIndexRoute = AppMastersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppMastersCustomersRoute = AppMastersCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppMastersProductsRoute = AppMastersProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppMastersTagsRoute = AppMastersTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => AppMastersRoute,
 } as any)
 const AppPermissionsRolesRoute = AppPermissionsRolesRouteImport.update({
   id: '/permissions/roles',
@@ -204,8 +234,12 @@ export interface FileRoutesByFullPath {
   '/articles': typeof AppArticlesRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/documentation': typeof AppDocumentationRoute
+  '/masters': typeof AppMastersRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/articles/create': typeof AppArticlesCreateRoute
+  '/masters/customers': typeof AppMastersCustomersRoute
+  '/masters/products': typeof AppMastersProductsRoute
+  '/masters/tags': typeof AppMastersTagsRoute
   '/permissions/roles': typeof AppPermissionsRolesRouteWithChildren
   '/permissions/users': typeof AppPermissionsUsersRouteWithChildren
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
@@ -219,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/showcase/table': typeof AppShowcaseTableRoute
   '/showcase/upload': typeof AppShowcaseUploadRoute
   '/articles/': typeof AppArticlesIndexRoute
+  '/masters/': typeof AppMastersIndexRoute
   '/showcase/': typeof AppShowcaseIndexRoute
   '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/permissions/roles/create': typeof AppPermissionsRolesCreateRoute
@@ -236,6 +271,9 @@ export interface FileRoutesByTo {
   '/documentation': typeof AppDocumentationRoute
   '/settings': typeof AppSettingsRoute
   '/articles/create': typeof AppArticlesCreateRoute
+  '/masters/customers': typeof AppMastersCustomersRoute
+  '/masters/products': typeof AppMastersProductsRoute
+  '/masters/tags': typeof AppMastersTagsRoute
   '/playground/nav1-1': typeof AppPlaygroundNav11Route
   '/playground/nav1-1-1': typeof AppPlaygroundNav111Route
   '/playground/nav1-1-2': typeof AppPlaygroundNav112Route
@@ -247,6 +285,7 @@ export interface FileRoutesByTo {
   '/showcase/table': typeof AppShowcaseTableRoute
   '/showcase/upload': typeof AppShowcaseUploadRoute
   '/articles': typeof AppArticlesIndexRoute
+  '/masters': typeof AppMastersIndexRoute
   '/showcase': typeof AppShowcaseIndexRoute
   '/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/permissions/roles/create': typeof AppPermissionsRolesCreateRoute
@@ -265,8 +304,12 @@ export interface FileRoutesById {
   '/_app/articles': typeof AppArticlesRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/documentation': typeof AppDocumentationRoute
+  '/_app/masters': typeof AppMastersRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_app/articles/create': typeof AppArticlesCreateRoute
+  '/_app/masters/customers': typeof AppMastersCustomersRoute
+  '/_app/masters/products': typeof AppMastersProductsRoute
+  '/_app/masters/tags': typeof AppMastersTagsRoute
   '/_app/permissions/roles': typeof AppPermissionsRolesRouteWithChildren
   '/_app/permissions/users': typeof AppPermissionsUsersRouteWithChildren
   '/_app/playground/nav1-1': typeof AppPlaygroundNav11Route
@@ -280,6 +323,7 @@ export interface FileRoutesById {
   '/_app/showcase/table': typeof AppShowcaseTableRoute
   '/_app/showcase/upload': typeof AppShowcaseUploadRoute
   '/_app/articles/': typeof AppArticlesIndexRoute
+  '/_app/masters/': typeof AppMastersIndexRoute
   '/_app/showcase/': typeof AppShowcaseIndexRoute
   '/_app/articles/$articleId/edit': typeof AppArticlesArticleIdEditRoute
   '/_app/permissions/roles/create': typeof AppPermissionsRolesCreateRoute
@@ -298,8 +342,12 @@ export interface FileRouteTypes {
     | '/articles'
     | '/dashboard'
     | '/documentation'
+    | '/masters'
     | '/settings'
     | '/articles/create'
+    | '/masters/customers'
+    | '/masters/products'
+    | '/masters/tags'
     | '/permissions/roles'
     | '/permissions/users'
     | '/playground/nav1-1'
@@ -313,6 +361,7 @@ export interface FileRouteTypes {
     | '/showcase/table'
     | '/showcase/upload'
     | '/articles/'
+    | '/masters/'
     | '/showcase/'
     | '/articles/$articleId/edit'
     | '/permissions/roles/create'
@@ -330,6 +379,9 @@ export interface FileRouteTypes {
     | '/documentation'
     | '/settings'
     | '/articles/create'
+    | '/masters/customers'
+    | '/masters/products'
+    | '/masters/tags'
     | '/playground/nav1-1'
     | '/playground/nav1-1-1'
     | '/playground/nav1-1-2'
@@ -341,6 +393,7 @@ export interface FileRouteTypes {
     | '/showcase/table'
     | '/showcase/upload'
     | '/articles'
+    | '/masters'
     | '/showcase'
     | '/articles/$articleId/edit'
     | '/permissions/roles/create'
@@ -358,8 +411,12 @@ export interface FileRouteTypes {
     | '/_app/articles'
     | '/_app/dashboard'
     | '/_app/documentation'
+    | '/_app/masters'
     | '/_app/settings'
     | '/_app/articles/create'
+    | '/_app/masters/customers'
+    | '/_app/masters/products'
+    | '/_app/masters/tags'
     | '/_app/permissions/roles'
     | '/_app/permissions/users'
     | '/_app/playground/nav1-1'
@@ -373,6 +430,7 @@ export interface FileRouteTypes {
     | '/_app/showcase/table'
     | '/_app/showcase/upload'
     | '/_app/articles/'
+    | '/_app/masters/'
     | '/_app/showcase/'
     | '/_app/articles/$articleId/edit'
     | '/_app/permissions/roles/create'
@@ -434,6 +492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDocumentationRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/masters': {
+      id: '/_app/masters'
+      path: '/masters'
+      fullPath: '/masters'
+      preLoaderRoute: typeof AppMastersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
@@ -454,6 +519,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/articles/create'
       preLoaderRoute: typeof AppArticlesCreateRouteImport
       parentRoute: typeof AppArticlesRoute
+    }
+    '/_app/masters/': {
+      id: '/_app/masters/'
+      path: '/'
+      fullPath: '/masters/'
+      preLoaderRoute: typeof AppMastersIndexRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/_app/masters/customers': {
+      id: '/_app/masters/customers'
+      path: '/customers'
+      fullPath: '/masters/customers'
+      preLoaderRoute: typeof AppMastersCustomersRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/_app/masters/products': {
+      id: '/_app/masters/products'
+      path: '/products'
+      fullPath: '/masters/products'
+      preLoaderRoute: typeof AppMastersProductsRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/_app/masters/tags': {
+      id: '/_app/masters/tags'
+      path: '/tags'
+      fullPath: '/masters/tags'
+      preLoaderRoute: typeof AppMastersTagsRouteImport
+      parentRoute: typeof AppMastersRoute
     }
     '/_app/permissions/roles': {
       id: '/_app/permissions/roles'
@@ -623,6 +716,24 @@ const AppArticlesRouteWithChildren = AppArticlesRoute._addFileChildren(
   AppArticlesRouteChildren,
 )
 
+interface AppMastersRouteChildren {
+  AppMastersCustomersRoute: typeof AppMastersCustomersRoute
+  AppMastersProductsRoute: typeof AppMastersProductsRoute
+  AppMastersTagsRoute: typeof AppMastersTagsRoute
+  AppMastersIndexRoute: typeof AppMastersIndexRoute
+}
+
+const AppMastersRouteChildren: AppMastersRouteChildren = {
+  AppMastersCustomersRoute: AppMastersCustomersRoute,
+  AppMastersProductsRoute: AppMastersProductsRoute,
+  AppMastersTagsRoute: AppMastersTagsRoute,
+  AppMastersIndexRoute: AppMastersIndexRoute,
+}
+
+const AppMastersRouteWithChildren = AppMastersRoute._addFileChildren(
+  AppMastersRouteChildren,
+)
+
 interface AppPermissionsRolesRouteChildren {
   AppPermissionsRolesCreateRoute: typeof AppPermissionsRolesCreateRoute
   AppPermissionsRolesIndexRoute: typeof AppPermissionsRolesIndexRoute
@@ -657,6 +768,7 @@ interface AppRouteChildren {
   AppArticlesRoute: typeof AppArticlesRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppDocumentationRoute: typeof AppDocumentationRoute
+  AppMastersRoute: typeof AppMastersRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
   AppPermissionsRolesRoute: typeof AppPermissionsRolesRouteWithChildren
   AppPermissionsUsersRoute: typeof AppPermissionsUsersRouteWithChildren
@@ -677,6 +789,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppArticlesRoute: AppArticlesRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppDocumentationRoute: AppDocumentationRoute,
+  AppMastersRoute: AppMastersRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
   AppPermissionsRolesRoute: AppPermissionsRolesRouteWithChildren,
   AppPermissionsUsersRoute: AppPermissionsUsersRouteWithChildren,

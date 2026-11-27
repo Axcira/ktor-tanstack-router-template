@@ -6,6 +6,9 @@ import io.ktor.server.routing.*
 import net.axcira.features.articles.ArticleService
 import net.axcira.features.auth.AuthService
 import net.axcira.features.health.HealthService
+import net.axcira.features.masters.customers.CustomerService
+import net.axcira.features.masters.products.ProductService
+import net.axcira.features.masters.tags.TagMasterService
 import net.axcira.features.permissions.PermissionService
 import net.axcira.features.users.UserService
 
@@ -16,6 +19,9 @@ fun Application.main() {
         provide<AuthService>(::AuthService)
         provide<UserService>(::UserService)
         provide<ArticleService>(::ArticleService)
+        provide<TagMasterService>(::TagMasterService)
+        provide<CustomerService>(::CustomerService)
+        provide<ProductService>(::ProductService)
         provide<PermissionService>(::PermissionService)
         provide<HealthService>(::HealthService)
     }

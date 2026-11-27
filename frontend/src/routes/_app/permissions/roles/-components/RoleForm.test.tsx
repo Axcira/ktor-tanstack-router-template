@@ -116,4 +116,57 @@ describe("RoleForm", () => {
 
     expect(screen.getByLabelText(/ロール名/)).toHaveValue("EditedRole");
   });
+
+  it("splits comma-separated master ids into one permission each", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <RoleForm
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+        isSubmitting={false}
+        submitLabel="作成"
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/ロール名/), "MasterEditor");
+    const masterLabel = screen.getByText("マスタの管理");
+    await user.click(requireSwitch(masterLabel.closest(".p-4")));
+    await user.type(
+      screen.getByLabelText(/マスタ ID/),
+      "tags, customers, tags",
+    );
+    await user.click(screen.getByRole("button", { name: "作成" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      name: "MasterEditor",
+      description: "",
+      permissions: [
+        { type: "ManageMasters", masterId: "tags" },
+        { type: "ManageMasters", masterId: "customers" },
+      ],
+    });
+  });
+
+  it("joins existing master permissions into the master id field", () => {
+    renderWithProviders(
+      <RoleForm
+        initialValues={{
+          name: "Editors",
+          description: "",
+          permissions: [
+            { type: "ManageMasters", masterId: "products" },
+            { type: "ManageMasters", masterId: "tags" },
+          ],
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+        isSubmitting={false}
+        submitLabel="更新を保存する"
+      />,
+    );
+
+    expect(screen.getByLabelText(/マスタ ID/)).toHaveValue("products, tags");
+  });
 });

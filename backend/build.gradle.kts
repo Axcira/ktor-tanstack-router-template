@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.dao)
     implementation(libs.exposed.json)
+    implementation(libs.exposed.java.time)
     implementation(libs.postgresql)
     implementation(libs.logback.classic)
     implementation(libs.hikaricp)

@@ -13,6 +13,19 @@ class PermissionSatisfiesTest {
         assertTrue(Permission.Administrator.satisfies(Permission.ChangePassword))
         assertTrue(Permission.Administrator.satisfies(Permission.UpdateArticle(true)))
         assertTrue(Permission.Administrator.satisfies(Permission.DeleteArticle(false)))
+        assertTrue(Permission.Administrator.satisfies(Permission.ManageMasters("tags")))
+    }
+
+    @Test
+    fun `manage masters matches only the same master id`() {
+        assertTrue(Permission.ManageMasters("tags").satisfies(Permission.ManageMasters("tags")))
+        assertFalse(Permission.ManageMasters("tags").satisfies(Permission.ManageMasters("customers")))
+        assertFalse(Permission.ManageMasters("customers").satisfies(Permission.ManageMasters("products")))
+        assertFalse(Permission.ManageMasters("tags").satisfies(Permission.ManageUsers))
+        assertFalse(Permission.ManageArticles.satisfies(Permission.ManageMasters("tags")))
+        val granted = listOf(Permission.ManageMasters("products"))
+        assertTrue(granted.satisfies(Permission.ManageMasters("products")))
+        assertFalse(granted.satisfies(Permission.ManageMasters("tags")))
     }
 
     @Test

@@ -53,3 +53,53 @@ inline fun <reified T : Permission> Route.withPermission(
         block()
     }
 }
+
+/**
+ * Requires [Permission.ManageMasters] for [masterId].
+ * The plugin name includes the id so two masters do not share one installation.
+ */
+
+/**
+ * Requires [Permission.ManageMasters] for any id in [masterIds].
+ * Used when one screen reads another master's labels, without granting edits.
+ */
+fun Route.requireAnyMaster(
+    masterIds: List<String>,
+    block: Route.() -> Unit,
+) {
+    val permissions = masterIds.map { Permission.ManageMasters(it) }
+    val name = masterIds.joinToString("-")
+    createChild(PermissionRouteSelector("ManageMasters:$name")).apply {
+        install(
+            createRouteScopedPlugin("RequireAnyManageMasters_$name") {
+                on(AuthenticationChecked) { call ->
+                    val principal = call.principal<UserSession>() ?: return@on
+                    if (permissions.none { principal.permissions.satisfies(it) }) {
+                        throw NoPermissionException(permissions.first())
+                    }
+                }
+            },
+        )
+        block()
+    }
+}
+
+fun Route.requireMaster(
+    masterId: String,
+    block: Route.() -> Unit,
+) {
+    val permission = Permission.ManageMasters(masterId)
+    createChild(PermissionRouteSelector("ManageMasters:$masterId")).apply {
+        install(
+            createRouteScopedPlugin("RequireManageMasters_$masterId") {
+                on(AuthenticationChecked) { call ->
+                    val principal = call.principal<UserSession>() ?: return@on
+                    if (!principal.permissions.satisfies(permission)) {
+                        throw NoPermissionException(permission)
+                    }
+                }
+            },
+        )
+        block()
+    }
+}

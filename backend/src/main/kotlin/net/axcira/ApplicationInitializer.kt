@@ -4,6 +4,9 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.launch
 import net.axcira.features.auth.PasswordHasher
+import net.axcira.features.masters.customers.CustomerService
+import net.axcira.features.masters.products.ProductService
+import net.axcira.features.masters.tags.TagMasterService
 import net.axcira.features.permissions.*
 import net.axcira.features.users.CreateUserInput
 import net.axcira.features.users.UserService
@@ -31,6 +34,9 @@ suspend fun Application.initialize() {
 
     val userService: UserService by dependencies
     val permissionService: PermissionService by dependencies
+    val tagMasterService: TagMasterService by dependencies
+    val customerService: CustomerService by dependencies
+    val productService: ProductService by dependencies
 
     val adminRoleName = System.getenv("ADMIN_ROLE_NAME") ?: "Administrator"
     val adminEmail = System.getenv("ADMIN_EMAIL") ?: "admin@example.com"
@@ -70,5 +76,9 @@ suspend fun Application.initialize() {
         userService.createUser(CreateUserInput(adminEmail, adminPassword, adminRoleId))
         log.info("Admin user created. You can safely remove password from environment variables.")
     }
+
+    customerService.seedIfEmpty()
+    productService.seedIfEmpty()
+    tagMasterService.seedIfEmpty()
     log.info("Initialize complete!")
 }

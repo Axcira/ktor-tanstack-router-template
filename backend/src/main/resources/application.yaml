@@ -20,6 +20,9 @@ ktor:
       - net.axcira.features.auth.v1.AccountRoutingKt.accounts
       - net.axcira.features.users.v1.UserRoutingKt.users
       - net.axcira.features.articles.v1.ArticleRoutingKt.articles
+      - net.axcira.features.masters.tags.v1.TagMasterRoutingKt.tagMasters
+      - net.axcira.features.masters.customers.v1.CustomerRoutingKt.customers
+      - net.axcira.features.masters.products.v1.ProductRoutingKt.products
       - net.axcira.features.permissions.v1.PermissionRoutingKt.permissions
       - net.axcira.features.health.v1.HealthRoutingKt.health
       - net.axcira.features.version.v1.VersionRoutingKt.version
